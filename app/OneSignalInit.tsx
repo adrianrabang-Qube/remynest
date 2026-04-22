@@ -1,53 +1,51 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
+import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    OneSignalDeferred: any[];
+  }
+}
 
 export default function OneSignalInit() {
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof window === "undefined") return;
 
-    console.log('🚀 OneSignalInit mounted')
+    if (!window.OneSignalDeferred) {
+      window.OneSignalDeferred = [];
+    }
 
-    const interval = setInterval(() => {
-      if (window.OneSignal) {
-        clearInterval(interval)
+    window.OneSignalDeferred.push(async function (OneSignal: any) {
+      await OneSignal.init({
+        appId: "0783b302-cb5a-474a-9f28-79869c2c0e03",
+      });
 
-        console.log('🚀 OneSignal found, initializing...')
+      console.log("OneSignal READY");
 
-        window.OneSignal = window.OneSignal || []
+      try {
+        const id = await OneSignal.User.PushSubscription.id;
 
-        window.OneSignal.push(async function () {
-          await window.OneSignal.init({
-            appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
-            allowLocalhostAsSecureOrigin: true,
-          })
+        console.log("OneSignal ID:", id);
 
-          console.log('✅ OneSignal READY')
+        if (!id) return;
 
-          // ✅ NEW WORKING WAY (v16)
-          const id = window.OneSignal.User.PushSubscription.id
+        await fetch("/api/save-onesignal", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            onesignal_id: id,
+          }),
+        });
 
-          console.log('🆔 OneSignal ID:', id)
-
-          // 🔥 SEND TO SUPABASE
-          await fetch('/api/save-onesignal', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              user_id: '969c8736-0a74-4012-a541-0c741bf538df',
-              onesignal_id: id,
-            }),
-          })
-
-          console.log('💾 Saved to DB')
-        })
+        console.log("Saved OneSignal ID to backend");
+      } catch (err) {
+        console.error("OneSignal error:", err);
       }
-    }, 100)
+    });
+  }, []);
 
-    return () => clearInterval(interval)
-  }, [])
-
-  return null
+  return null;
 }

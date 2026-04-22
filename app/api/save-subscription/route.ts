@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
+    const body = await req.json()
     const onesignal_id = body.onesignal_id
     const email = body.email
 
-    // 🚨 Validate input (this is what was breaking you)
     if (!onesignal_id || !email) {
       return NextResponse.json(
         { error: 'Missing onesignal_id or email' },
@@ -16,9 +19,6 @@ export async function POST(req: Request) {
       )
     }
 
-    console.log('Saving:', { email, onesignal_id })
-
-    // 1. Upsert user
     const { data: user, error: userError } = await supabase
       .from('users')
       .upsert([{ email }], { onConflict: 'email' })
@@ -26,28 +26,21 @@ export async function POST(req: Request) {
       .single()
 
     if (userError) {
-      console.error('User error:', userError)
-      throw userError
+      return NextResponse.json(
+        { error: userError.message },
+        { status: 500 }
+      )
     }
 
-    // 2. Save subscription
-    const { error: subError } = await supabase
-      .from('subscriptions')
-      .insert([
-        {
-          user_id: user.id,
-          onesignal_id,
-        },
-      ])
+    return NextResponse.json({
+      success: true,
+      user
+    })
 
-    if (subError) {
-      console.error('Subscription error:', subError)
-      throw subError
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('SAVE ERROR:', err)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json(
+      { error: 'Invalid request' },
+      { status: 400 }
+    )
   }
 }
