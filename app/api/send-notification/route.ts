@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
   try {
-    // ✅ Get message from URL query param
+    // ✅ Get message from URL query
     const { searchParams } = new URL(req.url)
     const message = searchParams.get('message')
 
-    // ❌ If no message → return error
+    // ❌ If missing message
     if (!message) {
       return NextResponse.json(
         { error: 'No message provided' },
@@ -14,12 +14,12 @@ export async function GET(req: Request) {
       )
     }
 
-    // ✅ Send notification via OneSignal
+    // ✅ Send notification to OneSignal
     const res = await fetch('https://onesignal.com/api/v1/notifications', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
+        Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`, // ✅ FIXED
       },
       body: JSON.stringify({
         app_id: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
     const data = await res.json()
 
-    // ✅ Return success
+    // ✅ Return response
     return NextResponse.json({
       success: true,
       onesignal: data,
