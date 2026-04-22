@@ -1,17 +1,26 @@
+import './globals.css'
+import Script from 'next/script'
+import OneSignalInit from './OneSignalInit'
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
+  console.log('🔥 LAYOUT RENDERED')
+
   return (
     <html lang="en">
-      <head>
-        <script
+      <body>
+        <Script
           src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-          defer
-        ></script>
-      </head>
-      <body>{children}</body>
+          strategy="afterInteractive"
+        />
+
+        <OneSignalInit />
+
+        {children}
+      </body>
     </html>
-  );
+  )
 }

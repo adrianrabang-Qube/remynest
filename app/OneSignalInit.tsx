@@ -1,50 +1,53 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
+import { useEffect } from 'react'
 
 export default function OneSignalInit() {
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return
 
-    (window as any).OneSignalDeferred =
-      (window as any).OneSignalDeferred || [];
+    console.log('🚀 OneSignalInit mounted')
 
-    (window as any).OneSignalDeferred.push(async function (OneSignal: any) {
-      console.log("OneSignal loaded");
+    const interval = setInterval(() => {
+      if (window.OneSignal) {
+        clearInterval(interval)
 
-      await OneSignal.init({
-        appId: "0783b302-cb5a-474a-9f28-79869c2c0e03",
-        notifyButton: {
-          enable: true,
-        },
-      });
+        console.log('🚀 OneSignal found, initializing...')
 
-      const permission =
-        await OneSignal.Notifications.requestPermission();
+        window.OneSignal = window.OneSignal || []
 
-      console.log("Permission:", permission);
+        window.OneSignal.push(async function () {
+          await window.OneSignal.init({
+            appId: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+            allowLocalhostAsSecureOrigin: true,
+          })
 
-      // 🔥 FIX: wait until subscription exists
-      let subId = null;
+          console.log('✅ OneSignal READY')
 
-      while (!subId) {
-        subId = OneSignal.User.PushSubscription.id;
-        await new Promise((res) => setTimeout(res, 500));
+          // ✅ NEW WORKING WAY (v16)
+          const id = window.OneSignal.User.PushSubscription.id
+
+          console.log('🆔 OneSignal ID:', id)
+
+          // 🔥 SEND TO SUPABASE
+          await fetch('/api/save-onesignal', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: '969c8736-0a74-4012-a541-0c741bf538df',
+              onesignal_id: id,
+            }),
+          })
+
+          console.log('💾 Saved to DB')
+        })
       }
+    }, 100)
 
-      console.log("SUBSCRIPTION ID:", subId);
+    return () => clearInterval(interval)
+  }, [])
 
-      await fetch("/api/save-subscription", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ subscriptionId: subId }),
-      });
-
-      console.log("Saved to backend");
-    });
-  }, []);
-
-  return null;
+  return null
 }
