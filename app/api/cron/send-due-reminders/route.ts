@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    // 1. Get current time
     const now = new Date().toISOString()
 
-    // 2. Fetch due reminders (not yet sent)
+    // 1. Fetch due reminders from Supabase
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/reminders?sent=eq.false&remind_at=lte.${now}`,
       {
@@ -18,16 +17,25 @@ export async function GET() {
 
     const reminders = await res.json()
 
-    // 3. Loop through reminders
+    // 2. Loop through reminders
     for (const reminder of reminders) {
-      // 4. Send push notification
-      await fetch('http://localhost:3000/api/send-notification', {
+      // 3. Send notification via OneSignal
+      await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: reminder.message }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
+        },
+        body: JSON.stringify({
+          app_id: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
+          included_segments: ['All'],
+          contents: {
+            en: reminder.message || 'Reminder',
+          },
+        }),
       })
 
-      // 5. Mark as sent in DB
+      // 4. Mark as sent in Supabase
       await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/reminders?id=eq.${reminder.id}`,
         {
@@ -42,16 +50,14 @@ export async function GET() {
       )
     }
 
-    // 6. Return success
     return NextResponse.json({
       success: true,
       processed: reminders.length,
     })
   } catch (err) {
-    console.error('CRON ERROR:', err)
-
+    console.error(err)
     return NextResponse.json(
-      { error: 'Cron failed' },
+      { error: 'Cron failed', details: err },
       { status: 500 }
     )
   }
