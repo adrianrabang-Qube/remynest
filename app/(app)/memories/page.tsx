@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { createClient } from "../../../lib/supabase/server"
-=======
-import { createClient } from "@/app/utils/supabase/server"
->>>>>>> ae84d54 (fix imports to @/app/utils/supabase/server)
 import Link from "next/link"
 
 export default async function MemoriesPage() {

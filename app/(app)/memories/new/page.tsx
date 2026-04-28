@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { createClient } from "../../../lib/supabase/server"
-=======
-import { createClient } from "../../../../../utils/supabase/server"
->>>>>>> ae84d54 (fix imports to @/app/utils/supabase/server)
+import { createClient } from "../../../../lib/supabase/server"
 import { redirect } from "next/navigation"
 
 export default function NewMemoryPage() {
