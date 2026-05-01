@@ -1,37 +1,18 @@
-import { createClient } from "../../../../lib/supabase/server"
-import { redirect } from "next/navigation"
+import MemoryForm from "@/components/MemoryForm"
+import { createMemory } from "../actions"
 
 export default function NewMemoryPage() {
-  async function createMemory(formData: FormData) {
-    "use server"
-
-    const supabase = createClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      throw new Error("Not authenticated")
-    }
-
-    const title = formData.get("title") as string
-    const content = formData.get("content") as string
-
-    await supabase.from("memories").insert({
-      title,
-      content,
-      user_id: user.id,
-    })
-
-    redirect("/memories")
-  }
-
   return (
-    <form action={createMemory}>
-      <input name="title" placeholder="Title" required />
-      <textarea name="content" placeholder="Content" required />
-      <button type="submit">Create Memory</button>
-    </form>
+    <div className="max-w-2xl mx-auto px-6 py-8 space-y-8">
+      
+      <h1 className="text-3xl font-semibold text-[#2F3E34]">
+        Create <span className="text-[#E6A57E] italic">Memory</span>
+      </h1>
+
+      <div className="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.05)] border border-white/40">
+        <MemoryForm action={createMemory} />
+      </div>
+
+    </div>
   )
 }
