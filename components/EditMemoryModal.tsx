@@ -1,76 +1,76 @@
 "use client";
 
 import { useState } from "react";
-
-type Memory = {
-  id: string;
-  title: string;
-  content: string;
-};
+import { TOAST_MESSAGES } from "@/lib/toastMessages";
 
 export default function EditMemoryModal({
   memory,
   onClose,
-  onSave,
+  onUpdated,
+  showToast,
 }: {
-  memory: Memory;
+  memory: any;
   onClose: () => void;
-  onSave: (updated: Memory) => void;
+  onUpdated: (memory: any) => void;
+  showToast: (message: string, type?: "success" | "error") => void;
 }) {
   const [title, setTitle] = useState(memory.title);
   const [content, setContent] = useState(memory.content);
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async () => {
+  const handleUpdate = async () => {
     setLoading(true);
 
     const res = await fetch(`/api/memories/${memory.id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content }),
     });
 
     if (!res.ok) {
-      alert("Update failed");
+      const err = await res.json().catch(() => null);
+      showToast(err?.error || TOAST_MESSAGES.ERROR_GENERIC, "error");
       setLoading(false);
       return;
     }
 
     const updated = await res.json();
 
-    onSave(updated);
+    onUpdated(updated);
+    showToast(TOAST_MESSAGES.MEMORY_UPDATED);
+
     setLoading(false);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-xl w-full max-w-md space-y-4">
-        <h2 className="text-lg font-semibold">Edit Memory</h2>
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+      <div className="card w-full max-w-md">
+        <h2>Edit Memory</h2>
 
         <input
+          className="input mt-3"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border p-2 rounded"
         />
 
         <textarea
+          className="input mt-3"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full border p-2 rounded"
         />
 
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose}>Cancel</button>
-
+        <div className="flex gap-3 mt-4">
           <button
-            onClick={handleSave}
+            onClick={handleUpdate}
             disabled={loading}
-            className="bg-blue-500 text-white px-4 py-1 rounded"
+            className="btn-primary"
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? "Saving..." : "Update"}
+          </button>
+
+          <button onClick={onClose} className="text-gray-500">
+            Cancel
           </button>
         </div>
       </div>

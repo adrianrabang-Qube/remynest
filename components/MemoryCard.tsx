@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { TOAST_MESSAGES } from "@/lib/toastMessages";
+
 type Memory = {
   id: string;
   title: string;
@@ -9,35 +12,50 @@ type Memory = {
 export default function MemoryCard({
   memory,
   onDelete,
-  onEdit,
+  showToast,
 }: {
   memory: Memory;
   onDelete: (id: string) => void;
-  onEdit: (memory: Memory) => void;
+  showToast: (message: string, type?: "success" | "error") => void;
 }) {
-  return (
-    <div className="p-4 bg-white rounded-xl shadow space-y-2">
-      <h2 className="font-semibold text-lg">{memory.title}</h2>
-      <p className="text-gray-600">{memory.content}</p>
+  const [loading, setLoading] = useState(false);
 
-      <div className="flex gap-3 text-sm mt-2">
-        <button
-          onClick={() => onEdit(memory)}
-          className="text-blue-500"
-        >
+  const handleDelete = async () => {
+    setLoading(true);
+
+    const res = await fetch(`/api/memories/${memory.id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      showToast(err?.error || TOAST_MESSAGES.ERROR_GENERIC, "error");
+      setLoading(false);
+      return;
+    }
+
+    onDelete(memory.id);
+    showToast(TOAST_MESSAGES.MEMORY_DELETED);
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="card transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-xl">
+      <h3>{memory.title}</h3>
+      <p>{memory.content}</p>
+
+      <div className="flex gap-4 mt-3">
+        <button className="text-blue-500 hover:underline">
           Edit
         </button>
 
         <button
-          onClick={async () => {
-            await fetch(`/api/memories/${memory.id}`, {
-              method: "DELETE",
-            });
-            onDelete(memory.id);
-          }}
-          className="text-red-500"
+          onClick={handleDelete}
+          disabled={loading}
+          className="text-red-500 hover:underline"
         >
-          Delete
+          {loading ? "Deleting..." : "Delete"}
         </button>
       </div>
     </div>

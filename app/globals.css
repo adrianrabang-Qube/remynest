@@ -88,3 +88,19 @@ p {
 .section {
   margin-top: 24px;
 }
+/* ===== Toast Animation ===== */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.25s ease-out forwards;
+}
