@@ -1,4 +1,5 @@
 import "./globals.css";
+import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
 
 export default function RootLayout({
@@ -9,17 +10,32 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <nav style={{ padding: "20px", borderBottom: "1px solid #ccc" }}>
-          <a href="/dashboard" style={{ marginRight: "10px" }}>Dashboard</a>
-          <a href="/memories" style={{ marginRight: "10px" }}>Memories</a>
-          <a href="/new" style={{ marginRight: "10px" }}>New</a>
-          <a href="/timeline" style={{ marginRight: "10px" }}>Timeline</a>
-          <a href="/reminders" style={{ marginRight: "10px" }}>Reminders</a>
+        {/* NAVBAR (styled — not broken) */}
+        <nav className="flex items-center justify-between px-6 py-4 border-b shadow-sm">
+          <div className="flex gap-6 text-sm font-medium">
+            <Link href="/dashboard" className="hover:underline">
+              Dashboard
+            </Link>
+            <Link href="/memories" className="hover:underline">
+              Memories
+            </Link>
+            <Link href="/new" className="hover:underline">
+              New
+            </Link>
+            <Link href="/timeline" className="hover:underline">
+              Timeline
+            </Link>
+            <Link href="/reminders" className="hover:underline">
+              Reminders
+            </Link>
+          </div>
 
+          {/* LOGOUT BUTTON (right side) */}
           <LogoutButton />
         </nav>
 
-        <main>{children}</main>
+        {/* MAIN CONTENT */}
+        <main className="p-6">{children}</main>
       </body>
     </html>
   );
