@@ -1,6 +1,5 @@
 import "./globals.css";
-import ToastProvider from "@/components/ToastProvider";
-import QueryProvider from "@/components/QueryProvider";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function RootLayout({
   children,
@@ -10,9 +9,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <QueryProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </QueryProvider>
+        <nav style={{ padding: "20px", borderBottom: "1px solid #ccc" }}>
+          <a href="/dashboard" style={{ marginRight: "10px" }}>Dashboard</a>
+          <a href="/memories" style={{ marginRight: "10px" }}>Memories</a>
+          <a href="/new" style={{ marginRight: "10px" }}>New</a>
+          <a href="/timeline" style={{ marginRight: "10px" }}>Timeline</a>
+          <a href="/reminders" style={{ marginRight: "10px" }}>Reminders</a>
+
+          <LogoutButton />
+        </nav>
+
+        <main>{children}</main>
       </body>
     </html>
   );
