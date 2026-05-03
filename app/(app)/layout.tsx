@@ -17,7 +17,7 @@ export default function AppLayout({
           <Link href="/memories" className="hover:opacity-70 transition">
             Memories
           </Link>
-          <Link href="/new" className="hover:opacity-70 transition">
+          <Link href="/memories/new" className="hover:opacity-70 transition">
             New
           </Link>
           <Link href="/timeline" className="hover:opacity-70 transition">
@@ -31,7 +31,7 @@ export default function AppLayout({
         <LogoutButton />
       </nav>
 
-      {/* CENTERED CONTENT */}
+      {/* CONTENT */}
       <main className="max-w-3xl mx-auto px-6 py-10">
         {children}
       </main>
