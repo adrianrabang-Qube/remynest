@@ -1,3 +1,5 @@
+"use client";
+
 import "./globals.css";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
@@ -10,11 +12,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#f5efe7] text-[#2f3e34]">
-        
+
         {/* NAVBAR */}
-        <nav className="flex items-center justify-between px-8 py-4 bg-white shadow-sm border-b">
+        <nav className="flex items-center justify-between px-6 py-4 bg-white border-b shadow-sm">
           
-          {/* LEFT NAV */}
+          {/* LEFT */}
           <div className="flex gap-6 text-sm font-medium">
             <Link href="/dashboard" className="hover:opacity-70 transition">
               Dashboard
@@ -33,13 +35,11 @@ export default function RootLayout({
             </Link>
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className="flex items-center gap-4">
-            <LogoutButton />
-          </div>
+          {/* RIGHT */}
+          <LogoutButton />
         </nav>
 
-        {/* PAGE CONTAINER */}
+        {/* CONTENT */}
         <main className="max-w-4xl mx-auto px-6 py-8">
           {children}
         </main>
