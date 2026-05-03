@@ -1,19 +1,41 @@
+import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
+
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
-      <nav className="flex gap-4 mb-6 text-sm text-gray-500">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/memories">Memories</a>
-        <a href="/memories/new">New</a>
-        <a href="/timeline">Timeline</a>
-        <a href="/reminders">Reminders</a>
+    <>
+      {/* NAVBAR */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b shadow-sm bg-white">
+        <div className="flex gap-6 text-sm font-medium">
+          <Link href="/dashboard" className="hover:underline">
+            Dashboard
+          </Link>
+          <Link href="/memories" className="hover:underline">
+            Memories
+          </Link>
+          <Link href="/new" className="hover:underline">
+            New
+          </Link>
+          <Link href="/timeline" className="hover:underline">
+            Timeline
+          </Link>
+          <Link href="/reminders" className="hover:underline">
+            Reminders
+          </Link>
+        </div>
+
+        {/* LOGOUT BUTTON */}
+        <LogoutButton />
       </nav>
 
-      <main>{children}</main>
-    </div>
+      {/* CONTENT */}
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        {children}
+      </main>
+    </>
   );
 }
