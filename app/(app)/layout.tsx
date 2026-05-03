@@ -8,30 +8,18 @@ export default function AppLayout({
 }) {
   return (
     <div className="min-h-screen bg-[#f5efe7] text-[#2f3e34]">
-      {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-8 py-4 border-b bg-[#f5efe7] shadow-sm">
+      <nav className="flex items-center justify-between px-8 py-4 border-b shadow-sm">
         <div className="flex gap-8 text-sm font-medium">
-          <Link href="/dashboard" className="hover:opacity-70 transition">
-            Dashboard
-          </Link>
-          <Link href="/memories" className="hover:opacity-70 transition">
-            Memories
-          </Link>
-          <Link href="/memories/new" className="hover:opacity-70 transition">
-            New
-          </Link>
-          <Link href="/timeline" className="hover:opacity-70 transition">
-            Timeline
-          </Link>
-          <Link href="/reminders" className="hover:opacity-70 transition">
-            Reminders
-          </Link>
+          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/memories">Memories</Link>
+          <Link href="/memories/new">New</Link>
+          <Link href="/timeline">Timeline</Link>
+          <Link href="/reminders">Reminders</Link>
         </div>
 
         <LogoutButton />
       </nav>
 
-      {/* CONTENT */}
       <main className="max-w-3xl mx-auto px-6 py-10">
         {children}
       </main>
