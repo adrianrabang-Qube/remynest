@@ -1,149 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
-import MemoryCard from "@/components/MemoryCard";
-import CreateMemoryModal from "@/components/CreateMemoryModal";
-import EditMemoryModal from "@/components/EditMemoryModal";
+export default function NewMemoryPage() {
+  const router = useRouter();
 
-type Memory = {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-};
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export default function MemoriesPage() {
-  const queryClient = useQueryClient();
+  const handleCreate = async () => {
+    if (!title || !content) {
+      alert("Fill all fields");
+      return;
+    }
 
-  const [showCreate, setShowCreate] = useState(false);
-  const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
+    setLoading(true);
 
-  // =========================
-  // FETCH MEMORIES
-  // =========================
-  const { data: memories = [], isLoading } = useQuery<Memory[]>({
-    queryKey: ["memories"],
-    queryFn: async () => {
-      const res = await fetch("/api/memories");
-      if (!res.ok) throw new Error("Failed to fetch");
-      return res.json();
-    },
-  });
+    const res = await fetch("/api/memories", {
+      method: "POST",
+      body: JSON.stringify({ title, content }),
+    });
 
-  // =========================
-  // CREATE
-  // =========================
-  const createMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string }) => {
-      const res = await fetch("/api/memories", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+    if (!res.ok) {
+      alert("Failed to create memory");
+      setLoading(false);
+      return;
+    }
 
-      if (!res.ok) throw new Error("Failed to create");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["memories"] });
-      setShowCreate(false);
-    },
-  });
-
-  // =========================
-  // UPDATE
-  // =========================
-  const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      title,
-      content,
-    }: {
-      id: string;
-      title: string;
-      content: string;
-    }) => {
-      const res = await fetch(`/api/memories/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ title, content }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["memories"] });
-      setEditingMemory(null);
-    },
-  });
-
-  // =========================
-  // DELETE
-  // =========================
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/memories/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) throw new Error("Failed to delete");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["memories"] });
-    },
-  });
-
-  if (isLoading) {
-    return <div className="p-6">Loading...</div>;
-  }
+    router.push("/memories");
+  };
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Your Memories</h1>
+    <div className="max-w-xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-semibold">Create New Memory</h1>
 
-      <button
-        onClick={() => setShowCreate(true)}
-        className="text-blue-600"
-      >
-        + New Memory
-      </button>
+      <div className="bg-white rounded-xl shadow p-6 border flex flex-col gap-4">
+        <input
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-black"
+        />
 
-      <div className="space-y-4">
-        {memories.map((memory) => (
-          <MemoryCard
-            key={memory.id}
-            memory={memory}
-            onEdit={() => setEditingMemory(memory)}
-            onDelete={() => deleteMutation.mutate(memory.id)}
-          />
-        ))}
+        <textarea
+          placeholder="Content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="border p-3 rounded h-32 resize-none focus:outline-none focus:ring-2 focus:ring-black"
+        />
+
+        <button
+          onClick={handleCreate}
+          disabled={loading}
+          className="bg-black text-white py-3 rounded hover:opacity-80 transition"
+        >
+          {loading ? "Creating..." : "Create Memory"}
+        </button>
       </div>
-
-      {/* CREATE MODAL */}
-      {showCreate && (
-        <CreateMemoryModal
-          onClose={() => setShowCreate(false)}
-          onCreate={async (data) => {
-            await createMutation.mutateAsync(data);
-          }}
-        />
-      )}
-
-      {/* EDIT MODAL */}
-      {editingMemory && (
-        <EditMemoryModal
-          memory={editingMemory}
-          onClose={() => setEditingMemory(null)}
-          onUpdate={async (data) => {
-            await updateMutation.mutateAsync({
-              id: editingMemory.id,
-              ...data,
-            });
-          }}
-        />
-      )}
     </div>
   );
 }
