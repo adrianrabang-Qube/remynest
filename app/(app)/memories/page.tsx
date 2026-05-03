@@ -73,23 +73,108 @@ export default function MemoriesPage() {
     },
   });
 
+  // =========================
+  // GROUPING LOGIC (NEW)
+  // =========================
+  const now = new Date();
+
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - 7);
+
+  const today: Memory[] = [];
+  const thisWeek: Memory[] = [];
+  const earlier: Memory[] = [];
+
+  memories.forEach((memory) => {
+    const date = new Date(memory.created_at);
+
+    if (date >= startOfToday) {
+      today.push(memory);
+    } else if (date >= startOfWeek) {
+      thisWeek.push(memory);
+    } else {
+      earlier.push(memory);
+    }
+  });
+
+  // =========================
+  // UI
+  // =========================
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Your Memories</h1>
 
-      <button onClick={() => setShowCreate(true)} className="text-blue-600">
+      <button
+        onClick={() => setShowCreate(true)}
+        className="text-blue-600"
+      >
         + New Memory
       </button>
 
-      {memories.map((memory) => (
-        <MemoryCard
-          key={memory.id}
-          memory={memory}
-          onEdit={() => setEditingMemory(memory)}
-          onDelete={() => deleteMutation.mutate(memory.id)}
-        />
-      ))}
+      {/* TODAY */}
+      {today.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 mb-2">
+            Today
+          </h2>
+          <div className="space-y-4">
+            {today.map((memory) => (
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onEdit={() => setEditingMemory(memory)}
+                onDelete={() => deleteMutation.mutate(memory.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
+      {/* THIS WEEK */}
+      {thisWeek.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 mb-2">
+            This Week
+          </h2>
+          <div className="space-y-4">
+            {thisWeek.map((memory) => (
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onEdit={() => setEditingMemory(memory)}
+                onDelete={() => deleteMutation.mutate(memory.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* EARLIER */}
+      {earlier.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 mb-2">
+            Earlier
+          </h2>
+          <div className="space-y-4">
+            {earlier.map((memory) => (
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onEdit={() => setEditingMemory(memory)}
+                onDelete={() => deleteMutation.mutate(memory.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CREATE MODAL */}
       {showCreate && (
         <CreateMemoryModal
           onClose={() => setShowCreate(false)}
@@ -99,6 +184,7 @@ export default function MemoriesPage() {
         />
       )}
 
+      {/* EDIT MODAL */}
       {editingMemory && (
         <EditMemoryModal
           memory={editingMemory}
