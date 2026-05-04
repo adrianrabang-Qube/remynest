@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import MemoryCard from "@/components/MemoryCard";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
@@ -20,27 +24,88 @@ export default function MemoriesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
 
-  const { data: memories = [] } = useQuery<Memory[]>({
+  // ✅ Use cached data immediately → no loading flicker
+  const {
+    data: memories = [],
+    isFetching,
+  } = useQuery<Memory[]>({
     queryKey: ["memories"],
     queryFn: async () => {
-      const res = await fetch("/api/memories");
+      const res = await fetch("/api/memories", {
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch memories");
+      }
+
       return res.json();
     },
+
+    initialData: () =>
+      queryClient.getQueryData<Memory[]>(["memories"]) || [],
+
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
+  // =========================
+  // CREATE (OPTIMISTIC)
+  // =========================
   const createMutation = useMutation({
     mutationFn: async (data: { title: string; content: string }) => {
-      await fetch("/api/memories", {
+      const res = await fetch("/api/memories", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to create memory");
+      }
+
+      return res.json();
     },
-    onSuccess: () => {
+
+    onMutate: async (newMemory) => {
+      await queryClient.cancelQueries({ queryKey: ["memories"] });
+
+      const previous = queryClient.getQueryData<Memory[]>(["memories"]);
+
+      const optimistic: Memory = {
+        id: crypto.randomUUID(),
+        title: newMemory.title,
+        content: newMemory.content,
+        created_at: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<Memory[]>(["memories"], (old = []) => [
+        optimistic,
+        ...old,
+      ]);
+
+      return { previous };
+    },
+
+    onError: (_err, _newMemory, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["memories"], context.previous);
+      }
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       setShowCreate(false);
     },
   });
 
+  // =========================
+  // UPDATE (OPTIMISTIC)
+  // =========================
   const updateMutation = useMutation({
     mutationFn: async ({
       id,
@@ -51,30 +116,84 @@ export default function MemoriesPage() {
       title: string;
       content: string;
     }) => {
-      await fetch(`/api/memories/${id}`, {
+      const res = await fetch(`/api/memories/${id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ title, content }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to update memory");
+      }
     },
-    onSuccess: () => {
+
+    onMutate: async (updated) => {
+      await queryClient.cancelQueries({ queryKey: ["memories"] });
+
+      const previous = queryClient.getQueryData<Memory[]>(["memories"]);
+
+      queryClient.setQueryData<Memory[]>(["memories"], (old = []) =>
+        old.map((m) =>
+          m.id === updated.id ? { ...m, ...updated } : m
+        )
+      );
+
+      return { previous };
+    },
+
+    onError: (_err, _updated, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["memories"], context.previous);
+      }
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["memories"] });
       setEditingMemory(null);
     },
   });
 
+  // =========================
+  // DELETE (OPTIMISTIC)
+  // =========================
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`/api/memories/${id}`, {
+      const res = await fetch(`/api/memories/${id}`, {
         method: "DELETE",
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete memory");
+      }
     },
-    onSuccess: () => {
+
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ["memories"] });
+
+      const previous = queryClient.getQueryData<Memory[]>(["memories"]);
+
+      queryClient.setQueryData<Memory[]>(["memories"], (old = []) =>
+        old.filter((m) => m.id !== id)
+      );
+
+      return { previous };
+    },
+
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["memories"], context.previous);
+      }
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["memories"] });
     },
   });
 
   // =========================
-  // SORT (CRITICAL FIX)
+  // SORT
   // =========================
   const sortedMemories = [...memories].sort(
     (a, b) =>
@@ -116,6 +235,11 @@ export default function MemoriesPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Your Memories</h1>
 
+      {/* subtle background refresh indicator */}
+      {isFetching && (
+        <p className="text-xs text-gray-400">Updating...</p>
+      )}
+
       <button
         onClick={() => setShowCreate(true)}
         className="text-blue-600"
@@ -123,7 +247,6 @@ export default function MemoriesPage() {
         + New Memory
       </button>
 
-      {/* TODAY */}
       {today.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-gray-500 mb-2">
@@ -142,7 +265,6 @@ export default function MemoriesPage() {
         </div>
       )}
 
-      {/* THIS WEEK */}
       {thisWeek.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-gray-500 mb-2">
@@ -161,7 +283,6 @@ export default function MemoriesPage() {
         </div>
       )}
 
-      {/* EARLIER */}
       {earlier.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-gray-500 mb-2">

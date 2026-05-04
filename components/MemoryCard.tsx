@@ -1,18 +1,64 @@
+"use client";
+
+type Memory = {
+  id: string;
+  title: string;
+  content: string;
+  created_at?: string;
+  summary?: string;
+  tags?: string[];
+};
+
 export default function MemoryCard({
   memory,
   onEdit,
   onDelete,
-}: any) {
+}: {
+  memory: Memory;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
   return (
     <div className="border rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition">
       <h3 className="font-semibold text-lg">{memory.title}</h3>
-      <p className="text-sm text-gray-600 mb-2">{memory.content}</p>
+
+      <p className="text-sm text-gray-600 mb-2">
+        {memory.content}
+      </p>
+
+      {/* ✅ AI SUMMARY (safe, optional) */}
+      {memory.summary && (
+        <p className="text-xs text-gray-500 italic mb-2">
+          {memory.summary}
+        </p>
+      )}
+
+      {/* ✅ AI TAGS (safe, optional) */}
+      {memory.tags && memory.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {memory.tags.map((tag, i) => (
+            <span
+              key={i}
+              className="text-xs bg-gray-200 px-2 py-1 rounded-full"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-4 text-sm">
-        <button onClick={onEdit} className="text-blue-500 hover:underline">
+        <button
+          onClick={onEdit}
+          className="text-blue-500 hover:underline"
+        >
           Edit
         </button>
-        <button onClick={onDelete} className="text-red-500 hover:underline">
+
+        <button
+          onClick={onDelete}
+          className="text-red-500 hover:underline"
+        >
           Delete
         </button>
       </div>
