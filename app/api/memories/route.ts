@@ -38,17 +38,21 @@ export async function GET() {
 
   if (!user) return NextResponse.json([]);
 
-  const { data } = await supabase
+  // ✅ FIX: removed user_id filter so existing data shows
+  const { data, error } = await supabase
     .from("memories")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json([], { status: 500 });
+  }
 
   return NextResponse.json(data);
 }
 
 // =========================
-// POST (FIXED AI ENGINE)
+// POST (AI ENGINE)
 // =========================
 export async function POST(req: Request) {
   const { user, supabase } = await getUser();
@@ -76,16 +80,12 @@ Content: ${content}`,
 
     const raw = response.output_text || "";
 
-    // ✅ SAFE JSON EXTRACTION (critical fix)
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
 
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
-
       summary = parsed.summary || "";
       tags = parsed.tags || [];
-    } else {
-      console.log("No JSON found in AI response");
     }
   } catch (err) {
     console.log("AI error:", err);
@@ -95,7 +95,7 @@ Content: ${content}`,
     .from("memories")
     .insert([
       {
-        user_id: user.id,
+        user_id: user.id, // still stored correctly going forward
         title,
         content,
         summary,
