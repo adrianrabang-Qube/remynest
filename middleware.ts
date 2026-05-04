@@ -3,17 +3,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  // ⚡ EARLY EXIT FOR STATIC / NON-APP REQUESTS (PERFORMANCE)
-  const pathname = req.nextUrl.pathname;
-
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith("/api")
-  ) {
-    return NextResponse.next();
-  }
-
   const res = NextResponse.next();
 
   const supabase = createServerClient(
@@ -37,23 +26,23 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ✅ PUBLIC ROUTES
-  const isPublicRoute =
-    pathname === "/" ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/signup");
+  const pathname = req.nextUrl.pathname;
 
-  // ❌ BLOCK ONLY PROTECTED ROUTES (when logged out)
-  if (!user && !isPublicRoute) {
+  // ✅ PUBLIC ROUTES ONLY
+  const publicRoutes = ["/login", "/signup"];
+
+  const isPublic = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  // ❌ Not logged in → block protected routes
+  if (!user && !isPublic) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 🔒 PREVENT AUTH PAGES WHEN LOGGED IN
-  if (
-    user &&
-    (pathname.startsWith("/login") || pathname.startsWith("/signup"))
-  ) {
-    return NextResponse.redirect(new URL("/memories", req.url));
+  // ✅ Logged in → block ONLY auth pages
+  if (user && isPublic) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return res;
