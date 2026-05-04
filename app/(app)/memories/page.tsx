@@ -74,7 +74,16 @@ export default function MemoriesPage() {
   });
 
   // =========================
-  // GROUPING LOGIC (NEW)
+  // SORT (CRITICAL FIX)
+  // =========================
+  const sortedMemories = [...memories].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
+  );
+
+  // =========================
+  // GROUPING
   // =========================
   const now = new Date();
 
@@ -91,7 +100,7 @@ export default function MemoriesPage() {
   const thisWeek: Memory[] = [];
   const earlier: Memory[] = [];
 
-  memories.forEach((memory) => {
+  sortedMemories.forEach((memory) => {
     const date = new Date(memory.created_at);
 
     if (date >= startOfToday) {
@@ -103,9 +112,6 @@ export default function MemoriesPage() {
     }
   });
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Your Memories</h1>
@@ -174,7 +180,6 @@ export default function MemoriesPage() {
         </div>
       )}
 
-      {/* CREATE MODAL */}
       {showCreate && (
         <CreateMemoryModal
           onClose={() => setShowCreate(false)}
@@ -184,7 +189,6 @@ export default function MemoriesPage() {
         />
       )}
 
-      {/* EDIT MODAL */}
       {editingMemory && (
         <EditMemoryModal
           memory={editingMemory}
