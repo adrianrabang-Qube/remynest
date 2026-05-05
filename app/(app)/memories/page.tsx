@@ -24,9 +24,10 @@ export default function MemoriesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
 
-  // ✅ Use cached data immediately → no loading flicker
+  // ✅ CLEAN QUERY (FIXED)
   const {
     data: memories = [],
+    isLoading,
     isFetching,
   } = useQuery<Memory[]>({
     queryKey: ["memories"],
@@ -41,9 +42,6 @@ export default function MemoriesPage() {
 
       return res.json();
     },
-
-    initialData: () =>
-      queryClient.getQueryData<Memory[]>(["memories"]) || [],
 
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
@@ -235,8 +233,13 @@ export default function MemoriesPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Your Memories</h1>
 
-      {/* subtle background refresh indicator */}
-      {isFetching && (
+      {/* ✅ Loading state (important fix) */}
+      {isLoading && (
+        <p className="text-sm text-gray-500">Loading memories...</p>
+      )}
+
+      {/* background refresh */}
+      {isFetching && !isLoading && (
         <p className="text-xs text-gray-400">Updating...</p>
       )}
 
@@ -246,6 +249,11 @@ export default function MemoriesPage() {
       >
         + New Memory
       </button>
+
+      {/* EMPTY STATE (important) */}
+      {!isLoading && memories.length === 0 && (
+        <p className="text-gray-500">No memories yet.</p>
+      )}
 
       {today.length > 0 && (
         <div>
