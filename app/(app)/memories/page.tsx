@@ -22,6 +22,7 @@ export default function MemoriesPage() {
   const queryClient = useQueryClient();
 
   const [showCreate, setShowCreate] = useState(false);
+
   const [editingMemory, setEditingMemory] =
     useState<Memory | null>(null);
 
@@ -287,7 +288,10 @@ export default function MemoriesPage() {
   // SEMANTIC SEARCH
   // =========================
   async function handleSearch() {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
     try {
       setIsSearching(true);
@@ -475,88 +479,91 @@ export default function MemoriesPage() {
         )}
 
       {/* Today */}
-      {today.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">
-            Today
-          </h2>
+      {searchResults.length === 0 &&
+        today.length > 0 && (
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 mb-2">
+              Today
+            </h2>
 
-          <div className="space-y-4">
-            {today.map((memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onEdit={() =>
-                  setEditingMemory(
-                    memory
-                  )
-                }
-                onDelete={() =>
-                  deleteMutation.mutate(
-                    memory.id
-                  )
-                }
-              />
-            ))}
+            <div className="space-y-4">
+              {today.map((memory) => (
+                <MemoryCard
+                  key={memory.id}
+                  memory={memory}
+                  onEdit={() =>
+                    setEditingMemory(
+                      memory
+                    )
+                  }
+                  onDelete={() =>
+                    deleteMutation.mutate(
+                      memory.id
+                    )
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* This Week */}
-      {thisWeek.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">
-            This Week
-          </h2>
+      {searchResults.length === 0 &&
+        thisWeek.length > 0 && (
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 mb-2">
+              This Week
+            </h2>
 
-          <div className="space-y-4">
-            {thisWeek.map((memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onEdit={() =>
-                  setEditingMemory(
-                    memory
-                  )
-                }
-                onDelete={() =>
-                  deleteMutation.mutate(
-                    memory.id
-                  )
-                }
-              />
-            ))}
+            <div className="space-y-4">
+              {thisWeek.map((memory) => (
+                <MemoryCard
+                  key={memory.id}
+                  memory={memory}
+                  onEdit={() =>
+                    setEditingMemory(
+                      memory
+                    )
+                  }
+                  onDelete={() =>
+                    deleteMutation.mutate(
+                      memory.id
+                    )
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Earlier */}
-      {earlier.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">
-            Earlier
-          </h2>
+      {searchResults.length === 0 &&
+        earlier.length > 0 && (
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 mb-2">
+              Earlier
+            </h2>
 
-          <div className="space-y-4">
-            {earlier.map((memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onEdit={() =>
-                  setEditingMemory(
-                    memory
-                  )
-                }
-                onDelete={() =>
-                  deleteMutation.mutate(
-                    memory.id
-                  )
-                }
-              />
-            ))}
+            <div className="space-y-4">
+              {earlier.map((memory) => (
+                <MemoryCard
+                  key={memory.id}
+                  memory={memory}
+                  onEdit={() =>
+                    setEditingMemory(
+                      memory
+                    )
+                  }
+                  onDelete={() =>
+                    deleteMutation.mutate(
+                      memory.id
+                    )
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Create Modal */}
       {showCreate && (
