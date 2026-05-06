@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateMemoryInsights } from "@/lib/ai-memory";
+import { generateEmbedding } from "@/lib/embeddings";
 
 export async function POST(req: Request) {
   try {
@@ -55,7 +56,22 @@ export async function POST(req: Request) {
 
       console.log("✅ AI MEMORY:", ai);
     } catch (aiError) {
-      console.log("AI ERROR:", aiError);
+      console.log("❌ AI ERROR:");
+      console.log(aiError);
+    }
+
+    // 🧠 Generate embedding
+    let embedding: number[] | null = null;
+
+    try {
+      console.log("🚀 GENERATING EMBEDDING");
+
+      embedding = await generateEmbedding(content);
+
+      console.log("✅ EMBEDDING CREATED");
+    } catch (embeddingError) {
+      console.log("❌ EMBEDDING ERROR:");
+      console.log(embeddingError);
     }
 
     // 💾 Save memory
@@ -72,13 +88,16 @@ export async function POST(req: Request) {
           ai_summary: aiSummary,
           ai_tags: aiTags,
           ai_category: aiCategory,
+
+          embedding,
         },
       ])
       .select()
       .single();
 
     if (error) {
-      console.log("MEMORY CREATE ERROR:", error);
+      console.log("❌ MEMORY CREATE ERROR:");
+      console.log(error);
 
       return NextResponse.json(
         {
@@ -94,7 +113,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.log("CREATE MEMORY ERROR:", error);
+    console.log("❌ CREATE MEMORY ERROR:");
+    console.log(error);
 
     return NextResponse.json(
       {

@@ -2,11 +2,15 @@
 
 type Memory = {
   id: string;
+
   title: string;
   content: string;
+
   created_at?: string;
-  summary?: string;
-  tags?: string[];
+
+  ai_title?: string;
+  ai_summary?: string;
+  ai_tags?: string[];
 };
 
 export default function MemoryCard({
@@ -20,23 +24,27 @@ export default function MemoryCard({
 }) {
   return (
     <div className="border rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition">
-      <h3 className="font-semibold text-lg">{memory.title}</h3>
+      {/* Title */}
+      <h3 className="font-semibold text-lg">
+        {memory.ai_title || memory.title}
+      </h3>
 
+      {/* Content */}
       <p className="text-sm text-gray-600 mb-2">
         {memory.content}
       </p>
 
-      {/* ✅ AI SUMMARY (safe, optional) */}
-      {memory.summary && (
+      {/* AI Summary */}
+      {memory.ai_summary && (
         <p className="text-xs text-gray-500 italic mb-2">
-          {memory.summary}
+          {memory.ai_summary}
         </p>
       )}
 
-      {/* ✅ AI TAGS (safe, optional) */}
-      {memory.tags && memory.tags.length > 0 && (
+      {/* AI Tags */}
+      {memory.ai_tags && memory.ai_tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
-          {memory.tags.map((tag, i) => (
+          {memory.ai_tags.map((tag, i) => (
             <span
               key={i}
               className="text-xs bg-gray-200 px-2 py-1 rounded-full"
@@ -47,6 +55,7 @@ export default function MemoryCard({
         </div>
       )}
 
+      {/* Actions */}
       <div className="flex gap-4 text-sm">
         <button
           onClick={onEdit}

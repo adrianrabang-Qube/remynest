@@ -8,11 +8,15 @@ export default function CreateMemoryForm() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!content) {
+      alert("Content required");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -28,10 +32,17 @@ export default function CreateMemoryForm() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        alert("Failed to create memory");
+        console.log(data);
+
+        alert(data.error || "Failed to create memory");
+
         return;
       }
+
+      console.log("✅ CREATED MEMORY:", data);
 
       setTitle("");
       setContent("");
@@ -40,7 +51,7 @@ export default function CreateMemoryForm() {
 
       alert("✅ Memory saved");
     } catch (error) {
-      console.log(error);
+      console.log("CREATE MEMORY FORM ERROR:", error);
 
       alert("Something went wrong");
     } finally {
@@ -82,7 +93,7 @@ export default function CreateMemoryForm() {
       <button
         type="submit"
         disabled={loading}
-        className="bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition"
+        className="bg-black text-white px-5 py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50"
       >
         {loading ? "Saving..." : "Save Memory"}
       </button>
