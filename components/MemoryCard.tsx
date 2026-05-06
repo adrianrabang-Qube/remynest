@@ -10,7 +10,7 @@ type Memory = {
 
   ai_title?: string;
   ai_summary?: string;
-  ai_tags?: string[];
+ ai_tags?: string[];
 };
 
 export default function MemoryCard({
@@ -23,20 +23,20 @@ export default function MemoryCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="border rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition">
+    <div className="border rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition overflow-hidden">
       {/* Title */}
-      <h3 className="font-semibold text-lg">
+      <h3 className="font-semibold text-lg break-words whitespace-pre-wrap">
         {memory.ai_title || memory.title}
       </h3>
 
       {/* Content */}
-      <p className="text-sm text-gray-600 mb-2">
+      <p className="text-sm text-gray-600 mb-2 break-words whitespace-pre-wrap">
         {memory.content}
       </p>
 
       {/* AI Summary */}
       {memory.ai_summary && (
-        <p className="text-xs text-gray-500 italic mb-2">
+        <p className="text-xs text-gray-500 italic mb-2 break-words whitespace-pre-wrap">
           {memory.ai_summary}
         </p>
       )}
@@ -47,7 +47,7 @@ export default function MemoryCard({
           {memory.ai_tags.map((tag, i) => (
             <span
               key={i}
-              className="text-xs bg-gray-200 px-2 py-1 rounded-full"
+              className="text-xs bg-gray-200 px-2 py-1 rounded-full break-words"
             >
               #{tag}
             </span>
