@@ -5,6 +5,13 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
+  const pathname = req.nextUrl.pathname;
+
+  // ✅ STRIPE WEBHOOK MUST STAY PUBLIC
+  if (pathname.startsWith("/api/stripe/webhook")) {
+    return res;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,21 +33,19 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = req.nextUrl.pathname;
-
-  // ✅ PUBLIC ROUTES ONLY
+  // ✅ PUBLIC ROUTES
   const publicRoutes = ["/login", "/signup"];
 
   const isPublic = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  // ❌ Not logged in → block protected routes
+  // ❌ Not logged in
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // ✅ Logged in → block ONLY auth pages
+  // ✅ Already logged in
   if (user && isPublic) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
@@ -49,5 +54,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
