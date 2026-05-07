@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       "match_memories",
       {
         query_embedding: embedding,
-        match_threshold: 0.45,
+        match_threshold: 0.2,
         match_count: 20,
         user_id_input: user.id,
       }

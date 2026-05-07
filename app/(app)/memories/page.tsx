@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useQuery,
   useMutation,
@@ -21,12 +21,15 @@ type Memory = {
 export default function MemoriesPage() {
   const queryClient = useQueryClient();
 
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] =
+    useState(false);
 
   const [editingMemory, setEditingMemory] =
     useState<Memory | null>(null);
 
-  // ✅ Semantic Search State
+  // =========================
+  // SEMANTIC SEARCH STATE
+  // =========================
   const [searchQuery, setSearchQuery] =
     useState("");
 
@@ -35,6 +38,29 @@ export default function MemoriesPage() {
 
   const [isSearching, setIsSearching] =
     useState(false);
+
+  // ✅ NEW
+  const isSearchActive =
+    searchQuery.trim().length > 0;
+
+  // =========================
+  // LIVE SEARCH
+  // =========================
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+
+    // restore grouped timeline
+    if (!trimmed) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // =========================
   // FETCH MEMORIES
@@ -47,9 +73,12 @@ export default function MemoriesPage() {
     queryKey: ["memories"],
 
     queryFn: async () => {
-      const res = await fetch("/api/memories", {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        "/api/memories",
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!res.ok) {
         throw new Error(
@@ -448,32 +477,49 @@ export default function MemoriesPage() {
       )}
 
       {/* Search Results */}
-      {searchResults.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-gray-500">
-            Semantic Search Results
-          </h2>
+      {isSearchActive &&
+        searchResults.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-sm font-semibold text-gray-500">
+              Semantic Search Results •{" "}
+              {searchResults.length} found
+            </h2>
 
-          {searchResults.map(
-            (memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onEdit={() =>
-                  setEditingMemory(
-                    memory
-                  )
-                }
-                onDelete={() =>
-                  deleteMutation.mutate(
-                    memory.id
-                  )
-                }
-              />
-            )
-          )}
-        </div>
-      )}
+            {searchResults.map(
+              (memory) => (
+                <MemoryCard
+                  key={memory.id}
+                  memory={memory}
+                  onEdit={() =>
+                    setEditingMemory(
+                      memory
+                    )
+                  }
+                  onDelete={() =>
+                    deleteMutation.mutate(
+                      memory.id
+                    )
+                  }
+                />
+              )
+            )}
+          </div>
+        )}
+
+      {/* No Search Results */}
+      {isSearchActive &&
+        !isSearching &&
+        searchResults.length === 0 && (
+          <div className="rounded-xl border border-gray-200 p-6 text-center">
+            <p className="text-sm text-gray-500">
+              No memories found.
+            </p>
+
+            <p className="text-xs text-gray-400 mt-2">
+              Try different keywords or phrases.
+            </p>
+          </div>
+        )}
 
       {/* Empty */}
       {!isLoading &&
@@ -483,8 +529,8 @@ export default function MemoriesPage() {
           </p>
         )}
 
-      {/* Today */}
-      {searchResults.length === 0 &&
+      {/* TODAY */}
+      {!isSearchActive &&
         today.length > 0 && (
           <div>
             <h2 className="text-sm font-semibold text-gray-500 mb-2">
@@ -512,8 +558,8 @@ export default function MemoriesPage() {
           </div>
         )}
 
-      {/* This Week */}
-      {searchResults.length === 0 &&
+      {/* THIS WEEK */}
+      {!isSearchActive &&
         thisWeek.length > 0 && (
           <div>
             <h2 className="text-sm font-semibold text-gray-500 mb-2">
@@ -541,8 +587,8 @@ export default function MemoriesPage() {
           </div>
         )}
 
-      {/* Earlier */}
-      {searchResults.length === 0 &&
+      {/* EARLIER */}
+      {!isSearchActive &&
         earlier.length > 0 && (
           <div>
             <h2 className="text-sm font-semibold text-gray-500 mb-2">
