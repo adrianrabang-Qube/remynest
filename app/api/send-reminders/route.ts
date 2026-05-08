@@ -8,6 +8,7 @@ export async function GET() {
     )
 
     const now = new Date().toISOString()
+
     console.log('NOW:', now)
 
     const { data: reminders, error } = await supabase
@@ -17,8 +18,12 @@ export async function GET() {
       .lte('remind_at', now)
 
     if (error) {
-      console.log('ERROR:', error)
-      return Response.json({ success: false, error })
+      console.log('SUPABASE ERROR:', error)
+
+      return Response.json({
+        success: false,
+        error,
+      })
     }
 
     console.log('REMINDERS FOUND:', reminders)
@@ -33,37 +38,87 @@ export async function GET() {
     for (const reminder of reminders) {
       console.log('PROCESSING:', reminder.id)
 
-      // 🔔 SEND REAL NOTIFICATION (OneSignal)
-      const response = await fetch('https://onesignal.com/api/v1/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
-        },
-        body: JSON.stringify({
-          app_id: process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID,
-          included_segments: ['All'],
-          contents: {
-            en: reminder.message || 'Reminder',
+      // 🔔 SEND PUSH NOTIFICATION
+      const response = await fetch(
+        'https://onesignal.com/api/v1/notifications',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+
+            Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
           },
-        }),
-      })
+
+          body: JSON.stringify({
+            app_id:
+              process.env
+                .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+
+            include_aliases: {
+              external_id: [reminder.user_id],
+            },
+
+            target_channel: 'push',
+
+            headings: {
+              en: 'RemyNest Reminder',
+            },
+
+            contents: {
+              en:
+                reminder.message ||
+                'Reminder',
+            },
+          }),
+        }
+      )
 
       const data = await response.json()
-      console.log('ONESIGNAL RESPONSE:', data)
 
-      // ✅ mark as sent
-      await supabase
-        .from('reminders')
-        .update({ sent: true })
-        .eq('id', reminder.id)
+      console.log(
+        'ONESIGNAL RESPONSE:',
+        data
+      )
 
-      console.log('UPDATED TO TRUE:', reminder.id)
+      // ✅ ONLY MARK SENT IF SUCCESS
+      if (response.ok) {
+        const { error: updateError } =
+          await supabase
+            .from('reminders')
+            .update({
+              sent: true,
+            })
+            .eq('id', reminder.id)
+
+        if (updateError) {
+          console.log(
+            'UPDATE ERROR:',
+            updateError
+          )
+        } else {
+          console.log(
+            'UPDATED TO TRUE:',
+            reminder.id
+          )
+        }
+      } else {
+        console.log(
+          'FAILED TO SEND:',
+          data
+        )
+      }
     }
 
-    return Response.json({ success: true })
+    return Response.json({
+      success: true,
+    })
   } catch (err) {
     console.log('CRASH:', err)
-    return Response.json({ success: false, error: err })
+
+    return Response.json({
+      success: false,
+      error: err,
+    })
   }
 }
