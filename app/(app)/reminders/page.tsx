@@ -32,7 +32,6 @@ export default async function RemindersPage() {
 
     const supabase = createClient();
 
-    // 🔐 Auth
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -43,11 +42,30 @@ export default async function RemindersPage() {
 
     const title = formData.get("title") as string;
 
+    const remindAt = formData.get(
+      "remind_at"
+    ) as string;
+
+    const recurring =
+      formData.get("recurring") === "on";
+
+    const frequency = formData.get(
+      "frequency"
+    ) as string;
+
     if (!title || title.trim().length === 0) {
       throw new Error("Title required");
     }
 
-    console.log("🚀 Creating reminder");
+    if (!remindAt) {
+      throw new Error(
+        "Reminder date required"
+      );
+    }
+
+    const finalFrequency = recurring
+      ? frequency
+      : null;
 
     const { data, error } = await supabase
       .from("reminders")
@@ -55,12 +73,15 @@ export default async function RemindersPage() {
         title,
         user_id: user.id,
 
-        // ⏰ Temporary MVP reminder time
         remind_at: new Date(
-          Date.now() + 1000 * 60 * 60 * 24
+          remindAt
         ).toISOString(),
 
         completed: false,
+
+        recurring,
+
+        frequency: finalFrequency,
       })
       .select()
       .single();
@@ -108,6 +129,31 @@ export default async function RemindersPage() {
     redirect("/reminders");
   }
 
+  // 🗑️ Delete Reminder
+  async function deleteReminder(
+    formData: FormData
+  ) {
+    "use server";
+
+    const supabase = createClient();
+
+    const id = formData.get("id") as string;
+
+    const { error } = await supabase
+      .from("reminders")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.log("❌ DELETE ERROR:");
+      console.log(error);
+
+      throw new Error(error.message);
+    }
+
+    redirect("/reminders");
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       {/* Header */}
@@ -123,6 +169,7 @@ export default async function RemindersPage() {
 
       {/* Create Reminder */}
       <form
+        key={Date.now()}
         action={createReminder}
         className="bg-white border rounded-2xl p-6 shadow-sm mb-8"
       >
@@ -130,19 +177,60 @@ export default async function RemindersPage() {
           Create Reminder
         </h2>
 
-        <div className="flex gap-3">
+        <div className="space-y-4">
+          {/* Title */}
           <input
             name="title"
+            defaultValue=""
             placeholder="Take medicine every Tuesday at 2PM..."
             required
-            className="flex-1 border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
           />
+
+          {/* Date */}
+          <input
+            type="datetime-local"
+            name="remind_at"
+            defaultValue=""
+            required
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+          />
+
+          {/* Recurring */}
+          <div className="border rounded-xl p-4 space-y-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="recurring"
+              />
+
+              Recurring reminder
+            </label>
+
+            <select
+              name="frequency"
+              defaultValue="daily"
+              className="w-full border rounded-xl px-4 py-3 outline-none"
+            >
+              <option value="daily">
+                Daily
+              </option>
+
+              <option value="weekly">
+                Weekly
+              </option>
+
+              <option value="monthly">
+                Monthly
+              </option>
+            </select>
+          </div>
 
           <button
             type="submit"
             className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90 transition"
           >
-            Create
+            Create Reminder
           </button>
         </div>
       </form>
@@ -178,37 +266,63 @@ export default async function RemindersPage() {
                         ).toLocaleString()
                       : "Unknown"}
                   </p>
+
+                  {reminder.recurring &&
+                    reminder.frequency && (
+                      <p className="text-sm text-blue-600 mt-1">
+                        Recurring:{" "}
+                        {reminder.frequency}
+                      </p>
+                    )}
                 </div>
 
-                {/* ✅ Completion Toggle */}
-                <form action={toggleReminderComplete}>
-                  <input
-                    type="hidden"
-                    name="id"
-                    value={reminder.id}
-                  />
+                <div className="flex items-center gap-2">
+                  {/* ✅ Completion Toggle */}
+                  <form action={toggleReminderComplete}>
+                    <input
+                      type="hidden"
+                      name="id"
+                      value={reminder.id}
+                    />
 
-                  <input
-                    type="hidden"
-                    name="completed"
-                    value={String(
-                      reminder.completed
-                    )}
-                  />
+                    <input
+                      type="hidden"
+                      name="completed"
+                      value={String(
+                        reminder.completed
+                      )}
+                    />
 
-                  <button
-                    type="submit"
-                    className={`text-xs px-3 py-1 rounded-full transition ${
-                      reminder.completed
-                        ? "bg-green-200 text-green-800"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {reminder.completed
-                      ? "Completed"
-                      : "Active"}
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      className={`text-xs px-3 py-1 rounded-full transition ${
+                        reminder.completed
+                          ? "bg-green-200 text-green-800"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {reminder.completed
+                        ? "Completed"
+                        : "Active"}
+                    </button>
+                  </form>
+
+                  {/* 🗑️ Delete */}
+                  <form action={deleteReminder}>
+                    <input
+                      type="hidden"
+                      name="id"
+                      value={reminder.id}
+                    />
+
+                    <button
+                      type="submit"
+                      className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           ))
