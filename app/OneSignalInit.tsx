@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 declare global {
   interface Window {
@@ -11,41 +12,57 @@ declare global {
 
 export default function OneSignalInit() {
   useEffect(() => {
-    window.OneSignalDeferred =
-      window.OneSignalDeferred || [];
+    async function initOneSignal() {
+      const supabase = createClient();
 
-    window.OneSignalDeferred.push(
-      async function () {
-        await window.OneSignal.init({
-          appId:
-            process.env
-              .NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-          allowLocalhostAsSecureOrigin: true,
-        });
-
-        console.log(
-          "✅ OneSignal initialized"
-        );
-
-        await window.OneSignal
-          .Notifications
-          .requestPermission();
-
-        console.log(
-          "🔔 Permission:",
-          Notification.permission
-        );
-
-        await window.OneSignal.login(
-          "test-user"
-        );
-
-        console.log(
-          "✅ Logged into OneSignal"
-        );
+      if (!user) {
+        console.log("❌ No authenticated user");
+        return;
       }
-    );
+
+      window.OneSignalDeferred =
+        window.OneSignalDeferred || [];
+
+      window.OneSignalDeferred.push(
+        async function () {
+          await window.OneSignal.init({
+            appId:
+              process.env
+                .NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+
+            allowLocalhostAsSecureOrigin: true,
+          });
+
+          console.log(
+            "✅ OneSignal initialized"
+          );
+
+          await window.OneSignal
+            .Notifications
+            .requestPermission();
+
+          console.log(
+            "🔔 Permission:",
+            Notification.permission
+          );
+
+          await window.OneSignal.login(
+            user.id
+          );
+
+          console.log(
+            "✅ Logged into OneSignal:",
+            user.id
+          );
+        }
+      );
+    }
+
+    initOneSignal();
   }, []);
 
   return null;
