@@ -20,11 +20,17 @@ export default function OneSignalInit() {
           appId:
             process.env
               .NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+
+          allowLocalhostAsSecureOrigin: true,
         });
 
         console.log(
           "✅ OneSignal initialized"
         );
+
+        await window.OneSignal
+          .Notifications
+          .requestPermission();
 
         console.log(
           "🔔 Permission:",
