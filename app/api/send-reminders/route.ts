@@ -7,19 +7,25 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const now = new Date().toISOString()
+    console.log('RUNNING REMINDER CHECK')
 
-    console.log('NOW:', now)
+    // TEMPORARY:
+    // removed timezone filtering
+    // to verify push system fully works
 
     const { data: reminders, error } = await supabase
       .from('reminders')
       .select('*')
       .eq('sent', false)
-      .lte('remind_at', now)
-      .order('remind_at', { ascending: true })
+      .order('remind_at', {
+        ascending: true,
+      })
 
     if (error) {
-      console.log('SUPABASE ERROR:', error)
+      console.log(
+        'SUPABASE ERROR:',
+        error
+      )
 
       return Response.json({
         success: false,
@@ -27,9 +33,15 @@ export async function GET() {
       })
     }
 
-    console.log('REMINDERS FOUND:', reminders)
+    console.log(
+      'REMINDERS FOUND:',
+      reminders
+    )
 
-    if (!reminders || reminders.length === 0) {
+    if (
+      !reminders ||
+      reminders.length === 0
+    ) {
       return Response.json({
         success: true,
         message: 'No reminders found',
@@ -37,9 +49,15 @@ export async function GET() {
     }
 
     for (const reminder of reminders) {
-      console.log('PROCESSING:', reminder.id)
+      console.log(
+        'PROCESSING:',
+        reminder.id
+      )
 
-      console.log('REMINDER DATA:', reminder)
+      console.log(
+        'REMINDER DATA:',
+        reminder
+      )
 
       // 🔔 SEND PUSH NOTIFICATION
       const response = await fetch(
@@ -48,7 +66,8 @@ export async function GET() {
           method: 'POST',
 
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':
+              'application/json',
 
             Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
           },
@@ -59,10 +78,13 @@ export async function GET() {
                 .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
             include_aliases: {
-              external_id: [reminder.user_id],
+              external_id: [
+                reminder.user_id,
+              ],
             },
 
-            target_channel: 'push',
+            target_channel:
+              'push',
 
             headings: {
               en: 'RemyNest Reminder',
@@ -77,7 +99,8 @@ export async function GET() {
         }
       )
 
-      const data = await response.json()
+      const data =
+        await response.json()
 
       console.log(
         'ONESIGNAL RESPONSE:',
@@ -86,13 +109,14 @@ export async function GET() {
 
       // ✅ ONLY MARK SENT IF SUCCESS
       if (response.ok) {
-        const { error: updateError } =
-          await supabase
-            .from('reminders')
-            .update({
-              sent: true,
-            })
-            .eq('id', reminder.id)
+        const {
+          error: updateError,
+        } = await supabase
+          .from('reminders')
+          .update({
+            sent: true,
+          })
+          .eq('id', reminder.id)
 
         if (updateError) {
           console.log(
