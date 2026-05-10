@@ -16,6 +16,7 @@ export async function GET() {
       .select('*')
       .eq('sent', false)
       .lte('remind_at', now)
+      .order('remind_at', { ascending: true })
 
     if (error) {
       console.log('SUPABASE ERROR:', error)
@@ -37,6 +38,8 @@ export async function GET() {
 
     for (const reminder of reminders) {
       console.log('PROCESSING:', reminder.id)
+
+      console.log('REMINDER DATA:', reminder)
 
       // 🔔 SEND PUSH NOTIFICATION
       const response = await fetch(
@@ -67,7 +70,7 @@ export async function GET() {
 
             contents: {
               en:
-                reminder.message ||
+                reminder.title ||
                 'Reminder',
             },
           }),
