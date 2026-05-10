@@ -43,14 +43,14 @@ export async function GET() {
 
       // 🔔 SEND PUSH NOTIFICATION
       const response = await fetch(
-        'https://onesignal.com/api/v1/notifications',
+        'https://api.onesignal.com/notifications',
         {
           method: 'POST',
 
           headers: {
             'Content-Type': 'application/json',
 
-            Authorization: `Basic ${process.env.ONESIGNAL_API_KEY}`,
+            Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
           },
 
           body: JSON.stringify({
@@ -58,9 +58,11 @@ export async function GET() {
               process.env
                 .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
-            include_external_user_ids: [
-              reminder.user_id,
-            ],
+            include_aliases: {
+              external_id: [reminder.user_id],
+            },
+
+            target_channel: 'push',
 
             headings: {
               en: 'RemyNest Reminder',
