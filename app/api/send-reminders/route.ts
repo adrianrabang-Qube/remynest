@@ -58,11 +58,9 @@ export async function GET() {
               process.env
                 .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
-            include_aliases: {
-              external_id: [reminder.user_id],
-            },
-
-            target_channel: 'push',
+            include_external_user_ids: [
+              reminder.user_id,
+            ],
 
             headings: {
               en: 'RemyNest Reminder',
