@@ -1,44 +1,97 @@
-import "./globals.css";
-import QueryProvider from "@/components/QueryProvider";
-import OneSignalInit from "./OneSignalInit";
-import Script from "next/script";
+"use client";
 
-import type { Metadata } from "next";
+import { useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    "https://remynest.com"
-  ),
+declare global {
+  interface Window {
+    OneSignalDeferred: any[];
+    OneSignal: any;
+  }
+}
 
-  title: "Remynest",
+export default function OneSignalInit() {
+  useEffect(() => {
+    async function init() {
+      try {
+        const supabase = createClient();
 
-  description:
-    "Your AI-powered memory system",
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-  alternates: {
-    canonical: "/",
-  },
-};
+        console.log("✅ Supabase user:", user);
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>
-        <Script
-          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-          strategy="beforeInteractive"
-        />
+        if (!user) {
+          console.log("❌ No authenticated user");
+          return;
+        }
 
-        <OneSignalInit />
+        if (!window.OneSignalDeferred) {
+          window.OneSignalDeferred = [];
+        }
 
-        <QueryProvider>
-          {children}
-        </QueryProvider>
-      </body>
-    </html>
-  );
+        window.OneSignalDeferred.push(async function (
+          OneSignal: any
+        ) {
+          console.log(
+            "✅ OneSignal SDK loaded"
+          );
+
+          await OneSignal.init({
+            appId:
+              process.env
+                .NEXT_PUBLIC_ONESIGNAL_APP_ID!,
+
+            allowLocalhostAsSecureOrigin: true,
+          });
+
+          console.log(
+            "✅ OneSignal initialized"
+          );
+
+          const permission =
+            await OneSignal.Notifications.requestPermission();
+
+          console.log(
+            "✅ Notification permission:",
+            permission
+          );
+
+          await OneSignal.login(user.id);
+
+          console.log(
+            "✅ Logged into OneSignal:",
+            user.id
+          );
+
+          const externalId =
+            await OneSignal.User.externalId;
+
+          console.log(
+            "✅ OneSignal externalId:",
+            externalId
+          );
+
+          const subscriptionId =
+            await OneSignal.User.PushSubscription
+              .id;
+
+          console.log(
+            "✅ Push Subscription ID:",
+            subscriptionId
+          );
+        });
+      } catch (err) {
+        console.error(
+          "❌ OneSignal init error:",
+          err
+        );
+      }
+    }
+
+    init();
+  }, []);
+
+  return null;
 }
