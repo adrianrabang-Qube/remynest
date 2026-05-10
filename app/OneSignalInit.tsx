@@ -15,19 +15,26 @@ export default function OneSignalInit() {
     async function initOneSignal() {
       const supabase = createClient();
 
-      // WAIT for auth session properly
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // WAIT slightly for auth hydration
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2000)
+      );
 
-      if (!session?.user) {
-        console.log("❌ No authenticated user");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.log(
+          "❌ No authenticated user"
+        );
         return;
       }
 
-      const user = session.user;
-
-      console.log("✅ Supabase user:", user.id);
+      console.log(
+        "✅ Supabase user:",
+        user.id
+      );
 
       window.OneSignalDeferred =
         window.OneSignalDeferred || [];
@@ -55,7 +62,7 @@ export default function OneSignalInit() {
             Notification.permission
           );
 
-          // LOGIN USER TO ONESIGNAL
+          // LOGIN USER
           await window.OneSignal.login(
             user.id
           );
@@ -65,13 +72,15 @@ export default function OneSignalInit() {
             user.id
           );
 
-          // VERIFY EXTERNAL ID
-          const externalId =
-            window.OneSignal.User?.externalId;
+          // WAIT FOR INTERNAL UPDATE
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1500)
+          );
 
           console.log(
             "✅ OneSignal externalId:",
-            externalId
+            window.OneSignal.User
+              ?.externalId
           );
         }
       );
