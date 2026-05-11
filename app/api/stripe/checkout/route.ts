@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
 
@@ -10,6 +11,7 @@ export async function POST() {
       data: { user },
     } = await supabase.auth.getUser();
 
+    // User must be logged in
     if (!user) {
       return NextResponse.json(
         {
@@ -21,24 +23,17 @@ export async function POST() {
       );
     }
 
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
 
       payment_method_types: ["card"],
 
+      customer_email: user.email!,
+
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: "RemyNest Premium",
-              description: "AI memory assistant subscription",
-            },
-            unit_amount: 999,
-            recurring: {
-              interval: "month",
-            },
-          },
+          price: process.env.STRIPE_PRICE_ID!,
           quantity: 1,
         },
       ],
@@ -47,18 +42,22 @@ export async function POST() {
         userId: user.id,
       },
 
-      success_url: "http://localhost:3000/dashboard?success=true",
+      success_url:
+        "https://remynest.com/dashboard?success=true",
 
-      cancel_url: "http://localhost:3000/dashboard?canceled=true",
+      cancel_url:
+        "https://remynest.com/dashboard?canceled=true",
     });
 
-    console.log("SESSION USER ID:", user.id);
+    console.log("✅ STRIPE SESSION CREATED");
+    console.log("✅ USER ID:", user.id);
+    console.log("✅ SESSION ID:", session.id);
 
     return NextResponse.json({
       url: session.url,
     });
   } catch (error) {
-    console.log("STRIPE CHECKOUT ERROR:", error);
+    console.log("❌ STRIPE CHECKOUT ERROR:", error);
 
     return NextResponse.json(
       {

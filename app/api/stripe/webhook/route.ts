@@ -8,12 +8,18 @@ import { createClient } from "@/utils/supabase/server";
 export async function POST(req: Request) {
   const body = await req.text();
 
-  const signature = headers().get("stripe-signature");
+  const headersList = await headers();
+
+  const signature = headersList.get("stripe-signature");
 
   if (!signature) {
     return NextResponse.json(
-      { error: "Missing signature" },
-      { status: 400 }
+      {
+        error: "Missing signature",
+      },
+      {
+        status: 400,
+      }
     );
   }
 
@@ -29,12 +35,16 @@ export async function POST(req: Request) {
     console.error("❌ Webhook signature error:", err);
 
     return NextResponse.json(
-      { error: "Invalid signature" },
-      { status: 400 }
+      {
+        error: "Invalid signature",
+      },
+      {
+        status: 400,
+      }
     );
   }
 
-  // ✅ Checkout completed
+  // ✅ Successful subscription checkout
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
@@ -47,7 +57,9 @@ export async function POST(req: Request) {
     if (!userId) {
       console.log("❌ No userId found in metadata");
 
-      return NextResponse.json({ received: true });
+      return NextResponse.json({
+        received: true,
+      });
     }
 
     const supabase = await createClient();
@@ -61,12 +73,15 @@ export async function POST(req: Request) {
       .select();
 
     console.log("✅ UPDATE DATA:", data);
+
     console.log("❌ UPDATE ERROR:", error);
 
     if (!error) {
-      console.log("✅ User upgraded:", userId);
+      console.log("✅ User upgraded to premium:", userId);
     }
   }
 
-  return NextResponse.json({ received: true });
+  return NextResponse.json({
+    received: true,
+  });
 }
