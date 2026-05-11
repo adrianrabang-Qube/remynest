@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // ✅ Successful subscription checkout
+  // ✅ CHECKOUT SUCCESS
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
@@ -64,10 +64,43 @@ export async function POST(req: Request) {
 
     const supabase = await createClient();
 
+    // ✅ GET SUBSCRIPTION DETAILS
+    let subscription = null;
+
+    if (session.subscription) {
+      subscription = await stripe.subscriptions.retrieve(
+        session.subscription as string
+      );
+    }
+
+    console.log("✅ SUBSCRIPTION:", subscription?.id);
+
+    const currentPeriodEnd =
+      subscription?.items.data[0]?.current_period_end;
+
+    // ✅ UPDATE PROFILE
     const { data, error } = await supabase
       .from("profiles")
       .update({
         is_premium: true,
+
+        stripe_customer_id:
+          typeof session.customer === "string"
+            ? session.customer
+            : null,
+
+        stripe_subscription_id:
+          subscription?.id || null,
+
+        subscription_status:
+          subscription?.status || "active",
+
+        current_period_end:
+          currentPeriodEnd
+            ? new Date(
+                currentPeriodEnd * 1000
+              ).toISOString()
+            : null,
       })
       .eq("id", userId)
       .select();
@@ -77,8 +110,46 @@ export async function POST(req: Request) {
     console.log("❌ UPDATE ERROR:", error);
 
     if (!error) {
-      console.log("✅ User upgraded to premium:", userId);
+      console.log(
+        "✅ User upgraded to premium:",
+        userId
+      );
     }
+  }
+
+  // ✅ SUBSCRIPTION CANCELED / EXPIRED
+  if (
+    event.type === "customer.subscription.deleted"
+  ) {
+    const subscription =
+      event.data.object as Stripe.Subscription;
+
+    console.log(
+      "⚠️ SUBSCRIPTION CANCELED:",
+      subscription.id
+    );
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({
+        is_premium: false,
+
+        subscription_status:
+          subscription.status,
+
+        current_period_end: null,
+      })
+      .eq(
+        "stripe_subscription_id",
+        subscription.id
+      )
+      .select();
+
+    console.log("✅ DOWNGRADE DATA:", data);
+
+    console.log("❌ DOWNGRADE ERROR:", error);
   }
 
   return NextResponse.json({
