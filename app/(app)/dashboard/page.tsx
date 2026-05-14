@@ -4,15 +4,26 @@ import CreateMemoryForm from "@/components/CreateMemoryForm";
 import CreateProfileForm from "@/components/CreateProfileForm";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
 import PendingInvites from "@/components/PendingInvites";
+import ProfileSwitcher from "@/components/ProfileSwitcher";
 
 import { createClient } from "@/utils/supabase/server";
-import { getAccessibleProfiles } from "@/lib/profile-access";
+
+import {
+  getAccessibleProfiles,
+} from "@/lib/profile-access";
+
+import {
+  getActiveProfile
+} from "@/lib/active-profile";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
 
   const accessibleProfiles =
     await getAccessibleProfiles();
+
+  const activeProfileId =
+    await getActiveProfile();
 
   const {
     data: { user },
@@ -32,6 +43,17 @@ export default async function DashboardPage() {
       .eq("email", user?.email)
       .eq("status", "pending");
 
+  const switcherProfiles =
+    accessibleProfiles?.map(
+      (profile: any) => ({
+        memory_profiles: {
+          id: profile.id,
+          profile_name:
+            profile.profile_name,
+        },
+      })
+    ) || [];
+
   return (
     <div className="min-h-screen bg-[#f5f1ea]">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
@@ -50,6 +72,14 @@ export default async function DashboardPage() {
 
           <LogoutButton />
         </div>
+
+        {/* PROFILE SWITCHER */}
+        <ProfileSwitcher
+          profiles={switcherProfiles}
+          activeProfileId={
+            activeProfileId
+          }
+        />
 
         {/* STATS */}
         <div className="grid md:grid-cols-2 gap-6">

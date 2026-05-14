@@ -27,6 +27,39 @@ export default function MemoriesPage() {
   const [editingMemory, setEditingMemory] =
     useState<Memory | null>(null);
 
+  const [activeProfileId, setActiveProfileId] =
+    useState<string | null>(null);
+
+  // =========================
+  // LOAD ACTIVE PROFILE
+  // =========================
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetch(
+          "/api/active-profile",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+
+        setActiveProfileId(
+          data.profileId || null
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
   // =========================
   // SEMANTIC SEARCH STATE
   // =========================
@@ -39,7 +72,6 @@ export default function MemoriesPage() {
   const [isSearching, setIsSearching] =
     useState(false);
 
-  // ✅ NEW
   const isSearchActive =
     searchQuery.trim().length > 0;
 
@@ -49,7 +81,6 @@ export default function MemoriesPage() {
   useEffect(() => {
     const trimmed = searchQuery.trim();
 
-    // restore grouped timeline
     if (!trimmed) {
       setSearchResults([]);
       return;
@@ -70,11 +101,16 @@ export default function MemoriesPage() {
     isLoading,
     isFetching,
   } = useQuery<Memory[]>({
-    queryKey: ["memories"],
+    queryKey: [
+      "memories",
+      activeProfileId,
+    ],
+
+    enabled: !!activeProfileId,
 
     queryFn: async () => {
       const res = await fetch(
-        "/api/memories",
+        `/api/memories?profileId=${activeProfileId}`,
         {
           cache: "no-store",
         }
@@ -111,7 +147,11 @@ export default function MemoriesPage() {
             "Content-Type":
               "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            ...data,
+            profileId:
+              activeProfileId,
+          }),
         }
       );
 
@@ -126,13 +166,19 @@ export default function MemoriesPage() {
 
     onMutate: async (newMemory) => {
       await queryClient.cancelQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
 
       const previous =
-        queryClient.getQueryData<Memory[]>([
-          "memories",
-        ]);
+        queryClient.getQueryData<Memory[]>(
+          [
+            "memories",
+            activeProfileId,
+          ]
+        );
 
       const optimistic: Memory = {
         id: crypto.randomUUID(),
@@ -143,7 +189,10 @@ export default function MemoriesPage() {
       };
 
       queryClient.setQueryData<Memory[]>(
-        ["memories"],
+        [
+          "memories",
+          activeProfileId,
+        ],
         (old = []) => [
           optimistic,
           ...old,
@@ -160,7 +209,10 @@ export default function MemoriesPage() {
     ) => {
       if (context?.previous) {
         queryClient.setQueryData(
-          ["memories"],
+          [
+            "memories",
+            activeProfileId,
+          ],
           context.previous
         );
       }
@@ -168,7 +220,10 @@ export default function MemoriesPage() {
 
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
 
       setShowCreate(false);
@@ -199,6 +254,8 @@ export default function MemoriesPage() {
           body: JSON.stringify({
             title,
             content,
+            profileId:
+              activeProfileId,
           }),
         }
       );
@@ -212,16 +269,25 @@ export default function MemoriesPage() {
 
     onMutate: async (updated) => {
       await queryClient.cancelQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
 
       const previous =
-        queryClient.getQueryData<Memory[]>([
-          "memories",
-        ]);
+        queryClient.getQueryData<Memory[]>(
+          [
+            "memories",
+            activeProfileId,
+          ]
+        );
 
       queryClient.setQueryData<Memory[]>(
-        ["memories"],
+        [
+          "memories",
+          activeProfileId,
+        ],
         (old = []) =>
           old.map((m) =>
             m.id === updated.id
@@ -240,7 +306,10 @@ export default function MemoriesPage() {
     ) => {
       if (context?.previous) {
         queryClient.setQueryData(
-          ["memories"],
+          [
+            "memories",
+            activeProfileId,
+          ],
           context.previous
         );
       }
@@ -248,7 +317,10 @@ export default function MemoriesPage() {
 
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
 
       setEditingMemory(null);
@@ -276,16 +348,25 @@ export default function MemoriesPage() {
 
     onMutate: async (id) => {
       await queryClient.cancelQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
 
       const previous =
-        queryClient.getQueryData<Memory[]>([
-          "memories",
-        ]);
+        queryClient.getQueryData<Memory[]>(
+          [
+            "memories",
+            activeProfileId,
+          ]
+        );
 
       queryClient.setQueryData<Memory[]>(
-        ["memories"],
+        [
+          "memories",
+          activeProfileId,
+        ],
         (old = []) =>
           old.filter((m) => m.id !== id)
       );
@@ -300,7 +381,10 @@ export default function MemoriesPage() {
     ) => {
       if (context?.previous) {
         queryClient.setQueryData(
-          ["memories"],
+          [
+            "memories",
+            activeProfileId,
+          ],
           context.previous
         );
       }
@@ -308,7 +392,10 @@ export default function MemoriesPage() {
 
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["memories"],
+        queryKey: [
+          "memories",
+          activeProfileId,
+        ],
       });
     },
   });
@@ -335,6 +422,8 @@ export default function MemoriesPage() {
           },
           body: JSON.stringify({
             query: searchQuery,
+            profileId:
+              activeProfileId,
           }),
         }
       );
@@ -416,6 +505,14 @@ export default function MemoriesPage() {
       <h1 className="text-2xl font-semibold">
         Your Memories
       </h1>
+
+      {!activeProfileId && (
+        <div className="rounded-xl border p-4 bg-yellow-50">
+          <p className="text-sm text-yellow-700">
+            No active profile selected.
+          </p>
+        </div>
+      )}
 
       {/* Loading */}
       {isLoading && (
