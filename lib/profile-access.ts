@@ -11,38 +11,96 @@ export async function getAccessibleProfiles() {
     return [];
   }
 
-  // Own profiles
-  const { data: ownedProfiles, error: ownedError } = await supabase
+  // OWNED PROFILES
+  const {
+    data: ownedProfiles,
+    error: ownedError,
+  } = await supabase
     .from("memory_profiles")
     .select("*")
-    .eq("created_by_account_id", user.id);
+    .eq(
+      "created_by_account_id",
+      user.id
+    );
 
   if (ownedError) {
-    console.error("Owned profiles error:", ownedError);
+    console.error(
+      "Owned profiles error:",
+      ownedError
+    );
   }
 
-  // Shared caregiver relationships
-  const { data: relationships, error: relationshipError } = await supabase
+  // RELATIONSHIPS
+  const {
+    data: relationships,
+    error: relationshipError,
+  } = await supabase
     .from("profile_relationships")
-    .select(`
-      memory_profile_id,
-      access_level,
-      relationship_type,
-      memory_profiles (*)
-    `)
-    .eq("caregiver_account_id", user.id);
+    .select("*")
+    .eq(
+      "caregiver_account_id",
+      user.id
+    );
 
   if (relationshipError) {
-    console.error("Relationship error:", relationshipError);
+    console.error(
+      "Relationship error:",
+      relationshipError
+    );
   }
 
-  const sharedProfiles =
-    relationships?.map((r: any) => ({
-      ...r.memory_profiles,
-      access_level: r.access_level,
-      relationship_type: r.relationship_type,
-      shared: true,
-    })) || [];
+  if (
+    !relationships ||
+    relationships.length === 0
+  ) {
+    return ownedProfiles || [];
+  }
 
-  return [...(ownedProfiles || []), ...sharedProfiles];
+  // GET PROFILE IDS
+  const profileIds = relationships.map(
+    (r: any) => r.memory_profile_id
+  );
+
+  // FETCH SHARED PROFILES
+  const {
+    data: sharedProfilesData,
+    error: sharedProfilesError,
+  } = await supabase
+    .from("memory_profiles")
+    .select("*")
+    .in("id", profileIds);
+
+  if (sharedProfilesError) {
+    console.error(
+      "Shared profiles error:",
+      sharedProfilesError
+    );
+  }
+
+  // MERGE RELATIONSHIP DATA
+  const sharedProfiles =
+    sharedProfilesData?.map(
+      (profile: any) => {
+        const relationship =
+          relationships.find(
+            (r: any) =>
+              r.memory_profile_id ===
+              profile.id
+          );
+
+        return {
+          ...profile,
+          access_level:
+            relationship?.access_level,
+          relationship_type:
+            relationship?.relationship_type,
+          shared: true,
+        };
+      }
+    ) || [];
+
+  return [
+    ...(ownedProfiles || []),
+    ...sharedProfiles,
+  ];
 }
