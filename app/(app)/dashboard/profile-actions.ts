@@ -1,25 +1,15 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import {
+  setActiveProfile as saveActiveProfile,
+} from "@/lib/active-profile";
 
 export async function setActiveProfile(
   profileId: string
 ) {
-  const cookieStore = await cookies();
-
-  cookieStore.set(
-    "active_profile_id",
-    profileId,
-    {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-    }
+  await saveActiveProfile(
+    profileId
   );
-
-  revalidatePath("/dashboard");
 
   return {
     success: true,

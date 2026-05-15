@@ -33,3 +33,12 @@ export async function getActiveProfile() {
     )?.value || null
   );
 }
+
+export async function clearActiveProfile() {
+  const cookieStore =
+    await cookies();
+
+  cookieStore.delete(
+    COOKIE_NAME
+  );
+}

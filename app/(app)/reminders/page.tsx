@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function RemindersPage() {
-  const supabase = createClient();
+  const supabase =
+  await createClient();
 
   // 🔐 Auth
   const {
@@ -30,8 +31,8 @@ export default async function RemindersPage() {
   async function createReminder(formData: FormData) {
     "use server";
 
-    const supabase = createClient();
-
+    const supabase =
+  await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -105,7 +106,8 @@ export default async function RemindersPage() {
   ) {
     "use server";
 
-    const supabase = createClient();
+    const supabase =
+  await createClient();
 
     const id = formData.get("id") as string;
 
@@ -135,7 +137,8 @@ export default async function RemindersPage() {
   ) {
     "use server";
 
-    const supabase = createClient();
+    const supabase =
+  await createClient();
 
     const id = formData.get("id") as string;
 

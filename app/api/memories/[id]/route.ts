@@ -4,7 +4,8 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient();
+  const supabase =
+  await createClient();
 
   const {
     data: { user },
@@ -32,7 +33,8 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient();
+  const supabase =
+  await createClient();
 
   const {
     data: { user },

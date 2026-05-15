@@ -1,4 +1,3 @@
-import LogoutButton from "@/components/LogoutButton";
 import UpgradeButton from "@/components/UpgradeButton";
 import CreateMemoryForm from "@/components/CreateMemoryForm";
 import CreateProfileForm from "@/components/CreateProfileForm";
@@ -13,11 +12,12 @@ import {
 } from "@/lib/profile-access";
 
 import {
-  getActiveProfile
+  getActiveProfile,
 } from "@/lib/active-profile";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  const supabase =
+    await createClient();
 
   const accessibleProfiles =
     await getAccessibleProfiles();
@@ -29,6 +29,9 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // =========================
+  // PENDING INVITES
+  // =========================
   const { data: pendingInvites } =
     await supabase
       .from("caregiver_invites")
@@ -43,6 +46,9 @@ export default async function DashboardPage() {
       .eq("email", user?.email)
       .eq("status", "pending");
 
+  // =========================
+  // PROFILE SWITCHER DATA
+  // =========================
   const switcherProfiles =
     accessibleProfiles?.map(
       (profile: any) => ({
@@ -54,23 +60,51 @@ export default async function DashboardPage() {
       })
     ) || [];
 
+  // =========================
+  // ACTIVE PROFILE
+  // =========================
+  const activeProfile =
+    accessibleProfiles?.find(
+      (profile: any) =>
+        profile.id ===
+        activeProfileId
+    ) || null;
+
+  // =========================
+  // MEMORY COUNT
+  // =========================
+  let memoryCount = 0;
+
+  if (activeProfileId) {
+    const {
+      count,
+    } = await supabase
+      .from("memories")
+      .select("*", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "memory_profile_id",
+        activeProfileId
+      );
+
+    memoryCount = count || 0;
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f1ea]">
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         {/* HERO */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-5xl font-bold mb-4">
-              Welcome to RemyNest
-            </h1>
+        <div>
+          <h1 className="text-5xl font-bold mb-4">
+            Welcome to RemyNest
+          </h1>
 
-            <p className="text-xl text-gray-600">
-              Your AI-powered memory
-              assistant.
-            </p>
-          </div>
-
-          <LogoutButton />
+          <p className="text-xl text-gray-600">
+            Your AI-powered memory
+            assistant.
+          </p>
         </div>
 
         {/* PROFILE SWITCHER */}
@@ -81,6 +115,16 @@ export default async function DashboardPage() {
           }
         />
 
+        {/* ACTIVE PROFILE WARNING */}
+        {!activeProfile && (
+          <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-4">
+            <p className="text-yellow-700">
+              No active care profile
+              selected.
+            </p>
+          </div>
+        )}
+
         {/* STATS */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border p-6 bg-white shadow-sm">
@@ -89,9 +133,7 @@ export default async function DashboardPage() {
             </p>
 
             <h2 className="text-5xl font-bold">
-              {
-                accessibleProfiles?.length
-              }
+              {memoryCount}
             </h2>
           </div>
 
@@ -113,70 +155,57 @@ export default async function DashboardPage() {
           }
         />
 
-        {/* ACCESSIBLE PROFILES */}
-        <div className="rounded-2xl border p-6 bg-white shadow-sm">
-          <h2 className="text-2xl font-semibold mb-6">
-            Accessible Profiles
-          </h2>
+        {/* ACTIVE PROFILE DETAILS */}
+        {activeProfile && (
+          <div className="rounded-2xl border p-6 bg-white shadow-sm">
+            <h2 className="text-2xl font-semibold mb-6">
+              Active Profile
+            </h2>
 
-          {!accessibleProfiles?.length && (
-            <p className="text-gray-500">
-              No accessible profiles yet.
-            </p>
-          )}
+            <div className="border rounded-2xl p-6">
+              <h3 className="text-3xl font-semibold mb-2">
+                {
+                  activeProfile.profile_name
+                }
+              </h3>
 
-          <div className="space-y-6">
-            {accessibleProfiles?.map(
-              (profile: any) => (
-                <div
-                  key={profile.id}
-                  className="border rounded-2xl p-6"
-                >
-                  <h3 className="text-3xl font-semibold mb-2">
+              <p className="text-gray-600 mb-4">
+                Preferred Name:{" "}
+                {
+                  activeProfile.preferred_name
+                }
+              </p>
+
+              {activeProfile.shared && (
+                <div className="space-y-2 mb-6">
+                  <p className="text-gray-600">
+                    Access Level:{" "}
                     {
-                      profile.profile_name
-                    }
-                  </h3>
-
-                  <p className="text-gray-600 mb-4">
-                    Preferred Name:{" "}
-                    {
-                      profile.preferred_name
+                      activeProfile.access_level
                     }
                   </p>
 
-                  {profile.shared && (
-                    <div className="space-y-2 mb-6">
-                      <p className="text-gray-600">
-                        Access Level:{" "}
-                        {
-                          profile.access_level
-                        }
-                      </p>
-
-                      <p className="text-gray-600">
-                        Relationship:{" "}
-                        {
-                          profile.relationship_type
-                        }
-                      </p>
-
-                      <span className="inline-block rounded-full bg-blue-100 text-blue-700 px-3 py-1 text-sm">
-                        Shared With You
-                      </span>
-                    </div>
-                  )}
-
-                  <InviteCaregiverForm
-                    memoryProfileId={
-                      profile.id
+                  <p className="text-gray-600">
+                    Relationship:{" "}
+                    {
+                      activeProfile.relationship_type
                     }
-                  />
+                  </p>
+
+                  <span className="inline-block rounded-full bg-blue-100 text-blue-700 px-3 py-1 text-sm">
+                    Shared With You
+                  </span>
                 </div>
-              )
-            )}
+              )}
+
+              <InviteCaregiverForm
+                memoryProfileId={
+                  activeProfile.id
+                }
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ACCOUNT STATUS */}
         <div className="rounded-2xl border p-6 bg-white shadow-sm">

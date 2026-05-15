@@ -1,6 +1,11 @@
 "use client";
 
-import { useTransition } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 
 import {
   setActiveProfile,
@@ -18,7 +23,57 @@ export default function ProfileSwitcher({
   const [isPending, startTransition] =
     useTransition();
 
-  if (!profiles?.length) {
+  // =========================
+  // REMOVE DUPLICATES
+  // =========================
+  const uniqueProfiles = useMemo(() => {
+    const seen = new Set();
+
+    return profiles.filter(
+      (profile: any) => {
+        const profileData =
+          profile?.memory_profiles;
+
+        if (!profileData?.id) {
+          return false;
+        }
+
+        if (
+          seen.has(profileData.id)
+        ) {
+          return false;
+        }
+
+        seen.add(profileData.id);
+
+        return true;
+      }
+    );
+  }, [profiles]);
+
+  // =========================
+  // LOCAL SELECT STATE
+  // =========================
+  const [selectedProfile, setSelectedProfile] =
+    useState(
+      activeProfileId ||
+        uniqueProfiles[0]
+          ?.memory_profiles?.id ||
+        ""
+    );
+
+  // =========================
+  // SYNC ACTIVE PROFILE
+  // =========================
+  useEffect(() => {
+    if (activeProfileId) {
+      setSelectedProfile(
+        activeProfileId
+      );
+    }
+  }, [activeProfileId]);
+
+  if (!uniqueProfiles?.length) {
     return null;
   }
 
@@ -31,21 +86,26 @@ export default function ProfileSwitcher({
       <select
         className="w-full border rounded-xl px-4 py-3 bg-white"
         disabled={isPending}
-        defaultValue={
-          activeProfileId ||
-          profiles[0]?.memory_profiles
-            ?.id ||
-          ""
-        }
+        value={selectedProfile}
         onChange={(e) => {
+          const newProfileId =
+            e.target.value;
+
+          // instant UI update
+          setSelectedProfile(
+            newProfileId
+          );
+
           startTransition(async () => {
             await setActiveProfile(
-              e.target.value
+              newProfileId
             );
+
+            window.location.reload();
           });
         }}
       >
-        {profiles.map(
+        {uniqueProfiles.map(
           (profile: any) => {
             const profileData =
               profile?.memory_profiles;
