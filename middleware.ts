@@ -7,8 +7,13 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname;
 
-  // ✅ STRIPE WEBHOOK MUST STAY PUBLIC
-  if (pathname.startsWith("/api/stripe/webhook")) {
+    // ✅ PUBLIC API ROUTES
+  if (
+    pathname.startsWith("/api/stripe/webhook") ||
+    pathname.startsWith("/api/send-reminders") ||
+    pathname.startsWith("/api/send-notification") ||
+    pathname.startsWith("/api/cron")
+  ) {
     return res;
   }
 
