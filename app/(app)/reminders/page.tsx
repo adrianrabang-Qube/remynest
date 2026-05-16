@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { getActiveProfile } from "@/lib/active-profile";
 import { redirect } from "next/navigation";
 
 export default async function RemindersPage() {
   const supabase =
-  await createClient();
+    await createClient();
 
   // 🔐 Auth
   const {
@@ -14,48 +15,95 @@ export default async function RemindersPage() {
     redirect("/login");
   }
 
+  // 🧠 Active Profile
+  const activeProfileId =
+    await getActiveProfile();
+
+  // 🚫 No active profile
+  if (!activeProfileId) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-2xl p-6">
+          No active care profile selected.
+        </div>
+      </div>
+    );
+  }
+
   // 📦 Fetch reminders
-  const { data: reminders, error: remindersError } =
-    await supabase
-      .from("reminders")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+  const {
+    data: reminders,
+    error: remindersError,
+  } = await supabase
+    .from("reminders")
+    .select("*")
+    .eq(
+      "memory_profile_id",
+      activeProfileId
+    )
+    .order("created_at", {
+      ascending: false,
+    });
 
   if (remindersError) {
-    console.log("❌ FETCH REMINDERS ERROR:");
+    console.log(
+      "❌ FETCH REMINDERS ERROR:"
+    );
+
     console.log(remindersError);
   }
 
   // ➕ Create Reminder
-  async function createReminder(formData: FormData) {
+  async function createReminder(
+    formData: FormData
+  ) {
     "use server";
 
     const supabase =
-  await createClient();
+      await createClient();
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("Not authenticated");
+      throw new Error(
+        "Not authenticated"
+      );
     }
 
-    const title = formData.get("title") as string;
+    const activeProfileId =
+      await getActiveProfile();
+
+    if (!activeProfileId) {
+      throw new Error(
+        "No active profile selected"
+      );
+    }
+
+    const title = formData.get(
+      "title"
+    ) as string;
 
     const remindAt = formData.get(
       "remind_at"
     ) as string;
 
     const recurring =
-      formData.get("recurring") === "on";
+      formData.get("recurring") ===
+      "on";
 
     const frequency = formData.get(
       "frequency"
     ) as string;
 
-    if (!title || title.trim().length === 0) {
-      throw new Error("Title required");
+    if (
+      !title ||
+      title.trim().length === 0
+    ) {
+      throw new Error(
+        "Title required"
+      );
     }
 
     if (!remindAt) {
@@ -64,37 +112,52 @@ export default async function RemindersPage() {
       );
     }
 
-    const finalFrequency = recurring
-      ? frequency
-      : null;
+    const finalFrequency =
+      recurring
+        ? frequency
+        : null;
 
-    const { data, error } = await supabase
-      .from("reminders")
-      .insert({
-        title,
-        user_id: user.id,
+    const { data, error } =
+      await supabase
+        .from("reminders")
+        .insert({
+          title,
 
-        remind_at: new Date(
-          remindAt
-        ).toISOString(),
+          user_id: user.id,
 
-        completed: false,
+          memory_profile_id:
+            activeProfileId,
 
-        recurring,
+          remind_at: new Date(
+            remindAt
+          ).toISOString(),
 
-        frequency: finalFrequency,
-      })
-      .select()
-      .single();
+          completed: false,
+
+          recurring,
+
+          frequency:
+            finalFrequency,
+        })
+        .select()
+        .single();
 
     if (error) {
-      console.log("❌ REMINDER CREATE ERROR:");
+      console.log(
+        "❌ REMINDER CREATE ERROR:"
+      );
+
       console.log(error);
 
-      throw new Error(error.message);
+      throw new Error(
+        error.message
+      );
     }
 
-    console.log("✅ Reminder created:");
+    console.log(
+      "✅ Reminder created:"
+    );
+
     console.log(data);
 
     redirect("/reminders");
@@ -107,25 +170,39 @@ export default async function RemindersPage() {
     "use server";
 
     const supabase =
-  await createClient();
+      await createClient();
 
-    const id = formData.get("id") as string;
+    const id = formData.get(
+      "id"
+    ) as string;
 
     const completed =
-      formData.get("completed") === "true";
+      formData.get(
+        "completed"
+      ) === "true";
 
-    const { error } = await supabase
-      .from("reminders")
-      .update({
-        completed: !completed,
-      })
-      .eq("id", id);
+    const { error } =
+      await supabase
+        .from("reminders")
+        .update({
+          completed: !completed,
+        })
+        .eq("id", id)
+        .eq(
+          "memory_profile_id",
+          activeProfileId
+        );
 
     if (error) {
-      console.log("❌ TOGGLE ERROR:");
+      console.log(
+        "❌ TOGGLE ERROR:"
+      );
+
       console.log(error);
 
-      throw new Error(error.message);
+      throw new Error(
+        error.message
+      );
     }
 
     redirect("/reminders");
@@ -138,20 +215,32 @@ export default async function RemindersPage() {
     "use server";
 
     const supabase =
-  await createClient();
+      await createClient();
 
-    const id = formData.get("id") as string;
+    const id = formData.get(
+      "id"
+    ) as string;
 
-    const { error } = await supabase
-      .from("reminders")
-      .delete()
-      .eq("id", id);
+    const { error } =
+      await supabase
+        .from("reminders")
+        .delete()
+        .eq("id", id)
+        .eq(
+          "memory_profile_id",
+          activeProfileId
+        );
 
     if (error) {
-      console.log("❌ DELETE ERROR:");
+      console.log(
+        "❌ DELETE ERROR:"
+      );
+
       console.log(error);
 
-      throw new Error(error.message);
+      throw new Error(
+        error.message
+      );
     }
 
     redirect("/reminders");
@@ -166,7 +255,8 @@ export default async function RemindersPage() {
         </h1>
 
         <p className="text-gray-500">
-          Manage your future memory prompts and AI reminders.
+          Manage your future memory
+          prompts and AI reminders.
         </p>
       </div>
 
@@ -240,95 +330,114 @@ export default async function RemindersPage() {
 
       {/* Reminder List */}
       <div className="space-y-4">
-        {reminders && reminders.length > 0 ? (
-          reminders.map((reminder) => (
-            <div
-              key={reminder.id}
-              className="bg-white border rounded-2xl p-5 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-lg text-[#2f3e34]">
-                    {reminder.title}
-                  </h3>
+        {reminders &&
+        reminders.length > 0 ? (
+          reminders.map(
+            (reminder) => (
+              <div
+                key={reminder.id}
+                className="bg-white border rounded-2xl p-5 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-semibold text-lg text-[#2f3e34]">
+                      {
+                        reminder.title
+                      }
+                    </h3>
 
-                  <p className="text-sm text-gray-500 mt-2">
-                    Created{" "}
-                    {reminder.created_at
-                      ? new Date(
-                          reminder.created_at
-                        ).toLocaleString()
-                      : "Unknown"}
-                  </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Created{" "}
+                      {reminder.created_at
+                        ? new Date(
+                            reminder.created_at
+                          ).toLocaleString()
+                        : "Unknown"}
+                    </p>
 
-                  <p className="text-sm text-gray-400 mt-1">
-                    Reminds at{" "}
-                    {reminder.remind_at
-                      ? new Date(
-                          reminder.remind_at
-                        ).toLocaleString()
-                      : "Unknown"}
-                  </p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Reminds at{" "}
+                      {reminder.remind_at
+                        ? new Date(
+                            reminder.remind_at
+                          ).toLocaleString()
+                        : "Unknown"}
+                    </p>
 
-                  {reminder.recurring &&
-                    reminder.frequency && (
-                      <p className="text-sm text-blue-600 mt-1">
-                        Recurring:{" "}
-                        {reminder.frequency}
-                      </p>
-                    )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* ✅ Completion Toggle */}
-                  <form action={toggleReminderComplete}>
-                    <input
-                      type="hidden"
-                      name="id"
-                      value={reminder.id}
-                    />
-
-                    <input
-                      type="hidden"
-                      name="completed"
-                      value={String(
-                        reminder.completed
+                    {reminder.recurring &&
+                      reminder.frequency && (
+                        <p className="text-sm text-blue-600 mt-1">
+                          Recurring:{" "}
+                          {
+                            reminder.frequency
+                          }
+                        </p>
                       )}
-                    />
+                  </div>
 
-                    <button
-                      type="submit"
-                      className={`text-xs px-3 py-1 rounded-full transition ${
-                        reminder.completed
-                          ? "bg-green-200 text-green-800"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
+                  <div className="flex items-center gap-2">
+                    {/* ✅ Completion Toggle */}
+                    <form
+                      action={
+                        toggleReminderComplete
+                      }
                     >
-                      {reminder.completed
-                        ? "Completed"
-                        : "Active"}
-                    </button>
-                  </form>
+                      <input
+                        type="hidden"
+                        name="id"
+                        value={
+                          reminder.id
+                        }
+                      />
 
-                  {/* 🗑️ Delete */}
-                  <form action={deleteReminder}>
-                    <input
-                      type="hidden"
-                      name="id"
-                      value={reminder.id}
-                    />
+                      <input
+                        type="hidden"
+                        name="completed"
+                        value={String(
+                          reminder.completed
+                        )}
+                      />
 
-                    <button
-                      type="submit"
-                      className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition"
+                      <button
+                        type="submit"
+                        className={`text-xs px-3 py-1 rounded-full transition ${
+                          reminder.completed
+                            ? "bg-green-200 text-green-800"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {reminder.completed
+                          ? "Completed"
+                          : "Active"}
+                      </button>
+                    </form>
+
+                    {/* 🗑️ Delete */}
+                    <form
+                      action={
+                        deleteReminder
+                      }
                     >
-                      Delete
-                    </button>
-                  </form>
+                      <input
+                        type="hidden"
+                        name="id"
+                        value={
+                          reminder.id
+                        }
+                      />
+
+                      <button
+                        type="submit"
+                        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            )
+          )
         ) : (
           <div className="bg-white border rounded-2xl p-10 text-center text-gray-500">
             No reminders yet.
