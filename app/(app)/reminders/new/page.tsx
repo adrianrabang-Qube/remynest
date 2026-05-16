@@ -5,7 +5,7 @@ export default function NewMemoryPage() {
   async function createMemory(formData: FormData) {
     "use server"
 
-    const supabase = createClient()
+    const supabase = await createClient();
 
     const {
       data: { user },
