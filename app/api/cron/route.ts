@@ -8,7 +8,7 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // ⏰ Current time
+    // ⏰ Current UTC time
     const now = new Date().toISOString();
 
     // 📦 Find due reminders
@@ -39,58 +39,92 @@ export async function GET() {
       );
 
       // =====================================
-// SEND ONESIGNAL
-// =====================================
+      // GET USER DEVICE
+      // =====================================
 
-try {
-  const notificationRes = await fetch(
-    "https://onesignal.com/api/v1/notifications",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-        Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
-      },
-      body: JSON.stringify({
-        app_id:
-          process.env
-            .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+      const {
+        data: device,
+        error: deviceError,
+      } = await supabase
+        .from("device_registrations")
+        .select("*")
+        .eq("user_id", reminder.user_id)
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(1)
+        .single();
 
-        included_segments: ["All"],
+      if (deviceError || !device) {
+        console.log(
+          "❌ No registered device found:"
+        );
 
-        headings: {
-          en: "RemyNest Reminder",
-        },
+        console.log(deviceError);
 
-        contents: {
-          en: reminder.title,
-        },
+        continue;
+      }
 
-        data: {
-          reminderId: reminder.id,
-        },
-      }),
-    }
-  );
+      // =====================================
+      // SEND PRIVATE ONESIGNAL
+      // =====================================
 
-  const notificationData =
-    await notificationRes.json();
+      try {
+        const notificationRes = await fetch(
+          "https://onesignal.com/api/v1/notifications",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
+            },
+            body: JSON.stringify({
+              app_id:
+                process.env
+                  .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
-  console.log(
-    "✅ OneSignal Sent:"
-  );
+              // ✅ PRIVATE TARGETING
+              include_player_ids: [
+                device.player_id,
+              ],
 
-  console.log(notificationData);
-} catch (notificationError) {
-  console.log(
-    "❌ OneSignal Send Error:"
-  );
+              headings: {
+                en: "RemyNest Reminder",
+              },
 
-  console.log(notificationError);
-}
+              contents: {
+                en: reminder.title,
+              },
 
-      // ✅ Recurring logic
+              data: {
+                reminderId: reminder.id,
+              },
+            }),
+          }
+        );
+
+        const notificationData =
+          await notificationRes.json();
+
+        console.log(
+          "✅ OneSignal Sent:"
+        );
+
+        console.log(notificationData);
+
+      } catch (notificationError) {
+        console.log(
+          "❌ OneSignal Send Error:"
+        );
+
+        console.log(notificationError);
+      }
+
+      // =====================================
+      // RECURRING LOGIC
+      // =====================================
+
       if (
         reminder.recurring &&
         reminder.frequency
@@ -137,7 +171,9 @@ try {
         console.log(
           `🔄 Rescheduled: ${reminder.title}`
         );
+
       } else {
+
         // ✅ One-time reminder completes
         await supabase
           .from("reminders")
@@ -156,6 +192,7 @@ try {
       success: true,
       processed: reminders.length,
     });
+
   } catch (err) {
     console.log("❌ CRON ERROR:");
     console.log(err);
