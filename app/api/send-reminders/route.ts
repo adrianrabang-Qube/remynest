@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const supabase = createClient(
@@ -8,10 +10,6 @@ export async function GET() {
     )
 
     console.log('RUNNING REMINDER CHECK')
-
-    // TEMPORARY:
-    // removed timezone filtering
-    // to verify push system fully works
 
     const { data: reminders, error } = await supabase
       .from('reminders')
@@ -24,7 +22,7 @@ export async function GET() {
     if (error) {
       console.log(
         'SUPABASE ERROR:',
-        error
+        JSON.stringify(error, null, 2)
       )
 
       return Response.json({
@@ -35,7 +33,7 @@ export async function GET() {
 
     console.log(
       'REMINDERS FOUND:',
-      reminders
+      JSON.stringify(reminders, null, 2)
     )
 
     if (
@@ -50,16 +48,57 @@ export async function GET() {
 
     for (const reminder of reminders) {
       console.log(
-        'PROCESSING:',
+        'PROCESSING REMINDER:',
         reminder.id
       )
 
       console.log(
-        'REMINDER DATA:',
-        reminder
+        'SENDING TO USER:',
+        reminder.user_id
       )
 
-      // 🔔 SEND PUSH NOTIFICATION
+      console.log(
+        'REMINDER DATA:',
+        JSON.stringify(
+          reminder,
+          null,
+          2
+        )
+      )
+
+      const payload = {
+        app_id:
+          process.env
+            .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+
+        include_aliases: {
+          external_id: [
+            reminder.user_id,
+          ],
+        },
+
+        target_channel: 'push',
+
+        headings: {
+          en: 'RemyNest Reminder',
+        },
+
+        contents: {
+          en:
+            reminder.title ||
+            'Reminder',
+        },
+      }
+
+      console.log(
+        'ONESIGNAL PAYLOAD:',
+        JSON.stringify(
+          payload,
+          null,
+          2
+        )
+      )
+
       const response = await fetch(
         'https://api.onesignal.com/notifications',
         {
@@ -72,30 +111,9 @@ export async function GET() {
             Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
           },
 
-          body: JSON.stringify({
-            app_id:
-              process.env
-                .NEXT_PUBLIC_ONESIGNAL_APP_ID,
-
-            include_aliases: {
-              external_id: [
-                reminder.user_id,
-              ],
-            },
-
-            target_channel:
-              'push',
-
-            headings: {
-              en: 'RemyNest Reminder',
-            },
-
-            contents: {
-              en:
-                reminder.title ||
-                'Reminder',
-            },
-          }),
+          body: JSON.stringify(
+            payload
+          ),
         }
       )
 
@@ -103,11 +121,19 @@ export async function GET() {
         await response.json()
 
       console.log(
-        'ONESIGNAL RESPONSE:',
-        data
+        'ONESIGNAL STATUS:',
+        response.status
       )
 
-      // ✅ ONLY MARK SENT IF SUCCESS
+      console.log(
+        'ONESIGNAL RESPONSE:',
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      )
+
       if (response.ok) {
         const {
           error: updateError,
@@ -121,7 +147,11 @@ export async function GET() {
         if (updateError) {
           console.log(
             'UPDATE ERROR:',
-            updateError
+            JSON.stringify(
+              updateError,
+              null,
+              2
+            )
           )
         } else {
           console.log(
@@ -132,7 +162,11 @@ export async function GET() {
       } else {
         console.log(
           'FAILED TO SEND:',
-          data
+          JSON.stringify(
+            data,
+            null,
+            2
+          )
         )
       }
     }
@@ -141,7 +175,14 @@ export async function GET() {
       success: true,
     })
   } catch (err) {
-    console.log('CRASH:', err)
+    console.log(
+      'CRASH:',
+      JSON.stringify(
+        err,
+        null,
+        2
+      )
+    )
 
     return Response.json({
       success: false,
