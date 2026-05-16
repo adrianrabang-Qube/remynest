@@ -11,7 +11,8 @@ type Props = {
 export default async function MemoryPage({
   params,
 }: Props) {
-  const supabase = createClient();
+  const supabase = await createClient();
+  
 
   // 🔐 Get logged in user
   const {
