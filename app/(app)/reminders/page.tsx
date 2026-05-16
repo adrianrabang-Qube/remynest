@@ -117,9 +117,11 @@ export default async function RemindersPage() {
         ? frequency
         : null;
 
-    // ✅ CORRECT UTC STORAGE
-    const utcDate =
-      new Date(remindAt).toISOString();
+    // ✅ TRUE LOCAL TIME FIX
+    // Stores EXACT user-selected local time
+    const utcDate = new Date(
+      `${remindAt}:00`
+    ).toISOString();
 
     const { data, error } =
       await supabase
@@ -353,7 +355,12 @@ export default async function RemindersPage() {
                       {reminder.created_at
                         ? new Date(
                             reminder.created_at
-                          ).toLocaleString()
+                          ).toLocaleString(
+                            "en-IE",
+                            {
+                              hour12: false,
+                            }
+                          )
                         : "Unknown"}
                     </p>
 
@@ -362,7 +369,12 @@ export default async function RemindersPage() {
                       {reminder.remind_at
                         ? new Date(
                             reminder.remind_at
-                          ).toLocaleString()
+                          ).toLocaleString(
+                            "en-IE",
+                            {
+                              hour12: false,
+                            }
+                          )
                         : "Unknown"}
                     </p>
 
