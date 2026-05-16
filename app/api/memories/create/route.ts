@@ -5,7 +5,7 @@ import { generateEmbedding } from "@/lib/embeddings";
 
 export async function POST(req: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient()
 
     // 🔐 Get logged in user
     const {
