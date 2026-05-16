@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function createMemory(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient();
 
   const title = formData.get("title") as string
   const content = formData.get("content") as string
@@ -18,7 +18,7 @@ export async function createMemory(formData: FormData) {
 }
 
 export async function updateMemory(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient();
 
   const id = formData.get("id") as string
   const title = formData.get("title") as string
@@ -33,7 +33,7 @@ export async function updateMemory(formData: FormData) {
 }
 
 export async function deleteMemory(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient();
 
   const id = formData.get("id") as string
 
