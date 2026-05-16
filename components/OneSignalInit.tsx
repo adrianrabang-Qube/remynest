@@ -11,13 +11,8 @@ declare global {
 
 export default function OneSignalInit() {
   useEffect(() => {
-    async function init() {
+    async function initOneSignal() {
       try {
-        if (!window.OneSignal) {
-          console.log("❌ OneSignal missing");
-          return;
-        }
-
         const supabase = createClient();
 
         const {
@@ -27,31 +22,42 @@ export default function OneSignalInit() {
         console.log("✅ Supabase user:", user);
 
         if (!user) {
+          console.log("❌ No authenticated user");
           return;
         }
+
+        // WAIT until SDK exists
+        let attempts = 0;
+
+        while (!window.OneSignal && attempts < 50) {
+          await new Promise((r) => setTimeout(r, 200));
+          attempts++;
+        }
+
+        if (!window.OneSignal) {
+          console.log("❌ OneSignal SDK missing");
+          return;
+        }
+
+        console.log("✅ OneSignal SDK loaded");
 
         await window.OneSignal.init({
           appId:
             process.env
-              .NEXT_PUBLIC_ONESIGNAL_APP_ID,
-
+              .NEXT_PUBLIC_ONESIGNAL_APP_ID!,
           allowLocalhostAsSecureOrigin: true,
         });
 
-        console.log(
-          "✅ OneSignal initialized"
-        );
+        console.log("✅ OneSignal initialized");
 
-        await window.OneSignal
-          .Notifications.requestPermission();
+        await window.OneSignal.Notifications.requestPermission();
 
         console.log(
-          "✅ Permission granted"
+          "✅ Permission:",
+          Notification.permission
         );
 
-        await window.OneSignal.login(
-          user.id
-        );
+        await window.OneSignal.login(user.id);
 
         console.log(
           "✅ Logged into OneSignal:",
@@ -60,8 +66,7 @@ export default function OneSignalInit() {
 
         console.log(
           "✅ External ID:",
-          window.OneSignal.User
-            ?.externalId
+          window.OneSignal.User?.externalId
         );
 
         console.log(
@@ -72,17 +77,13 @@ export default function OneSignalInit() {
 
       } catch (err) {
         console.error(
-          "❌ OneSignal crash:",
+          "❌ OneSignal init error:",
           err
         );
       }
     }
 
-    const timer = setTimeout(() => {
-      init();
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    initOneSignal();
   }, []);
 
   return null;
