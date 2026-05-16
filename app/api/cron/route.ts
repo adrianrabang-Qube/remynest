@@ -39,9 +39,56 @@ export async function GET() {
       );
 
       // =====================================
-      // FUTURE:
-      // Send OneSignal push notification here
-      // =====================================
+// SEND ONESIGNAL
+// =====================================
+
+try {
+  const notificationRes = await fetch(
+    "https://onesignal.com/api/v1/notifications",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+        Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
+      },
+      body: JSON.stringify({
+        app_id:
+          process.env
+            .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+
+        included_segments: ["All"],
+
+        headings: {
+          en: "RemyNest Reminder",
+        },
+
+        contents: {
+          en: reminder.title,
+        },
+
+        data: {
+          reminderId: reminder.id,
+        },
+      }),
+    }
+  );
+
+  const notificationData =
+    await notificationRes.json();
+
+  console.log(
+    "✅ OneSignal Sent:"
+  );
+
+  console.log(notificationData);
+} catch (notificationError) {
+  console.log(
+    "❌ OneSignal Send Error:"
+  );
+
+  console.log(notificationError);
+}
 
       // ✅ Recurring logic
       if (

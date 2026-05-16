@@ -49,8 +49,9 @@ export default function MemoriesPage() {
 
         const data = await res.json();
 
+        // ✅ FIXED
         setActiveProfileId(
-          data.profileId || null
+          data.activeProfileId || null
         );
       } catch (error) {
         console.error(error);

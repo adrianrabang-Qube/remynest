@@ -9,15 +9,29 @@ declare global {
   }
 }
 
+// Prevent double initialization in React dev mode
+let initialized = false;
+
 export default function OneSignalInit() {
   useEffect(() => {
     async function initOneSignal() {
+      // Prevent duplicate SDK init
+      if (initialized) return;
+
+      initialized = true;
+
       try {
         const supabase = createClient();
 
+        // Get authenticated user
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
+        // Get current session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         console.log("✅ Supabase user:", user);
 
@@ -41,6 +55,7 @@ export default function OneSignalInit() {
 
         console.log("✅ OneSignal SDK loaded");
 
+        // Initialize OneSignal
         await window.OneSignal.init({
           appId:
             process.env
@@ -50,6 +65,7 @@ export default function OneSignalInit() {
 
         console.log("✅ OneSignal initialized");
 
+        // Ask notification permission
         await window.OneSignal.Notifications.requestPermission();
 
         console.log(
@@ -57,6 +73,7 @@ export default function OneSignalInit() {
           Notification.permission
         );
 
+        // Login user to OneSignal
         await window.OneSignal.login(user.id);
 
         console.log(
@@ -69,11 +86,48 @@ export default function OneSignalInit() {
           window.OneSignal.User?.externalId
         );
 
+        // Wait for subscription registration
+        await new Promise((resolve) =>
+          setTimeout(resolve, 3000)
+        );
+
+        // Get OneSignal player ID
+        const playerId =
+          window.OneSignal.User
+            ?.PushSubscription?.id;
+
         console.log(
           "✅ Subscription ID:",
-          window.OneSignal.User
-            ?.PushSubscription?.id
+          playerId
         );
+
+        // Register device securely
+        if (playerId && session?.access_token) {
+          const response = await fetch(
+            "/api/register-device",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                playerId,
+              }),
+            }
+          );
+
+          const result = await response.json();
+
+          console.log(
+            "✅ Device registration result:",
+            result
+          );
+        } else {
+          console.log(
+            "❌ Missing playerId or session token"
+          );
+        }
 
       } catch (err) {
         console.error(
