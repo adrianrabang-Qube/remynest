@@ -117,17 +117,6 @@ export default async function RemindersPage() {
         ? frequency
         : null;
 
-    // ✅ FIXED TIMEZONE NORMALIZATION
-    const localDate = new Date(
-      remindAt
-    );
-
-    const utcDate = new Date(
-      localDate.getTime() -
-        localDate.getTimezoneOffset() *
-          60000
-    ).toISOString();
-
     const { data, error } =
       await supabase
         .from("reminders")
@@ -139,7 +128,8 @@ export default async function RemindersPage() {
           memory_profile_id:
             activeProfileId,
 
-          remind_at: utcDate,
+          // ✅ FINAL TIMEZONE FIX
+          remind_at: remindAt,
 
           completed: false,
 
