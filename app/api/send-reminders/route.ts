@@ -11,32 +11,26 @@ export async function GET() {
 
     console.log("RUNNING REMINDER CHECK");
 
-    // =========================================
-    // TIME WINDOW BUFFER
-    // =========================================
-
     const now = new Date();
 
+    // 60 second precision window
     const oneMinuteAgo = new Date(
       now.getTime() - 60 * 1000
     );
-
-    // =========================================
-    // GET REMINDERS
-    // =========================================
 
     const { data: reminders, error } =
       await supabase
         .from("reminders")
         .select("*")
         .eq("sent", false)
-        .gte(
-          "remind_at",
-          oneMinuteAgo.toISOString()
-        )
+        .eq("processing", false)
         .lte(
           "remind_at",
           now.toISOString()
+        )
+        .gte(
+          "remind_at",
+          oneMinuteAgo.toISOString()
         )
         .order("remind_at", {
           ascending: true,
@@ -69,15 +63,37 @@ export async function GET() {
       });
     }
 
-    // =========================================
-    // SEND NOTIFICATIONS
-    // =========================================
-
     for (const reminder of reminders) {
       console.log(
         "PROCESSING:",
         reminder.id
       );
+
+      // =====================================
+      // LOCK REMINDER
+      // =====================================
+
+      const {
+        data: lockedReminder,
+      } = await supabase
+        .from("reminders")
+        .update({
+          processing: true,
+        })
+        .eq("id", reminder.id)
+        .eq("processing", false)
+        .select()
+        .single();
+
+      // already locked by another cron
+      if (!lockedReminder) {
+        console.log(
+          "SKIPPED ALREADY PROCESSING:",
+          reminder.id
+        );
+
+        continue;
+      }
 
       console.log(
         "SENDING TO USER:",
@@ -139,10 +155,6 @@ export async function GET() {
         data
       );
 
-      // =========================================
-      // MARK AS SENT
-      // =========================================
-
       if (response.ok) {
         const {
           error: updateError,
@@ -150,6 +162,7 @@ export async function GET() {
           .from("reminders")
           .update({
             sent: true,
+            processing: false,
           })
           .eq("id", reminder.id);
 
@@ -160,11 +173,18 @@ export async function GET() {
           );
         } else {
           console.log(
-            "UPDATED TO TRUE:",
+            "UPDATED TO SENT:",
             reminder.id
           );
         }
       } else {
+        await supabase
+          .from("reminders")
+          .update({
+            processing: false,
+          })
+          .eq("id", reminder.id);
+
         console.log(
           "FAILED TO SEND:",
           data
