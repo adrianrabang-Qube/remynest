@@ -23,9 +23,7 @@ export async function middleware(req: NextRequest) {
   ];
 
   const isPublicFile = publicFiles.some(
-    (path) =>
-      pathname === path ||
-      pathname.startsWith(path)
+    (path) => pathname === path || pathname.startsWith(path)
   );
 
   if (isPublicFile) {
@@ -36,17 +34,36 @@ export async function middleware(req: NextRequest) {
   // PUBLIC API ROUTES
   // =========================================
 
-  if (
-    pathname.startsWith("/api/stripe/webhook") ||
-    pathname.startsWith("/api/send-reminders") ||
-    pathname.startsWith("/api/send-notification") ||
-    pathname.startsWith("/api/cron")
-  ) {
+  const publicApiRoutes = [
+    "/api/stripe/webhook",
+    "/api/send-reminders",
+    "/api/send-notification",
+    "/api/cron",
+  ];
+
+  const isPublicApi = publicApiRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isPublicApi) {
     return res;
   }
 
   // =========================================
-  // SUPABASE AUTH
+  // PUBLIC AUTH ROUTES
+  // =========================================
+
+  const publicRoutes = [
+    "/login",
+    "/signup",
+  ];
+
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  // =========================================
+  // CREATE SUPABASE CLIENT
   // =========================================
 
   const supabase = createServerClient(
@@ -67,25 +84,19 @@ export async function middleware(req: NextRequest) {
     }
   );
 
+  // =========================================
+  // GET USER
+  // =========================================
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   // =========================================
-  // PUBLIC ROUTES
-  // =========================================
-
-  const publicRoutes = ["/login", "/signup"];
-
-  const isPublic = publicRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-
-  // =========================================
   // NOT LOGGED IN
   // =========================================
 
-  if (!user && !isPublic) {
+  if (!user && !isPublicRoute) {
     return NextResponse.redirect(
       new URL("/login", req.url)
     );
@@ -95,7 +106,7 @@ export async function middleware(req: NextRequest) {
   // ALREADY LOGGED IN
   // =========================================
 
-  if (user && isPublic) {
+  if (user && isPublicRoute) {
     return NextResponse.redirect(
       new URL("/dashboard", req.url)
     );

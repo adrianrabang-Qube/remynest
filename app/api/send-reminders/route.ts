@@ -11,11 +11,33 @@ export async function GET() {
 
     console.log("RUNNING REMINDER CHECK");
 
+    // =========================================
+    // TIME WINDOW BUFFER
+    // =========================================
+
+    const now = new Date();
+
+    const oneMinuteAgo = new Date(
+      now.getTime() - 60 * 1000
+    );
+
+    // =========================================
+    // GET REMINDERS
+    // =========================================
+
     const { data: reminders, error } =
       await supabase
         .from("reminders")
         .select("*")
         .eq("sent", false)
+        .gte(
+          "remind_at",
+          oneMinuteAgo.toISOString()
+        )
+        .lte(
+          "remind_at",
+          now.toISOString()
+        )
         .order("remind_at", {
           ascending: true,
         });
@@ -46,6 +68,10 @@ export async function GET() {
         message: "No reminders found",
       });
     }
+
+    // =========================================
+    // SEND NOTIFICATIONS
+    // =========================================
 
     for (const reminder of reminders) {
       console.log(
@@ -112,6 +138,10 @@ export async function GET() {
         "ONESIGNAL RESPONSE:",
         data
       );
+
+      // =========================================
+      // MARK AS SENT
+      // =========================================
 
       if (response.ok) {
         const {
