@@ -5,10 +5,19 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
+
+    // =====================================
+    // SUPABASE
+    // =====================================
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // =====================================
+    // CURRENT UTC TIME
+    // =====================================
 
     const now = new Date().toISOString();
 
@@ -30,6 +39,7 @@ export async function GET() {
         );
 
     if (error) {
+
       console.log("❌ FETCH ERROR:");
       console.log(error);
 
@@ -43,27 +53,53 @@ export async function GET() {
     );
 
     // =====================================
+    // NO REMINDERS
+    // =====================================
+
+    if (!reminders || reminders.length === 0) {
+
+      return NextResponse.json({
+        success: true,
+        processed: 0,
+      });
+    }
+
+    // =====================================
     // PROCESS LOOP
     // =====================================
 
     for (const reminder of reminders) {
 
+      console.log(
+        `🔔 STARTING: ${reminder.title}`
+      );
+
       // =====================================
-      // LOCK REMINDER
+      // ATOMIC LOCK
       // =====================================
 
-      const { error: lockError } =
-        await supabase
-          .from("reminders")
-          .update({
-            processing: true,
-          })
-          .eq("id", reminder.id)
-          .eq("processing", false);
+      const {
+        data: lockedReminder,
+        error: lockError,
+      } = await supabase
+        .from("reminders")
+        .update({
+          processing: true,
+        })
+        .eq("id", reminder.id)
+        .eq("processing", false)
+        .select()
+        .single();
 
-      if (lockError) {
-        console.log("❌ LOCK ERROR:");
-        console.log(lockError);
+      // =====================================
+      // LOCK FAILED
+      // =====================================
+
+      if (lockError || !lockedReminder) {
+
+        console.log(
+          "⚠️ Reminder already locked"
+        );
 
         continue;
       }
@@ -89,11 +125,17 @@ export async function GET() {
         .limit(1)
         .single();
 
+      // =====================================
+      // DEVICE NOT FOUND
+      // =====================================
+
       if (deviceError || !device) {
 
         console.log(
           "❌ No registered device"
         );
+
+        console.log(deviceError);
 
         await supabase
           .from("reminders")
@@ -104,6 +146,9 @@ export async function GET() {
 
         continue;
       }
+
+      console.log("📱 PLAYER ID:");
+      console.log(device.player_id);
 
       // =====================================
       // SEND PUSH
@@ -140,7 +185,9 @@ export async function GET() {
                 },
 
                 contents: {
-                  en: reminder.title,
+                  en:
+                    reminder.title ||
+                    "Reminder",
                 },
 
                 priority: 10,
@@ -181,7 +228,7 @@ export async function GET() {
       }
 
       // =====================================
-      // SEND FAILED
+      // NOTIFICATION FAILED
       // =====================================
 
       if (!notificationSuccess) {
@@ -201,7 +248,7 @@ export async function GET() {
       }
 
       // =====================================
-      // RECURRING
+      // RECURRING REMINDER
       // =====================================
 
       if (
@@ -261,7 +308,7 @@ export async function GET() {
       } else {
 
         // =====================================
-        // COMPLETE
+        // COMPLETE REMINDER
         // =====================================
 
         await supabase
@@ -277,6 +324,10 @@ export async function GET() {
         );
       }
     }
+
+    // =====================================
+    // SUCCESS RESPONSE
+    // =====================================
 
     return NextResponse.json({
       success: true,
