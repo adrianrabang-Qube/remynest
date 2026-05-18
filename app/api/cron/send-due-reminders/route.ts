@@ -34,7 +34,9 @@ export async function GET() {
         .select("*")
         .lte("remind_at", now)
         .eq("processing", false)
-        .is("completed", false);
+        .or(
+          "completed.is.null,completed.eq.false"
+        );
 
     if (error) {
 
@@ -49,6 +51,13 @@ export async function GET() {
     console.log(
       `🚀 Found ${reminders.length} due reminders`
     );
+
+    // =====================================
+    // DEBUG REMINDERS
+    // =====================================
+
+    console.log("📦 REMINDERS:");
+    console.log(reminders);
 
     // =====================================
     // NO REMINDERS
@@ -71,6 +80,12 @@ export async function GET() {
       console.log(
         `🔔 STARTING: ${reminder.title}`
       );
+
+      console.log(
+        "🕓 REMINDER TIME:"
+      );
+
+      console.log(reminder.remind_at);
 
       // =====================================
       // ATOMIC LOCK
