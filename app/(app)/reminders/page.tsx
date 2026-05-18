@@ -53,7 +53,10 @@ export default async function RemindersPage() {
     console.log(remindersError);
   }
 
-  // ➕ Create Reminder
+  // =====================================
+  // CREATE REMINDER
+  // =====================================
+
   async function createReminder(
     formData: FormData
   ) {
@@ -97,6 +100,10 @@ export default async function RemindersPage() {
       "frequency"
     ) as string;
 
+    // =====================================
+    // VALIDATION
+    // =====================================
+
     if (
       !title ||
       title.trim().length === 0
@@ -117,11 +124,31 @@ export default async function RemindersPage() {
         ? frequency
         : null;
 
-    // ✅ TRUE LOCAL TIME FIX
-    // Stores EXACT user-selected local time
-    const utcDate = new Date(
-      `${remindAt}:00`
-    ).toISOString();
+    // =====================================
+    // ✅ FIXED LOCAL → UTC CONVERSION
+    // =====================================
+
+    const localDate =
+      new Date(remindAt);
+
+    const utcDate =
+      localDate.toISOString();
+
+    console.log(
+      "🕓 LOCAL DATE:"
+    );
+
+    console.log(localDate);
+
+    console.log(
+      "🌍 UTC DATE:"
+    );
+
+    console.log(utcDate);
+
+    // =====================================
+    // INSERT REMINDER
+    // =====================================
 
     const { data, error } =
       await supabase
@@ -137,6 +164,8 @@ export default async function RemindersPage() {
           remind_at: utcDate,
 
           completed: false,
+
+          processing: false,
 
           recurring,
 
@@ -167,7 +196,10 @@ export default async function RemindersPage() {
     redirect("/reminders");
   }
 
-  // ✅ Toggle Reminder Completion
+  // =====================================
+  // TOGGLE COMPLETE
+  // =====================================
+
   async function toggleReminderComplete(
     formData: FormData
   ) {
@@ -212,7 +244,10 @@ export default async function RemindersPage() {
     redirect("/reminders");
   }
 
-  // 🗑️ Delete Reminder
+  // =====================================
+  // DELETE REMINDER
+  // =====================================
+
   async function deleteReminder(
     formData: FormData
   ) {
@@ -252,6 +287,7 @@ export default async function RemindersPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#2f3e34] mb-2">
@@ -259,8 +295,7 @@ export default async function RemindersPage() {
         </h1>
 
         <p className="text-gray-500">
-          Manage your future memory
-          prompts and AI reminders.
+          Manage your future memory prompts and AI reminders.
         </p>
       </div>
 
@@ -275,6 +310,7 @@ export default async function RemindersPage() {
         </h2>
 
         <div className="space-y-4">
+
           {/* Title */}
           <input
             name="title"
@@ -295,6 +331,7 @@ export default async function RemindersPage() {
 
           {/* Recurring */}
           <div className="border rounded-xl p-4 space-y-3">
+
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -334,20 +371,24 @@ export default async function RemindersPage() {
 
       {/* Reminder List */}
       <div className="space-y-4">
+
         {reminders &&
         reminders.length > 0 ? (
+
           reminders.map(
             (reminder) => (
+
               <div
                 key={reminder.id}
                 className="bg-white border rounded-2xl p-5 shadow-sm"
               >
+
                 <div className="flex items-start justify-between gap-4">
+
                   <div>
+
                     <h3 className="font-semibold text-lg text-[#2f3e34]">
-                      {
-                        reminder.title
-                      }
+                      {reminder.title}
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-2">
@@ -382,15 +423,14 @@ export default async function RemindersPage() {
                       reminder.frequency && (
                         <p className="text-sm text-blue-600 mt-1">
                           Recurring:{" "}
-                          {
-                            reminder.frequency
-                          }
+                          {reminder.frequency}
                         </p>
                       )}
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {/* ✅ Completion Toggle */}
+
+                    {/* Toggle */}
                     <form
                       action={
                         toggleReminderComplete
@@ -426,7 +466,7 @@ export default async function RemindersPage() {
                       </button>
                     </form>
 
-                    {/* 🗑️ Delete */}
+                    {/* Delete */}
                     <form
                       action={
                         deleteReminder
@@ -447,12 +487,15 @@ export default async function RemindersPage() {
                         Delete
                       </button>
                     </form>
+
                   </div>
                 </div>
               </div>
             )
           )
+
         ) : (
+
           <div className="bg-white border rounded-2xl p-10 text-center text-gray-500">
             No reminders yet.
           </div>
