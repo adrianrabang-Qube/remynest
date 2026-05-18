@@ -125,22 +125,47 @@ export default async function RemindersPage() {
         : null;
 
     // =====================================
-    // ✅ CORRECT UTC CONVERSION
+    // ✅ REAL LOCAL → UTC FIX
     // =====================================
 
+    const [datePart, timePart] =
+      remindAt.split("T");
+
+    const [year, month, day] =
+      datePart
+        .split("-")
+        .map(Number);
+
+    const [hour, minute] =
+      timePart
+        .split(":")
+        .map(Number);
+
+    // Build LOCAL browser time
+    const localDate = new Date(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute
+    );
+
+    // Convert LOCAL → UTC
     const utcDate =
       new Date(
-        remindAt + ":00"
+        localDate.getTime() -
+          localDate.getTimezoneOffset() *
+            60000
       ).toISOString();
 
     console.log(
-      "🕓 USER LOCAL INPUT:"
+      "🕓 LOCAL DATE:"
     );
 
-    console.log(remindAt);
+    console.log(localDate);
 
     console.log(
-      "🌍 STORED UTC:"
+      "🌍 UTC DATE:"
     );
 
     console.log(utcDate);
