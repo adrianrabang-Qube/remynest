@@ -12,15 +12,20 @@ export async function middleware(req: NextRequest) {
   // =========================================
 
   const publicFiles = [
+    "/manifest.webmanifest",
     "/manifest.json",
     "/favicon.ico",
     "/sw.js",
+    "/icon-192.png",
+    "/icon-512.png",
     "/OneSignalSDKWorker.js",
     "/OneSignalSDKUpdaterWorker.js",
   ];
 
-  const isPublicFile = publicFiles.some((path) =>
-    pathname.startsWith(path)
+  const isPublicFile = publicFiles.some(
+    (path) =>
+      pathname === path ||
+      pathname.startsWith(path)
   );
 
   if (isPublicFile) {
