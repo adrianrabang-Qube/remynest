@@ -11,6 +11,9 @@ export async function GET() {
     // ⏰ Current UTC time
     const now = new Date().toISOString();
 
+    console.log("⏰ CURRENT UTC:");
+    console.log(now);
+
     // 📦 Find due reminders
     const { data: reminders, error } =
       await supabase
@@ -37,7 +40,7 @@ export async function GET() {
     // 🔁 Process reminders
     for (const reminder of reminders) {
       console.log(
-        `🔔 Sending reminder: ${reminder.title}`
+        `🔔 Processing reminder: ${reminder.title}`
       );
 
       // =====================================
@@ -59,7 +62,7 @@ export async function GET() {
 
       if (deviceError || !device) {
         console.log(
-          "❌ No registered device found:"
+          "❌ No registered device found"
         );
 
         console.log(deviceError);
@@ -68,64 +71,93 @@ export async function GET() {
       }
 
       console.log(
-        "📱 PLAYER ID USED:"
+        "📱 PLAYER ID:"
       );
 
       console.log(device.player_id);
 
       // =====================================
-      // SEND PRIVATE ONESIGNAL
+      // SEND PUSH
       // =====================================
 
+      let notificationSuccess = false;
+
       try {
-        const notificationRes = await fetch(
-          "https://onesignal.com/api/v1/notifications",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json",
-              Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
-            },
-            body: JSON.stringify({
-              app_id:
-                process.env
-                  .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+        const notificationRes =
+          await fetch(
+            "https://onesignal.com/api/v1/notifications",
+            {
+              method: "POST",
 
-              include_player_ids: [
-                device.player_id,
-              ],
+              headers: {
+                "Content-Type":
+                  "application/json",
 
-              headings: {
-                en: "RemyNest Reminder",
+                Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
               },
 
-              contents: {
-                en: reminder.title,
-              },
+              body: JSON.stringify({
+                app_id:
+                  process.env
+                    .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
-              data: {
-                reminderId: reminder.id,
-              },
-            }),
-          }
-        );
+                include_player_ids: [
+                  device.player_id,
+                ],
+
+                headings: {
+                  en: "RemyNest Reminder",
+                },
+
+                contents: {
+                  en: reminder.title,
+                },
+
+                data: {
+                  reminderId:
+                    reminder.id,
+                },
+              }),
+            }
+          );
 
         const notificationData =
           await notificationRes.json();
 
         console.log(
-          "✅ OneSignal Sent:"
+          "✅ ONESIGNAL RESPONSE:"
         );
 
         console.log(notificationData);
+
+        // ✅ SUCCESS CHECK
+        if (
+          notificationData.id ||
+          notificationData.recipients > 0
+        ) {
+          notificationSuccess = true;
+        }
 
       } catch (notificationError) {
         console.log(
           "❌ OneSignal Send Error:"
         );
 
-        console.log(notificationError);
+        console.log(
+          notificationError
+        );
+      }
+
+      // =====================================
+      // STOP IF DELIVERY FAILED
+      // =====================================
+
+      if (!notificationSuccess) {
+        console.log(
+          "❌ Notification failed — reminder NOT completed"
+        );
+
+        continue;
       }
 
       // =====================================
@@ -136,14 +168,17 @@ export async function GET() {
         reminder.recurring &&
         reminder.frequency
       ) {
-        const currentDate = new Date(
-          reminder.remind_at
-        );
+        const currentDate =
+          new Date(
+            reminder.remind_at
+          );
 
-        let nextDate = new Date(currentDate);
+        let nextDate =
+          new Date(currentDate);
 
         if (
-          reminder.frequency === "daily"
+          reminder.frequency ===
+          "daily"
         ) {
           nextDate.setDate(
             nextDate.getDate() + 1
@@ -151,7 +186,8 @@ export async function GET() {
         }
 
         if (
-          reminder.frequency === "weekly"
+          reminder.frequency ===
+          "weekly"
         ) {
           nextDate.setDate(
             nextDate.getDate() + 7
@@ -159,14 +195,14 @@ export async function GET() {
         }
 
         if (
-          reminder.frequency === "monthly"
+          reminder.frequency ===
+          "monthly"
         ) {
           nextDate.setMonth(
             nextDate.getMonth() + 1
           );
         }
 
-        // 🔄 Move reminder forward
         await supabase
           .from("reminders")
           .update({
@@ -181,7 +217,7 @@ export async function GET() {
 
       } else {
 
-        // ✅ One-time reminder completes
+        // ✅ Complete ONLY if notification succeeded
         await supabase
           .from("reminders")
           .update({
