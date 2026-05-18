@@ -34,9 +34,7 @@ export async function GET() {
         .select("*")
         .lte("remind_at", now)
         .eq("processing", false)
-        .or(
-          "completed.is.null,completed.eq.false"
-        );
+        .is("completed", false);
 
     if (error) {
 
