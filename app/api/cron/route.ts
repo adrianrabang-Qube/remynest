@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // ✅ Forward cron request
+    // ✅ Directly call internal route
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/cron/send-due-reminders`,
+      "https://www.remynest.com/api/cron/send-due-reminders",
       {
         method: "GET",
         cache: "no-store",
