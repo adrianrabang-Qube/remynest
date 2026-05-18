@@ -10,24 +10,27 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // ⏰ Current UTC time
     const now = new Date().toISOString();
 
     console.log("⏰ CURRENT UTC:");
     console.log(now);
 
-    // 📦 Find due reminders
+    // =====================================
+    // FIND DUE REMINDERS
+    // =====================================
+
     const { data: reminders, error } =
       await supabase
         .from("reminders")
         .select("*")
         .lte("remind_at", now)
+        .eq("processing", false)
         .or(
           "completed.is.null,completed.eq.false"
         );
 
     if (error) {
-      console.log("❌ CRON FETCH ERROR:");
+      console.log("❌ FETCH ERROR:");
       console.log(error);
 
       return NextResponse.json({
@@ -39,10 +42,34 @@ export async function GET() {
       `🚀 Found ${reminders.length} due reminders`
     );
 
-    // 🔁 Process reminders
+    // =====================================
+    // PROCESS LOOP
+    // =====================================
+
     for (const reminder of reminders) {
+
+      // =====================================
+      // LOCK REMINDER
+      // =====================================
+
+      const { error: lockError } =
+        await supabase
+          .from("reminders")
+          .update({
+            processing: true,
+          })
+          .eq("id", reminder.id)
+          .eq("processing", false);
+
+      if (lockError) {
+        console.log("❌ LOCK ERROR:");
+        console.log(lockError);
+
+        continue;
+      }
+
       console.log(
-        `🔔 Processing reminder: ${reminder.title}`
+        `🔒 LOCKED: ${reminder.title}`
       );
 
       // =====================================
@@ -63,20 +90,20 @@ export async function GET() {
         .single();
 
       if (deviceError || !device) {
+
         console.log(
-          "❌ No registered device found"
+          "❌ No registered device"
         );
 
-        console.log(deviceError);
+        await supabase
+          .from("reminders")
+          .update({
+            processing: false,
+          })
+          .eq("id", reminder.id);
 
         continue;
       }
-
-      console.log(
-        "📱 PLAYER ID:"
-      );
-
-      console.log(device.player_id);
 
       // =====================================
       // SEND PUSH
@@ -85,6 +112,7 @@ export async function GET() {
       let notificationSuccess = false;
 
       try {
+
         const notificationRes =
           await fetch(
             "https://onesignal.com/api/v1/notifications",
@@ -115,6 +143,8 @@ export async function GET() {
                   en: reminder.title,
                 },
 
+                priority: 10,
+
                 data: {
                   reminderId:
                     reminder.id,
@@ -127,12 +157,11 @@ export async function GET() {
           await notificationRes.json();
 
         console.log(
-          "✅ ONESIGNAL RESPONSE:"
+          "📨 ONESIGNAL RESPONSE:"
         );
 
         console.log(notificationData);
 
-        // ✅ SUCCESS CHECK
         if (
           notificationData.id ||
           notificationData.recipients > 0
@@ -141,8 +170,9 @@ export async function GET() {
         }
 
       } catch (notificationError) {
+
         console.log(
-          "❌ OneSignal Send Error:"
+          "❌ OneSignal Error:"
         );
 
         console.log(
@@ -151,25 +181,34 @@ export async function GET() {
       }
 
       // =====================================
-      // STOP IF DELIVERY FAILED
+      // SEND FAILED
       // =====================================
 
       if (!notificationSuccess) {
+
+        await supabase
+          .from("reminders")
+          .update({
+            processing: false,
+          })
+          .eq("id", reminder.id);
+
         console.log(
-          "❌ Notification failed — reminder NOT completed"
+          "❌ Notification failed"
         );
 
         continue;
       }
 
       // =====================================
-      // RECURRING LOGIC
+      // RECURRING
       // =====================================
 
       if (
         reminder.recurring &&
         reminder.frequency
       ) {
+
         const currentDate =
           new Date(
             reminder.remind_at
@@ -210,6 +249,8 @@ export async function GET() {
           .update({
             remind_at:
               nextDate.toISOString(),
+
+            processing: false,
           })
           .eq("id", reminder.id);
 
@@ -219,11 +260,15 @@ export async function GET() {
 
       } else {
 
-        // ✅ Complete ONLY if notification succeeded
+        // =====================================
+        // COMPLETE
+        // =====================================
+
         await supabase
           .from("reminders")
           .update({
             completed: true,
+            processing: false,
           })
           .eq("id", reminder.id);
 
@@ -239,6 +284,7 @@ export async function GET() {
     });
 
   } catch (err) {
+
     console.log("❌ CRON ERROR:");
     console.log(err);
 
