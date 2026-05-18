@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "RemyNest",
     short_name: "RemyNest",
-    description: "AI memory assistant and reminder system",
+    description: "AI memory assistant and reminder app",
     start_url: "/",
     display: "standalone",
     background_color: "#f5f1e8",
