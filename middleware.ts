@@ -7,7 +7,30 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname;
 
-    // ✅ PUBLIC API ROUTES
+  // =========================================
+  // PUBLIC STATIC / PWA FILES
+  // =========================================
+
+  const publicFiles = [
+    "/manifest.json",
+    "/favicon.ico",
+    "/sw.js",
+    "/OneSignalSDKWorker.js",
+    "/OneSignalSDKUpdaterWorker.js",
+  ];
+
+  const isPublicFile = publicFiles.some((path) =>
+    pathname.startsWith(path)
+  );
+
+  if (isPublicFile) {
+    return res;
+  }
+
+  // =========================================
+  // PUBLIC API ROUTES
+  // =========================================
+
   if (
     pathname.startsWith("/api/stripe/webhook") ||
     pathname.startsWith("/api/send-reminders") ||
@@ -17,6 +40,10 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // =========================================
+  // SUPABASE AUTH
+  // =========================================
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -25,6 +52,7 @@ export async function middleware(req: NextRequest) {
         getAll() {
           return req.cookies.getAll();
         },
+
         setAll(cookies) {
           cookies.forEach(({ name, value, options }) => {
             res.cookies.set(name, value, options);
@@ -38,26 +66,41 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // ✅ PUBLIC ROUTES
+  // =========================================
+  // PUBLIC ROUTES
+  // =========================================
+
   const publicRoutes = ["/login", "/signup"];
 
   const isPublic = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  // ❌ Not logged in
+  // =========================================
+  // NOT LOGGED IN
+  // =========================================
+
   if (!user && !isPublic) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(
+      new URL("/login", req.url)
+    );
   }
 
-  // ✅ Already logged in
+  // =========================================
+  // ALREADY LOGGED IN
+  // =========================================
+
   if (user && isPublic) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(
+      new URL("/dashboard", req.url)
+    );
   }
 
   return res;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };
