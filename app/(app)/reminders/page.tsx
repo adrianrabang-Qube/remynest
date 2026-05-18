@@ -125,26 +125,22 @@ export default async function RemindersPage() {
         : null;
 
     // =====================================
-    // ✅ FINAL TIMEZONE FIX
+    // ✅ CORRECT UTC CONVERSION
     // =====================================
 
-    const localDate =
-      new Date(remindAt);
-
-    const utcDate = new Date(
-      localDate.getTime() -
-      localDate.getTimezoneOffset() *
-        60000
-    ).toISOString();
+    const utcDate =
+      new Date(
+        remindAt + ":00"
+      ).toISOString();
 
     console.log(
-      "🕓 LOCAL DATE:"
+      "🕓 USER LOCAL INPUT:"
     );
 
-    console.log(localDate);
+    console.log(remindAt);
 
     console.log(
-      "🌍 UTC DATE:"
+      "🌍 STORED UTC:"
     );
 
     console.log(utcDate);
