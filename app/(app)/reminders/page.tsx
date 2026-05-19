@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveProfile } from "@/lib/active-profile";
 import { redirect } from "next/navigation";
-
 export default async function RemindersPage() {
   const supabase =
     await createClient();
@@ -125,47 +124,24 @@ export default async function RemindersPage() {
         : null;
 
     // =====================================
-    // ✅ REAL LOCAL → UTC FIX
+    // ✅ FINAL TIMEZONE FIX
     // =====================================
 
-    const [datePart, timePart] =
-      remindAt.split("T");
+    // datetime-local already gives local user time.
+    // Convert ONCE to UTC ISO.
+    // DO NOT manually offset timezone.
 
-    const [year, month, day] =
-      datePart
-        .split("-")
-        .map(Number);
-
-    const [hour, minute] =
-      timePart
-        .split(":")
-        .map(Number);
-
-    // Build LOCAL browser time
-    const localDate = new Date(
-      year,
-      month - 1,
-      day,
-      hour,
-      minute
-    );
-
-    // Convert LOCAL → UTC
     const utcDate =
-      new Date(
-        localDate.getTime() -
-          localDate.getTimezoneOffset() *
-            60000
-      ).toISOString();
+      new Date(remindAt).toISOString();
 
     console.log(
-      "🕓 LOCAL DATE:"
+      "🕓 ORIGINAL LOCAL INPUT:"
     );
 
-    console.log(localDate);
+    console.log(remindAt);
 
     console.log(
-      "🌍 UTC DATE:"
+      "🌍 FINAL UTC DATE:"
     );
 
     console.log(utcDate);
