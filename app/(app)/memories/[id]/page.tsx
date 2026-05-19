@@ -12,9 +12,8 @@ export default async function MemoryPage({
   params,
 }: Props) {
   const supabase = await createClient();
-  
 
-  // 🔐 Get logged in user
+  // 🔐 Auth
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,7 +22,7 @@ export default async function MemoryPage({
     return notFound();
   }
 
-  // 📦 Fetch memory
+  // 📦 Memory
   const { data: memory, error } =
     await supabase
       .from("memories")
@@ -36,8 +35,34 @@ export default async function MemoryPage({
     return notFound();
   }
 
+  // 🔗 Semantic related memories
+  let relatedMemories: any[] = [];
+
+  if (memory.embedding) {
+    const { data } =
+      await supabase.rpc(
+        "match_memories",
+        {
+          query_embedding:
+            memory.embedding,
+          match_threshold: 0.45,
+          match_count: 3,
+          user_id_input: user.id,
+          memory_id_input:
+            memory.id,
+        }
+      );
+
+    relatedMemories =
+      data || [];
+  }
+
+  // 🎨 Confidence Width
+  const confidence =
+    memory.ai_confidence || 0;
+
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Back */}
       <a
         href="/memories"
@@ -46,47 +71,123 @@ export default async function MemoryPage({
         ← Back to Memories
       </a>
 
-      {/* Card */}
-      <div className="bg-white border rounded-2xl p-6 shadow-sm space-y-6">
-        {/* Title */}
-        <div>
-          <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">
-            Memory
+      {/* Main Card */}
+      <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="p-8 border-b border-gray-100">
+          <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">
+            Memory Intelligence
           </p>
 
-          <h1 className="text-3xl font-bold break-words">
-            {memory.ai_title || memory.title}
-          </h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+                {memory.ai_title ||
+                  memory.title}
+              </h1>
+
+              <p className="text-sm text-gray-400 mt-3">
+                Created{" "}
+                {new Date(
+                  memory.created_at
+                ).toLocaleString()}
+              </p>
+            </div>
+
+            {/* Category */}
+            {memory.ai_category && (
+              <div className="bg-black text-white text-sm px-4 py-2 rounded-full">
+                {memory.ai_category}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Category */}
-        {memory.ai_category && (
+        {/* Cognitive Metadata */}
+        <div className="p-8 border-b border-gray-100 space-y-6">
           <div>
-            <span className="inline-flex items-center rounded-full bg-black text-white px-3 py-1 text-xs">
-              {memory.ai_category}
-            </span>
-          </div>
-        )}
+            <h2 className="text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wide">
+              Cognitive Analysis
+            </h2>
 
-        {/* Original Content */}
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-gray-500">
+            <div className="flex flex-wrap gap-3">
+              {/* Mood */}
+              {memory.ai_mood && (
+                <div className="px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                  Mood: {memory.ai_mood}
+                </div>
+              )}
+
+              {/* Importance */}
+              {memory.ai_importance && (
+                <div className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                  Importance:{" "}
+                  {memory.ai_importance}
+                </div>
+              )}
+
+              {/* Sentiment */}
+              {memory.ai_sentiment && (
+                <div className="px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+                  Sentiment:{" "}
+                  {memory.ai_sentiment}
+                </div>
+              )}
+
+              {/* Emotional Weight */}
+              {memory.ai_emotional_weight && (
+                <div className="px-4 py-2 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
+                  Emotional Weight:{" "}
+                  {
+                    memory.ai_emotional_weight
+                  }
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Confidence */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500 font-medium">
+                AI Confidence
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800">
+                {confidence}%
+              </span>
+            </div>
+
+            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all"
+                style={{
+                  width: `${confidence}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Original Memory */}
+        <div className="p-8 border-b border-gray-100 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
             Original Memory
           </h2>
 
-          <div className="bg-gray-50 rounded-xl p-4 text-gray-700 whitespace-pre-wrap break-words">
+          <div className="bg-gray-50 rounded-2xl p-6 text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
             {memory.content}
           </div>
         </div>
 
         {/* AI Summary */}
         {memory.ai_summary && (
-          <div className="space-y-2">
-            <h2 className="text-sm font-semibold text-gray-500">
+          <div className="p-8 border-b border-gray-100 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
               AI Summary
             </h2>
 
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-gray-700 italic whitespace-pre-wrap break-words">
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-gray-700 italic leading-relaxed whitespace-pre-wrap break-words">
               {memory.ai_summary}
             </div>
           </div>
@@ -95,35 +196,98 @@ export default async function MemoryPage({
         {/* AI Tags */}
         {memory.ai_tags &&
           memory.ai_tags.length > 0 && (
-            <div className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-500">
-                AI Tags
+            <div className="p-8 border-b border-gray-100 space-y-4">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                Semantic Tags
               </h2>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {memory.ai_tags.map(
                   (
                     tag: string,
                     index: number
                   ) => (
-                    <span
+                    <div
                       key={index}
-                      className="bg-gray-200 text-sm px-3 py-1 rounded-full"
+                      className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm"
                     >
                       #{tag}
-                    </span>
+                    </div>
                   )
                 )}
               </div>
             </div>
           )}
 
-        {/* Created Date */}
-        <div className="pt-4 border-t text-xs text-gray-400">
-          Created{" "}
-          {new Date(
-            memory.created_at
-          ).toLocaleString()}
+        {/* Related Memories */}
+        {relatedMemories &&
+          relatedMemories.length > 0 && (
+            <div className="p-8 border-b border-gray-100 space-y-6">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                Related Memories
+              </h2>
+
+              <div className="space-y-4">
+                {relatedMemories.map(
+                  (
+                    related: any
+                  ) => (
+                    <a
+                      key={related.id}
+                      href={`/memories/${related.id}`}
+                      className="block border border-gray-100 rounded-2xl p-5 hover:border-black transition"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 text-lg">
+                            {related.ai_title ||
+                              related.title}
+                          </h3>
+
+                          <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                            {related.ai_summary ||
+                              related.content}
+                          </p>
+
+                          {/* Similarity Score */}
+                          {related.similarity && (
+                            <div className="mt-3 text-xs text-gray-400">
+                              Semantic Similarity:{" "}
+                              {Math.round(
+                                related.similarity *
+                                  100
+                              )}
+                              %
+                            </div>
+                          )}
+                        </div>
+
+                        {related.ai_mood && (
+                          <div className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 whitespace-nowrap">
+                            {
+                              related.ai_mood
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </a>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
+        {/* Footer */}
+        <div className="px-8 py-6 bg-gray-50">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="text-sm text-gray-500">
+              Semantic Memory Stored
+            </div>
+
+            <div className="text-xs text-gray-400">
+              RemyNest Cognitive Engine
+            </div>
+          </div>
         </div>
       </div>
     </div>

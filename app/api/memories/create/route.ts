@@ -3,9 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { generateMemoryInsights } from "@/lib/ai-memory";
 import { generateEmbedding } from "@/lib/embeddings";
 import { getActiveProfile } from "@/lib/active-profile";
+import { buildRelationships } from "@/lib/build-relationships";
+import { buildClusters } from "@/lib/build-clusters";
 
 export async function POST(req: Request) {
   try {
+
     const supabase =
       await createClient();
 
@@ -51,14 +54,19 @@ export async function POST(req: Request) {
     // REQUEST BODY
     // =====================================
 
-    const body = await req.json();
+    const body =
+      await req.json();
 
-    const { title, content } = body;
+    const {
+      title,
+      content,
+    } = body;
 
     if (!content) {
       return NextResponse.json(
         {
-          error: "Content required",
+          error:
+            "Content required",
         },
         {
           status: 400,
@@ -75,22 +83,29 @@ export async function POST(req: Request) {
 
     let aiSummary = "";
 
-    let aiTags: string[] = [];
+    let aiTags: string[] =
+      [];
 
-    let aiCategory = "General";
+    let aiCategory =
+      "General";
 
-    let aiMood = "Neutral";
+    let aiMood =
+      "Neutral";
 
-    let aiImportance = "Medium";
+    let aiImportance =
+      "Medium";
 
-    let aiConfidence = 85;
+    let aiConfidence =
+      85;
 
-    let aiSentiment = "Neutral";
+    let aiSentiment =
+      "Neutral";
 
     let aiEmotionalWeight =
       "Light";
 
     try {
+
       const ai =
         await generateMemoryInsights(
           content
@@ -154,6 +169,7 @@ export async function POST(req: Request) {
       | null = null;
 
     try {
+
       console.log(
         "🚀 GENERATING EMBEDDING"
       );
@@ -191,26 +207,31 @@ export async function POST(req: Request) {
       .from("memories")
       .insert([
         {
-          user_id: user.id,
+          user_id:
+            user.id,
 
           memory_profile_id:
             activeProfileId,
 
-          title: aiTitle,
+          title:
+            aiTitle,
 
           content,
 
-          ai_title: aiTitle,
+          ai_title:
+            aiTitle,
 
           ai_summary:
             aiSummary,
 
-          ai_tags: aiTags,
+          ai_tags:
+            aiTags,
 
           ai_category:
             aiCategory,
 
-          ai_mood: aiMood,
+          ai_mood:
+            aiMood,
 
           ai_importance:
             aiImportance,
@@ -250,10 +271,75 @@ export async function POST(req: Request) {
     }
 
     console.log(
-      "✅ Memory created:"
+      "✅ MEMORY CREATED:"
     );
 
-    console.log(data.id);
+    console.log(
+      data.id
+    );
+
+    // =====================================
+    // BUILD RELATIONSHIPS
+    // =====================================
+
+    try {
+
+      const relationshipResult =
+        await buildRelationships(
+          data.id
+        );
+
+      console.log(
+        "🧠 RELATIONSHIP RESULT:"
+      );
+
+      console.log(
+        relationshipResult
+      );
+
+      console.log(
+        "✅ RELATIONSHIPS BUILT"
+      );
+
+    } catch (
+      relationshipError
+    ) {
+
+      console.log(
+        "❌ RELATIONSHIP ERROR:"
+      );
+
+      console.log(
+        relationshipError
+      );
+    }
+
+    // =====================================
+    // BUILD CLUSTERS
+    // =====================================
+
+    try {
+
+      await buildClusters(
+        data.id
+      );
+
+      console.log(
+        "✅ CLUSTERS BUILT"
+      );
+
+    } catch (
+      clusterError
+    ) {
+
+      console.log(
+        "❌ CLUSTER ERROR:"
+      );
+
+      console.log(
+        clusterError
+      );
+    }
 
     return NextResponse.json(
       data
@@ -269,7 +355,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        error: "Server error",
+        error:
+          "Server error",
       },
       {
         status: 500,
