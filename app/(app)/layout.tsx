@@ -11,18 +11,38 @@ export default function AppLayout({
       {/* NAVBAR */}
       <header className="flex justify-between items-center px-6 py-4 border-b">
         <nav className="flex gap-6 text-sm font-medium">
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/memories">Memories</Link>
-          <Link href="/memories/new">New</Link>
-          <Link href="/timeline">Timeline</Link>
-          <Link href="/reminders">Reminders</Link>
+          <Link href="/dashboard">
+            Dashboard
+          </Link>
+
+          <Link href="/memories">
+            Memories
+          </Link>
+
+          <Link href="/memory-chat">
+            Memory Chat
+          </Link>
+
+          <Link href="/memories/new">
+            New
+          </Link>
+
+          <Link href="/timeline">
+            Timeline
+          </Link>
+
+          <Link href="/reminders">
+            Reminders
+          </Link>
         </nav>
 
         <LogoutButton />
       </header>
 
       {/* PAGE CONTENT */}
-      <main className="p-6">{children}</main>
+      <main className="p-6">
+        {children}
+      </main>
     </>
   );
 }
