@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/embeddings";
 
 export async function retrieveMemoryContext(
-  query: string,
-  userId: string
+  userId: string,
+  query: string
 ) {
   try {
 
@@ -192,7 +192,7 @@ ${memory.similarity}
 
     console.log(context);
 
-    return context;
+    return matches;
 
   } catch (error) {
 
