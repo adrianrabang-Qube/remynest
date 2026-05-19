@@ -7,7 +7,9 @@ export async function POST(
   req: Request
 ) {
   try {
-    const body = await req.json();
+
+    const body =
+      await req.json();
 
     const {
       title,
@@ -18,18 +20,29 @@ export async function POST(
       user_id,
     } = body;
 
-    // ✅ Validate required fields
-    if (!title || !remind_at) {
+    // =====================================
+    // VALIDATION
+    // =====================================
+
+    if (
+      !title ||
+      !remind_at
+    ) {
       return NextResponse.json(
         {
           error:
             "Missing required fields",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
-    // ✅ Use SERVICE ROLE
+    // =====================================
+    // SUPABASE
+    // =====================================
+
     const supabase =
       createClient(
         process.env
@@ -38,7 +51,10 @@ export async function POST(
           .SUPABASE_SERVICE_ROLE_KEY!
       );
 
-    // ✅ Create reminder
+    // =====================================
+    // CREATE REMINDER
+    // =====================================
+
     const {
       data,
       error,
@@ -48,9 +64,10 @@ export async function POST(
         {
           title,
 
-          remind_at: new Date(
-            remind_at
-          ).toISOString(),
+          // ✅ FIXED TIMEZONE BUG
+          // Store raw timestamp directly
+          // DO NOT convert again
+          remind_at,
 
           recurring:
             recurring || false,
@@ -63,7 +80,8 @@ export async function POST(
           sent: false,
 
           memory_profile_id:
-            memory_profile_id || null,
+            memory_profile_id ||
+            null,
 
           user_id:
             user_id || null,
@@ -72,7 +90,12 @@ export async function POST(
       .select()
       .single();
 
+    // =====================================
+    // ERROR HANDLING
+    // =====================================
+
     if (error) {
+
       console.log(
         "❌ CREATE REMINDER ERROR:"
       );
@@ -84,12 +107,18 @@ export async function POST(
           error:
             error.message,
         },
-        { status: 500 }
+        {
+          status: 500,
+        }
       );
     }
 
+    // =====================================
+    // SUCCESS
+    // =====================================
+
     console.log(
-      "✅ Reminder Created:"
+      "✅ REMINDER CREATED:"
     );
 
     console.log(data);
@@ -98,7 +127,9 @@ export async function POST(
       success: true,
       reminder: data,
     });
+
   } catch (err) {
+
     console.log(
       "❌ INVALID REQUEST:"
     );
@@ -110,7 +141,9 @@ export async function POST(
         error:
           "Invalid request",
       },
-      { status: 400 }
+      {
+        status: 400,
+      }
     );
   }
 }
