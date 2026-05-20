@@ -162,7 +162,7 @@ export default function LandingClient() {
   </div>
 </div>
 
-<section className="relative mt-32 flex justify-center overflow-hidden px-6">
+<section className="pointer-events-none relative mt-32 flex justify-center overflow-hidden px-6">
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.15),transparent_60%)]" />
 
   <div className="relative flex items-center justify-center">
