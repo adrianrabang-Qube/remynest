@@ -43,7 +43,7 @@ export default function LandingClient() {
   const typed = useTypingEffect(prompts);
 
   return (
-    <main className="relative overflow-hidden bg-[#0b1020] text-white min-h-screen">
+    <main className="relative overflow-hidden bg-[#f5f1e8] text-[#1f2937] min-h-screen">
 
       {/* BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden">
@@ -58,7 +58,7 @@ export default function LandingClient() {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-[-200px] left-[-120px] h-[600px] w-[600px] rounded-full bg-cyan-500/20 blur-3xl"
+          className="absolute top-[-200px] left-[-120px] h-[600px] w-[600px] rounded-full bg-[#d8d2c7]/40 blur-3xl"
         />
 
         <motion.div
@@ -71,47 +71,47 @@ export default function LandingClient() {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute bottom-[-250px] right-[-120px] h-[600px] w-[600px] rounded-full bg-purple-500/20 blur-3xl"
+          className="absolute bottom-[-250px] right-[-120px] h-[600px] w-[600px] rounded-full bg-[#e7e1d6]/40 blur-3xl"
         />
 
       </div>
 
       {/* NAVBAR */}
-      <header className="relative z-20 border-b border-white/10 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-black/5 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-[#243428]">
             RemyNest
           </h1>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm text-gray-300">
-            <a className="hover:text-white transition">
+          <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
+            <a className="hover:text-[#243428] transition">
               Features
             </a>
 
-            <a className="hover:text-white transition">
+            <a className="hover:text-[#243428] transition">
               Security
             </a>
 
-            <a className="hover:text-white transition">
+            <a className="hover:text-[#243428] transition">
               Caregivers
             </a>
           </nav>
 
           <div className="flex items-center gap-4">
-  <a
-    href="/login"
-    className="text-sm text-white/70 transition hover:text-white"
-  >
-    Login
-  </a>
+            <a
+              href="/login"
+              className="text-sm text-gray-600 transition hover:text-[#243428]"
+            >
+              Login
+            </a>
 
-  <a href="/signup">
-    <button className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:scale-105">
-      Get Started
-    </button>
-  </a>
-</div>
+            <a href="/signup">
+              <button className="rounded-2xl bg-[#243428] px-5 py-3 text-sm font-semibold text-white transition hover:scale-105 hover:bg-[#2f4633]">
+                Get Started
+              </button>
+            </a>
+          </div>
 
         </div>
       </header>
@@ -128,197 +128,210 @@ export default function LandingClient() {
             transition={{ duration: 0.8 }}
           >
 
-            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur-xl">
+            <div className="mb-6 inline-flex rounded-full border border-black/5 bg-white/70 px-4 py-2 text-sm backdrop-blur-xl text-gray-700">
               AI Cognitive Memory Platform
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#243428]">
               Preserve Memory.
               <br />
               Extend Human Continuity.
             </h1>
 
-            <p className="mt-8 max-w-2xl text-lg md:text-xl text-gray-300">
+            <p className="mt-8 max-w-2xl text-lg md:text-xl text-gray-600">
               RemyNest helps people preserve memories,
               organize thoughts, manage reminders,
               and support cognitive continuity using AI.
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row">
-  <a href="/signup">
-  <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-cyan-300">
-    Start Free
-  </button>
-</a>
 
-  <div className="flex gap-4">
-    <button className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-200 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-white">
-       App Store
-    </button>
+              <a href="/signup">
+                <button className="rounded-2xl bg-[#243428] px-8 py-4 text-lg font-semibold text-white transition hover:scale-105 hover:bg-[#2f4633]">
+                  Start Free
+                </button>
+              </a>
 
-    <button className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-200 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-white">
-      Google Play
-    </button>
-  </div>
-</div>
+              <div className="flex gap-4">
 
-<section className="pointer-events-none relative mt-32 flex justify-center overflow-hidden px-6">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.15),transparent_60%)]" />
+                <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
+                   App Store
+                </button>
 
-  <div className="relative flex items-center justify-center">
-    
-    {/* FLOATING LEFT CARD */}
-    <motion.div
-      animate={{ y: [0, -12, 0] }}
-      transition={{ duration: 5, repeat: Infinity }}
-      className="absolute -left-20 top-24 hidden w-56 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-2xl lg:block"
-    >
-      <div className="text-xs uppercase tracking-[0.3em] text-cyan-400">
-        Memory Recall
-      </div>
+                <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
+                  Google Play
+                </button>
 
-      <div className="mt-4 text-lg font-semibold text-white">
-        “Call Sarah tomorrow at 3PM”
-      </div>
+              </div>
 
-      <div className="mt-3 text-sm text-gray-400">
-        Retrieved instantly using semantic memory search.
-      </div>
-    </motion.div>
-
-    {/* PHONE */}
-    <motion.div
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 6, repeat: Infinity }}
-      className="relative h-[650px] w-[320px] rounded-[3.5rem] border border-white/10 bg-black p-4 shadow-[0_0_120px_rgba(34,211,238,0.15)]"
-    >
-      {/* GLOW */}
-      <div className="absolute inset-0 rounded-[3.5rem] bg-cyan-400/10 blur-3xl" />
-
-      {/* SCREEN */}
-      <div className="relative h-full overflow-hidden rounded-[3rem] border border-white/10 bg-[#071018]">
-        
-        {/* TOP BAR */}
-        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
-          <div>
-            <div className="text-sm text-gray-400">
-              Good evening
             </div>
 
-            <div className="text-lg font-semibold text-white">
-              Adrian
-            </div>
-          </div>
+            <section className="pointer-events-none relative mt-32 flex justify-center overflow-hidden px-6">
 
-          <div className="h-10 w-10 rounded-full bg-cyan-400/20" />
-        </div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(36,52,40,0.08),transparent_60%)]" />
 
-        {/* MEMORY TIMELINE */}
-        <div className="space-y-4 p-5">
-          
-          <motion.div
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="rounded-3xl border border-white/10 bg-white/5 p-4"
-          >
-            <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
-              Reminder
-            </div>
+              <div className="relative flex items-center justify-center">
 
-            <div className="mt-2 text-white">
-              Take medication at 8PM
-            </div>
-          </motion.div>
+                {/* FLOATING LEFT CARD */}
+                <motion.div
+                  animate={{ y: [0, -12, 0] }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  className="absolute -left-20 top-24 hidden w-56 rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-2xl shadow-xl lg:block"
+                >
+                  <div className="text-xs uppercase tracking-[0.3em] text-[#7c8d7f]">
+                    Memory Recall
+                  </div>
 
-          <motion.div
-            animate={{ opacity: [1, 0.7, 1] }}
-            transition={{ duration: 4, repeat: Infinity }}
-            className="rounded-3xl border border-white/10 bg-white/5 p-4"
-          >
-            <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
-              Semantic Search
-            </div>
+                  <div className="mt-4 text-lg font-semibold text-[#243428]">
+                    “Call Sarah tomorrow at 3PM”
+                  </div>
 
-            <div className="mt-2 text-white">
-              “Birthday dinner with Cheralou”
-            </div>
+                  <div className="mt-3 text-sm text-gray-500">
+                    Retrieved instantly using semantic memory search.
+                  </div>
+                </motion.div>
 
-            <div className="mt-2 text-sm text-gray-400">
-              Match found from March memories.
-            </div>
-          </motion.div>
+                {/* PHONE */}
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 6, repeat: Infinity }}
+                  className="relative h-[650px] w-[320px] rounded-[3.5rem] border border-black/10 bg-[#111111] p-4 shadow-[0_0_120px_rgba(36,52,40,0.12)]"
+                >
 
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-400/20 to-blue-500/10 p-5"
-          >
-            <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
-              Cognitive Continuity
-            </div>
+                  <div className="absolute inset-0 rounded-[3.5rem] bg-[#243428]/10 blur-3xl" />
 
-            <div className="mt-3 text-lg font-semibold text-white">
-              AI detected emotional importance.
-            </div>
+                  <div className="relative h-full overflow-hidden rounded-[3rem] border border-white/10 bg-[#071018]">
 
-            <div className="mt-2 text-sm text-gray-300">
-              This memory was prioritized for future recall.
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </motion.div>
+                    {/* TOP BAR */}
+                    <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
 
-    {/* FLOATING RIGHT CARD */}
-    <motion.div
-      animate={{ y: [0, 14, 0] }}
-      transition={{ duration: 6, repeat: Infinity }}
-      className="absolute -right-20 bottom-24 hidden w-56 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-2xl lg:block"
-    >
-      <div className="text-xs uppercase tracking-[0.3em] text-cyan-400">
-        Caregiver Continuity
-      </div>
+                      <div>
 
-      <div className="mt-4 text-lg font-semibold text-white">
-        Shared memory update synced.
-      </div>
+                        <div className="text-sm text-gray-400">
+                          Good evening
+                        </div>
 
-      <div className="mt-3 text-sm text-gray-400">
-        Family members remain connected across timelines.
-      </div>
-    </motion.div>
-  </div>
-</section>
+                        <div className="text-lg font-semibold text-white">
+                          Adrian
+                        </div>
+
+                      </div>
+
+                      <div className="h-10 w-10 rounded-full bg-cyan-400/20" />
+
+                    </div>
+
+                    {/* MEMORY TIMELINE */}
+                    <div className="space-y-4 p-5">
+
+                      <motion.div
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="rounded-3xl border border-white/10 bg-white/5 p-4"
+                      >
+                        <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+                          Reminder
+                        </div>
+
+                        <div className="mt-2 text-white">
+                          Take medication at 8PM
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        animate={{ opacity: [1, 0.7, 1] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                        className="rounded-3xl border border-white/10 bg-white/5 p-4"
+                      >
+                        <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+                          Semantic Search
+                        </div>
+
+                        <div className="mt-2 text-white">
+                          “Birthday dinner with Cheralou”
+                        </div>
+
+                        <div className="mt-2 text-sm text-gray-400">
+                          Match found from March memories.
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 5, repeat: Infinity }}
+                        className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-400/20 to-blue-500/10 p-5"
+                      >
+                        <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
+                          Cognitive Continuity
+                        </div>
+
+                        <div className="mt-3 text-lg font-semibold text-white">
+                          AI detected emotional importance.
+                        </div>
+
+                        <div className="mt-2 text-sm text-gray-300">
+                          This memory was prioritized for future recall.
+                        </div>
+                      </motion.div>
+
+                    </div>
+
+                  </div>
+
+                </motion.div>
+
+                {/* FLOATING RIGHT CARD */}
+                <motion.div
+                  animate={{ y: [0, 14, 0] }}
+                  transition={{ duration: 6, repeat: Infinity }}
+                  className="absolute -right-20 bottom-24 hidden w-56 rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-2xl shadow-xl lg:block"
+                >
+                  <div className="text-xs uppercase tracking-[0.3em] text-[#7c8d7f]">
+                    Caregiver Continuity
+                  </div>
+
+                  <div className="mt-4 text-lg font-semibold text-[#243428]">
+                    Shared memory update synced.
+                  </div>
+
+                  <div className="mt-3 text-sm text-gray-500">
+                    Family members remain connected across timelines.
+                  </div>
+                </motion.div>
+
+              </div>
+
+            </section>
 
             {/* TRUST STATS */}
             <div className="mt-16 grid grid-cols-3 gap-6">
 
               <div>
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-3xl font-bold text-[#243428]">
                   AI
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-gray-500">
                   Semantic Recall
                 </p>
               </div>
 
               <div>
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-3xl font-bold text-[#243428]">
                   24/7
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-gray-500">
                   Cognitive Continuity
                 </p>
               </div>
 
               <div>
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-3xl font-bold text-[#243428]">
                   Secure
                 </h3>
 
-                <p className="mt-2 text-sm text-gray-400">
+                <p className="mt-2 text-sm text-gray-500">
                   Private by Design
                 </p>
               </div>
@@ -340,7 +353,6 @@ export default function LandingClient() {
           className="relative"
         >
 
-          {/* FLOATING CARD */}
           <motion.div
             animate={{
               y: [0, -10, 0],
@@ -351,18 +363,19 @@ export default function LandingClient() {
             }}
             className="absolute -left-10 -top-10 hidden xl:block"
           >
-            <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
-              <p className="text-sm text-gray-300">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-xl shadow-xl">
+
+              <p className="text-sm text-gray-500">
                 AI Recall Active
               </p>
 
-              <p className="mt-2 text-lg font-semibold">
+              <p className="mt-2 text-lg font-semibold text-[#243428]">
                 Emotional continuity improving
               </p>
+
             </div>
           </motion.div>
 
-          {/* FLOATING METRIC */}
           <motion.div
             animate={{
               y: [0, 12, 0],
@@ -373,56 +386,55 @@ export default function LandingClient() {
             }}
             className="absolute -right-8 bottom-10 hidden xl:block"
           >
-            <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5 backdrop-blur-xl shadow-2xl">
-              <p className="text-sm text-cyan-200">
+            <div className="rounded-3xl border border-[#243428]/10 bg-[#243428]/5 p-5 backdrop-blur-xl shadow-xl">
+
+              <p className="text-sm text-[#243428]">
                 Memory Confidence
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-3xl font-bold text-[#243428]">
                 98%
               </p>
+
             </div>
           </motion.div>
 
-          <div className="absolute inset-0 rounded-[40px] bg-cyan-500/10 blur-3xl" />
+          <div className="absolute inset-0 rounded-[40px] bg-[#243428]/5 blur-3xl" />
 
-          <div className="relative rounded-[40px] border border-white/10 bg-white/5 p-6 backdrop-blur-2xl shadow-2xl">
+          <div className="relative rounded-[40px] border border-black/5 bg-white/70 p-6 backdrop-blur-2xl shadow-2xl">
 
-            {/* SEARCH */}
-            <div className="rounded-3xl bg-black/20 p-4">
+            <div className="rounded-3xl bg-[#f7f4ed] p-4 border border-black/5">
 
-              <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-gray-300">
+              <div className="rounded-2xl bg-white px-4 py-3 text-sm text-gray-500 border border-black/5">
                 {typed}
                 <span className="animate-pulse">|</span>
               </div>
 
-              <div className="mt-4 rounded-2xl bg-white p-5 text-black">
+              <div className="mt-4 rounded-2xl bg-white p-5 text-black border border-black/5">
 
-                <p className="text-xs uppercase tracking-widest text-gray-500">
+                <p className="text-xs uppercase tracking-widest text-gray-400">
                   Semantic Recall
                 </p>
 
-                <p className="mt-3 text-sm leading-relaxed">
-                  “Your father smiled most during
-                  evening family dinners near Galway.”
+                <p className="mt-3 text-sm leading-relaxed text-gray-700">
+                  “Your father smiled most during evening family dinners near Galway.”
                 </p>
 
               </div>
 
             </div>
 
-            {/* ACTIVITY */}
             <div className="mt-6 space-y-4">
 
-              <div className="rounded-2xl bg-white/10 p-5">
+              <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
                 Voice memory transcribed successfully
               </div>
 
-              <div className="rounded-2xl bg-white/10 p-5">
+              <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
                 Routine consistency improved this week
               </div>
 
-              <div className="rounded-2xl bg-white/10 p-5">
+              <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
                 Caregiver sync completed
               </div>
 
@@ -436,141 +448,160 @@ export default function LandingClient() {
 
       {/* TRUST RIBBON */}
       <section className="relative z-10 px-6 pb-10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-10 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur-xl">
 
-          <div className="text-gray-300">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-10 rounded-3xl border border-black/5 bg-white/70 px-8 py-6 backdrop-blur-xl shadow-xl">
+
+          <div className="text-gray-600">
             Semantic AI Recall
           </div>
 
-          <div className="text-gray-300">
+          <div className="text-gray-600">
             Healthcare Potential
           </div>
 
-          <div className="text-gray-300">
+          <div className="text-gray-600">
             Cognitive Support
           </div>
 
-          <div className="text-gray-300">
+          <div className="text-gray-600">
             Caregiver Continuity
           </div>
 
         </div>
+
       </section>
 
       {/* TIMELINE */}
       <section className="relative z-10 px-6 py-24">
+
         <div className="mx-auto max-w-6xl">
 
-          <h2 className="text-4xl md:text-5xl font-bold text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#243428]">
             Built For Human Continuity
           </h2>
 
           <div className="mt-20 grid gap-8 md:grid-cols-3">
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <div className="text-cyan-400 text-sm">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <div className="text-[#7c8d7f] text-sm">
                 STEP 1
               </div>
 
-              <h3 className="mt-4 text-2xl font-semibold">
+              <h3 className="mt-4 text-2xl font-semibold text-[#243428]">
                 Capture Memories
               </h3>
 
-              <p className="mt-4 text-gray-300">
+              <p className="mt-4 text-gray-600">
                 Store thoughts, routines,
                 conversations, and life moments.
               </p>
+
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <div className="text-cyan-400 text-sm">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <div className="text-[#7c8d7f] text-sm">
                 STEP 2
               </div>
 
-              <h3 className="mt-4 text-2xl font-semibold">
+              <h3 className="mt-4 text-2xl font-semibold text-[#243428]">
                 AI Understands Context
               </h3>
 
-              <p className="mt-4 text-gray-300">
+              <p className="mt-4 text-gray-600">
                 Semantic AI connects memories,
                 emotional patterns, and continuity.
               </p>
+
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <div className="text-cyan-400 text-sm">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <div className="text-[#7c8d7f] text-sm">
                 STEP 3
               </div>
 
-              <h3 className="mt-4 text-2xl font-semibold">
+              <h3 className="mt-4 text-2xl font-semibold text-[#243428]">
                 Support Daily Life
               </h3>
 
-              <p className="mt-4 text-gray-300">
+              <p className="mt-4 text-gray-600">
                 Help users, caregivers,
                 and families maintain continuity.
               </p>
+
             </div>
 
           </div>
 
         </div>
+
       </section>
 
       {/* TESTIMONIALS */}
       <section className="relative z-10 px-6 py-24">
+
         <div className="mx-auto max-w-6xl">
 
-          <h2 className="text-center text-4xl md:text-5xl font-bold">
+          <h2 className="text-center text-4xl md:text-5xl font-bold text-[#243428]">
             Future-Focused Memory Support
           </h2>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <p className="text-gray-300">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <p className="text-gray-600">
                 “A completely new direction for cognitive continuity and AI memory systems.”
               </p>
 
-              <p className="mt-6 text-sm text-cyan-300">
+              <p className="mt-6 text-sm text-[#7c8d7f]">
                 Healthcare Vision
               </p>
+
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <p className="text-gray-300">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <p className="text-gray-600">
                 “RemyNest feels like the beginning of a second-brain platform.”
               </p>
 
-              <p className="mt-6 text-sm text-cyan-300">
+              <p className="mt-6 text-sm text-[#7c8d7f]">
                 AI Product Perspective
               </p>
+
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-              <p className="text-gray-300">
+            <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
+
+              <p className="text-gray-600">
                 “The caregiver continuity direction has massive long-term potential.”
               </p>
 
-              <p className="mt-6 text-sm text-cyan-300">
+              <p className="mt-6 text-sm text-[#7c8d7f]">
                 Cognitive Support Focus
               </p>
+
             </div>
 
           </div>
 
         </div>
+
       </section>
 
       {/* FINAL CTA */}
       <section className="relative z-10 px-6 pb-32">
-        <div className="mx-auto max-w-5xl rounded-[40px] border border-white/10 bg-white/5 p-12 text-center backdrop-blur-2xl">
 
-          <h2 className="text-4xl md:text-6xl font-bold">
+        <div className="mx-auto max-w-5xl rounded-[40px] border border-black/5 bg-white/70 p-12 text-center backdrop-blur-2xl shadow-xl">
+
+          <h2 className="text-4xl md:text-6xl font-bold text-[#243428]">
             Build Your Second Brain
           </h2>
 
-          <p className="mt-6 text-lg text-gray-300">
+          <p className="mt-6 text-lg text-gray-600">
             RemyNest combines AI memory recall,
             reminders, and cognitive continuity
             into one modern platform.
@@ -578,48 +609,55 @@ export default function LandingClient() {
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
 
-            <button className="rounded-2xl bg-white px-8 py-4 font-semibold text-black hover:scale-105 transition">
+            <button className="rounded-2xl bg-[#243428] px-8 py-4 font-semibold text-white hover:scale-105 transition hover:bg-[#2f4633]">
               Download For iPhone
             </button>
 
-            <button className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 font-semibold hover:bg-white/10 transition">
+            <button className="rounded-2xl border border-black/10 bg-white px-8 py-4 font-semibold text-gray-700 hover:bg-[#f7f4ed] transition">
               Download For Android
             </button>
 
           </div>
 
         </div>
+
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 border-t border-white/10 px-6 py-10">
+      <footer className="relative z-10 border-t border-black/5 px-6 py-10">
+
         <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
 
           <div>
-            <h3 className="text-xl font-bold">
+
+            <h3 className="text-xl font-bold text-[#243428]">
               RemyNest
             </h3>
 
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-gray-500">
               AI-powered cognitive continuity platform.
             </p>
+
           </div>
 
-          <div className="flex gap-6 text-sm text-gray-400">
-            <a className="hover:text-white transition">
+          <div className="flex gap-6 text-sm text-gray-500">
+
+            <a className="hover:text-[#243428] transition">
               Privacy
             </a>
 
-            <a className="hover:text-white transition">
+            <a className="hover:text-[#243428] transition">
               Security
             </a>
 
-            <a className="hover:text-white transition">
+            <a className="hover:text-[#243428] transition">
               Contact
             </a>
+
           </div>
 
         </div>
+
       </footer>
 
     </main>
