@@ -98,9 +98,20 @@ export default function LandingClient() {
             </a>
           </nav>
 
-          <button className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black hover:scale-105 transition">
-            Get Started
-          </button>
+          <div className="flex items-center gap-4">
+  <a
+    href="/login"
+    className="text-sm text-white/70 transition hover:text-white"
+  >
+    Login
+  </a>
+
+  <a href="/signup">
+    <button className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:scale-105">
+      Get Started
+    </button>
+  </a>
+</div>
 
         </div>
       </header>
@@ -134,9 +145,11 @@ export default function LandingClient() {
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row">
+  <a href="/signup">
   <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-cyan-300">
     Start Free
   </button>
+</a>
 
   <div className="flex gap-4">
     <button className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-200 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-white">
