@@ -1,7 +1,15 @@
+import dynamic from "next/dynamic";
+
+const LandingClient = dynamic(
+  () =>
+    import(
+      "@/components/marketing/LandingClient"
+    ),
+  {
+    ssr: false,
+  }
+);
+
 export default function HomePage() {
-  return (
-    <main className="p-10">
-      <h1>RemyNest</h1>
-    </main>
-  );
+  return <LandingClient />;
 }
