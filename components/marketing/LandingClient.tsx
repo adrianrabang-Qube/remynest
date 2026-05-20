@@ -133,17 +133,21 @@ export default function LandingClient() {
               and support cognitive continuity using AI.
             </p>
 
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row">
+  <button className="rounded-2xl bg-cyan-400 px-8 py-4 text-lg font-semibold text-black transition hover:scale-105 hover:bg-cyan-300">
+    Start Free
+  </button>
 
-              <button className="rounded-2xl bg-white px-8 py-4 font-medium text-black hover:scale-105 transition">
-                Download App
-              </button>
+  <div className="flex gap-4">
+    <button className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-200 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-white">
+       App Store
+    </button>
 
-              <button className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 font-medium backdrop-blur hover:bg-white/10 transition">
-                Watch Demo
-              </button>
-
-            </div>
+    <button className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-200 backdrop-blur-xl transition hover:border-cyan-400/50 hover:bg-cyan-400/10 hover:text-white">
+      Google Play
+    </button>
+  </div>
+</div>
 
             {/* TRUST STATS */}
             <div className="mt-16 grid grid-cols-3 gap-6">
