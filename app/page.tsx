@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import RemyNestLandingPage from "./(marketing)/page";
 
 export default function HomePage() {
-  redirect("/memories");
+  return <RemyNestLandingPage />;
 }

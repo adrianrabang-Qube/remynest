@@ -50,17 +50,22 @@ export async function middleware(req: NextRequest) {
   }
 
   // =========================================
-  // PUBLIC AUTH ROUTES
+  // PUBLIC ROUTES
   // =========================================
 
   const publicRoutes = [
+    "/",          // LANDING PAGE
     "/login",
     "/signup",
   ];
 
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === "/") {
+      return pathname === "/";
+    }
+
+    return pathname.startsWith(route);
+  });
 
   // =========================================
   // CREATE SUPABASE CLIENT
@@ -106,7 +111,10 @@ export async function middleware(req: NextRequest) {
   // ALREADY LOGGED IN
   // =========================================
 
-  if (user && isPublicRoute) {
+  if (
+    user &&
+    (pathname === "/login" || pathname === "/signup")
+  ) {
     return NextResponse.redirect(
       new URL("/dashboard", req.url)
     );
