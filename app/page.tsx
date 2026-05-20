@@ -1,5 +1,7 @@
-import RemyNestLandingPage from "./(marketing)/page";
-
 export default function HomePage() {
-  return <RemyNestLandingPage />;
+  return (
+    <main className="p-10">
+      <h1>RemyNest</h1>
+    </main>
+  );
 }
