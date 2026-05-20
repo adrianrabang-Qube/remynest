@@ -227,7 +227,7 @@ export default function LandingClient() {
             </div>
 
             <div className="mt-2 text-white">
-              “Birthday dinner with Emma”
+              “Birthday dinner with Cheralou”
             </div>
 
             <div className="mt-2 text-sm text-gray-400">
