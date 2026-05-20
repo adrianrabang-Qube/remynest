@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Apple, Play } from "lucide-react";
+import { Apple, PlayCircle } from "lucide-react";
 
 const fadeUp = {
   hidden: {
@@ -218,7 +218,7 @@ export default function RemyNestLandingPage() {
               }}
               className="flex items-center gap-3 bg-white border border-black/5 px-5 py-3 rounded-2xl shadow-md hover:shadow-xl transition-all"
             >
-              <Play size={22} strokeWidth={2} />
+              <PlayCircle size={22} strokeWidth={2} />
 
               <div className="leading-tight">
                 <p className="text-[10px] uppercase tracking-wide text-gray-400">
@@ -448,9 +448,7 @@ export default function RemyNestLandingPage() {
                     </p>
 
                     <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                      “Your father smiled most during
-                      family dinners and preferred
-                      evening walks near the beach in Galway.”
+                      “Your father smiled most during family dinners and preferred evening walks near the beach in Galway.”
                     </p>
                   </div>
                 </div>
@@ -614,14 +612,11 @@ export default function RemyNestLandingPage() {
               </p>
 
               <h2 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-8">
-                Start preserving memories
-                that matter.
+                Start preserving memories that matter.
               </h2>
 
               <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto mb-12">
-                Create your intelligent memory
-                space for yourself, your family,
-                and future generations.
+                Create your intelligent memory space for yourself, your family, and future generations.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
