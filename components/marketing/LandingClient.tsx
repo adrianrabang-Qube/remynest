@@ -145,7 +145,7 @@ export default function LandingClient() {
 
             </div>
 
-            {/* STATS */}
+            {/* TRUST STATS */}
             <div className="mt-16 grid grid-cols-3 gap-6">
 
               <div>
@@ -164,7 +164,7 @@ export default function LandingClient() {
                 </h3>
 
                 <p className="mt-2 text-sm text-gray-400">
-                  Memory Continuity
+                  Cognitive Continuity
                 </p>
               </div>
 
@@ -184,7 +184,7 @@ export default function LandingClient() {
 
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT DASHBOARD */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -213,6 +213,28 @@ export default function LandingClient() {
 
               <p className="mt-2 text-lg font-semibold">
                 Emotional continuity improving
+              </p>
+            </div>
+          </motion.div>
+
+          {/* FLOATING METRIC */}
+          <motion.div
+            animate={{
+              y: [0, 12, 0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+            }}
+            className="absolute -right-8 bottom-10 hidden xl:block"
+          >
+            <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/10 p-5 backdrop-blur-xl shadow-2xl">
+              <p className="text-sm text-cyan-200">
+                Memory Confidence
+              </p>
+
+              <p className="mt-2 text-3xl font-bold">
+                98%
               </p>
             </div>
           </motion.div>
@@ -267,6 +289,29 @@ export default function LandingClient() {
 
       </section>
 
+      {/* TRUST RIBBON */}
+      <section className="relative z-10 px-6 pb-10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-10 rounded-3xl border border-white/10 bg-white/5 px-8 py-6 backdrop-blur-xl">
+
+          <div className="text-gray-300">
+            Semantic AI Recall
+          </div>
+
+          <div className="text-gray-300">
+            Healthcare Potential
+          </div>
+
+          <div className="text-gray-300">
+            Cognitive Support
+          </div>
+
+          <div className="text-gray-300">
+            Caregiver Continuity
+          </div>
+
+        </div>
+      </section>
+
       {/* TIMELINE */}
       <section className="relative z-10 px-6 py-24">
         <div className="mx-auto max-w-6xl">
@@ -287,8 +332,8 @@ export default function LandingClient() {
               </h3>
 
               <p className="mt-4 text-gray-300">
-                Store thoughts, routines, conversations,
-                and meaningful life moments.
+                Store thoughts, routines,
+                conversations, and life moments.
               </p>
             </div>
 
@@ -317,8 +362,8 @@ export default function LandingClient() {
               </h3>
 
               <p className="mt-4 text-gray-300">
-                Help users, caregivers, and families
-                maintain cognitive continuity.
+                Help users, caregivers,
+                and families maintain continuity.
               </p>
             </div>
 
@@ -326,6 +371,111 @@ export default function LandingClient() {
 
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      <section className="relative z-10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+
+          <h2 className="text-center text-4xl md:text-5xl font-bold">
+            Future-Focused Memory Support
+          </h2>
+
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <p className="text-gray-300">
+                “A completely new direction for cognitive continuity and AI memory systems.”
+              </p>
+
+              <p className="mt-6 text-sm text-cyan-300">
+                Healthcare Vision
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <p className="text-gray-300">
+                “RemyNest feels like the beginning of a second-brain platform.”
+              </p>
+
+              <p className="mt-6 text-sm text-cyan-300">
+                AI Product Perspective
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <p className="text-gray-300">
+                “The caregiver continuity direction has massive long-term potential.”
+              </p>
+
+              <p className="mt-6 text-sm text-cyan-300">
+                Cognitive Support Focus
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="relative z-10 px-6 pb-32">
+        <div className="mx-auto max-w-5xl rounded-[40px] border border-white/10 bg-white/5 p-12 text-center backdrop-blur-2xl">
+
+          <h2 className="text-4xl md:text-6xl font-bold">
+            Build Your Second Brain
+          </h2>
+
+          <p className="mt-6 text-lg text-gray-300">
+            RemyNest combines AI memory recall,
+            reminders, and cognitive continuity
+            into one modern platform.
+          </p>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+
+            <button className="rounded-2xl bg-white px-8 py-4 font-semibold text-black hover:scale-105 transition">
+              Download For iPhone
+            </button>
+
+            <button className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 font-semibold hover:bg-white/10 transition">
+              Download For Android
+            </button>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="relative z-10 border-t border-white/10 px-6 py-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
+
+          <div>
+            <h3 className="text-xl font-bold">
+              RemyNest
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-400">
+              AI-powered cognitive continuity platform.
+            </p>
+          </div>
+
+          <div className="flex gap-6 text-sm text-gray-400">
+            <a className="hover:text-white transition">
+              Privacy
+            </a>
+
+            <a className="hover:text-white transition">
+              Security
+            </a>
+
+            <a className="hover:text-white transition">
+              Contact
+            </a>
+          </div>
+
+        </div>
+      </footer>
 
     </main>
   );
