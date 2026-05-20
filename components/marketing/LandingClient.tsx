@@ -149,6 +149,134 @@ export default function LandingClient() {
   </div>
 </div>
 
+<section className="relative mt-32 flex justify-center overflow-hidden px-6">
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.15),transparent_60%)]" />
+
+  <div className="relative flex items-center justify-center">
+    
+    {/* FLOATING LEFT CARD */}
+    <motion.div
+      animate={{ y: [0, -12, 0] }}
+      transition={{ duration: 5, repeat: Infinity }}
+      className="absolute -left-20 top-24 hidden w-56 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-2xl lg:block"
+    >
+      <div className="text-xs uppercase tracking-[0.3em] text-cyan-400">
+        Memory Recall
+      </div>
+
+      <div className="mt-4 text-lg font-semibold text-white">
+        “Call Sarah tomorrow at 3PM”
+      </div>
+
+      <div className="mt-3 text-sm text-gray-400">
+        Retrieved instantly using semantic memory search.
+      </div>
+    </motion.div>
+
+    {/* PHONE */}
+    <motion.div
+      animate={{ y: [0, -10, 0] }}
+      transition={{ duration: 6, repeat: Infinity }}
+      className="relative h-[650px] w-[320px] rounded-[3.5rem] border border-white/10 bg-black p-4 shadow-[0_0_120px_rgba(34,211,238,0.15)]"
+    >
+      {/* GLOW */}
+      <div className="absolute inset-0 rounded-[3.5rem] bg-cyan-400/10 blur-3xl" />
+
+      {/* SCREEN */}
+      <div className="relative h-full overflow-hidden rounded-[3rem] border border-white/10 bg-[#071018]">
+        
+        {/* TOP BAR */}
+        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
+          <div>
+            <div className="text-sm text-gray-400">
+              Good evening
+            </div>
+
+            <div className="text-lg font-semibold text-white">
+              Adrian
+            </div>
+          </div>
+
+          <div className="h-10 w-10 rounded-full bg-cyan-400/20" />
+        </div>
+
+        {/* MEMORY TIMELINE */}
+        <div className="space-y-4 p-5">
+          
+          <motion.div
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="rounded-3xl border border-white/10 bg-white/5 p-4"
+          >
+            <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+              Reminder
+            </div>
+
+            <div className="mt-2 text-white">
+              Take medication at 8PM
+            </div>
+          </motion.div>
+
+          <motion.div
+            animate={{ opacity: [1, 0.7, 1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="rounded-3xl border border-white/10 bg-white/5 p-4"
+          >
+            <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
+              Semantic Search
+            </div>
+
+            <div className="mt-2 text-white">
+              “Birthday dinner with Emma”
+            </div>
+
+            <div className="mt-2 text-sm text-gray-400">
+              Match found from March memories.
+            </div>
+          </motion.div>
+
+          <motion.div
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 5, repeat: Infinity }}
+            className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-400/20 to-blue-500/10 p-5"
+          >
+            <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
+              Cognitive Continuity
+            </div>
+
+            <div className="mt-3 text-lg font-semibold text-white">
+              AI detected emotional importance.
+            </div>
+
+            <div className="mt-2 text-sm text-gray-300">
+              This memory was prioritized for future recall.
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+
+    {/* FLOATING RIGHT CARD */}
+    <motion.div
+      animate={{ y: [0, 14, 0] }}
+      transition={{ duration: 6, repeat: Infinity }}
+      className="absolute -right-20 bottom-24 hidden w-56 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-2xl lg:block"
+    >
+      <div className="text-xs uppercase tracking-[0.3em] text-cyan-400">
+        Caregiver Continuity
+      </div>
+
+      <div className="mt-4 text-lg font-semibold text-white">
+        Shared memory update synced.
+      </div>
+
+      <div className="mt-3 text-sm text-gray-400">
+        Family members remain connected across timelines.
+      </div>
+    </motion.div>
+  </div>
+</section>
+
             {/* TRUST STATS */}
             <div className="mt-16 grid grid-cols-3 gap-6">
 
