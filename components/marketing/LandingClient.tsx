@@ -1,125 +1,332 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+const prompts = [
+  "Show family memories...",
+  "Find Galway trip...",
+  "What routines calm dad?",
+  "Summarize this week...",
+];
+
+function useTypingEffect(words: string[]) {
+  const [text, setText] = useState("");
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    let current = "";
+    let char = 0;
+
+    const interval = setInterval(() => {
+      current += words[index][char];
+      setText(current);
+      char++;
+
+      if (char >= words[index].length) {
+        clearInterval(interval);
+
+        setTimeout(() => {
+          setText("");
+          setIndex((prev) => (prev + 1) % words.length);
+        }, 1800);
+      }
+    }, 45);
+
+    return () => clearInterval(interval);
+  }, [index, words]);
+
+  return text;
+}
 
 export default function LandingClient() {
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f5f1ea] text-[#2f3e34]">
+  const typed = useTypingEffect(prompts);
 
-      {/* CINEMATIC BACKGROUND */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+  return (
+    <main className="relative overflow-hidden bg-[#0b1020] text-white min-h-screen">
+
+      {/* BACKGROUND */}
+      <div className="absolute inset-0 overflow-hidden">
 
         <motion.div
           animate={{
             x: [0, 40, 0],
             y: [0, -30, 0],
-            scale: [1, 1.08, 1],
           }}
           transition={{
-            duration: 18,
+            duration: 12,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-[-200px] left-[-120px] w-[700px] h-[700px] rounded-full bg-[#dce7dc] blur-3xl opacity-50"
+          className="absolute top-[-200px] left-[-120px] h-[600px] w-[600px] rounded-full bg-cyan-500/20 blur-3xl"
         />
 
         <motion.div
           animate={{
             x: [0, -50, 0],
             y: [0, 40, 0],
-            scale: [1, 1.12, 1],
           }}
           transition={{
-            duration: 22,
+            duration: 16,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-[10%] right-[-200px] w-[850px] h-[850px] rounded-full bg-[#efe6dc] blur-3xl opacity-50"
+          className="absolute bottom-[-250px] right-[-120px] h-[600px] w-[600px] rounded-full bg-purple-500/20 blur-3xl"
         />
 
-        <motion.div
-          animate={{
-            opacity: [0.25, 0.45, 0.25],
-            scale: [1, 1.08, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute left-1/2 top-1/3 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-white blur-3xl opacity-30"
-        />
-
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "radial-gradient(#000 0.5px, transparent 0.5px)",
-            backgroundSize: "12px 12px",
-          }}
-        />
       </div>
 
-      {/* CONTENT */}
-      <div className="max-w-6xl mx-auto px-6 py-24">
+      {/* NAVBAR */}
+      <header className="relative z-20 border-b border-white/10 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-        <motion.div
-          initial={{
-            opacity: 0,
-            y: 40,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.8,
-          }}
-        >
-          <h1 className="text-7xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold">
             RemyNest
           </h1>
 
-          <p className="mt-6 text-xl text-gray-600 max-w-2xl leading-relaxed">
-            Preserve memories, routines,
-            emotional continuity, and family
-            identity in one intelligent space.
-          </p>
-        </motion.div>
+          <nav className="hidden md:flex items-center gap-8 text-sm text-gray-300">
+            <a className="hover:text-white transition">
+              Features
+            </a>
 
+            <a className="hover:text-white transition">
+              Security
+            </a>
+
+            <a className="hover:text-white transition">
+              Caregivers
+            </a>
+          </nav>
+
+          <button className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black hover:scale-105 transition">
+            Get Started
+          </button>
+
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="relative z-10 grid min-h-screen items-center gap-20 px-6 py-24 lg:grid-cols-2 max-w-7xl mx-auto">
+
+        {/* LEFT */}
+        <div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+
+            <div className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur-xl">
+              AI Cognitive Memory Platform
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+              Preserve Memory.
+              <br />
+              Extend Human Continuity.
+            </h1>
+
+            <p className="mt-8 max-w-2xl text-lg md:text-xl text-gray-300">
+              RemyNest helps people preserve memories,
+              organize thoughts, manage reminders,
+              and support cognitive continuity using AI.
+            </p>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+
+              <button className="rounded-2xl bg-white px-8 py-4 font-medium text-black hover:scale-105 transition">
+                Download App
+              </button>
+
+              <button className="rounded-2xl border border-white/20 bg-white/5 px-8 py-4 font-medium backdrop-blur hover:bg-white/10 transition">
+                Watch Demo
+              </button>
+
+            </div>
+
+            {/* STATS */}
+            <div className="mt-16 grid grid-cols-3 gap-6">
+
+              <div>
+                <h3 className="text-3xl font-bold">
+                  AI
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-400">
+                  Semantic Recall
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-3xl font-bold">
+                  24/7
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-400">
+                  Memory Continuity
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-3xl font-bold">
+                  Secure
+                </h3>
+
+                <p className="mt-2 text-sm text-gray-400">
+                  Private by Design
+                </p>
+              </div>
+
+            </div>
+
+          </motion.div>
+
+        </div>
+
+        {/* RIGHT */}
         <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.9,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-          }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{
-            duration: 1,
             delay: 0.2,
+            duration: 0.8,
           }}
-          className="mt-20 rounded-[40px] bg-white border border-black/5 p-10 shadow-2xl"
+          className="relative"
         >
-          <div className="space-y-4">
 
-            <div className="rounded-2xl bg-[#f5f1ea] p-5">
-              AI Memory Recall
+          {/* FLOATING CARD */}
+          <motion.div
+            animate={{
+              y: [0, -10, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+            }}
+            className="absolute -left-10 -top-10 hidden xl:block"
+          >
+            <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-xl shadow-2xl">
+              <p className="text-sm text-gray-300">
+                AI Recall Active
+              </p>
+
+              <p className="mt-2 text-lg font-semibold">
+                Emotional continuity improving
+              </p>
+            </div>
+          </motion.div>
+
+          <div className="absolute inset-0 rounded-[40px] bg-cyan-500/10 blur-3xl" />
+
+          <div className="relative rounded-[40px] border border-white/10 bg-white/5 p-6 backdrop-blur-2xl shadow-2xl">
+
+            {/* SEARCH */}
+            <div className="rounded-3xl bg-black/20 p-4">
+
+              <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-gray-300">
+                {typed}
+                <span className="animate-pulse">|</span>
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-white p-5 text-black">
+
+                <p className="text-xs uppercase tracking-widest text-gray-500">
+                  Semantic Recall
+                </p>
+
+                <p className="mt-3 text-sm leading-relaxed">
+                  “Your father smiled most during
+                  evening family dinners near Galway.”
+                </p>
+
+              </div>
+
             </div>
 
-            <div className="rounded-2xl bg-[#f5f1ea] p-5">
-              Semantic Search
-            </div>
+            {/* ACTIVITY */}
+            <div className="mt-6 space-y-4">
 
-            <div className="rounded-2xl bg-[#f5f1ea] p-5">
-              Caregiver Continuity
+              <div className="rounded-2xl bg-white/10 p-5">
+                Voice memory transcribed successfully
+              </div>
+
+              <div className="rounded-2xl bg-white/10 p-5">
+                Routine consistency improved this week
+              </div>
+
+              <div className="rounded-2xl bg-white/10 p-5">
+                Caregiver sync completed
+              </div>
+
             </div>
 
           </div>
+
         </motion.div>
 
-      </div>
+      </section>
+
+      {/* TIMELINE */}
+      <section className="relative z-10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+
+          <h2 className="text-4xl md:text-5xl font-bold text-center">
+            Built For Human Continuity
+          </h2>
+
+          <div className="mt-20 grid gap-8 md:grid-cols-3">
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <div className="text-cyan-400 text-sm">
+                STEP 1
+              </div>
+
+              <h3 className="mt-4 text-2xl font-semibold">
+                Capture Memories
+              </h3>
+
+              <p className="mt-4 text-gray-300">
+                Store thoughts, routines, conversations,
+                and meaningful life moments.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <div className="text-cyan-400 text-sm">
+                STEP 2
+              </div>
+
+              <h3 className="mt-4 text-2xl font-semibold">
+                AI Understands Context
+              </h3>
+
+              <p className="mt-4 text-gray-300">
+                Semantic AI connects memories,
+                emotional patterns, and continuity.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+              <div className="text-cyan-400 text-sm">
+                STEP 3
+              </div>
+
+              <h3 className="mt-4 text-2xl font-semibold">
+                Support Daily Life
+              </h3>
+
+              <p className="mt-4 text-gray-300">
+                Help users, caregivers, and families
+                maintain cognitive continuity.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
     </main>
   );
 }
