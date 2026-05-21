@@ -10,18 +10,16 @@ const ChartSkeleton = () => (
   </div>
 );
 
-const dynamicChartOptions = {
-  ssr: false,
-  loading: () => <ChartSkeleton />,
-};
-
 const AIInsightSummary =
   dynamic(
     () =>
       import(
         "./AIInsightSummary"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const BehavioralAnalyticsCard =
@@ -30,7 +28,10 @@ const BehavioralAnalyticsCard =
       import(
         "./BehavioralAnalyticsCard"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const CognitiveScoreChart =
@@ -39,7 +40,10 @@ const CognitiveScoreChart =
       import(
         "./CognitiveScoreChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const CognitiveDriftChart =
@@ -48,7 +52,10 @@ const CognitiveDriftChart =
       import(
         "./CognitiveDriftChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const EmotionalTrendsChart =
@@ -57,7 +64,10 @@ const EmotionalTrendsChart =
       import(
         "./EmotionalTrendsChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const MoodDistributionChart =
@@ -66,7 +76,10 @@ const MoodDistributionChart =
       import(
         "./MoodDistributionChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const ReminderConsistencyChart =
@@ -75,7 +88,10 @@ const ReminderConsistencyChart =
       import(
         "./ReminderConsistencyChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const SleepRecoveryChart =
@@ -84,7 +100,10 @@ const SleepRecoveryChart =
       import(
         "./SleepRecoveryChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const WearableTelemetryChart =
@@ -93,7 +112,10 @@ const WearableTelemetryChart =
       import(
         "./WearableTelemetryChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const MemoryContinuityChart =
@@ -102,7 +124,10 @@ const MemoryContinuityChart =
       import(
         "./MemoryContinuityChart"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const AlzheimerRiskSignals =
@@ -111,7 +136,10 @@ const AlzheimerRiskSignals =
       import(
         "./AlzheimerRiskSignals"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 const AttentionAnalytics =
@@ -120,7 +148,10 @@ const AttentionAnalytics =
       import(
         "./AttentionAnalytics"
       ),
-    dynamicChartOptions
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
   );
 
 import { calculateCognitionScore } from "@/lib/cognition/cognitionScore";
