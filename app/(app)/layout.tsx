@@ -34,6 +34,10 @@ export default function AppLayout({
           <Link href="/reminders">
             Reminders
           </Link>
+
+          <Link href="/insights">
+            Insights
+          </Link>
         </nav>
 
         <LogoutButton />
