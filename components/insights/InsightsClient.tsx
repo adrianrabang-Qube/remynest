@@ -1,18 +1,158 @@
 "use client";
 
-import AIInsightSummary from "./AIInsightSummary";
-import BehavioralAnalyticsCard from "./BehavioralAnalyticsCard";
+import { useMemo } from "react";
+import dynamic from "next/dynamic";
 
-import CognitiveScoreChart from "./CognitiveScoreChart";
-import CognitiveDriftChart from "./CognitiveDriftChart";
-import EmotionalTrendsChart from "./EmotionalTrendsChart";
-import MoodDistributionChart from "./MoodDistributionChart";
-import ReminderConsistencyChart from "./ReminderConsistencyChart";
-import SleepRecoveryChart from "./SleepRecoveryChart";
-import WearableTelemetryChart from "./WearableTelemetryChart";
-import MemoryContinuityChart from "./MemoryContinuityChart";
-import AlzheimerRiskSignals from "./AlzheimerRiskSignals";
-import AttentionAnalytics from "./AttentionAnalytics";
+const ChartSkeleton = () => (
+  <div className="rounded-[32px] border bg-white p-8 shadow-sm animate-pulse">
+    <div className="h-8 w-64 rounded bg-gray-200 mb-6" />
+    <div className="h-[320px] rounded-3xl bg-gray-100" />
+  </div>
+);
+
+const AIInsightSummary =
+  dynamic(
+    () =>
+      import(
+        "./AIInsightSummary"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const BehavioralAnalyticsCard =
+  dynamic(
+    () =>
+      import(
+        "./BehavioralAnalyticsCard"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const CognitiveScoreChart =
+  dynamic(
+    () =>
+      import(
+        "./CognitiveScoreChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const CognitiveDriftChart =
+  dynamic(
+    () =>
+      import(
+        "./CognitiveDriftChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const EmotionalTrendsChart =
+  dynamic(
+    () =>
+      import(
+        "./EmotionalTrendsChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const MoodDistributionChart =
+  dynamic(
+    () =>
+      import(
+        "./MoodDistributionChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const ReminderConsistencyChart =
+  dynamic(
+    () =>
+      import(
+        "./ReminderConsistencyChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const SleepRecoveryChart =
+  dynamic(
+    () =>
+      import(
+        "./SleepRecoveryChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const WearableTelemetryChart =
+  dynamic(
+    () =>
+      import(
+        "./WearableTelemetryChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const MemoryContinuityChart =
+  dynamic(
+    () =>
+      import(
+        "./MemoryContinuityChart"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const AlzheimerRiskSignals =
+  dynamic(
+    () =>
+      import(
+        "./AlzheimerRiskSignals"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
+
+const AttentionAnalytics =
+  dynamic(
+    () =>
+      import(
+        "./AttentionAnalytics"
+      ),
+    {
+      ssr: false,
+      loading: () => <ChartSkeleton />,
+    }
+  );
 
 import { calculateCognitionScore } from "@/lib/cognition/cognitionScore";
 import { calculateDriftTelemetry } from "@/lib/cognition/driftEngine";
@@ -39,6 +179,19 @@ import {
   ReminderTelemetry,
 } from "@/lib/types/telemetry";
 
+const moodScores: Record<
+  string,
+  number
+> = {
+  happy: 8,
+  excited: 9,
+  calm: 7,
+  neutral: 5,
+  anxious: 3,
+  sad: 2,
+  stressed: 2,
+};
+
 interface InsightsClientProps {
   memories: Memory[];
 
@@ -51,248 +204,320 @@ export default function InsightsClient({
 }: InsightsClientProps) {
 
   // =====================================
-  // EMOTIONAL SCORING ENGINE
-  // =====================================
-
-  const moodScores: Record<
-    string,
-    number
-  > = {
-    happy: 8,
-    excited: 9,
-    calm: 7,
-    neutral: 5,
-    anxious: 3,
-    sad: 2,
-    stressed: 2,
-  };
-
-  // =====================================
   // MOOD TELEMETRY
   // =====================================
 
   const moodData =
-    memories.map(
-      (
-        memory: Memory
-      ): MoodTelemetry => {
+    useMemo(() => {
 
-        const mood =
-          memory.ai_mood
-            ?.toLowerCase()
-            ?.trim() || "neutral";
+      return memories.map(
+        (
+          memory: Memory
+        ): MoodTelemetry => {
 
-        return {
+          const mood =
+            memory.ai_mood
+              ?.toLowerCase()
+              ?.trim() || "neutral";
 
-          date:
-            new Date(
-              memory.created_at
-            ).toLocaleDateString(
-              "en-US",
-              {
-                weekday: "short",
-              }
-            ),
+          return {
 
-          positive:
-            moodScores[mood] || 5,
-        };
-      }
-    );
+            date:
+              new Date(
+                memory.created_at
+              ).toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "short",
+                }
+              ),
+
+            positive:
+              moodScores[mood] || 5,
+          };
+        }
+      );
+
+    }, [memories]);
 
   // =====================================
   // CATEGORY TELEMETRY
   // =====================================
 
-  const categoryMap: Record<
-    string,
-    number
-  > = {};
-
-  memories.forEach(
-    (memory: Memory) => {
-
-      const category =
-        memory.ai_category?.trim()
-        || "Uncategorized";
-
-      if (!categoryMap[category]) {
-        categoryMap[category] = 0;
-      }
-
-      categoryMap[category] += 1;
-    }
-  );
-
   const categoryData =
-    Object.entries(categoryMap).map(
-      ([name, value]) => ({
-        name,
-        value,
-      })
-    );
+    useMemo(() => {
+
+      const categoryMap: Record<
+        string,
+        number
+      > = {};
+
+      memories.forEach(
+        (memory: Memory) => {
+
+          const category =
+            memory.ai_category?.trim()
+            || "Uncategorized";
+
+          if (!categoryMap[category]) {
+            categoryMap[category] = 0;
+          }
+
+          categoryMap[category] += 1;
+        }
+      );
+
+      return Object.entries(
+        categoryMap
+      ).map(
+        ([name, value]) => ({
+          name,
+          value,
+        })
+      );
+
+    }, [memories]);
 
   // =====================================
   // REMINDER TELEMETRY
   // =====================================
 
-  const reminderData:
-    ReminderTelemetry[] = [
-      {
-        week: "W1",
-        completed: 0,
-      },
-      {
-        week: "W2",
-        completed: 0,
-      },
-      {
-        week: "W3",
-        completed: 0,
-      },
-      {
-        week: "W4",
-        completed: 0,
-      },
-    ];
+  const reminderData =
+    useMemo(() => {
 
-  reminders.forEach(
-    (reminder: Reminder) => {
+      const telemetry:
+        ReminderTelemetry[] = [
 
-      if (!reminder.completed)
-        return;
+        {
+          week: "W1",
+          completed: 0,
+        },
 
-      const date =
-        new Date(
-          reminder.created_at
-        );
+        {
+          week: "W2",
+          completed: 0,
+        },
 
-      const day =
-        date.getDate();
+        {
+          week: "W3",
+          completed: 0,
+        },
 
-      if (day <= 7) {
-        reminderData[0].completed += 1;
-      }
+        {
+          week: "W4",
+          completed: 0,
+        },
+      ];
 
-      else if (day <= 14) {
-        reminderData[1].completed += 1;
-      }
+      reminders.forEach(
+        (reminder: Reminder) => {
 
-      else if (day <= 21) {
-        reminderData[2].completed += 1;
-      }
+          if (!reminder.completed)
+            return;
 
-      else {
-        reminderData[3].completed += 1;
-      }
-    }
-  );
+          const date =
+            new Date(
+              reminder.created_at
+            );
+
+          const day =
+            date.getDate();
+
+          if (day <= 7) {
+            telemetry[0].completed += 1;
+          }
+
+          else if (day <= 14) {
+            telemetry[1].completed += 1;
+          }
+
+          else if (day <= 21) {
+            telemetry[2].completed += 1;
+          }
+
+          else {
+            telemetry[3].completed += 1;
+          }
+        }
+      );
+
+      return telemetry;
+
+    }, [reminders]);
 
   // =====================================
   // COGNITION ENGINE LAYER
   // =====================================
 
   const cognitionScore =
-    calculateCognitionScore({
+    useMemo(() => {
+
+      return calculateCognitionScore({
+        memories,
+        reminders,
+        moodData,
+      });
+
+    }, [
       memories,
       reminders,
       moodData,
-    });
+    ]);
 
   const {
     driftData,
   } =
-    calculateDriftTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateDriftTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   const {
     continuityData,
   } =
-    calculateContinuityTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateContinuityTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   const {
     attentionData,
   } =
-    calculateAttentionTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateAttentionTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   const {
     sleepData,
   } =
-    calculateSleepRecoveryTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateSleepRecoveryTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   const {
     wearableData,
   } =
-    calculateWearableTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateWearableTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   const {
     riskData,
   } =
-    calculateRiskTelemetry(
-      moodData
-    );
+    useMemo(() => {
+
+      return calculateRiskTelemetry(
+        moodData
+      );
+
+    }, [moodData]);
 
   // =====================================
   // ANALYTICS INTELLIGENCE LAYER
   // =====================================
 
   const behavioralPatterns =
-    analyzeBehavioralPatterns(
-      memories
-    );
+    useMemo(() => {
+
+      return analyzeBehavioralPatterns(
+        memories
+      );
+
+    }, [memories]);
 
   const streakAnalysis =
-    analyzeReminderStreaks(
-      reminders
-    );
+    useMemo(() => {
+
+      return analyzeReminderStreaks(
+        reminders
+      );
+
+    }, [reminders]);
 
   const emotionalVolatility =
-    analyzeEmotionalVolatility(
-      moodData
-    );
+    useMemo(() => {
+
+      return analyzeEmotionalVolatility(
+        moodData
+      );
+
+    }, [moodData]);
 
   const memoryFrequency =
-    analyzeMemoryFrequency(
-      memories
-    );
+    useMemo(() => {
+
+      return analyzeMemoryFrequency(
+        memories
+      );
+
+    }, [memories]);
 
   const inactivityDetection =
-    detectInactivityPatterns(
-      memories
-    );
+    useMemo(() => {
+
+      return detectInactivityPatterns(
+        memories
+      );
+
+    }, [memories]);
 
   const declineSignals =
-    analyzeCognitiveDeclineSignals({
+    useMemo(() => {
 
-      volatilityScore:
-        emotionalVolatility.volatilityScore,
+      return analyzeCognitiveDeclineSignals({
 
-      inactiveDays:
-        inactivityDetection.inactiveDays,
+        volatilityScore:
+          emotionalVolatility.volatilityScore,
 
-      activityScore:
-        behavioralPatterns.activityScore,
-    });
+        inactiveDays:
+          inactivityDetection.inactiveDays,
+
+        activityScore:
+          behavioralPatterns.activityScore,
+      });
+
+    }, [
+      emotionalVolatility,
+      inactivityDetection,
+      behavioralPatterns,
+    ]);
 
   // =====================================
   // AI INSIGHT INTERPRETATION
   // =====================================
 
   const insights =
-    generateInsightSummary({
+    useMemo(() => {
+
+      return generateInsightSummary({
+        cognitionScore,
+        driftData,
+        reminderData,
+      });
+
+    }, [
       cognitionScore,
       driftData,
       reminderData,
-    });
+    ]);
 
   return (
 

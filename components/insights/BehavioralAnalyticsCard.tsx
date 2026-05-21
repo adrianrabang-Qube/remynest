@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 interface BehavioralAnalyticsCardProps {
   behavioralPatterns: {
     consistency: string;
@@ -32,7 +34,8 @@ interface BehavioralAnalyticsCardProps {
   };
 }
 
-export default function BehavioralAnalyticsCard({
+const BehavioralAnalyticsCard = memo(
+  function BehavioralAnalyticsCard({
   behavioralPatterns,
   streakAnalysis,
   emotionalVolatility,
@@ -263,3 +266,6 @@ export default function BehavioralAnalyticsCard({
     </div>
   );
 }
+);
+
+export default BehavioralAnalyticsCard;

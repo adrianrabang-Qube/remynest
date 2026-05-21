@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import {
   AreaChart,
   Area,
@@ -10,7 +12,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export default function AttentionAnalytics({
+const AttentionAnalytics = memo(
+  function AttentionAnalytics({
   attentionData = [],
 }: any) {
 
@@ -150,3 +153,6 @@ export default function AttentionAnalytics({
     </div>
   );
 }
+);
+
+export default AttentionAnalytics;

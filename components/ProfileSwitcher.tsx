@@ -1,31 +1,68 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
 
+import { useRouter } from "next/navigation";
+
 import {
   setActiveProfile,
 } from "@/app/(app)/dashboard/profile-actions";
+
+const PROFILE_SWITCHER_TAG =
+  "profile-switcher";
 
 interface Props {
   profiles: any[];
   activeProfileId?: string | null;
 }
 
+function logProfileSwitcherStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${PROFILE_SWITCHER_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logProfileSwitcherError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${PROFILE_SWITCHER_TAG}] ${stage}`,
+    error
+  );
+}
+
 export default function ProfileSwitcher({
   profiles,
   activeProfileId,
 }: Props) {
+  const router = useRouter();
+
   const [isPending, startTransition] =
     useTransition();
 
-  // =========================
+  const [isSwitching, setIsSwitching] =
+    useState(false);
+
+  const requestIdRef = useRef(
+    crypto.randomUUID()
+  );
+
+  // =====================================
   // REMOVE DUPLICATES
-  // =========================
+  // =====================================
+
   const uniqueProfiles = useMemo(() => {
     const seen = new Set();
 
@@ -51,9 +88,10 @@ export default function ProfileSwitcher({
     );
   }, [profiles]);
 
-  // =========================
+  // =====================================
   // LOCAL SELECT STATE
-  // =========================
+  // =====================================
+
   const [selectedProfile, setSelectedProfile] =
     useState(
       activeProfileId ||
@@ -62,9 +100,31 @@ export default function ProfileSwitcher({
         ""
     );
 
-  // =========================
+  // =====================================
+  // PROFILE OPTIONS
+  // =====================================
+
+  const profileOptions = useMemo(() => {
+    return uniqueProfiles.map(
+      (profile: any) => {
+        const profileData =
+          profile?.memory_profiles;
+
+        return {
+          id: profileData?.id,
+
+          name:
+            profileData?.profile_name ||
+            "Unknown Profile",
+        };
+      }
+    );
+  }, [uniqueProfiles]);
+
+  // =====================================
   // SYNC ACTIVE PROFILE
-  // =========================
+  // =====================================
+
   useEffect(() => {
     if (activeProfileId) {
       setSelectedProfile(
@@ -73,7 +133,147 @@ export default function ProfileSwitcher({
     }
   }, [activeProfileId]);
 
-  if (!uniqueProfiles?.length) {
+  // =====================================
+  // LIFECYCLE OBSERVABILITY
+  // =====================================
+
+  useEffect(() => {
+    logProfileSwitcherStage(
+      "profile-switcher-mounted",
+      {
+        requestId:
+          requestIdRef.current,
+
+        profiles:
+          profileOptions.length,
+
+        activeProfileId,
+      }
+    );
+
+    return () => {
+      logProfileSwitcherStage(
+        "profile-switcher-unmounted",
+        {
+          requestId:
+            requestIdRef.current,
+        }
+      );
+    };
+  }, [
+    profileOptions.length,
+    activeProfileId,
+  ]);
+
+  // =====================================
+  // PROFILE SWITCH
+  // =====================================
+
+  const handleProfileSwitch =
+    useCallback(
+      async (
+        newProfileId: string
+      ) => {
+        if (
+          !newProfileId ||
+          newProfileId ===
+            selectedProfile ||
+          isSwitching
+        ) {
+          return;
+        }
+
+        const switchStart =
+          performance.now();
+
+        try {
+          setIsSwitching(true);
+
+          setSelectedProfile(
+            newProfileId
+          );
+
+          logProfileSwitcherStage(
+            "profile-switch-started",
+            {
+              requestId:
+                requestIdRef.current,
+
+              previousProfileId:
+                selectedProfile,
+
+              newProfileId,
+            }
+          );
+
+          startTransition(() => {
+            void setActiveProfile(
+              newProfileId
+            )
+              .then(() => {
+                const durationMs =
+                  Number(
+                    (
+                      performance.now() -
+                      switchStart
+                    ).toFixed(2)
+                  );
+
+                logProfileSwitcherStage(
+                  "profile-switch-completed",
+                  {
+                    requestId:
+                      requestIdRef.current,
+
+                    newProfileId,
+
+                    durationMs,
+                  }
+                );
+
+                router.refresh();
+              })
+              .catch((error) => {
+                logProfileSwitcherError(
+                  "profile-switch-error",
+                  {
+                    requestId:
+                      requestIdRef.current,
+
+                    error,
+                  }
+                );
+
+                setSelectedProfile(
+                  selectedProfile
+                );
+              })
+              .finally(() => {
+                setIsSwitching(false);
+              });
+          });
+        } catch (error) {
+          setIsSwitching(false);
+
+          logProfileSwitcherError(
+            "profile-switch-engine-error",
+            {
+              requestId:
+                requestIdRef.current,
+
+              error,
+            }
+          );
+        }
+      },
+      [
+        router,
+        selectedProfile,
+        isSwitching,
+      ]
+    );
+
+  if (!profileOptions.length) {
     return null;
   }
 
@@ -85,50 +285,36 @@ export default function ProfileSwitcher({
 
       <select
         className="w-full border rounded-xl px-4 py-3 bg-white"
-        disabled={isPending}
+        disabled={
+          isPending || isSwitching
+        }
         value={selectedProfile}
         onChange={(e) => {
-          const newProfileId =
-            e.target.value;
-
-          // instant UI update
-          setSelectedProfile(
-            newProfileId
+          void handleProfileSwitch(
+            e.target.value
           );
-
-          startTransition(async () => {
-            await setActiveProfile(
-              newProfileId
-            );
-
-            window.location.reload();
-          });
         }}
       >
-        {uniqueProfiles.map(
-          (profile: any) => {
-            const profileData =
-              profile?.memory_profiles;
-
-            if (!profileData?.id) {
+        {profileOptions.map(
+          (profile) => {
+            if (!profile.id) {
               return null;
             }
 
             return (
               <option
-                key={profileData.id}
-                value={profileData.id}
+                key={profile.id}
+                value={profile.id}
               >
-                {
-                  profileData.profile_name
-                }
+                {profile.name}
               </option>
             );
           }
         )}
       </select>
 
-      {isPending && (
+      {(isPending ||
+        isSwitching) && (
         <p className="text-sm text-gray-500 mt-3">
           Switching profile...
         </p>

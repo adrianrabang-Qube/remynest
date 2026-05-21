@@ -1,228 +1,328 @@
 import { createClient } from "@/lib/supabase/server";
 
+const RELATIONSHIP_TAG =
+  "memory-relationship-engine";
+
+const RELATIONSHIP_MATCH_THRESHOLD =
+  0.15;
+
+const RELATIONSHIP_MATCH_COUNT =
+  10;
+
+const MAX_RELATIONSHIPS_PER_MEMORY =
+  25;
+
+function logRelationshipStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${RELATIONSHIP_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logRelationshipError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${RELATIONSHIP_TAG}] ${stage}`,
+    error
+  );
+}
+
+function createRelationshipRequestId() {
+  return crypto.randomUUID();
+}
+
+function validateRelationshipMatch(
+  match: any
+) {
+  return (
+    match &&
+    typeof match.id ===
+      "string" &&
+    typeof match.similarity ===
+      "number"
+  );
+}
+
+function normalizeRelationshipMatches(
+  matches: any[]
+) {
+  return matches
+    .filter(
+      validateRelationshipMatch
+    )
+    .sort(
+      (a, b) =>
+        b.similarity -
+        a.similarity
+    )
+    .slice(
+      0,
+      MAX_RELATIONSHIPS_PER_MEMORY
+    );
+}
+
+function buildRelationshipPayload(
+  memoryId: string,
+  matches: any[]
+) {
+  return matches.map(
+    (match) => ({
+      memory_id:
+        memoryId,
+
+      related_memory_id:
+        match.id,
+
+      similarity:
+        match.similarity,
+
+      relationship_type:
+        "semantic",
+    })
+  );
+}
+
 export async function buildRelationships(
   memoryId: string
 ) {
+  const requestId =
+    createRelationshipRequestId();
 
-  const supabase =
-    await createClient();
+  const start =
+    performance.now();
 
-  // =====================================
-  // FETCH MEMORY
-  // =====================================
+  try {
+    const supabase =
+      await createClient();
 
-  const {
-    data: memory,
-    error: memoryError,
-  } = await supabase
-    .from("memories")
-    .select("*")
-    .eq("id", memoryId)
-    .single();
+    logRelationshipStage(
+      "relationship-build-started",
+      {
+        requestId,
 
-  if (
-    memoryError ||
-    !memory
-  ) {
-
-    console.log(
-      "❌ MEMORY FETCH ERROR"
+        memoryId,
+      }
     );
 
-    console.log(
-      memoryError
-    );
+    // =====================================
+    // FETCH MEMORY
+    // =====================================
 
-    return {
-      success: false,
-      error:
-        "Memory not found",
-    };
-  }
+    const {
+      data: memory,
+      error: memoryError,
+    } = await supabase
+      .from("memories")
+      .select("*")
+      .eq("id", memoryId)
+      .single();
 
-  if (!memory.embedding) {
+    if (
+      memoryError ||
+      !memory
+    ) {
+      logRelationshipError(
+        "memory-fetch-error",
+        {
+          requestId,
 
-    console.log(
-      "❌ NO EMBEDDING FOUND"
-    );
+          memoryError,
+        }
+      );
 
-    return {
-      success: false,
-      error:
-        "Memory has no embedding",
-    };
-  }
-
-  console.log(
-    "🚀 BUILDING RELATIONSHIPS FOR:",
-    memory.id
-  );
-
-  // =====================================
-  // FIND MATCHES
-  // =====================================
-
-  const {
-    data: matches,
-    error: matchError,
-  } = await supabase.rpc(
-    "match_memories",
-    {
-      query_embedding:
-        memory.embedding,
-
-      match_threshold: 0.15,
-
-      match_count: 10,
-
-      user_id_input:
-        memory.user_id,
-
-      memory_id_input:
-        memory.id,
+      return {
+        success: false,
+        error:
+          "Memory not found",
+      };
     }
-  );
 
-  console.log(
-    "🧠 RAW MATCHES:"
-  );
+    if (!memory.embedding) {
+      logRelationshipStage(
+        "relationship-skipped",
+        {
+          requestId,
 
-  console.log(matches);
+          reason:
+            "missing-embedding",
+        }
+      );
 
-  console.log(
-    "🧠 RAW MATCH ERROR:"
-  );
+      return {
+        success: false,
+        error:
+          "Memory has no embedding",
+      };
+    }
 
-  console.log(matchError);
+    // =====================================
+    // FIND MATCHES
+    // =====================================
 
-  if (matchError) {
+    const {
+      data: matches,
+      error: matchError,
+    } = await supabase.rpc(
+      "match_memories",
+      {
+        query_embedding:
+          memory.embedding,
 
-    console.log(
-      "❌ MATCH ERROR"
+        match_threshold:
+          RELATIONSHIP_MATCH_THRESHOLD,
+
+        match_count:
+          RELATIONSHIP_MATCH_COUNT,
+
+        user_id_input:
+          memory.user_id,
+
+        memory_id_input:
+          memory.id,
+      }
     );
 
-    console.log(
-      matchError
+    if (matchError) {
+      logRelationshipError(
+        "relationship-match-error",
+        {
+          requestId,
+
+          matchError,
+        }
+      );
+
+      return {
+        success: false,
+        error:
+          "Failed to match memories",
+      };
+    }
+
+    const normalizedMatches =
+      normalizeRelationshipMatches(
+        matches || []
+      );
+
+    logRelationshipStage(
+      "relationship-matches-found",
+      {
+        requestId,
+
+        totalMatches:
+          normalizedMatches.length,
+      }
     );
 
-    return {
-      success: false,
+    if (
+      normalizedMatches.length ===
+      0
+    ) {
+      return {
+        success: true,
+        inserted: 0,
+        relationships: [],
+      };
+    }
+
+    // =====================================
+    // BUILD RELATIONSHIPS
+    // =====================================
+
+    const relationships =
+      buildRelationshipPayload(
+        memory.id,
+        normalizedMatches
+      );
+
+    // =====================================
+    // INSERT RELATIONSHIPS
+    // =====================================
+
+    const {
+      data: insertedData,
       error:
-        "Failed to match memories",
-    };
-  }
+        relationshipError,
+    } = await supabase
+      .from(
+        "memory_relationships"
+      )
+      .upsert(relationships, {
+        onConflict:
+          "memory_id,related_memory_id",
 
-  console.log(
-    "✅ MATCHES FOUND:",
-    matches?.length || 0
-  );
+        ignoreDuplicates: false,
+      })
+      .select();
 
-  if (
-    !matches ||
-    matches.length === 0
-  ) {
+    if (
+      relationshipError
+    ) {
+      logRelationshipError(
+        "relationship-insert-error",
+        {
+          requestId,
 
-    console.log(
-      "⚠️ NO RELATIONSHIPS FOUND"
+          relationshipError,
+        }
+      );
+
+      return {
+        success: false,
+        error:
+          "Failed to insert relationships",
+      };
+    }
+
+    const durationMs = Number(
+      (
+        performance.now() -
+        start
+      ).toFixed(2)
+    );
+
+    logRelationshipStage(
+      "relationship-build-completed",
+      {
+        requestId,
+
+        memoryId,
+
+        inserted:
+          insertedData?.length || 0,
+
+        durationMs,
+      }
     );
 
     return {
       success: true,
-      inserted: 0,
-      relationships: [],
+
+      inserted:
+        insertedData?.length || 0,
+
+      relationships:
+        insertedData || [],
     };
-  }
+  } catch (error) {
+    logRelationshipError(
+      "relationship-engine-error",
+      {
+        requestId,
 
-  // =====================================
-  // BUILD RELATIONSHIPS
-  // =====================================
-
-  const relationships =
-    matches.map(
-      (match: any) => ({
-        memory_id:
-          memory.id,
-
-        related_memory_id:
-          match.id,
-
-        similarity:
-          match.similarity,
-
-        relationship_type:
-          "semantic",
-      })
-    );
-
-  console.log(
-    "🧩 RELATIONSHIPS TO INSERT:"
-  );
-
-  console.log(
-    relationships
-  );
-
-  // =====================================
-  // INSERT RELATIONSHIPS
-  // =====================================
-
-  const {
-    data: insertedData,
-    error:
-      relationshipError,
-  } = await supabase
-    .from(
-      "memory_relationships"
-    )
-    .insert(relationships)
-    .select();
-
-  console.log(
-    "🧩 INSERT RESULT:"
-  );
-
-  console.log(
-    insertedData
-  );
-
-  console.log(
-    "🧩 INSERT ERROR:"
-  );
-
-  console.log(
-    relationshipError
-  );
-
-  if (
-    relationshipError
-  ) {
-
-    console.log(
-      "❌ RELATIONSHIP INSERT ERROR"
-    );
-
-    console.log(
-      relationshipError
+        error,
+      }
     );
 
     return {
       success: false,
       error:
-        "Failed to insert relationships",
+        "Relationship engine failure",
     };
   }
-
-  console.log(
-    "✅ RELATIONSHIPS INSERTED"
-  );
-
-  return {
-    success: true,
-
-    inserted:
-      relationships.length,
-
-    relationships:
-      insertedData,
-  };
 }

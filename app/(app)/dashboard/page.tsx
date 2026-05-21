@@ -17,7 +17,48 @@ import {
 
 import { redirect } from "next/navigation";
 
+import { unstable_noStore as noStore } from "next/cache";
+
 export default async function DashboardPage() {
+
+  // =====================================
+  // REALTIME / DYNAMIC GOVERNANCE
+  // =====================================
+
+  noStore();
+
+  const dashboardRequestId =
+    crypto.randomUUID();
+
+  const dashboardStart =
+    performance.now();
+
+  function logDashboardStage(
+    stage: string,
+    metadata?: unknown
+  ) {
+    console.info(
+      `[dashboard-page] ${stage}`,
+      metadata || {}
+    );
+  }
+
+  function logDashboardError(
+    stage: string,
+    error: unknown
+  ) {
+    console.error(
+      `[dashboard-page] ${stage}`,
+      error
+    );
+  }
+
+  logDashboardStage(
+    "dashboard-request-started",
+    {
+      dashboardRequestId,
+    }
+  );
 
   const supabase =
     await createClient();
@@ -31,6 +72,16 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  logDashboardStage(
+    "dashboard-auth-loaded",
+    {
+      dashboardRequestId,
+
+      authenticated:
+        Boolean(user),
+    }
+  );
 
   // =====================================
   // AUTH PROTECTION
@@ -106,6 +157,7 @@ export default async function DashboardPage() {
 
   const {
     data: pendingInvites,
+    error: pendingInvitesError,
   } = await supabase
     .from("caregiver_invites")
     .select(`
@@ -124,6 +176,18 @@ export default async function DashboardPage() {
       "status",
       "pending"
     );
+
+  if (pendingInvitesError) {
+
+    logDashboardError(
+      "pending-invites-error",
+      {
+        dashboardRequestId,
+
+        pendingInvitesError,
+      }
+    );
+  }
 
   // =====================================
   // PROFILE SWITCHER DATA
@@ -157,10 +221,15 @@ export default async function DashboardPage() {
 
   let memoryCount = 0;
 
+  let memoryCountError:
+    | unknown
+    | null = null;
+
   if (activeProfileId) {
 
     const {
       count,
+      error,
     } = await supabase
       .from("memories")
       .select("*", {
@@ -174,7 +243,47 @@ export default async function DashboardPage() {
 
     memoryCount =
       count || 0;
+
+    memoryCountError =
+      error;
   }
+
+  if (memoryCountError) {
+
+    logDashboardError(
+      "memory-count-error",
+      {
+        dashboardRequestId,
+
+        memoryCountError,
+      }
+    );
+  }
+
+  const dashboardDurationMs =
+    Number(
+      (
+        performance.now() -
+        dashboardStart
+      ).toFixed(2)
+    );
+
+  logDashboardStage(
+    "dashboard-request-completed",
+    {
+      dashboardRequestId,
+
+      activeProfileId,
+
+      accessibleProfiles:
+        accessibleProfiles?.length || 0,
+
+      memoryCount,
+
+      durationMs:
+        dashboardDurationMs,
+    }
+  );
 
   return (
     <div className="min-h-screen bg-[#f5f1ea]">

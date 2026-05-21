@@ -6,6 +6,109 @@ import { getActiveProfile } from "@/lib/active-profile";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
 
+const MEMORY_PIPELINE_TAG =
+  "memory-cognition-pipeline";
+
+const MEMORY_CONTENT_MAX_LENGTH =
+  10_000;
+
+const MEMORY_PIPELINE_TIMEOUT_MS =
+  30_000;
+
+function logPipelineStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${MEMORY_PIPELINE_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logPipelineError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${MEMORY_PIPELINE_TAG}] ${stage}`,
+    error
+  );
+}
+
+function normalizeMemoryContent(
+  content: string
+) {
+  return content.trim();
+}
+
+function validateMemoryContent(
+  content: string
+) {
+  if (!content) {
+    return "Content required";
+  }
+
+  if (
+    content.length >
+    MEMORY_CONTENT_MAX_LENGTH
+  ) {
+    return `Memory content exceeds ${MEMORY_CONTENT_MAX_LENGTH} characters`;
+  }
+
+  return null;
+}
+
+function createPipelineRequestId() {
+  return crypto.randomUUID();
+}
+
+function createPipelineAbortSignal() {
+  return AbortSignal.timeout(
+    MEMORY_PIPELINE_TIMEOUT_MS
+  );
+}
+
+function createPipelineMetrics() {
+  return {
+    aiDurationMs: 0,
+    embeddingDurationMs: 0,
+    relationshipDurationMs: 0,
+    clusterDurationMs: 0,
+  };
+}
+
+function logPipelineMetrics(
+  metrics: ReturnType<
+    typeof createPipelineMetrics
+  >
+) {
+  logPipelineStage(
+    "pipeline-metrics",
+    metrics
+  );
+}
+
+async function safelyExecutePipelineTask<T>(
+  stage: string,
+  task: (
+    signal: AbortSignal
+  ) => Promise<T>
+) {
+  try {
+    const signal =
+      createPipelineAbortSignal();
+
+    return await task(signal);
+  } catch (error) {
+    logPipelineError(
+      stage,
+      error
+    );
+
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   try {
 
@@ -57,22 +160,63 @@ export async function POST(req: Request) {
     const body =
       await req.json();
 
+    logPipelineStage(
+      "request-body-received"
+    );
+
     const {
       title,
       content,
     } = body;
 
-    if (!content) {
+    const normalizedContent =
+      normalizeMemoryContent(
+        content || ""
+      );
+
+    const contentValidationError =
+      validateMemoryContent(
+        normalizedContent
+      );
+
+    if (
+      contentValidationError
+    ) {
       return NextResponse.json(
         {
           error:
-            "Content required",
+            contentValidationError,
         },
         {
           status: 400,
         }
       );
     }
+
+    const pipelineStart =
+      performance.now();
+
+    const pipelineRequestId =
+      createPipelineRequestId();
+
+    const pipelineMetrics =
+      createPipelineMetrics();
+
+    logPipelineStage(
+      "memory-pipeline-started",
+      {
+        requestId:
+          pipelineRequestId,
+
+        userId: user.id,
+
+        profileId:
+          activeProfileId,
+
+        contentLength:
+          normalizedContent.length,
+      }
+    );
 
     // =====================================
     // AI MEMORY ANALYSIS
@@ -104,13 +248,20 @@ export async function POST(req: Request) {
     let aiEmotionalWeight =
       "Light";
 
-    try {
+    const aiStart =
+      performance.now();
 
-      const ai =
-        await generateMemoryInsights(
-          content
-        );
+    const ai =
+      await safelyExecutePipelineTask(
+        "ai-analysis-error",
+        async () => {
+          return generateMemoryInsights(
+            normalizedContent
+          );
+        }
+      );
 
+    if (ai) {
       aiTitle =
         ai.title ||
         title ||
@@ -145,19 +296,21 @@ export async function POST(req: Request) {
         ai.emotionalWeight ||
         "Light";
 
-      console.log(
-        "✅ AI MEMORY:"
+      pipelineMetrics.aiDurationMs =
+        Number(
+          (
+            performance.now() -
+            aiStart
+          ).toFixed(2)
+        );
+
+      logPipelineStage(
+        "ai-analysis-completed",
+        {
+          durationMs:
+            pipelineMetrics.aiDurationMs,
+        }
       );
-
-      console.log(ai);
-
-    } catch (aiError) {
-
-      console.log(
-        "❌ AI ERROR:"
-      );
-
-      console.log(aiError);
     }
 
     // =====================================
@@ -168,37 +321,52 @@ export async function POST(req: Request) {
       | number[]
       | null = null;
 
-    try {
+    logPipelineStage(
+      "embedding-generation-started"
+    );
 
-      console.log(
-        "🚀 GENERATING EMBEDDING"
+    const embeddingStart =
+      performance.now();
+
+    embedding =
+      await safelyExecutePipelineTask(
+        "embedding-generation-error",
+        async () => {
+          return generateEmbedding(
+            normalizedContent
+          );
+        }
       );
 
-      embedding =
-        await generateEmbedding(
-          content
+    if (embedding) {
+      pipelineMetrics.embeddingDurationMs =
+        Number(
+          (
+            performance.now() -
+            embeddingStart
+          ).toFixed(2)
         );
 
-      console.log(
-        "✅ EMBEDDING CREATED"
-      );
-
-    } catch (
-      embeddingError
-    ) {
-
-      console.log(
-        "❌ EMBEDDING ERROR:"
-      );
-
-      console.log(
-        embeddingError
+      logPipelineStage(
+        "embedding-completed",
+        {
+          durationMs:
+            pipelineMetrics.embeddingDurationMs,
+        }
       );
     }
 
     // =====================================
     // INSERT MEMORY
     // =====================================
+
+    logPipelineStage(
+      "memory-persist-started",
+      {
+        requestId:
+          pipelineRequestId,
+      }
+    );
 
     const {
       data,
@@ -216,7 +384,8 @@ export async function POST(req: Request) {
           title:
             aiTitle,
 
-          content,
+          content:
+            normalizedContent,
 
           ai_title:
             aiTitle,
@@ -253,11 +422,15 @@ export async function POST(req: Request) {
 
     if (error) {
 
-      console.log(
-        "❌ MEMORY CREATE ERROR:"
-      );
+      logPipelineError(
+        "memory-persist-error",
+        {
+          requestId:
+            pipelineRequestId,
 
-      console.log(error);
+          error,
+        }
+      );
 
       return NextResponse.json(
         {
@@ -270,76 +443,166 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(
-      "✅ MEMORY CREATED:"
+    logPipelineStage(
+      "memory-persisted",
+      {
+        requestId:
+          pipelineRequestId,
+
+        memoryId:
+          data.id,
+      }
     );
 
-    console.log(
-      data.id
-    );
+    // =====================================
+    // ASYNC COGNITION TASKS
+    // =====================================
+
+    const cognitionTasks: Promise<void>[] = [];
 
     // =====================================
     // BUILD RELATIONSHIPS
     // =====================================
 
-    try {
+    const relationshipStart =
+      performance.now();
 
-      const relationshipResult =
-        await buildRelationships(
-          data.id
+    const relationshipPromise =
+      buildRelationships(
+        data.id
+      )
+        .then(
+          (
+            relationshipResult
+          ) => {
+            pipelineMetrics.relationshipDurationMs =
+              Number(
+                (
+                  performance.now() -
+                  relationshipStart
+                ).toFixed(2)
+              );
+
+            logPipelineStage(
+              "relationships-built",
+              {
+                relationshipResult,
+                durationMs:
+                  pipelineMetrics.relationshipDurationMs,
+              }
+            );
+          }
+        )
+        .catch(
+          (
+            relationshipError
+          ) => {
+            logPipelineError(
+              "relationship-error",
+              relationshipError
+            );
+          }
         );
 
-      console.log(
-        "🧠 RELATIONSHIP RESULT:"
-      );
-
-      console.log(
-        relationshipResult
-      );
-
-      console.log(
-        "✅ RELATIONSHIPS BUILT"
-      );
-
-    } catch (
-      relationshipError
-    ) {
-
-      console.log(
-        "❌ RELATIONSHIP ERROR:"
-      );
-
-      console.log(
-        relationshipError
-      );
-    }
+    cognitionTasks.push(
+      relationshipPromise
+    );
 
     // =====================================
     // BUILD CLUSTERS
     // =====================================
 
-    try {
+    const clusterStart =
+      performance.now();
 
-      await buildClusters(
+    const clusterPromise =
+      buildClusters(
         data.id
+      )
+        .then(() => {
+          pipelineMetrics.clusterDurationMs =
+            Number(
+              (
+                performance.now() -
+                clusterStart
+              ).toFixed(2)
+            );
+
+          logPipelineStage(
+            "clusters-built",
+            {
+              durationMs:
+                pipelineMetrics.clusterDurationMs,
+            }
+          );
+        })
+        .catch(
+          (clusterError) => {
+            logPipelineError(
+              "cluster-error",
+              clusterError
+            );
+          }
+        );
+
+    cognitionTasks.push(
+      clusterPromise
+    );
+
+    await Promise.allSettled(
+      cognitionTasks
+    );
+
+    const pipelineDuration =
+      performance.now() -
+      pipelineStart;
+
+    logPipelineStage(
+      "memory-pipeline-completed",
+      {
+        requestId:
+          pipelineRequestId,
+
+        memoryId: data.id,
+
+        durationMs:
+          pipelineDuration.toFixed(2),
+      }
+    );
+
+    logPipelineMetrics(
+      pipelineMetrics
+    );
+
+    const totalPipelineDurationMs =
+      Number(
+        (
+          performance.now() -
+          pipelineStart
+        ).toFixed(2)
       );
 
-      console.log(
-        "✅ CLUSTERS BUILT"
-      );
+    logPipelineStage(
+      "pipeline-performance-summary",
+      {
+        requestId:
+          pipelineRequestId,
 
-    } catch (
-      clusterError
-    ) {
+        totalPipelineDurationMs,
 
-      console.log(
-        "❌ CLUSTER ERROR:"
-      );
+        aiDurationMs:
+          pipelineMetrics.aiDurationMs,
 
-      console.log(
-        clusterError
-      );
-    }
+        embeddingDurationMs:
+          pipelineMetrics.embeddingDurationMs,
+
+        relationshipDurationMs:
+          pipelineMetrics.relationshipDurationMs,
+
+        clusterDurationMs:
+          pipelineMetrics.clusterDurationMs,
+      }
+    );
 
     return NextResponse.json(
       data
@@ -347,11 +610,12 @@ export async function POST(req: Request) {
 
   } catch (error) {
 
-    console.log(
-      "❌ CREATE MEMORY ERROR:"
+    logPipelineError(
+      "memory-create-error",
+      {
+        error,
+      }
     );
-
-    console.log(error);
 
     return NextResponse.json(
       {

@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import {
   LineChart,
   Line,
@@ -10,118 +12,122 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export default function MemoryContinuityChart({
-  continuityData = [],
-}: any) {
+const MemoryContinuityChart = memo(
+  function MemoryContinuityChart({
+    continuityData = [],
+  }: any) {
 
-  return (
+    return (
 
-    <div className="rounded-[32px] border bg-white p-8 shadow-sm">
+      <div className="rounded-[32px] border bg-white p-8 shadow-sm">
 
-      {/* HEADER */}
+        {/* HEADER */}
 
-      <div className="mb-8">
+        <div className="mb-8">
 
-        <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-          Memory Continuity Telemetry
-        </div>
+          <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
+            Memory Continuity Telemetry
+          </div>
 
-        <h2 className="text-4xl font-bold text-[#243428]">
-          Memory Continuity
-        </h2>
+          <h2 className="text-4xl font-bold text-[#243428]">
+            Memory Continuity
+          </h2>
 
-        <p className="text-gray-500 mt-2 text-lg">
-          Longitudinal continuity retention across cognitive interactions.
-        </p>
-
-      </div>
-
-      {/* METRICS */}
-
-      <div className="grid grid-cols-3 gap-4 mb-8">
-
-        <div className="rounded-2xl border bg-[#f8faf7] p-5">
-
-          <p className="text-sm text-gray-500">
-            Continuity Stability
+          <p className="text-gray-500 mt-2 text-lg">
+            Longitudinal continuity retention across cognitive interactions.
           </p>
 
-          <h3 className="text-3xl font-bold text-[#243428] mt-2">
-            91%
-          </h3>
+        </div>
+
+        {/* METRICS */}
+
+        <div className="grid grid-cols-3 gap-4 mb-8">
+
+          <div className="rounded-2xl border bg-[#f8faf7] p-5">
+
+            <p className="text-sm text-gray-500">
+              Continuity Stability
+            </p>
+
+            <h3 className="text-3xl font-bold text-[#243428] mt-2">
+              91%
+            </h3>
+
+          </div>
+
+          <div className="rounded-2xl border bg-[#f8faf7] p-5">
+
+            <p className="text-sm text-gray-500">
+              Retention Integrity
+            </p>
+
+            <h3 className="text-3xl font-bold text-[#243428] mt-2">
+              Strong
+            </h3>
+
+          </div>
+
+          <div className="rounded-2xl border bg-[#f8faf7] p-5">
+
+            <p className="text-sm text-gray-500">
+              Recall Drift
+            </p>
+
+            <h3 className="text-3xl font-bold text-[#243428] mt-2">
+              Minimal
+            </h3>
+
+          </div>
 
         </div>
 
-        <div className="rounded-2xl border bg-[#f8faf7] p-5">
+        {/* CHART */}
 
-          <p className="text-sm text-gray-500">
-            Retention Integrity
-          </p>
+        <div className="h-[420px]">
 
-          <h3 className="text-3xl font-bold text-[#243428] mt-2">
-            Strong
-          </h3>
-
-        </div>
-
-        <div className="rounded-2xl border bg-[#f8faf7] p-5">
-
-          <p className="text-sm text-gray-500">
-            Recall Drift
-          </p>
-
-          <h3 className="text-3xl font-bold text-[#243428] mt-2">
-            Minimal
-          </h3>
-
-        </div>
-
-      </div>
-
-      {/* CHART */}
-
-      <div className="h-[420px]">
-
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-        >
-
-          <LineChart
-            data={continuityData}
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
           >
 
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-            />
+            <LineChart
+              data={continuityData}
+            >
 
-            <XAxis
-              dataKey="date"
-            />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+              />
 
-            <YAxis
-              domain={[0, 10]}
-            />
+              <XAxis
+                dataKey="date"
+              />
 
-            <Tooltip />
+              <YAxis
+                domain={[0, 10]}
+              />
 
-            <Line
-              type="monotone"
-              dataKey="continuity"
-              stroke="#243428"
-              strokeWidth={4}
-              dot={{
-                r: 4,
-              }}
-            />
+              <Tooltip />
 
-          </LineChart>
+              <Line
+                type="monotone"
+                dataKey="continuity"
+                stroke="#243428"
+                strokeWidth={4}
+                dot={{
+                  r: 4,
+                }}
+              />
 
-        </ResponsiveContainer>
+            </LineChart>
+
+          </ResponsiveContainer>
+
+        </div>
 
       </div>
+    );
+  }
+);
 
-    </div>
-  );
-}
+export default MemoryContinuityChart;

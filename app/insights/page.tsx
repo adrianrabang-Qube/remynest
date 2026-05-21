@@ -1,11 +1,28 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  createTelemetryGovernanceSnapshot,
+  createTelemetryHealthSnapshot,
+  createTelemetryLimitWarnings,
+  createTelemetryPayload,
+  createTelemetryPayloadMetadata,
+  createTelemetrySnapshot,
+  fetchInsightsTelemetry,
+  hasTelemetryWarnings,
+  logTelemetrySnapshot,
+  logTelemetryWarnings,
+  normalizeTelemetry,
+  stabilizeTelemetryPayload,
+} from "@/lib/data/insights";
 
 import InsightsClient from "@/components/insights/InsightsClient";
 
 export const dynamic =
   "force-dynamic";
+
+
+export const revalidate = 60;
 
 export default async function InsightsPage() {
 
@@ -30,47 +47,115 @@ export default async function InsightsPage() {
   // =====================================
 
   const {
-    data: memories,
-  } = await supabase
-    .from("memories")
-    .select(`
-      id,
-      ai_mood,
-      ai_category,
-      created_at
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", {
-      ascending: true,
-    });
+    memoriesResponse,
+    remindersResponse,
+  } = await fetchInsightsTelemetry(
+    supabase,
+    user.id
+  );
 
-  // =====================================
-  // REMINDERS
-  // =====================================
+  const {
+    data: memories,
+    error: memoriesError,
+  } = memoriesResponse;
 
   const {
     data: reminders,
-  } = await supabase
-    .from("reminders")
-    .select(`
-      id,
-      completed,
-      created_at
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", {
-      ascending: true,
-    });
+    error: remindersError,
+  } = remindersResponse;
+
+  const telemetrySnapshot =
+    createTelemetrySnapshot(
+      memories,
+      reminders
+    );
+
+  const telemetryLimitWarnings =
+    createTelemetryLimitWarnings(
+      memories,
+      reminders
+    );
+
+  const telemetryHealth =
+    createTelemetryHealthSnapshot(
+      memories,
+      reminders
+    );
+
+  const telemetryGovernanceSnapshot =
+    createTelemetryGovernanceSnapshot(
+      telemetrySnapshot,
+      telemetryHealth
+    );
+
+  stabilizeTelemetryPayload(
+    telemetryGovernanceSnapshot
+  );
+
+  // =====================================
+  // QUERY ERROR LOGGING
+  // =====================================
+
+  if (memoriesError) {
+    console.error(
+      "Insights memories query failed:",
+      memoriesError
+    );
+  }
+
+  if (remindersError) {
+    console.error(
+      "Insights reminders query failed:",
+      remindersError
+    );
+  }
+
+  logTelemetrySnapshot(
+    telemetryGovernanceSnapshot
+  );
+
+  if (
+    hasTelemetryWarnings(
+      telemetryLimitWarnings
+    )
+  ) {
+    logTelemetryWarnings(
+      telemetryLimitWarnings
+    );
+  }
+
+  const normalizedMemories =
+    normalizeTelemetry(memories);
+
+  const normalizedReminders =
+    normalizeTelemetry(reminders);
 
   // =====================================
   // SAFETY FALLBACKS
   // =====================================
 
   const safeMemories =
-    memories || [];
+    normalizedMemories;
 
   const safeReminders =
-    reminders || [];
+    normalizedReminders;
+
+  const telemetryPayload =
+    createTelemetryPayload(
+      safeMemories,
+      safeReminders
+    );
+
+  const telemetryPayloadMetadata =
+    createTelemetryPayloadMetadata();
+
+  stabilizeTelemetryPayload(
+    telemetryPayload
+  );
+
+  stabilizeTelemetryPayload(
+    telemetryPayloadMetadata
+  );
 
   // =====================================
   // RETURN
@@ -78,8 +163,8 @@ export default async function InsightsPage() {
 
   return (
     <InsightsClient
-      memories={safeMemories}
-      reminders={safeReminders}
+      memories={telemetryPayload.memories}
+      reminders={telemetryPayload.reminders}
     />
   );
 }

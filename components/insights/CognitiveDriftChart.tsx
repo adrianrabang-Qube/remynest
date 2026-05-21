@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import {
   AreaChart,
   Area,
@@ -10,7 +12,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export default function CognitiveDriftChart({
+const CognitiveDriftChart = memo(
+  function CognitiveDriftChart({
   driftData = [],
 }: any) {
 
@@ -147,4 +150,7 @@ export default function CognitiveDriftChart({
 
     </div>
   );
-}
+  }
+);
+
+export default CognitiveDriftChart;

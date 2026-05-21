@@ -1,17 +1,123 @@
 import { createClient } from "@/lib/supabase/server";
 
+const CLUSTER_TAG =
+  "memory-cluster-engine";
+
+const CLUSTER_MATCH_THRESHOLD =
+  0.55;
+
+const CLUSTER_MATCH_COUNT =
+  10;
+
+const MAX_CLUSTER_ITEMS =
+  15;
+
+function logClusterStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${CLUSTER_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logClusterError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${CLUSTER_TAG}] ${stage}`,
+    error
+  );
+}
+
+function createClusterRequestId() {
+  return crypto.randomUUID();
+}
+
+function validateClusterMatch(
+  match: any
+) {
+  return (
+    match &&
+    typeof match.id ===
+      "string" &&
+    typeof match.similarity ===
+      "number"
+  );
+}
+
+function normalizeClusterMatches(
+  matches: any[]
+) {
+  return matches
+    .filter(
+      validateClusterMatch
+    )
+    .sort(
+      (a, b) =>
+        b.similarity -
+        a.similarity
+    )
+    .slice(
+      0,
+      MAX_CLUSTER_ITEMS
+    );
+}
+
+function buildClusterItems(
+  clusterId: string,
+  memoryId: string,
+  matches: any[]
+) {
+  const items = matches.map(
+    (match) => ({
+      cluster_id:
+        clusterId,
+
+      memory_id:
+        match.id,
+
+      similarity:
+        match.similarity,
+    })
+  );
+
+  items.push({
+    cluster_id:
+      clusterId,
+
+    memory_id:
+      memoryId,
+
+    similarity: 1,
+  });
+
+  return items;
+}
+
 export async function buildClusters(
   memoryId: string
 ) {
+  const requestId =
+    createClusterRequestId();
+
+  const start =
+    performance.now();
 
   try {
-
-    console.log(
-      "🚀 buildClusters STARTED"
-    );
-
     const supabase =
       await createClient();
+
+    logClusterStage(
+      "cluster-build-started",
+      {
+        requestId,
+
+        memoryId,
+      }
+    );
 
     // =====================================
     // FETCH MEMORY
@@ -26,32 +132,42 @@ export async function buildClusters(
       .eq("id", memoryId)
       .single();
 
-    console.log(
-      "🧠 MEMORY:"
-    );
-
-    console.log(memory);
-
-    console.log(
-      "🧠 MEMORY ERROR:"
-    );
-
-    console.log(memoryError);
-
     if (
       memoryError ||
       !memory
     ) {
-      return;
+      logClusterError(
+        "cluster-memory-fetch-error",
+        {
+          requestId,
+
+          memoryError,
+        }
+      );
+
+      return {
+        success: false,
+        error:
+          "Memory not found",
+      };
     }
 
     if (!memory.embedding) {
+      logClusterStage(
+        "cluster-skipped",
+        {
+          requestId,
 
-      console.log(
-        "❌ NO EMBEDDING"
+          reason:
+            "missing-embedding",
+        }
       );
 
-      return;
+      return {
+        success: false,
+        error:
+          "Missing embedding",
+      };
     }
 
     // =====================================
@@ -67,9 +183,11 @@ export async function buildClusters(
         query_embedding:
           memory.embedding,
 
-        match_threshold: 0.55,
+        match_threshold:
+          CLUSTER_MATCH_THRESHOLD,
 
-        match_count: 10,
+        match_count:
+          CLUSTER_MATCH_COUNT,
 
         user_id_input:
           memory.user_id,
@@ -79,29 +197,46 @@ export async function buildClusters(
       }
     );
 
-    console.log(
-      "🧠 CLUSTER MATCHES:"
-    );
+    if (matchError) {
+      logClusterError(
+        "cluster-match-error",
+        {
+          requestId,
 
-    console.log(matches);
-
-    console.log(
-      "🧠 CLUSTER MATCH ERROR:"
-    );
-
-    console.log(matchError);
-
-    if (
-      matchError ||
-      !matches ||
-      matches.length === 0
-    ) {
-
-      console.log(
-        "❌ NO CLUSTER MATCHES"
+          matchError,
+        }
       );
 
-      return;
+      return {
+        success: false,
+        error:
+          "Cluster matching failed",
+      };
+    }
+
+    const normalizedMatches =
+      normalizeClusterMatches(
+        matches || []
+      );
+
+    logClusterStage(
+      "cluster-matches-found",
+      {
+        requestId,
+
+        totalMatches:
+          normalizedMatches.length,
+      }
+    );
+
+    if (
+      normalizedMatches.length ===
+      0
+    ) {
+      return {
+        success: true,
+        inserted: 0,
+      };
     }
 
     // =====================================
@@ -138,60 +273,46 @@ export async function buildClusters(
       .select()
       .single();
 
-    console.log(
-      "🧩 CLUSTER:"
-    );
-
-    console.log(cluster);
-
-    console.log(
-      "🧩 CLUSTER ERROR:"
-    );
-
-    console.log(clusterError);
-
     if (
       clusterError ||
       !cluster
     ) {
-      return;
+      logClusterError(
+        "cluster-create-error",
+        {
+          requestId,
+
+          clusterError,
+        }
+      );
+
+      return {
+        success: false,
+        error:
+          "Cluster creation failed",
+      };
     }
 
+    logClusterStage(
+      "cluster-created",
+      {
+        requestId,
+
+        clusterId:
+          cluster.id,
+      }
+    );
+
     // =====================================
-    // BUILD CLUSTER ITEMS
+    // BUILD ITEMS
     // =====================================
 
     const clusterItems =
-      matches.map(
-        (match: any) => ({
-          cluster_id:
-            cluster.id,
-
-          memory_id:
-            match.id,
-
-          similarity:
-            match.similarity,
-        })
-      );
-
-    clusterItems.push({
-      cluster_id:
+      buildClusterItems(
         cluster.id,
-
-      memory_id:
         memory.id,
-
-      similarity: 1,
-    });
-
-    console.log(
-      "🧩 CLUSTER ITEMS:"
-    );
-
-    console.log(
-      clusterItems
-    );
+        normalizedMatches
+      );
 
     // =====================================
     // INSERT ITEMS
@@ -204,39 +325,79 @@ export async function buildClusters(
       .from(
         "memory_cluster_items"
       )
-      .insert(clusterItems)
+      .upsert(clusterItems, {
+        onConflict:
+          "cluster_id,memory_id",
+
+        ignoreDuplicates: false,
+      })
       .select();
 
-    console.log(
-      "🧩 INSERTED ITEMS:"
-    );
-
-    console.log(
-      insertedItems
-    );
-
-    console.log(
-      "🧩 INSERT ERROR:"
-    );
-
-    console.log(
-      insertError
-    );
-
     if (insertError) {
-      return;
+      logClusterError(
+        "cluster-item-insert-error",
+        {
+          requestId,
+
+          insertError,
+        }
+      );
+
+      return {
+        success: false,
+        error:
+          "Cluster item insert failed",
+      };
     }
 
-    console.log(
-      "✅ CLUSTERS BUILT SUCCESSFULLY"
+    const durationMs = Number(
+      (
+        performance.now() -
+        start
+      ).toFixed(2)
     );
 
+    logClusterStage(
+      "cluster-build-completed",
+      {
+        requestId,
+
+        clusterId:
+          cluster.id,
+
+        inserted:
+          insertedItems?.length || 0,
+
+        durationMs,
+      }
+    );
+
+    return {
+      success: true,
+
+      clusterId:
+        cluster.id,
+
+      inserted:
+        insertedItems?.length || 0,
+
+      items:
+        insertedItems || [],
+    };
   } catch (error) {
+    logClusterError(
+      "cluster-engine-error",
+      {
+        requestId,
 
-    console.log(
-      "❌ BUILD CLUSTERS ERROR"
+        error,
+      }
     );
 
-    console.log(error);
+    return {
+      success: false,
+      error:
+        "Cluster engine failure",
+    };
   }
 }

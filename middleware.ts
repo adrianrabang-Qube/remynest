@@ -1,126 +1,333 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import {
+  NextResponse,
+  type NextRequest,
+} from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+const MIDDLEWARE_TAG =
+  "auth-security-middleware";
 
-  const pathname = req.nextUrl.pathname;
+const AUTH_ROUTES = [
+  "/login",
+  "/signup",
+];
 
-  // =========================================
-  // PUBLIC STATIC / PWA FILES
-  // =========================================
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/signup",
+];
 
-  const publicFiles = [
-    "/manifest.webmanifest",
-    "/manifest.json",
-    "/favicon.ico",
-    "/sw.js",
-    "/icon-192.png",
-    "/icon-512.png",
-    "/OneSignalSDKWorker.js",
-    "/OneSignalSDKUpdaterWorker.js",
-  ];
+const PUBLIC_API_ROUTES = [
+  "/api/stripe/webhook",
+  "/api/send-reminders",
+  "/api/send-notification",
+  "/api/cron",
+];
 
-  const isPublicFile = publicFiles.some(
-    (path) => pathname === path || pathname.startsWith(path)
+const PUBLIC_STATIC_FILES = [
+  "/manifest.webmanifest",
+  "/manifest.json",
+  "/favicon.ico",
+  "/sw.js",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/OneSignalSDKWorker.js",
+  "/OneSignalSDKUpdaterWorker.js",
+];
+
+function logMiddlewareStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${MIDDLEWARE_TAG}] ${stage}`,
+    metadata || {}
   );
+}
 
-  if (isPublicFile) {
-    return res;
-  }
-
-  // =========================================
-  // PUBLIC API ROUTES
-  // =========================================
-
-  const publicApiRoutes = [
-    "/api/stripe/webhook",
-    "/api/send-reminders",
-    "/api/send-notification",
-    "/api/cron",
-  ];
-
-  const isPublicApi = publicApiRoutes.some((route) =>
-    pathname.startsWith(route)
+function logMiddlewareError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${MIDDLEWARE_TAG}] ${stage}`,
+    error
   );
+}
 
-  if (isPublicApi) {
-    return res;
-  }
+function createMiddlewareRequestId() {
+  return crypto.randomUUID();
+}
 
-  // =========================================
-  // PUBLIC ROUTES
-  // =========================================
+function isPublicStaticFile(
+  pathname: string
+) {
+  return PUBLIC_STATIC_FILES.some(
+    (path) =>
+      pathname === path ||
+      pathname.startsWith(path)
+  );
+}
 
-  const publicRoutes = [
-    "/",          // LANDING PAGE
-    "/login",
-    "/signup",
-  ];
+function isPublicApiRoute(
+  pathname: string
+) {
+  return PUBLIC_API_ROUTES.some(
+    (route) =>
+      pathname.startsWith(route)
+  );
+}
 
-  const isPublicRoute = publicRoutes.some((route) => {
-    if (route === "/") {
-      return pathname === "/";
+function isPublicRoute(
+  pathname: string
+) {
+  return PUBLIC_ROUTES.some(
+    (route) => {
+      if (route === "/") {
+        return pathname === "/";
+      }
+
+      return pathname.startsWith(
+        route
+      );
+    }
+  );
+}
+
+function isAuthRoute(
+  pathname: string
+) {
+  return AUTH_ROUTES.some(
+    (route) =>
+      pathname === route
+  );
+}
+
+function createRedirectResponse(
+  request: NextRequest,
+  path: string
+) {
+  return NextResponse.redirect(
+    new URL(path, request.url)
+  );
+}
+
+export async function middleware(
+  req: NextRequest
+) {
+  const requestId =
+    createMiddlewareRequestId();
+
+  const start =
+    performance.now();
+
+  const pathname =
+    req.nextUrl.pathname;
+
+  const method = req.method;
+
+  const res =
+    NextResponse.next();
+
+  try {
+    logMiddlewareStage(
+      "middleware-request-started",
+      {
+        requestId,
+
+        pathname,
+
+        method,
+      }
+    );
+
+    // =========================================
+    // PUBLIC STATIC FILES
+    // =========================================
+
+    if (
+      isPublicStaticFile(
+        pathname
+      )
+    ) {
+      logMiddlewareStage(
+        "public-static-bypass",
+        {
+          requestId,
+
+          pathname,
+        }
+      );
+
+      return res;
     }
 
-    return pathname.startsWith(route);
-  });
+    // =========================================
+    // PUBLIC API ROUTES
+    // =========================================
 
-  // =========================================
-  // CREATE SUPABASE CLIENT
-  // =========================================
+    if (
+      isPublicApiRoute(
+        pathname
+      )
+    ) {
+      logMiddlewareStage(
+        "public-api-bypass",
+        {
+          requestId,
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll();
-        },
+          pathname,
+        }
+      );
 
-        setAll(cookies) {
-          cookies.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options);
-          });
-        },
-      },
+      return res;
     }
-  );
 
-  // =========================================
-  // GET USER
-  // =========================================
+    // =========================================
+    // SUPABASE SSR CLIENT
+    // =========================================
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const supabase =
+      createServerClient(
+        process.env
+          .NEXT_PUBLIC_SUPABASE_URL!,
 
-  // =========================================
-  // NOT LOGGED IN
-  // =========================================
+        process.env
+          .NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 
-  if (!user && !isPublicRoute) {
-    return NextResponse.redirect(
-      new URL("/login", req.url)
+        {
+          cookies: {
+            getAll() {
+              return req.cookies.getAll();
+            },
+
+            setAll(cookies) {
+              cookies.forEach(
+                ({
+                  name,
+                  value,
+                  options,
+                }) => {
+                  res.cookies.set(
+                    name,
+                    value,
+                    options
+                  );
+                }
+              );
+            },
+          },
+        }
+      );
+
+    // =========================================
+    // AUTH LOOKUP
+    // =========================================
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError) {
+      logMiddlewareError(
+        "auth-lookup-error",
+        {
+          requestId,
+
+          authError,
+        }
+      );
+    }
+
+    const publicRoute =
+      isPublicRoute(pathname);
+
+    // =========================================
+    // UNAUTHORIZED
+    // =========================================
+
+    if (
+      !user &&
+      !publicRoute
+    ) {
+      logMiddlewareStage(
+        "unauthorized-redirect",
+        {
+          requestId,
+
+          pathname,
+        }
+      );
+
+      return createRedirectResponse(
+        req,
+        "/login"
+      );
+    }
+
+    // =========================================
+    // AUTH ROUTE REDIRECT
+    // =========================================
+
+    if (
+      user &&
+      isAuthRoute(pathname)
+    ) {
+      logMiddlewareStage(
+        "authenticated-redirect",
+        {
+          requestId,
+
+          pathname,
+
+          userId: user.id,
+        }
+      );
+
+      return createRedirectResponse(
+        req,
+        "/dashboard"
+      );
+    }
+
+    const durationMs = Number(
+      (
+        performance.now() -
+        start
+      ).toFixed(2)
     );
-  }
 
-  // =========================================
-  // ALREADY LOGGED IN
-  // =========================================
+    logMiddlewareStage(
+      "middleware-request-completed",
+      {
+        requestId,
 
-  if (
-    user &&
-    (pathname === "/login" || pathname === "/signup")
-  ) {
-    return NextResponse.redirect(
-      new URL("/dashboard", req.url)
+        pathname,
+
+        authenticated:
+          Boolean(user),
+
+        durationMs,
+      }
     );
-  }
 
-  return res;
+    return res;
+  } catch (error) {
+    logMiddlewareError(
+      "middleware-engine-error",
+      {
+        requestId,
+
+        pathname,
+
+        error,
+      }
+    );
+
+    return res;
+  }
 }
 
 export const config = {
