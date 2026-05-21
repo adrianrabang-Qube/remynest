@@ -1,6 +1,9 @@
 "use client";
 
-export default function AIInsightSummary({
+import { memo } from "react";
+
+const AIInsightSummary = memo(
+  function AIInsightSummary({
   insights = [],
 }: any) {
 
@@ -59,4 +62,7 @@ export default function AIInsightSummary({
 
     </div>
   );
-}
+  }
+);
+
+export default AIInsightSummary;

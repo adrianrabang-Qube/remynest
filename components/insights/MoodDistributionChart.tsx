@@ -1,4 +1,7 @@
+
 "use client";
+
+import { memo } from "react";
 
 import {
   PieChart,
@@ -8,7 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export default function MoodDistributionChart({
+const MoodDistributionChart = memo(
+  function MoodDistributionChart({
   categoryData = [],
 }: any) {
 
@@ -95,4 +99,7 @@ export default function MoodDistributionChart({
 
     </div>
   );
-}
+  }
+);
+
+export default MoodDistributionChart;

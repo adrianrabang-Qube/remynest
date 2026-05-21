@@ -3,67 +3,236 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+const REMINDER_CRON_TAG =
+  "reminder-cron-engine";
+
+const REMINDER_BATCH_LIMIT =
+  50;
+
+const ONESIGNAL_TIMEOUT_MS =
+  15_000;
+
+function logReminderStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${REMINDER_CRON_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logReminderError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${REMINDER_CRON_TAG}] ${stage}`,
+    error
+  );
+}
+
+function createReminderRequestId() {
+  return crypto.randomUUID();
+}
+
+function createOneSignalAbortSignal() {
+  return AbortSignal.timeout(
+    ONESIGNAL_TIMEOUT_MS
+  );
+}
+
+function calculateNextReminderDate(
+  currentDate: string,
+  frequency: string
+) {
+  const nextDate = new Date(
+    currentDate
+  );
+
+  if (frequency === "daily") {
+    nextDate.setDate(
+      nextDate.getDate() + 1
+    );
+  }
+
+  if (frequency === "weekly") {
+    nextDate.setDate(
+      nextDate.getDate() + 7
+    );
+  }
+
+  if (frequency === "monthly") {
+    nextDate.setMonth(
+      nextDate.getMonth() + 1
+    );
+  }
+
+  return nextDate.toISOString();
+}
+
+async function unlockReminder(
+  supabase: any,
+  reminderId: string
+) {
+  await supabase
+    .from("reminders")
+    .update({
+      processing: false,
+    })
+    .eq("id", reminderId);
+}
+
+async function completeReminder(
+  supabase: any,
+  reminderId: string
+) {
+  await supabase
+    .from("reminders")
+    .update({
+      completed: true,
+      processing: false,
+    })
+    .eq("id", reminderId);
+}
+
+async function rescheduleReminder(
+  supabase: any,
+  reminderId: string,
+  nextDate: string
+) {
+  await supabase
+    .from("reminders")
+    .update({
+      remind_at: nextDate,
+      processing: false,
+    })
+    .eq("id", reminderId);
+}
+
+async function sendOneSignalNotification(
+  playerId: string,
+  reminder: any
+) {
+  const response = await fetch(
+    "https://onesignal.com/api/v1/notifications",
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
+      },
+
+      body: JSON.stringify({
+        app_id:
+          process.env
+            .NEXT_PUBLIC_ONESIGNAL_APP_ID,
+
+        include_player_ids: [
+          playerId,
+        ],
+
+        headings: {
+          en: "RemyNest Reminder",
+        },
+
+        contents: {
+          en:
+            reminder.title ||
+            "Reminder",
+        },
+
+        priority: 10,
+
+        data: {
+          reminderId:
+            reminder.id,
+        },
+      }),
+
+      signal:
+        createOneSignalAbortSignal(),
+    }
+  );
+
+  return response.json();
+}
+
 export async function GET() {
+  const requestId =
+    createReminderRequestId();
+
+  const start =
+    performance.now();
+
   try {
-
-    // =====================================
-    // SUPABASE
-    // =====================================
-
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env
+        .NEXT_PUBLIC_SUPABASE_URL!,
+
+      process.env
+        .SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // =====================================
-    // CURRENT UTC TIME
-    // =====================================
+    const now =
+      new Date().toISOString();
 
-    const now = new Date().toISOString();
+    logReminderStage(
+      "cron-started",
+      {
+        requestId,
 
-    console.log("⏰ CURRENT UTC:");
-    console.log(now);
+        now,
+      }
+    );
 
     // =====================================
     // FIND DUE REMINDERS
     // =====================================
 
-    const { data: reminders, error } =
-      await supabase
-        .from("reminders")
-        .select("*")
-        .lte("remind_at", now)
-        .eq("processing", false)
-        .or(
-          "completed.is.null,completed.eq.false"
-        );
+    const {
+      data: reminders,
+      error,
+    } = await supabase
+      .from("reminders")
+      .select("*")
+      .lte("remind_at", now)
+      .eq("processing", false)
+      .or(
+        "completed.is.null,completed.eq.false"
+      )
+      .limit(
+        REMINDER_BATCH_LIMIT
+      );
 
     if (error) {
+      logReminderError(
+        "reminder-fetch-error",
+        {
+          requestId,
 
-      console.log("❌ FETCH ERROR:");
-      console.log(error);
+          error,
+        }
+      );
 
       return NextResponse.json({
         success: false,
       });
     }
 
-    console.log(
-      `🚀 Found ${reminders.length} due reminders`
-    );
-
-    // =====================================
-    // DEBUG REMINDERS
-    // =====================================
-
-    console.log("📦 REMINDERS:");
-    console.log(reminders);
-
-    // =====================================
-    // NO REMINDERS
-    // =====================================
-
-    if (!reminders || reminders.length === 0) {
+    if (
+      !reminders ||
+      reminders.length === 0
+    ) {
+      logReminderStage(
+        "no-due-reminders",
+        {
+          requestId,
+        }
+      );
 
       return NextResponse.json({
         success: true,
@@ -71,24 +240,35 @@ export async function GET() {
       });
     }
 
+    logReminderStage(
+      "due-reminders-found",
+      {
+        requestId,
+
+        count:
+          reminders.length,
+      }
+    );
+
+    let processedCount = 0;
+
     // =====================================
     // PROCESS LOOP
     // =====================================
 
     for (const reminder of reminders) {
+      logReminderStage(
+        "reminder-processing-started",
+        {
+          requestId,
 
-      console.log(
-        `🔔 STARTING: ${reminder.title}`
+          reminderId:
+            reminder.id,
+        }
       );
-
-      console.log(
-        "🕓 REMINDER TIME:"
-      );
-
-      console.log(reminder.remind_at);
 
       // =====================================
-      // ATOMIC LOCK
+      // LOCK
       // =====================================
 
       const {
@@ -104,253 +284,221 @@ export async function GET() {
         .select()
         .single();
 
-      // =====================================
-      // LOCK FAILED
-      // =====================================
+      if (
+        lockError ||
+        !lockedReminder
+      ) {
+        logReminderStage(
+          "reminder-lock-skipped",
+          {
+            requestId,
 
-      if (lockError || !lockedReminder) {
-
-        console.log(
-          "⚠️ Reminder already locked"
+            reminderId:
+              reminder.id,
+          }
         );
 
         continue;
       }
 
-      console.log(
-        `🔒 LOCKED: ${reminder.title}`
-      );
-
       // =====================================
-      // GET USER DEVICE
+      // GET DEVICE
       // =====================================
 
       const {
         data: device,
         error: deviceError,
       } = await supabase
-        .from("device_registrations")
+        .from(
+          "device_registrations"
+        )
         .select("*")
-        .eq("user_id", reminder.user_id)
+        .eq(
+          "user_id",
+          reminder.user_id
+        )
         .order("created_at", {
           ascending: false,
         })
         .limit(1)
         .single();
 
-      // =====================================
-      // DEVICE NOT FOUND
-      // =====================================
+      if (
+        deviceError ||
+        !device
+      ) {
+        logReminderError(
+          "device-fetch-error",
+          {
+            requestId,
 
-      if (deviceError || !device) {
+            reminderId:
+              reminder.id,
 
-        console.log(
-          "❌ No registered device"
+            deviceError,
+          }
         );
 
-        console.log(deviceError);
-
-        await supabase
-          .from("reminders")
-          .update({
-            processing: false,
-          })
-          .eq("id", reminder.id);
+        await unlockReminder(
+          supabase,
+          reminder.id
+        );
 
         continue;
       }
-
-      console.log("📱 PLAYER ID:");
-      console.log(device.player_id);
 
       // =====================================
       // SEND PUSH
       // =====================================
 
-      let notificationSuccess = false;
+      let notificationSuccess =
+        false;
 
       try {
-
-        const notificationRes =
-          await fetch(
-            "https://onesignal.com/api/v1/notifications",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-
-                Authorization: `Key ${process.env.ONESIGNAL_API_KEY}`,
-              },
-
-              body: JSON.stringify({
-                app_id:
-                  process.env
-                    .NEXT_PUBLIC_ONESIGNAL_APP_ID,
-
-                include_player_ids: [
-                  device.player_id,
-                ],
-
-                headings: {
-                  en: "RemyNest Reminder",
-                },
-
-                contents: {
-                  en:
-                    reminder.title ||
-                    "Reminder",
-                },
-
-                priority: 10,
-
-                data: {
-                  reminderId:
-                    reminder.id,
-                },
-              }),
-            }
+        const notificationData =
+          await sendOneSignalNotification(
+            device.player_id,
+            reminder
           );
 
-        const notificationData =
-          await notificationRes.json();
+        logReminderStage(
+          "notification-response",
+          {
+            requestId,
 
-        console.log(
-          "📨 ONESIGNAL RESPONSE:"
+            reminderId:
+              reminder.id,
+
+            notificationData,
+          }
         );
-
-        console.log(notificationData);
 
         if (
           notificationData.id ||
-          notificationData.recipients > 0
+          notificationData
+            .recipients >
+            0
         ) {
-          notificationSuccess = true;
+          notificationSuccess =
+            true;
         }
+      } catch (
+        notificationError
+      ) {
+        logReminderError(
+          "notification-send-error",
+          {
+            requestId,
 
-      } catch (notificationError) {
+            reminderId:
+              reminder.id,
 
-        console.log(
-          "❌ OneSignal Error:"
-        );
-
-        console.log(
-          notificationError
+            notificationError,
+          }
         );
       }
 
-      // =====================================
-      // NOTIFICATION FAILED
-      // =====================================
-
       if (!notificationSuccess) {
+        await unlockReminder(
+          supabase,
+          reminder.id
+        );
 
-        await supabase
-          .from("reminders")
-          .update({
-            processing: false,
-          })
-          .eq("id", reminder.id);
+        logReminderStage(
+          "notification-failed",
+          {
+            requestId,
 
-        console.log(
-          "❌ Notification failed"
+            reminderId:
+              reminder.id,
+          }
         );
 
         continue;
       }
 
       // =====================================
-      // RECURRING REMINDER
+      // RECURRING
       // =====================================
 
       if (
         reminder.recurring &&
         reminder.frequency
       ) {
-
-        const currentDate =
-          new Date(
-            reminder.remind_at
+        const nextDate =
+          calculateNextReminderDate(
+            reminder.remind_at,
+            reminder.frequency
           );
 
-        let nextDate =
-          new Date(currentDate);
-
-        if (
-          reminder.frequency ===
-          "daily"
-        ) {
-          nextDate.setDate(
-            nextDate.getDate() + 1
-          );
-        }
-
-        if (
-          reminder.frequency ===
-          "weekly"
-        ) {
-          nextDate.setDate(
-            nextDate.getDate() + 7
-          );
-        }
-
-        if (
-          reminder.frequency ===
-          "monthly"
-        ) {
-          nextDate.setMonth(
-            nextDate.getMonth() + 1
-          );
-        }
-
-        await supabase
-          .from("reminders")
-          .update({
-            remind_at:
-              nextDate.toISOString(),
-
-            processing: false,
-          })
-          .eq("id", reminder.id);
-
-        console.log(
-          `🔄 Rescheduled: ${reminder.title}`
+        await rescheduleReminder(
+          supabase,
+          reminder.id,
+          nextDate
         );
 
+        logReminderStage(
+          "reminder-rescheduled",
+          {
+            requestId,
+
+            reminderId:
+              reminder.id,
+
+            nextDate,
+          }
+        );
       } else {
+        await completeReminder(
+          supabase,
+          reminder.id
+        );
 
-        // =====================================
-        // COMPLETE REMINDER
-        // =====================================
+        logReminderStage(
+          "reminder-completed",
+          {
+            requestId,
 
-        await supabase
-          .from("reminders")
-          .update({
-            completed: true,
-            processing: false,
-          })
-          .eq("id", reminder.id);
-
-        console.log(
-          `✅ Completed: ${reminder.title}`
+            reminderId:
+              reminder.id,
+          }
         );
       }
+
+      processedCount += 1;
     }
 
-    // =====================================
-    // SUCCESS RESPONSE
-    // =====================================
+    const durationMs = Number(
+      (
+        performance.now() -
+        start
+      ).toFixed(2)
+    );
+
+    logReminderStage(
+      "cron-completed",
+      {
+        requestId,
+
+        processedCount,
+
+        durationMs,
+      }
+    );
 
     return NextResponse.json({
       success: true,
-      processed: reminders.length,
+      processed: processedCount,
     });
+  } catch (error) {
+    logReminderError(
+      "cron-engine-error",
+      {
+        requestId,
 
-  } catch (err) {
-
-    console.log("❌ CRON ERROR:");
-    console.log(err);
+        error,
+      }
+    );
 
     return NextResponse.json({
       success: false,
