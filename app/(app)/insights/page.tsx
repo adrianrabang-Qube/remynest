@@ -21,10 +21,47 @@ import InsightsClient from "@/components/insights/InsightsClient";
 export const dynamic =
   "force-dynamic";
 
-
 export const revalidate = 60;
 
+export const runtime =
+  "nodejs";
+
+const INSIGHTS_PAGE_TAG =
+  "insights-page";
+
+function logInsightsPageStage(
+  stage: string,
+  metadata?: unknown
+) {
+  console.info(
+    `[${INSIGHTS_PAGE_TAG}] ${stage}`,
+    metadata || {}
+  );
+}
+
+function logInsightsPageError(
+  stage: string,
+  error: unknown
+) {
+  console.error(
+    `[${INSIGHTS_PAGE_TAG}] ${stage}`,
+    error
+  );
+}
+
 export default async function InsightsPage() {
+  const requestId =
+    crypto.randomUUID();
+
+  const pageStart =
+    performance.now();
+
+  logInsightsPageStage(
+    "insights-page-request-started",
+    {
+      requestId,
+    }
+  );
 
   const supabase =
     await createClient();
@@ -41,6 +78,15 @@ export default async function InsightsPage() {
   if (!user) {
     redirect("/login");
   }
+
+  logInsightsPageStage(
+    "insights-page-authenticated",
+    {
+      requestId,
+
+      userId: user.id,
+    }
+  );
 
   // =====================================
   // MEMORIES
@@ -97,16 +143,24 @@ export default async function InsightsPage() {
   // =====================================
 
   if (memoriesError) {
-    console.error(
-      "Insights memories query failed:",
-      memoriesError
+    logInsightsPageError(
+      "insights-memories-query-failed",
+      {
+        requestId,
+
+        memoriesError,
+      }
     );
   }
 
   if (remindersError) {
-    console.error(
-      "Insights reminders query failed:",
-      remindersError
+    logInsightsPageError(
+      "insights-reminders-query-failed",
+      {
+        requestId,
+
+        remindersError,
+      }
     );
   }
 
@@ -161,10 +215,37 @@ export default async function InsightsPage() {
   // RETURN
   // =====================================
 
+  const pageDurationMs =
+    Number(
+      (
+        performance.now() -
+        pageStart
+      ).toFixed(2)
+    );
+
+  logInsightsPageStage(
+    "insights-page-request-completed",
+    {
+      requestId,
+
+      memoryCount:
+        telemetryPayload.memories.length,
+
+      reminderCount:
+        telemetryPayload.reminders.length,
+
+      pageDurationMs,
+    }
+  );
+
   return (
-    <InsightsClient
-      memories={telemetryPayload.memories}
-      reminders={telemetryPayload.reminders}
-    />
+    <main className="min-h-screen bg-[#f5f1e8]">
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <InsightsClient
+          memories={telemetryPayload.memories}
+          reminders={telemetryPayload.reminders}
+        />
+      </section>
+    </main>
   );
 }

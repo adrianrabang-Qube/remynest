@@ -3,9 +3,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function createProfile(
-  formData: FormData
-) {
+const DASHBOARD_PATH = "/dashboard";
+
+async function requireUser() {
   const supabase = await createClient();
 
   const {
@@ -16,13 +16,43 @@ export async function createProfile(
     throw new Error("Unauthorized");
   }
 
-  const profileName = formData.get(
-    "profile_name"
-  ) as string;
+  return {
+    supabase,
+    user,
+  };
+}
 
-  const preferredName = formData.get(
-    "preferred_name"
-  ) as string;
+function normalizeFormValue(
+  value: FormDataEntryValue | null
+) {
+  return String(value || "").trim();
+}
+
+export async function createProfile(
+  formData: FormData
+) {
+  const { supabase, user } =
+    await requireUser();
+
+  const profileName =
+    normalizeFormValue(
+      formData.get(
+        "profile_name"
+      )
+    );
+
+  const preferredName =
+    normalizeFormValue(
+      formData.get(
+        "preferred_name"
+      )
+    );
+
+  if (!profileName) {
+    throw new Error(
+      "Profile name is required"
+    );
+  }
 
   const { data: profile, error } =
     await supabase
@@ -64,7 +94,9 @@ export async function createProfile(
     );
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath(
+    DASHBOARD_PATH
+  );
 }
 
 interface InviteCaregiverInput {
@@ -80,17 +112,8 @@ export async function inviteCaregiver({
   accessLevel,
   memoryProfileId,
 }: InviteCaregiverInput) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return {
-      error: "Unauthorized",
-    };
-  }
+  const { supabase, user } =
+    await requireUser();
 
   const { data: profiles, error: profilesError } =
     await supabase
@@ -107,7 +130,12 @@ export async function inviteCaregiver({
   }
 
   const caregiver = profiles?.find(
-    (p: any) =>
+    (
+      p: {
+        id: string;
+        email: string | null;
+      }
+    ) =>
       p.email?.toLowerCase() ===
       email.toLowerCase()
   );
@@ -143,7 +171,9 @@ export async function inviteCaregiver({
     };
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath(
+    DASHBOARD_PATH
+  );
 
   return {
     success: true,
@@ -153,15 +183,8 @@ export async function inviteCaregiver({
 export async function acceptInvite(
   formData: FormData
 ) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
+  const { supabase, user } =
+    await requireUser();
 
   const inviteId = formData.get(
     "invite_id"
@@ -227,21 +250,16 @@ export async function acceptInvite(
     );
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath(
+    DASHBOARD_PATH
+  );
 }
 
 export async function declineInvite(
   formData: FormData
 ) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
+  const { supabase, user } =
+    await requireUser();
 
   const inviteId = formData.get(
     "invite_id"
@@ -262,5 +280,7 @@ export async function declineInvite(
     );
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath(
+    DASHBOARD_PATH
+  );
 }

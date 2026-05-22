@@ -58,6 +58,24 @@ function validateMemoryContent(
   return null;
 }
 
+function sanitizeStringValue(
+  value: unknown,
+  fallback: string
+) {
+  if (
+    typeof value !== "string"
+  ) {
+    return fallback;
+  }
+
+  const normalized =
+    value.trim();
+
+  return (
+    normalized || fallback
+  );
+}
+
 function createPipelineRequestId() {
   return crypto.randomUUID();
 }
@@ -223,7 +241,10 @@ export async function POST(req: Request) {
     // =====================================
 
     let aiTitle =
-      title || "Untitled Memory";
+      sanitizeStringValue(
+        title,
+        "Untitled Memory"
+      );
 
     let aiSummary = "";
 
@@ -263,38 +284,71 @@ export async function POST(req: Request) {
 
     if (ai) {
       aiTitle =
-        ai.title ||
-        title ||
-        "Untitled Memory";
+        sanitizeStringValue(
+          ai.title,
+          aiTitle
+        );
 
       aiSummary =
-        ai.summary || "";
+        sanitizeStringValue(
+          ai.summary,
+          ""
+        );
 
-      aiTags =
-        ai.tags || [];
+      aiTags = Array.isArray(
+        ai.tags
+      )
+        ? ai.tags.filter(
+            (
+              tag: unknown
+            ): tag is string =>
+              typeof tag ===
+                "string" &&
+              Boolean(
+                tag.trim()
+              )
+          )
+        : [];
 
       aiCategory =
-        ai.category ||
-        "General";
+        sanitizeStringValue(
+          ai.category,
+          "General"
+        );
 
       aiMood =
-        ai.mood ||
-        "Neutral";
+        sanitizeStringValue(
+          ai.mood,
+          "Neutral"
+        );
 
       aiImportance =
-        ai.importance ||
-        "Medium";
+        sanitizeStringValue(
+          ai.importance,
+          "Medium"
+        );
 
       aiConfidence =
-        ai.confidence || 85;
+  typeof ai.confidence ===
+    "number"
+    ? Math.round(
+        ai.confidence <= 1
+          ? ai.confidence * 100
+          : ai.confidence
+      )
+    : 85;
 
       aiSentiment =
-        ai.sentiment ||
-        "Neutral";
+        sanitizeStringValue(
+          ai.sentiment,
+          "Neutral"
+        );
 
       aiEmotionalWeight =
-        ai.emotionalWeight ||
-        "Light";
+        sanitizeStringValue(
+          ai.emotionalWeight,
+          "Light"
+        );
 
       pipelineMetrics.aiDurationMs =
         Number(
@@ -368,54 +422,78 @@ export async function POST(req: Request) {
       }
     );
 
+    const memoryInsertPayload = {
+      user_id:
+        user.id,
+
+      memory_profile_id:
+        activeProfileId,
+
+      title:
+        aiTitle,
+
+      content:
+        normalizedContent,
+
+      ai_title:
+        aiTitle,
+
+      ai_summary:
+        aiSummary,
+
+      ai_tags:
+        aiTags,
+
+      ai_category:
+        aiCategory,
+
+      ai_mood:
+        aiMood,
+
+      ai_importance:
+        aiImportance,
+
+      ai_confidence:
+        aiConfidence,
+
+      ai_sentiment:
+        aiSentiment,
+
+      ai_emotional_weight:
+        aiEmotionalWeight,
+
+      embedding:
+        Array.isArray(
+          embedding
+        )
+          ? embedding
+          : null,
+    };
+
+    logPipelineStage(
+      "memory-insert-payload-built",
+      {
+        requestId:
+          pipelineRequestId,
+
+        hasEmbedding:
+          Boolean(embedding),
+
+        tagCount:
+          aiTags.length,
+
+        category:
+          aiCategory,
+      }
+    );
+
     const {
       data,
       error,
     } = await supabase
       .from("memories")
       .insert([
-        {
-          user_id:
-            user.id,
-
-          memory_profile_id:
-            activeProfileId,
-
-          title:
-            aiTitle,
-
-          content:
-            normalizedContent,
-
-          ai_title:
-            aiTitle,
-
-          ai_summary:
-            aiSummary,
-
-          ai_tags:
-            aiTags,
-
-          ai_category:
-            aiCategory,
-
-          ai_mood:
-            aiMood,
-
-          ai_importance:
-            aiImportance,
-
-          ai_confidence:
-            aiConfidence,
-
-          ai_sentiment:
-            aiSentiment,
-
-          ai_emotional_weight:
-            aiEmotionalWeight,
-
-          embedding,
-        },
+        memoryInsertPayload,
       ])
       .select()
       .single();
@@ -436,6 +514,12 @@ export async function POST(req: Request) {
         {
           error:
             "Failed to create memory",
+
+          details:
+            error.message,
+
+          code:
+            error.code || null,
         },
         {
           status: 500,

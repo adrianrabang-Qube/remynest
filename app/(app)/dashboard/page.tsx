@@ -19,6 +19,15 @@ import { redirect } from "next/navigation";
 
 import { unstable_noStore as noStore } from "next/cache";
 
+import DashboardHeader from "./components/DashboardHeader";
+import DashboardStats from "./components/DashboardStats";
+import DashboardProfilePanel from "./components/DashboardProfilePanel";
+import DashboardAccountStatus from "./components/DashboardAccountStatus";
+import DashboardCreateProfile from "./components/DashboardCreateProfile";
+import DashboardCreateMemory from "./components/DashboardCreateMemory";
+import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
+import DashboardTelemetry from "./components/DashboardTelemetry";
+
 export default async function DashboardPage() {
 
   // =====================================
@@ -290,28 +299,10 @@ export default async function DashboardPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
 
-        {/* HERO */}
-        <div className="space-y-4">
-
-          <div className="inline-flex items-center rounded-full bg-white border px-4 py-2 text-sm text-gray-600 shadow-sm">
-            AI Cognitive Memory Assistant
-          </div>
-
-          <div>
-
-            <h1 className="text-5xl font-bold tracking-tight text-[#2f3e34] mb-4">
-              {greeting},{" "}
-              {displayName}
-            </h1>
-
-            <p className="text-xl text-gray-600 max-w-2xl leading-relaxed">
-              Welcome back to RemyNest.
-              Your memories, reminders,
-              and cognitive insights are
-              ready for today.
-            </p>
-          </div>
-        </div>
+        <DashboardHeader
+          greeting={greeting}
+          displayName={displayName}
+        />
 
         {/* PROFILE SWITCHER */}
         <ProfileSwitcher
@@ -325,50 +316,13 @@ export default async function DashboardPage() {
 
         {/* ACTIVE PROFILE WARNING */}
         {!activeProfile && (
-          <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-5 shadow-sm">
-            <p className="text-yellow-700 font-medium">
-              No active care profile
-              selected.
-            </p>
-          </div>
+          <DashboardActiveProfileWarning />
         )}
 
         {/* STATS */}
-        <div className="grid md:grid-cols-2 gap-6">
-
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-            <p className="text-gray-500 mb-3">
-              Total Memories
-            </p>
-
-            <h2 className="text-5xl font-bold text-[#2f3e34]">
-              {memoryCount}
-            </h2>
-
-            <p className="text-sm text-gray-400 mt-3">
-              Your cognitive archive
-              continues to grow.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-            <p className="text-gray-500 mb-3">
-              Subscription
-            </p>
-
-            <h2 className="text-3xl font-semibold text-[#2f3e34]">
-              Free Plan
-            </h2>
-
-            <p className="text-sm text-gray-400 mt-3">
-              Upgrade anytime for
-              advanced AI cognition
-              features.
-            </p>
-          </div>
-        </div>
+        <DashboardStats
+          memoryCount={memoryCount}
+        />
 
         {/* PENDING INVITES */}
         <PendingInvites
@@ -377,108 +331,28 @@ export default async function DashboardPage() {
           }
         />
 
+        <DashboardTelemetry
+          memoryCount={memoryCount}
+          activeProfileName={
+            activeProfile?.profile_name
+          }
+        />
+
         {/* ACTIVE PROFILE DETAILS */}
         {activeProfile && (
-
-          <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-            <h2 className="text-2xl font-semibold mb-6 text-[#2f3e34]">
-              Active Profile
-            </h2>
-
-            <div className="border rounded-3xl p-6 bg-[#faf8f4]">
-
-              <h3 className="text-3xl font-semibold mb-3 text-[#2f3e34]">
-                {
-                  activeProfile.profile_name
-                }
-              </h3>
-
-              <p className="text-gray-600 mb-5">
-                Preferred Name:{" "}
-                {
-                  activeProfile.preferred_name
-                }
-              </p>
-
-              {activeProfile.shared && (
-
-                <div className="space-y-2 mb-6">
-
-                  <p className="text-gray-600">
-                    Access Level:{" "}
-                    {
-                      activeProfile.access_level
-                    }
-                  </p>
-
-                  <p className="text-gray-600">
-                    Relationship:{" "}
-                    {
-                      activeProfile.relationship_type
-                    }
-                  </p>
-
-                  <span className="inline-block rounded-full bg-blue-100 text-blue-700 px-4 py-2 text-sm font-medium">
-                    Shared With You
-                  </span>
-                </div>
-              )}
-
-              <InviteCaregiverForm
-                memoryProfileId={
-                  activeProfile.id
-                }
-              />
-            </div>
-          </div>
+          <DashboardProfilePanel
+            activeProfile={activeProfile}
+          />
         )}
 
         {/* ACCOUNT STATUS */}
-        <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-          <h2 className="text-2xl font-semibold mb-4 text-[#2f3e34]">
-            Account Status
-          </h2>
-
-          <p className="text-gray-600 mb-5">
-            You are currently using
-            the free RemyNest plan.
-          </p>
-
-          <UpgradeButton />
-        </div>
+        <DashboardAccountStatus />
 
         {/* CREATE PROFILE */}
-        <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-          <h2 className="text-2xl font-semibold mb-2 text-[#2f3e34]">
-            Create Care Profile
-          </h2>
-
-          <p className="text-gray-500 mb-5">
-            Create a new memory care
-            profile for yourself or a
-            loved one.
-          </p>
-
-          <CreateProfileForm />
-        </div>
+        <DashboardCreateProfile />
 
         {/* CREATE MEMORY */}
-        <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
-          <h2 className="text-2xl font-semibold mb-2 text-[#2f3e34]">
-            Create Memory
-          </h2>
-
-          <p className="text-gray-500 mb-5">
-            Save an important moment,
-            thought, or experience.
-          </p>
-
-          <CreateMemoryForm />
-        </div>
+        <DashboardCreateMemory />
       </main>
     </div>
   );

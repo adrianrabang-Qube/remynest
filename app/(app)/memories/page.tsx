@@ -18,6 +18,56 @@ type Memory = {
   created_at: string;
 };
 
+type ApiMetadata = {
+  requestId?: string;
+  durationMs?: number;
+  memoryCount?: number;
+};
+
+type MemoriesApiResponse = {
+  success?: boolean;
+  data?: Memory[];
+  results?: Memory[];
+  error?: string;
+  metadata?: ApiMetadata;
+};
+
+function normalizeMemoryArray(
+  payload: unknown
+): Memory[] {
+  // raw array support
+  if (Array.isArray(payload)) {
+    return payload as Memory[];
+  }
+
+  // wrapped enterprise response
+  if (
+    payload &&
+    typeof payload === "object"
+  ) {
+    const typedPayload =
+      payload as MemoriesApiResponse;
+
+    if (
+      Array.isArray(
+        typedPayload.data
+      )
+    ) {
+      return typedPayload.data;
+    }
+
+    if (
+      Array.isArray(
+        typedPayload.results
+      )
+    ) {
+      return typedPayload.results;
+    }
+  }
+
+  return [];
+}
+
 export default function MemoriesPage() {
   const queryClient = useQueryClient();
 
@@ -123,7 +173,23 @@ export default function MemoriesPage() {
         );
       }
 
-      return res.json();
+      const responseData =
+  await res.json();
+
+const normalizedMemories =
+  normalizeMemoryArray(
+    responseData
+  );
+
+console.log(
+  "[memories-page] fetch-complete",
+  {
+    memoryCount:
+      normalizedMemories.length,
+  }
+);
+
+return normalizedMemories;
     },
 
     staleTime: 1000 * 60 * 2,
@@ -435,9 +501,33 @@ export default function MemoriesPage() {
         );
       }
 
-      const data = await res.json();
+      const responseData =
+  await res.json();
 
-      setSearchResults(data);
+const normalizedResults = Array.isArray(
+  responseData
+)
+  ? responseData
+  : Array.isArray(responseData.results)
+  ? responseData.results
+  : Array.isArray(responseData.data)
+  ? responseData.data
+  : [];
+
+console.log(
+  "[memories-search-ui] normalized-results",
+  {
+    query: searchQuery,
+    resultCount:
+      normalizedResults.length,
+    rawResponse:
+      responseData,
+  }
+);
+
+setSearchResults(
+  normalizedResults
+);
     } catch (error) {
       console.error(error);
     } finally {
@@ -448,9 +538,14 @@ export default function MemoriesPage() {
   // =========================
   // SORT
   // =========================
-  const sortedMemories = [
-    ...memories,
-  ].sort(
+  const normalizedMemories =
+  normalizeMemoryArray(
+    memories
+  );
+
+const sortedMemories = [
+  ...normalizedMemories,
+].sort(
     (a, b) =>
       new Date(
         b.created_at
@@ -621,7 +716,8 @@ export default function MemoriesPage() {
 
       {/* Empty */}
       {!isLoading &&
-        memories.length === 0 && (
+        normalizedMemories.length ===
+  0 && (
           <p className="text-gray-500">
             No memories yet.
           </p>
