@@ -63,6 +63,8 @@ export async function POST(req: Request) {
 
     const userId = session.metadata?.userId;
 
+    console.log("✅ SESSION METADATA:", session.metadata);
+
     const plan =
       (session.metadata?.plan as BillingPlan) ||
       "PREMIUM";
@@ -96,6 +98,24 @@ export async function POST(req: Request) {
 
     const currentPeriodEnd =
       subscription?.items.data[0]?.current_period_end;
+
+    // ✅ VERIFY USER EXISTS FIRST
+    const { data: existingProfile, error: profileLookupError } =
+      await supabase
+        .from("profiles")
+        .select("id, email")
+        .eq("id", userId)
+        .single();
+
+    console.log(
+      "✅ PROFILE LOOKUP:",
+      existingProfile
+    );
+
+    console.log(
+      "❌ PROFILE LOOKUP ERROR:",
+      profileLookupError
+    );
 
     // ✅ UPDATE PROFILE
     const { data, error } = await supabase
@@ -131,6 +151,13 @@ export async function POST(req: Request) {
     console.log("✅ UPDATE DATA:", data);
 
     console.log("❌ UPDATE ERROR:", error);
+
+    if (error) {
+      console.error(
+        "❌ FULL UPDATE FAILURE:",
+        JSON.stringify(error, null, 2)
+      );
+    }
 
     if (!error) {
       console.log(
