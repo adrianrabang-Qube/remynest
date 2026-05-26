@@ -63,8 +63,6 @@ export async function POST(req: Request) {
 
     const userId = session.metadata?.userId;
 
-    console.log("✅ SESSION METADATA:", session.metadata);
-
     const plan =
       (session.metadata?.plan as BillingPlan) ||
       "PREMIUM";
@@ -86,12 +84,13 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin;
 
     // ✅ GET SUBSCRIPTION DETAILS
-    let subscription = null;
+    let subscription: Stripe.Subscription | null = null;
 
     if (session.subscription) {
-      subscription = await stripe.subscriptions.retrieve(
-        session.subscription as string
-      );
+      subscription =
+        await stripe.subscriptions.retrieve(
+          session.subscription as string
+        ) as Stripe.Subscription;
     }
 
     const stripeSubscription = subscription as any;
@@ -101,30 +100,18 @@ export async function POST(req: Request) {
       stripeSubscription?.items?.data?.[0]?.current_period_end ??
       null;
 
-    console.log("✅ SUBSCRIPTION:", subscription?.id);
     console.log(
       "✅ STRIPE CURRENT PERIOD END:",
-      currentPeriodEnd,
-      typeof currentPeriodEnd
+      currentPeriodEnd
     );
 
     // ✅ VERIFY USER EXISTS FIRST
-    const { data: existingProfile, error: profileLookupError } =
+    const { data: existingProfile } =
       await supabase
         .from("profiles")
-        .select("id, email")
+        .select("id")
         .eq("id", userId)
-        .single();
-
-    console.log(
-      "✅ PROFILE LOOKUP:",
-      existingProfile
-    );
-
-    console.log(
-      "❌ PROFILE LOOKUP ERROR:",
-      profileLookupError
-    );
+        .maybeSingle();
 
     // ✅ UPDATE PROFILE
     const updatePayload = {
@@ -153,11 +140,6 @@ export async function POST(req: Request) {
         : null,
     };
 
-    console.log(
-      "✅ UPDATE PAYLOAD:",
-      JSON.stringify(updatePayload, null, 2)
-    );
-
     const { data, error } = await supabase
       .from("profiles")
       .update(updatePayload)
@@ -165,19 +147,9 @@ export async function POST(req: Request) {
       .select("*")
       .maybeSingle();
 
-    console.log("✅ UPDATE DATA:", data);
-
-    console.log("✅ UPDATED ROW VALUES:", {
-      is_premium: data?.is_premium,
-      subscription_plan: data?.subscription_plan,
-      billing_interval: data?.billing_interval,
-      stripe_customer_id: data?.stripe_customer_id,
-      stripe_subscription_id: data?.stripe_subscription_id,
-      subscription_status: data?.subscription_status,
-      current_period_end: data?.current_period_end,
-    });
-
-    console.log("❌ UPDATE ERROR:", error);
+    if (error) {
+      console.error("❌ UPDATE ERROR:", error);
+    }
 
     if (!data && !error) {
       console.error(
