@@ -267,6 +267,144 @@ export async function POST(req: Request) {
     });
   }
 
+  // ✅ SUBSCRIPTION UPDATED / RENEWED
+  if (
+    event.type ===
+    "customer.subscription.updated"
+  ) {
+    const subscription =
+      event.data.object as Stripe.Subscription;
+
+    console.log(
+      "🔄 SUBSCRIPTION UPDATED:",
+      subscription.id
+    );
+
+    const supabase = supabaseAdmin;
+
+    const currentPeriodEnd =
+      (subscription as any)
+        ?.current_period_end ?? null;
+
+    const updatePayload = {
+      is_premium:
+        subscription.status === "active",
+
+      subscription_status:
+        subscription.status,
+
+      stripe_subscription_id:
+        subscription.id,
+
+      current_period_end:
+        currentPeriodEnd
+          ? new Date(
+              Number(currentPeriodEnd) *
+                1000
+            ).toISOString()
+          : null,
+    };
+
+    const { data, error } =
+      await supabase
+        .from("profiles")
+        .update(updatePayload)
+        .eq(
+          "stripe_subscription_id",
+          subscription.id
+        )
+        .select(
+          "id, subscription_status, current_period_end"
+        )
+        .maybeSingle();
+
+    if (error) {
+      console.error(
+        "❌ SUBSCRIPTION UPDATE FAILURE:",
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
+    } else {
+      console.log(
+        "✅ SUBSCRIPTION UPDATED:",
+        data
+      );
+    }
+
+    logSubscriptionChanged({
+      metadata: {
+        stripeSubscriptionId:
+          subscription.id,
+        status:
+          subscription.status,
+      },
+    });
+  }
+
+  // ✅ PAYMENT FAILED
+  if (
+    event.type ===
+    "invoice.payment_failed"
+  ) {
+    const invoice =
+      event.data.object as Stripe.Invoice;
+
+    console.log(
+      "⚠️ PAYMENT FAILED:",
+      invoice.id
+    );
+
+    const subscriptionId =
+      typeof (invoice as any)
+        .subscription === "string"
+        ? (invoice as any)
+            .subscription
+        : null;
+
+    if (!subscriptionId) {
+      return NextResponse.json({
+        received: true,
+      });
+    }
+
+    const supabase = supabaseAdmin;
+
+    const { data, error } =
+      await supabase
+        .from("profiles")
+        .update({
+          subscription_status:
+            "payment_failed",
+        })
+        .eq(
+          "stripe_subscription_id",
+          subscriptionId
+        )
+        .select(
+          "id, subscription_status"
+        )
+        .maybeSingle();
+
+    if (error) {
+      console.error(
+        "❌ PAYMENT FAILURE UPDATE ERROR:",
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
+    } else {
+      console.log(
+        "✅ PAYMENT FAILURE RECORDED:",
+        data
+      );
+    }
+  }
+
   return NextResponse.json({
     received: true,
   });
