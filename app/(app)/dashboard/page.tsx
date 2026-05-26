@@ -317,6 +317,18 @@ export default async function DashboardPage() {
     },
   });
 
+  console.info(
+    "[dashboard-page] billing-state",
+    {
+      subscription_plan:
+        profile?.subscription_plan,
+      is_premium:
+        profile?.is_premium,
+      subscription_status:
+        profile?.subscription_status,
+    }
+  );
+
   return (
     <div className="min-h-screen bg-[#f5f1ea]">
 
@@ -370,12 +382,11 @@ export default async function DashboardPage() {
 
         {/* ACCOUNT STATUS */}
         <DashboardAccountStatus
-          currentPlan={
-            profile?.subscription_plan === "PREMIUM"
-              ? "Premium Plan"
-              : "Free Plan"
-          }
-          isPremium={Boolean(profile?.is_premium)}
+          currentPlan={profile?.subscription_plan}
+          isPremium={Boolean(
+            profile?.is_premium ||
+            profile?.subscription_status === "active"
+          )}
         />
 
         {/* CREATE PROFILE */}
