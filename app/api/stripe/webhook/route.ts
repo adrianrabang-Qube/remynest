@@ -3,7 +3,18 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { stripe } from "@/lib/stripe";
-import { createClient } from "@/utils/supabase/server";
+import {
+  BillingPlan,
+  BillingInterval,
+} from "@/lib/billing/plans";
+
+import {
+  logCheckoutCompleted,
+  logSubscriptionChanged,
+  logSubscriptionCancelled,
+} from "@/lib/billing/billing-telemetry";
+
+import { supabaseAdmin } from "@/utils/supabase/admin";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -52,6 +63,14 @@ export async function POST(req: Request) {
 
     const userId = session.metadata?.userId;
 
+    const plan =
+      (session.metadata?.plan as BillingPlan) ||
+      "PREMIUM";
+
+    const interval =
+      (session.metadata?.interval as BillingInterval) ||
+      "monthly";
+
     console.log("✅ USER ID:", userId);
 
     if (!userId) {
@@ -62,7 +81,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     // ✅ GET SUBSCRIPTION DETAILS
     let subscription = null;
@@ -83,6 +102,10 @@ export async function POST(req: Request) {
       .from("profiles")
       .update({
         is_premium: true,
+
+        subscription_plan: plan,
+
+        billing_interval: interval,
 
         stripe_customer_id:
           typeof session.customer === "string"
@@ -115,6 +138,18 @@ export async function POST(req: Request) {
         userId
       );
     }
+
+    logCheckoutCompleted({
+      userId,
+      plan,
+      interval,
+    });
+
+    logSubscriptionChanged({
+      userId,
+      plan,
+      interval,
+    });
   }
 
   // ✅ SUBSCRIPTION CANCELED / EXPIRED
@@ -129,12 +164,14 @@ export async function POST(req: Request) {
       subscription.id
     );
 
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     const { data, error } = await supabase
       .from("profiles")
       .update({
         is_premium: false,
+
+        subscription_plan: "FREE",
 
         subscription_status:
           subscription.status,
@@ -150,6 +187,13 @@ export async function POST(req: Request) {
     console.log("✅ DOWNGRADE DATA:", data);
 
     console.log("❌ DOWNGRADE ERROR:", error);
+
+    logSubscriptionCancelled({
+      metadata: {
+        stripeSubscriptionId:
+          subscription.id,
+      },
+    });
   }
 
   return NextResponse.json({
