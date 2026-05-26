@@ -1,32 +1,32 @@
 import UpgradeButton from "@/components/UpgradeButton";
 
 type DashboardAccountStatusProps = {
-  currentPlan?: string;
+  currentPlan?: string | null;
+  isPremium?: boolean;
 };
 
 export default function DashboardAccountStatus({
-  currentPlan = "Free Plan",
+  currentPlan,
+  isPremium = false,
 }: DashboardAccountStatusProps) {
+  const displayPlan =
+    currentPlan ?? (isPremium ? "Premium Plan" : "Free Plan");
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
-
       <h2 className="text-2xl font-semibold mb-4 text-[#2f3e34]">
         Account Status
       </h2>
 
       <div className="space-y-5">
-
         <div>
-
           <p className="text-gray-600 mb-2">
             Subscription Tier
           </p>
 
           <h3 className="text-3xl font-bold text-[#2f3e34]">
-            {currentPlan}
+            {displayPlan}
           </h3>
-
         </div>
 
         <p className="text-gray-500 leading-relaxed">
@@ -38,10 +38,8 @@ export default function DashboardAccountStatus({
           capabilities.
         </p>
 
-        <UpgradeButton />
-
+        {!isPremium && <UpgradeButton />}
       </div>
-
     </div>
   );
 }

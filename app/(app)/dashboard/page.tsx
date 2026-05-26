@@ -369,7 +369,14 @@ export default async function DashboardPage() {
         )}
 
         {/* ACCOUNT STATUS */}
-        <DashboardAccountStatus />
+        <DashboardAccountStatus
+          currentPlan={
+            profile?.subscription_plan === "PREMIUM"
+              ? "Premium Plan"
+              : "Free Plan"
+          }
+          isPremium={Boolean(profile?.is_premium)}
+        />
 
         {/* CREATE PROFILE */}
         <DashboardCreateProfile />
