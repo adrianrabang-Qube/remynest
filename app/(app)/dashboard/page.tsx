@@ -357,6 +357,11 @@ export default async function DashboardPage() {
         {/* STATS */}
         <DashboardStats
           memoryCount={memoryCount}
+          currentPlan={profile?.subscription_plan}
+          isPremium={Boolean(
+            profile?.is_premium ||
+            profile?.subscription_status === "active"
+          )}
         />
 
         {/* PENDING INVITES */}
