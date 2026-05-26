@@ -94,11 +94,19 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("✅ SUBSCRIPTION:", subscription?.id);
+    const stripeSubscription = subscription as any;
 
-    const currentPeriodEnd = subscription
-      ? (subscription as any).current_period_end
-      : null;
+    const currentPeriodEnd =
+      stripeSubscription?.current_period_end ??
+      stripeSubscription?.items?.data?.[0]?.current_period_end ??
+      null;
+
+    console.log("✅ SUBSCRIPTION:", subscription?.id);
+    console.log(
+      "✅ STRIPE CURRENT PERIOD END:",
+      currentPeriodEnd,
+      typeof currentPeriodEnd
+    );
 
     // ✅ VERIFY USER EXISTS FIRST
     const { data: existingProfile, error: profileLookupError } =
@@ -138,12 +146,11 @@ export async function POST(req: Request) {
         (subscription as any)?.status ??
         "active",
 
-      current_period_end:
-        typeof currentPeriodEnd === "number"
-          ? new Date(
-              currentPeriodEnd * 1000
-            ).toISOString()
-          : null,
+      current_period_end: currentPeriodEnd
+        ? new Date(
+            Number(currentPeriodEnd) * 1000
+          ).toISOString()
+        : null,
     };
 
     console.log(
