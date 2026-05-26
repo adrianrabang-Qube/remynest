@@ -97,7 +97,8 @@ export async function POST(req: Request) {
     console.log("✅ SUBSCRIPTION:", subscription?.id);
 
     const currentPeriodEnd =
-      subscription?.items.data[0]?.current_period_end;
+      (subscription as any)?.current_period_end ??
+      null;
 
     // ✅ VERIFY USER EXISTS FIRST
     const { data: existingProfile, error: profileLookupError } =
@@ -134,7 +135,8 @@ export async function POST(req: Request) {
         subscription?.id ?? null,
 
       subscription_status:
-        subscription?.status ?? "active",
+        (subscription as any)?.status ??
+        "active",
 
       current_period_end:
         currentPeriodEnd
