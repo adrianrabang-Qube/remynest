@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 import {
   BillingPlan,
   BillingInterval,
-  getPlan,
+  getPriceId,
 } from "@/lib/billing/plans";
 
 import {
@@ -47,18 +47,20 @@ export async function POST(
       (body.interval as BillingInterval) ||
       "monthly";
 
-    const config =
-      getPlan(plan);
-
     const stripePriceId =
-      interval === "yearly"
-        ? config.yearlyPriceId
-        : config.monthlyPriceId;
+      getPriceId(
+        plan,
+        interval
+      );
 
     console.log("PLAN:", plan);
     console.log("INTERVAL:", interval);
     console.log("PRICE ID:", stripePriceId);
     console.log("USER EMAIL:", user.email);
+    console.log(
+      "PRICE RESOLVER SOURCE:",
+      `STRIPE_${plan}_${interval.toUpperCase()}_PRICE_ID`
+    );
 
     if (!stripePriceId) {
       return NextResponse.json(
