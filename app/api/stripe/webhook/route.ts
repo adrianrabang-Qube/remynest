@@ -158,15 +158,15 @@ export async function POST(req: Request) {
       JSON.stringify(updatePayload, null, 2)
     );
 
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .update(updatePayload)
       .eq("id", userId)
       .select("*")
-      .single();
+      .maybeSingle();
 
     console.log("✅ UPDATE DATA:", data);
-    console.log("✅ UPDATE COUNT:", count);
+
     console.log("✅ UPDATED ROW VALUES:", {
       is_premium: data?.is_premium,
       subscription_plan: data?.subscription_plan,
@@ -178,14 +178,25 @@ export async function POST(req: Request) {
     });
 
     console.log("❌ UPDATE ERROR:", error);
-    if (!data) {
-      console.error("❌ NO UPDATED ROW RETURNED FOR USER:", userId);
+
+    if (!data && !error) {
+      console.error(
+        "❌ PROFILE EXISTS BUT UPDATE RETURNED NO ROW:",
+        userId
+      );
     }
 
     if (error) {
       console.error(
         "❌ FULL UPDATE FAILURE:",
         JSON.stringify(error, null, 2)
+      );
+    }
+
+    if (!existingProfile) {
+      console.error(
+        "❌ PROFILE NOT FOUND FOR USER ID:",
+        userId
       );
     }
 
