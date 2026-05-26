@@ -118,35 +118,42 @@ export async function POST(req: Request) {
     );
 
     // ✅ UPDATE PROFILE
+    const updatePayload = {
+      is_premium: true,
+
+      subscription_plan: plan,
+
+      billing_interval: interval,
+
+      stripe_customer_id:
+        typeof session.customer === "string"
+          ? session.customer
+          : null,
+
+      stripe_subscription_id:
+        subscription?.id ?? null,
+
+      subscription_status:
+        subscription?.status ?? "active",
+
+      current_period_end:
+        currentPeriodEnd
+          ? new Date(
+              currentPeriodEnd * 1000
+            ).toISOString()
+          : null,
+    };
+
+    console.log(
+      "✅ UPDATE PAYLOAD:",
+      JSON.stringify(updatePayload, null, 2)
+    );
+
     const { data, error } = await supabase
       .from("profiles")
-      .update({
-        is_premium: true,
-
-        subscription_plan: plan,
-
-        billing_interval: interval,
-
-        stripe_customer_id:
-          typeof session.customer === "string"
-            ? session.customer
-            : null,
-
-        stripe_subscription_id:
-          subscription?.id || null,
-
-        subscription_status:
-          subscription?.status || "active",
-
-        current_period_end:
-          currentPeriodEnd
-            ? new Date(
-                currentPeriodEnd * 1000
-              ).toISOString()
-            : null,
-      })
+      .update(updatePayload)
       .eq("id", userId)
-      .select();
+      .select("*");
 
     console.log("✅ UPDATE DATA:", data);
 
