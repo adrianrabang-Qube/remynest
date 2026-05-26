@@ -96,9 +96,9 @@ export async function POST(req: Request) {
 
     console.log("✅ SUBSCRIPTION:", subscription?.id);
 
-    const currentPeriodEnd =
-      (subscription as any)?.current_period_end ??
-      null;
+    const currentPeriodEnd = subscription
+      ? (subscription as any).current_period_end
+      : null;
 
     // ✅ VERIFY USER EXISTS FIRST
     const { data: existingProfile, error: profileLookupError } =
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
         "active",
 
       current_period_end:
-        currentPeriodEnd
+        typeof currentPeriodEnd === "number"
           ? new Date(
               currentPeriodEnd * 1000
             ).toISOString()
