@@ -151,15 +151,29 @@ export async function POST(req: Request) {
       JSON.stringify(updatePayload, null, 2)
     );
 
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from("profiles")
       .update(updatePayload)
       .eq("id", userId)
-      .select("*");
+      .select("*")
+      .single();
 
     console.log("✅ UPDATE DATA:", data);
+    console.log("✅ UPDATE COUNT:", count);
+    console.log("✅ UPDATED ROW VALUES:", {
+      is_premium: data?.is_premium,
+      subscription_plan: data?.subscription_plan,
+      billing_interval: data?.billing_interval,
+      stripe_customer_id: data?.stripe_customer_id,
+      stripe_subscription_id: data?.stripe_subscription_id,
+      subscription_status: data?.subscription_status,
+      current_period_end: data?.current_period_end,
+    });
 
     console.log("❌ UPDATE ERROR:", error);
+    if (!data) {
+      console.error("❌ NO UPDATED ROW RETURNED FOR USER:", userId);
+    }
 
     if (error) {
       console.error(
