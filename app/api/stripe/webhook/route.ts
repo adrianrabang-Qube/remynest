@@ -93,12 +93,24 @@ export async function POST(req: Request) {
         ) as Stripe.Subscription;
     }
 
-    const stripeSubscription = subscription as any;
+    const stripeSubscription =
+      subscription as Stripe.Subscription | null;
 
     const currentPeriodEnd =
-      stripeSubscription?.current_period_end ??
-      stripeSubscription?.items?.data?.[0]?.current_period_end ??
-      null;
+      stripeSubscription
+        ? (
+            stripeSubscription as Stripe.Subscription & {
+              current_period_end?: number;
+              items?: {
+                data?: Array<{
+                  current_period_end?: number;
+                }>;
+              };
+            }
+          ).current_period_end ??
+          stripeSubscription.items?.data?.[0]?.current_period_end ??
+          null
+        : null;
 
     console.log(
       "✅ STRIPE CURRENT PERIOD END:",
@@ -106,12 +118,26 @@ export async function POST(req: Request) {
     );
 
     // ✅ VERIFY USER EXISTS FIRST
-    const { data: existingProfile } =
+    const {
+      data: existingProfile,
+      error: profileLookupError,
+    } =
       await supabase
         .from("profiles")
         .select("id")
         .eq("id", userId)
         .maybeSingle();
+
+    if (profileLookupError) {
+      console.error(
+        "❌ PROFILE LOOKUP FAILURE:",
+        JSON.stringify(
+          profileLookupError,
+          null,
+          2
+        )
+      );
+    }
 
     // ✅ UPDATE PROFILE
     const updatePayload = {
@@ -148,31 +174,35 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (error) {
-      console.error("❌ UPDATE ERROR:", error);
-    }
-
-    if (!data && !error) {
-      console.error(
-        "❌ PROFILE EXISTS BUT UPDATE RETURNED NO ROW:",
-        userId
-      );
-    }
-
-    if (error) {
       console.error(
         "❌ FULL UPDATE FAILURE:",
         JSON.stringify(error, null, 2)
       );
-    }
-
-    if (!existingProfile) {
+    } else if (!data) {
       console.error(
-        "❌ PROFILE NOT FOUND FOR USER ID:",
+        "❌ PROFILE EXISTS BUT UPDATE RETURNED NO ROW:",
         userId
       );
-    }
+    } else {
+      console.log(
+        "✅ UPDATED ROW VALUES:",
+        {
+          is_premium: data.is_premium,
+          subscription_plan:
+            data.subscription_plan,
+          billing_interval:
+            data.billing_interval,
+          stripe_customer_id:
+            data.stripe_customer_id,
+          stripe_subscription_id:
+            data.stripe_subscription_id,
+          subscription_status:
+            data.subscription_status,
+          current_period_end:
+            data.current_period_end,
+        }
+      );
 
-    if (!error) {
       console.log(
         "✅ User upgraded to premium:",
         userId
@@ -222,7 +252,8 @@ export async function POST(req: Request) {
         "stripe_subscription_id",
         subscription.id
       )
-      .select();
+      .select("id, subscription_status, current_period_end")
+      .maybeSingle();
 
     console.log("✅ DOWNGRADE DATA:", data);
 
