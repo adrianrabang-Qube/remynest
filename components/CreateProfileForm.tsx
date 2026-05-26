@@ -3,9 +3,12 @@
 import { useState } from "react";
 
 import { createProfile } from "@/app/(app)/dashboard/actions";
+import UpgradeModal from "./UpgradeModal";
 
 export default function CreateProfileForm() {
   const [loading, setLoading] =
+    useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] =
     useState(false);
 
   async function handleSubmit(
@@ -20,7 +23,22 @@ export default function CreateProfileForm() {
     } catch (err) {
       console.error(err);
 
-      alert("Failed to create profile");
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to create profile";
+
+      if (
+        message.includes(
+          "Care profile limit reached"
+        )
+      ) {
+        setShowUpgradeModal(true);
+
+        return;
+      }
+
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -85,6 +103,12 @@ export default function CreateProfileForm() {
             : "Create Profile"}
         </button>
       </form>
+      <UpgradeModal
+        open={showUpgradeModal}
+        onClose={() =>
+          setShowUpgradeModal(false)
+        }
+      />
     </div>
   );
 }

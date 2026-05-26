@@ -1,38 +1,69 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
+import { checkPremium } from "@/lib/premium";
+
+import {
+  canCreateCareProfile,
+} from "@/lib/billing/usage-limits";
+
+import {
+  normalizeFormValue,
+  requireDashboardUser,
+  requireNonEmpty,
+} from "./lib/dashboard-guards";
+
+import {
+  logProfileCreation,
+  logDashboardEvent,
+} from "./lib/dashboard-telemetry";
+
 const DASHBOARD_PATH = "/dashboard";
-
-async function requireUser() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  return {
-    supabase,
-    user,
-  };
-}
-
-function normalizeFormValue(
-  value: FormDataEntryValue | null
-) {
-  return String(value || "").trim();
-}
 
 export async function createProfile(
   formData: FormData
 ) {
   const { supabase, user } =
-    await requireUser();
+    await requireDashboardUser();
+
+  const {
+    plan,
+  } = await checkPremium();
+
+  const {
+    count: currentProfileCount,
+    error: countError,
+  } = await supabase
+    .from("memory_profiles")
+    .select("id", {
+      count: "exact",
+      head: true,
+    })
+    .eq(
+      "created_by_account_id",
+      user.id
+    );
+
+  if (countError) {
+    console.error(countError);
+
+    throw new Error(
+      "Failed to validate profile limits"
+    );
+  }
+
+  const canCreate =
+    canCreateCareProfile(
+      currentProfileCount ?? 0,
+      plan
+    );
+
+  if (!canCreate) {
+    throw new Error(
+      `Care profile limit reached for ${plan} plan.`
+    );
+  }
 
   const profileName =
     normalizeFormValue(
@@ -48,11 +79,10 @@ export async function createProfile(
       )
     );
 
-  if (!profileName) {
-    throw new Error(
-      "Profile name is required"
-    );
-  }
+  requireNonEmpty(
+    profileName,
+    "Profile name"
+  );
 
   const { data: profile, error } =
     await supabase
@@ -94,6 +124,11 @@ export async function createProfile(
     );
   }
 
+  logProfileCreation({
+    userId: user.id,
+    profileId: profile.id,
+  });
+
   revalidatePath(
     DASHBOARD_PATH
   );
@@ -113,7 +148,7 @@ export async function inviteCaregiver({
   memoryProfileId,
 }: InviteCaregiverInput) {
   const { supabase, user } =
-    await requireUser();
+    await requireDashboardUser();
 
   const { data: profiles, error: profilesError } =
     await supabase
@@ -171,6 +206,15 @@ export async function inviteCaregiver({
     };
   }
 
+  logDashboardEvent(
+    "invite_sent",
+    {
+      userId: user.id,
+      profileId:
+        memoryProfileId,
+    }
+  );
+
   revalidatePath(
     DASHBOARD_PATH
   );
@@ -184,7 +228,7 @@ export async function acceptInvite(
   formData: FormData
 ) {
   const { supabase, user } =
-    await requireUser();
+    await requireDashboardUser();
 
   const inviteId = formData.get(
     "invite_id"
@@ -259,7 +303,7 @@ export async function declineInvite(
   formData: FormData
 ) {
   const { supabase, user } =
-    await requireUser();
+    await requireDashboardUser();
 
   const inviteId = formData.get(
     "invite_id"

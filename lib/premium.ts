@@ -1,7 +1,18 @@
 import { createClient } from "@/utils/supabase/server";
 
-export async function checkPremium() {
-  const supabase = await createClient();
+import {
+  BillingPlan,
+} from "@/lib/billing/plans";
+
+export interface PremiumStatus {
+  user: unknown | null;
+  isPremium: boolean;
+  plan: BillingPlan;
+}
+
+export async function checkPremium(): Promise<PremiumStatus> {
+  const supabase =
+    await createClient();
 
   const {
     data: { user },
@@ -11,17 +22,30 @@ export async function checkPremium() {
     return {
       user: null,
       isPremium: false,
+      plan: "FREE",
     };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_premium")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } =
+    await supabase
+      .from("profiles")
+      .select(
+        "is_premium, subscription_plan"
+      )
+      .eq("id", user.id)
+      .single();
+
+  const plan =
+    (profile
+      ?.subscription_plan as BillingPlan | null) ??
+    (profile?.is_premium
+      ? "PREMIUM"
+      : "FREE");
 
   return {
     user,
-    isPremium: profile?.is_premium ?? false,
+    isPremium:
+      plan !== "FREE",
+    plan,
   };
 }

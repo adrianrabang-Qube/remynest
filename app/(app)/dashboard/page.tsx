@@ -1,7 +1,3 @@
-import UpgradeButton from "@/components/UpgradeButton";
-import CreateMemoryForm from "@/components/CreateMemoryForm";
-import CreateProfileForm from "@/components/CreateProfileForm";
-import InviteCaregiverForm from "@/components/InviteCaregiverForm";
 import PendingInvites from "@/components/PendingInvites";
 import ProfileSwitcher from "@/components/ProfileSwitcher";
 
@@ -18,6 +14,14 @@ import {
 import { redirect } from "next/navigation";
 
 import { unstable_noStore as noStore } from "next/cache";
+
+import {
+  formatDisplayName,
+} from "./lib/dashboard-formatters";
+
+import {
+  logDashboardLoad,
+} from "./lib/dashboard-telemetry";
 
 import DashboardHeader from "./components/DashboardHeader";
 import DashboardStats from "./components/DashboardStats";
@@ -155,10 +159,12 @@ export default async function DashboardPage() {
   }
 
   const displayName =
-    profile?.preferred_name ||
-    profile?.first_name ||
-    user?.email?.split("@")[0] ||
-    "there";
+    formatDisplayName(
+      profile?.preferred_name ||
+      profile?.first_name ||
+      user?.email?.split("@")[0] ||
+      "there"
+    );
 
   // =====================================
   // PENDING INVITES
@@ -293,6 +299,23 @@ export default async function DashboardPage() {
         dashboardDurationMs,
     }
   );
+
+  logDashboardLoad({
+    requestId:
+      dashboardRequestId,
+
+    userId: user.id,
+
+    profileId:
+      activeProfileId ||
+      undefined,
+
+    metadata: {
+      memoryCount,
+      durationMs:
+        dashboardDurationMs,
+    },
+  });
 
   return (
     <div className="min-h-screen bg-[#f5f1ea]">

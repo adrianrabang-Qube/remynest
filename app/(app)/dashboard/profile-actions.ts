@@ -3,25 +3,18 @@
 import { revalidatePath } from "next/cache";
 
 import {
+  validateProfileId,
+} from "./lib/dashboard-guards";
+
+import {
+  logProfileSwitch,
+} from "./lib/dashboard-telemetry";
+
+import {
   setActiveProfile as saveActiveProfile,
 } from "@/lib/active-profile";
 
 const DASHBOARD_PATH = "/dashboard";
-
-function validateProfileId(
-  profileId: string
-) {
-  const normalized =
-    String(profileId).trim();
-
-  if (!normalized) {
-    throw new Error(
-      "Profile ID is required"
-    );
-  }
-
-  return normalized;
-}
 
 export async function setActiveProfile(
   profileId: string
@@ -34,6 +27,11 @@ export async function setActiveProfile(
   await saveActiveProfile(
     normalizedProfileId
   );
+
+  logProfileSwitch({
+    profileId:
+      normalizedProfileId,
+  });
 
   revalidatePath(
     DASHBOARD_PATH

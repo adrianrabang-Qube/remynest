@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
+import {
+  BillingPlan,
+  BillingInterval,
+  getPlan,
+} from "@/lib/billing/plans";
+
+import {
+  logCheckoutStarted,
+} from "@/lib/billing/billing-telemetry";
+
 import { createClient } from "@/utils/supabase/server";
 
-export async function POST() {
+export async function POST(
+  request: Request
+) {
   try {
     const supabase = await createClient();
 
@@ -23,23 +35,74 @@ export async function POST() {
       );
     }
 
+    const body =
+      await request.json()
+        .catch(() => ({}));
+
+    const plan =
+      (body.plan as BillingPlan) ||
+      "PREMIUM";
+
+    const interval =
+      (body.interval as BillingInterval) ||
+      "monthly";
+
+    const config =
+      getPlan(plan);
+
+    const stripePriceId =
+      interval === "yearly"
+        ? config.yearlyPriceId
+        : config.monthlyPriceId;
+
+    console.log("PLAN:", plan);
+    console.log("INTERVAL:", interval);
+    console.log("PRICE ID:", stripePriceId);
+    console.log("USER EMAIL:", user.email);
+
+    if (!stripePriceId) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid billing configuration",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    logCheckoutStarted({
+      userId: user.id,
+      plan,
+      interval,
+    });
+
+    console.log("CHECKOUT PAYLOAD:", {
+      plan,
+      interval,
+      stripePriceId,
+      userId: user.id,
+      email: user.email,
+    });
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
 
-      payment_method_types: ["card"],
-
-      customer_email: user.email!,
+      customer_email: user.email ?? undefined,
 
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          price: stripePriceId,
           quantity: 1,
         },
       ],
 
       metadata: {
         userId: user.id,
+        plan,
+        interval,
       },
 
       success_url:
@@ -57,7 +120,19 @@ export async function POST() {
       url: session.url,
     });
   } catch (error) {
-    console.log("❌ STRIPE CHECKOUT ERROR:", error);
+    console.error("❌ STRIPE CHECKOUT ERROR");
+
+    if (error && typeof error === "object") {
+      const stripeError = error as any;
+
+      console.error("MESSAGE:", stripeError.message);
+      console.error("TYPE:", stripeError.type);
+      console.error("CODE:", stripeError.code);
+      console.error("STATUS:", stripeError.statusCode);
+      console.error("RAW:", stripeError.raw);
+    }
+
+    console.error(error);
 
     return NextResponse.json(
       {
