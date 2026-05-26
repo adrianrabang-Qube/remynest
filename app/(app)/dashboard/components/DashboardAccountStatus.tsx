@@ -9,13 +9,17 @@ export default function DashboardAccountStatus({
   currentPlan,
   isPremium = false,
 }: DashboardAccountStatusProps) {
-  const normalizedPlan = currentPlan?.toUpperCase();
+  console.info("[DashboardAccountStatus] props", {
+    currentPlan,
+    isPremium,
+  });
 
-  const displayPlan = isPremium
-    ? normalizedPlan === "PREMIUM"
+  const normalizedPlan = currentPlan?.trim().toUpperCase();
+
+  const displayPlan =
+    isPremium || normalizedPlan === "PREMIUM"
       ? "Premium Plan"
-      : currentPlan || "Premium Plan"
-    : "Free Plan";
+      : "Free Plan";
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
