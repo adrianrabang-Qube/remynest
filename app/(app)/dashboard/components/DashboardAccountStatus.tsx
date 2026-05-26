@@ -9,8 +9,13 @@ export default function DashboardAccountStatus({
   currentPlan,
   isPremium = false,
 }: DashboardAccountStatusProps) {
-  const displayPlan =
-    currentPlan ?? (isPremium ? "Premium Plan" : "Free Plan");
+  const normalizedPlan = currentPlan?.toUpperCase();
+
+  const displayPlan = isPremium
+    ? normalizedPlan === "PREMIUM"
+      ? "Premium Plan"
+      : currentPlan || "Premium Plan"
+    : "Free Plan";
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
@@ -30,12 +35,9 @@ export default function DashboardAccountStatus({
         </div>
 
         <p className="text-gray-500 leading-relaxed">
-          Upgrade anytime for
-          advanced AI cognition,
-          semantic memory search,
-          expanded storage,
-          and premium RemyNest
-          capabilities.
+          {isPremium
+            ? "Your premium subscription is active. Advanced cognition, semantic search, and expanded features are enabled."
+            : "Upgrade anytime for advanced AI cognition, semantic memory search, expanded storage, and premium RemyNest capabilities."}
         </p>
 
         {!isPremium && <UpgradeButton />}
