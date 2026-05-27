@@ -222,6 +222,95 @@ export async function POST(req: Request) {
     });
   }
 
+  // ✅ SUBSCRIPTION CREATED (Dashboard/Admin or non-checkout flows)
+  if (
+    event.type ===
+    "customer.subscription.created"
+  ) {
+    const subscription =
+      event.data.object as Stripe.Subscription;
+
+    console.log(
+      "🆕 SUBSCRIPTION CREATED:",
+      subscription.id
+    );
+
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : null;
+
+    if (!customerId) {
+      console.error(
+        "❌ SUBSCRIPTION CREATED: Missing customer id"
+      );
+
+      return NextResponse.json({
+        received: true,
+      });
+    }
+
+    const supabase = supabaseAdmin;
+
+    const currentPeriodEnd =
+      (subscription as any)
+        ?.current_period_end ?? null;
+
+    const updatePayload = {
+      is_premium:
+        subscription.status === "active" ||
+        subscription.status === "trialing",
+
+      subscription_status:
+        subscription.status,
+
+      stripe_subscription_id:
+        subscription.id,
+
+      current_period_end:
+        currentPeriodEnd
+          ? new Date(
+              Number(currentPeriodEnd) *
+                1000
+            ).toISOString()
+          : null,
+    };
+
+    const { data, error } =
+      await supabase
+        .from("profiles")
+        .update(updatePayload)
+        .eq(
+          "stripe_customer_id",
+          customerId
+        )
+        .select(
+          "id, is_premium, subscription_status, stripe_customer_id"
+        )
+        .maybeSingle();
+
+    if (error) {
+      console.error(
+        "❌ SUBSCRIPTION CREATED UPDATE FAILURE:",
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
+    } else if (!data) {
+      console.error(
+        "❌ SUBSCRIPTION CREATED: NO PROFILE MATCH FOR CUSTOMER:",
+        customerId
+      );
+    } else {
+      console.log(
+        "✅ SUBSCRIPTION CREATED PROFILE UPDATED:",
+        data
+      );
+    }
+  }
+
   // ✅ SUBSCRIPTION CANCELED / EXPIRED
   if (
     event.type === "customer.subscription.deleted"
