@@ -10,6 +10,8 @@ export default function BillingSection() {
     useState<string | null>(null);
   const [action, setAction] =
     useState<"checkout" | "cancel" | null>(null);
+  const [selectedPlan, setSelectedPlan] =
+    useState<"PREMIUM" | "FAMILY">("PREMIUM");
   const {
     billing,
     loading: billingLoading,
@@ -30,7 +32,7 @@ export default function BillingSection() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            plan: "PREMIUM",
+            plan: selectedPlan,
             interval: "monthly",
           }),
         },
@@ -131,6 +133,36 @@ export default function BillingSection() {
 
       <div className="flex flex-wrap gap-3">
 
+        <div className="flex gap-2 w-full">
+          <button
+            type="button"
+            onClick={() =>
+              setSelectedPlan("PREMIUM")
+            }
+            className={`rounded-lg border px-4 py-2 text-sm ${
+              selectedPlan === "PREMIUM"
+                ? "bg-black text-white border-black"
+                : "border-neutral-300"
+            }`}
+          >
+            Premium (€9.99/mo)
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setSelectedPlan("FAMILY")
+            }
+            className={`rounded-lg border px-4 py-2 text-sm ${
+              selectedPlan === "FAMILY"
+                ? "bg-black text-white border-black"
+                : "border-neutral-300"
+            }`}
+          >
+            Family
+          </button>
+        </div>
+
         {billing?.customerPortalEnabled ? (
           <button
             onClick={upgradePlan}
@@ -179,7 +211,7 @@ export default function BillingSection() {
         >
           {loading && action === "checkout"
             ? "Loading..."
-            : "Upgrade Plan"}
+            : `Upgrade to ${selectedPlan}`}
         </button>
 
         <button
