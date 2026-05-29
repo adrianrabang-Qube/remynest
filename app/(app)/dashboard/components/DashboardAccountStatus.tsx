@@ -16,12 +16,15 @@ export default function DashboardAccountStatus({
 
   const normalizedPlan = currentPlan?.trim().toUpperCase();
 
-  const displayPlan =
-    normalizedPlan === "FAMILY"
-      ? "Family Plan"
-      : isPremium || normalizedPlan === "PREMIUM"
-      ? "Premium Plan"
-      : "Free Plan";
+  const isFamily = normalizedPlan === "FAMILY";
+  const isPremiumPlan = normalizedPlan === "PREMIUM";
+  const isFree = !isFamily && !isPremiumPlan;
+
+  const displayPlan = isFamily
+    ? "Family Plan"
+    : isPremiumPlan
+    ? "Premium Plan"
+    : "Free Plan";
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
@@ -41,14 +44,14 @@ export default function DashboardAccountStatus({
         </div>
 
         <p className="text-gray-500 leading-relaxed">
-          {normalizedPlan === "FAMILY"
+          {isFamily
             ? "Your Family subscription is active. Collaboration, shared caregiving, and expanded family features are enabled."
-            : isPremium || normalizedPlan === "PREMIUM"
+            : isPremiumPlan
             ? "Your premium subscription is active. Advanced cognition, semantic search, and expanded features are enabled."
             : "Upgrade anytime for advanced AI cognition, semantic memory search, expanded storage, and premium RemyNest capabilities."}
         </p>
 
-        {!isPremium && normalizedPlan !== "FAMILY" && <UpgradeButton />}
+        {isFree && <UpgradeButton />}
       </div>
     </div>
   );
