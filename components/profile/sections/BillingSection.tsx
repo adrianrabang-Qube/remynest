@@ -159,7 +159,7 @@ export default function BillingSection() {
                 : "border-neutral-300"
             }`}
           >
-            Family
+            Family (€19.99/mo)
           </button>
         </div>
 
