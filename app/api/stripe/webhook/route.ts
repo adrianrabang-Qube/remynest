@@ -42,6 +42,7 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
+    console.log("🔥 WEBHOOK EVENT TYPE:", event.type);
   } catch (err) {
     console.error("❌ Webhook signature error:", err);
 
@@ -253,8 +254,23 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin;
 
     const currentPeriodEnd =
-      (subscription as any)
-        ?.current_period_end ?? null;
+      (
+        subscription as Stripe.Subscription & {
+          current_period_end?: number;
+          items?: {
+            data?: Array<{
+              current_period_end?: number;
+            }>;
+          };
+        }
+      ).current_period_end ??
+      subscription.items?.data?.[0]?.current_period_end ??
+      null;
+
+    console.log(
+      "✅ CREATED CURRENT PERIOD END:",
+      currentPeriodEnd,
+    );
 
     const updatePayload = {
       is_premium:
@@ -325,28 +341,80 @@ export async function POST(req: Request) {
 
     const supabase = supabaseAdmin;
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({
-        is_premium: false,
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : null;
 
-        subscription_plan: "FREE",
+    let data: any = null;
+    let error: any = null;
 
-        subscription_status:
-          subscription.status,
+    // First attempt: stable customer lookup
+    if (customerId) {
+      const customerResult = await supabase
+        .from("profiles")
+        .update({
+          is_premium: false,
+          subscription_plan: "FREE",
+          subscription_status:
+            subscription.status,
+          stripe_subscription_id: null,
+          current_period_end: null,
+        })
+        .eq(
+          "stripe_customer_id",
+          customerId
+        )
+        .select(
+          "id, subscription_status, current_period_end, stripe_customer_id, stripe_subscription_id"
+        )
+        .maybeSingle();
 
-        current_period_end: null,
-      })
-      .eq(
-        "stripe_subscription_id",
-        subscription.id
-      )
-      .select("id, subscription_status, current_period_end")
-      .maybeSingle();
+      data = customerResult.data;
+      error = customerResult.error;
 
-    console.log("✅ DOWNGRADE DATA:", data);
+      if (!data) {
+        console.warn(
+          "⚠️ CUSTOMER LOOKUP FAILED — falling back to subscription lookup:",
+          customerId
+        );
+      }
+    }
 
-    console.log("❌ DOWNGRADE ERROR:", error);
+    // Fallback: subscription id lookup
+    if (!data) {
+      const subscriptionResult = await supabase
+        .from("profiles")
+        .update({
+          is_premium: false,
+          subscription_plan: "FREE",
+          subscription_status:
+            subscription.status,
+          stripe_subscription_id: null,
+          current_period_end: null,
+        })
+        .eq(
+          "stripe_subscription_id",
+          subscription.id
+        )
+        .select(
+          "id, subscription_status, current_period_end, stripe_customer_id, stripe_subscription_id"
+        )
+        .maybeSingle();
+
+      data = subscriptionResult.data;
+      error = subscriptionResult.error;
+    }
+
+    console.log(
+      "✅ DOWNGRADE DATA:",
+      data
+    );
+
+    console.log(
+      "❌ DOWNGRADE ERROR:",
+      error
+    );
 
     logSubscriptionCancelled({
       metadata: {
@@ -372,12 +440,34 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin;
 
     const currentPeriodEnd =
-      (subscription as any)
-        ?.current_period_end ?? null;
+      (
+        subscription as Stripe.Subscription & {
+          current_period_end?: number;
+          items?: {
+            data?: Array<{
+              current_period_end?: number;
+            }>;
+          };
+        }
+      ).current_period_end ??
+      subscription.items?.data?.[0]?.current_period_end ??
+      null;
+
+    console.log(
+      "✅ UPDATED CURRENT PERIOD END:",
+      currentPeriodEnd,
+    );
 
     const updatePayload = {
       is_premium:
-        subscription.status === "active",
+        subscription.status === "active" ||
+        subscription.status === "trialing",
+
+      subscription_plan:
+        subscription.status === "active" ||
+        subscription.status === "trialing"
+          ? "PREMIUM"
+          : "FREE",
 
       subscription_status:
         subscription.status,
@@ -394,8 +484,42 @@ export async function POST(req: Request) {
           : null,
     };
 
-    const { data, error } =
-      await supabase
+    const customerId =
+      typeof subscription.customer === "string"
+        ? subscription.customer
+        : null;
+
+    let data: any = null;
+    let error: any = null;
+
+    // First attempt: stable customer lookup
+    if (customerId) {
+      const customerResult = await supabase
+        .from("profiles")
+        .update(updatePayload)
+        .eq(
+          "stripe_customer_id",
+          customerId
+        )
+        .select(
+          "id, subscription_status, current_period_end, stripe_customer_id, stripe_subscription_id"
+        )
+        .maybeSingle();
+
+      data = customerResult.data;
+      error = customerResult.error;
+
+      if (!data) {
+        console.warn(
+          "⚠️ CUSTOMER LOOKUP FAILED — falling back to subscription lookup:",
+          customerId
+        );
+      }
+    }
+
+    // Fallback: subscription id lookup
+    if (!data) {
+      const subscriptionResult = await supabase
         .from("profiles")
         .update(updatePayload)
         .eq(
@@ -403,18 +527,26 @@ export async function POST(req: Request) {
           subscription.id
         )
         .select(
-          "id, subscription_status, current_period_end"
+          "id, subscription_status, current_period_end, stripe_customer_id, stripe_subscription_id"
         )
         .maybeSingle();
+
+      data = subscriptionResult.data;
+      error = subscriptionResult.error;
+    }
 
     if (error) {
       console.error(
         "❌ SUBSCRIPTION UPDATE FAILURE:",
-        JSON.stringify(
-          error,
-          null,
-          2
-        )
+        JSON.stringify(error, null, 2)
+      );
+    } else if (!data) {
+      console.error(
+        "❌ NO PROFILE MATCH FOR CUSTOMER OR SUBSCRIPTION:",
+        {
+          customerId,
+          subscriptionId: subscription.id,
+        }
       );
     } else {
       console.log(

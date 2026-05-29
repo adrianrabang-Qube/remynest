@@ -1,52 +1,19 @@
-import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
+import AppNavbar from "@/components/navigation/AppNavbar";
+
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
 
 export default function AppLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: AppLayoutProps) {
   return (
-    <>
-      {/* NAVBAR */}
-      <header className="flex justify-between items-center px-6 py-4 border-b">
-        <nav className="flex gap-6 text-sm font-medium">
-          <Link href="/dashboard">
-            Dashboard
-          </Link>
+    <div className="min-h-screen bg-stone-50">
+      <AppNavbar />
 
-          <Link href="/memories">
-            Memories
-          </Link>
-
-          <Link href="/memory-chat">
-            Memory Chat
-          </Link>
-
-          <Link href="/memories/new">
-            New
-          </Link>
-
-          <Link href="/timeline">
-            Timeline
-          </Link>
-
-          <Link href="/reminders">
-            Reminders
-          </Link>
-
-          <Link href="/insights">
-            Insights
-          </Link>
-        </nav>
-
-        <LogoutButton />
-      </header>
-
-      {/* PAGE CONTENT */}
-      <main className="p-6">
+      <main className="mx-auto w-full max-w-[1600px] px-6 py-6">
         {children}
       </main>
-    </>
+    </div>
   );
 }
