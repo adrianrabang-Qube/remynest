@@ -360,7 +360,8 @@ export default async function DashboardPage() {
           currentPlan={profile?.subscription_plan}
           isPremium={Boolean(
             profile?.is_premium ||
-            profile?.subscription_status === "active"
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan?.toUpperCase() === "FAMILY"
           )}
         />
 
@@ -390,7 +391,8 @@ export default async function DashboardPage() {
           currentPlan={profile?.subscription_plan}
           isPremium={Boolean(
             profile?.is_premium ||
-            profile?.subscription_status === "active"
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan?.toUpperCase() === "FAMILY"
           )}
         />
 
