@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
 
+
 import TimelineHeader from "./components/TimelineHeader";
 import TimelineSearch from "./components/TimelineSearch";
 import TimelineCategories from "./components/TimelineCategories";
 import TimelineDayGroup from "./components/TimelineDayGroup";
 import TimelineViewToggle from "./components/TimelineViewToggle";
 import ChaptersView from "./components/ChaptersView";
+
+export const dynamic = "force-dynamic";
 
 type Memory = {
   id: string;
