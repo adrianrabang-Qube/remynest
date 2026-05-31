@@ -4,9 +4,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
-import {
-  getActiveProfile,
-} from "@/lib/active-profile";
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 export async function GET() {
   try {
@@ -30,7 +28,14 @@ export async function GET() {
     }
 
     const activeProfileId =
-      await getActiveProfile();
+      await resolveActiveProfileId();
+
+    console.info(
+      "[TIMELINE_API_CONTEXT]",
+      {
+        activeProfileId,
+      }
+    );
 
     if (!activeProfileId) {
       return NextResponse.json([]);

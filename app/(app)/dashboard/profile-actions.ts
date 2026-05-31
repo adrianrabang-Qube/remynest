@@ -11,7 +11,7 @@ import {
 } from "./lib/dashboard-telemetry";
 
 import {
-  setActiveProfile as saveActiveProfile,
+  setActiveContext,
 } from "@/lib/active-profile";
 
 const DASHBOARD_PATH = "/dashboard";
@@ -24,9 +24,11 @@ export async function setActiveProfile(
       profileId
     );
 
-  await saveActiveProfile(
-    normalizedProfileId
-  );
+  await setActiveContext({
+    type: "CARE",
+    profileId:
+      normalizedProfileId,
+  });
 
   logProfileSwitch({
     profileId:

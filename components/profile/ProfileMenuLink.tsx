@@ -13,15 +13,9 @@ export default function ProfileMenuLink({
   icon,
   requiresPremium,
 }: ProfileMenuLinkProps) {
-  const resolvedHref =
-    label
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/&/g, "and");
-
   return (
     <Link
-      href={`#${resolvedHref}`}
+      href={href}
       scroll
       onClick={() => {
         const active = document.activeElement as HTMLElement | null;

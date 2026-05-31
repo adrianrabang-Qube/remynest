@@ -9,9 +9,9 @@ export interface ProfileMenuItem {
 
 export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: "🏠",
+    label: "My Nest",
+    href: "/dashboard?context=my-nest",
+    icon: "🏡",
     requiresAuth: true,
   },
   {

@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useSearchParams,
+} from "next/navigation";
 import {
   useQuery,
   useMutation,
@@ -71,6 +78,13 @@ function normalizeMemoryArray(
 export default function MemoriesPage() {
   const queryClient = useQueryClient();
 
+  const searchParams =
+  useSearchParams();
+
+const isMyNestContext =
+  searchParams.get("context") ===
+  "my-nest";
+
   const [showCreate, setShowCreate] =
     useState(false);
 
@@ -85,6 +99,12 @@ export default function MemoriesPage() {
   // =========================
   useEffect(() => {
     async function loadProfile() {
+
+      if (isMyNestContext) {
+  setActiveProfileId(null);
+  return;
+}
+
       try {
         const res = await fetch(
           "/api/active-profile",

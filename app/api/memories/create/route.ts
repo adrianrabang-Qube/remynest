@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateMemoryInsights } from "@/lib/ai-memory";
 import { generateEmbedding } from "@/lib/embeddings";
-import { getActiveProfile } from "@/lib/active-profile";
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
 
@@ -157,13 +157,20 @@ export async function POST(req: Request) {
     // =====================================
 
     const activeProfileId =
-      await getActiveProfile();
+      await resolveActiveProfileId();
+
+    logPipelineStage(
+      "active-context-resolved",
+      {
+        activeProfileId,
+      }
+    );
 
     if (!activeProfileId) {
       return NextResponse.json(
         {
           error:
-            "No active profile selected",
+            "My Nest mode active. Memory creation requires an active care profile.",
         },
         {
           status: 400,
