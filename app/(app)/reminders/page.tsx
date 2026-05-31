@@ -1,7 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-import { getActiveProfile } from "@/lib/active-profile";
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { redirect } from "next/navigation";
-export default async function RemindersPage() {
+
+export const dynamic = "force-dynamic";
+
+export default async function RemindersPage({
+  searchParams,
+}: {
+  searchParams?: {
+    context?: string;
+  };
+}) {
   const supabase =
     await createClient();
 
@@ -14,16 +23,22 @@ export default async function RemindersPage() {
     redirect("/login");
   }
 
-  // 🧠 Active Profile
+  // 🧠 Context Isolation
+  const isMyNestContext =
+    searchParams?.context ===
+    "my-nest";
+
   const activeProfileId =
-    await getActiveProfile();
+    isMyNestContext
+      ? null
+      : await resolveActiveProfileId();
 
   // 🚫 No active profile
   if (!activeProfileId) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-10">
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-2xl p-6">
-          No active care profile selected.
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-2xl p-6">
+          My Nest mode active. Reminders are isolated from care profiles.
         </div>
       </div>
     );
@@ -75,11 +90,11 @@ export default async function RemindersPage() {
     }
 
     const activeProfileId =
-      await getActiveProfile();
+      await resolveActiveProfileId();
 
     if (!activeProfileId) {
       throw new Error(
-        "No active profile selected"
+        "My Nest mode active. Reminder creation requires an active care profile."
       );
     }
 
@@ -193,7 +208,11 @@ export default async function RemindersPage() {
 
     console.log(data);
 
-    redirect("/reminders");
+    redirect(
+      isMyNestContext
+        ? "/reminders?context=my-nest"
+        : "/reminders"
+    );
   }
 
   // =====================================
@@ -241,7 +260,11 @@ export default async function RemindersPage() {
       );
     }
 
-    redirect("/reminders");
+    redirect(
+      isMyNestContext
+        ? "/reminders?context=my-nest"
+        : "/reminders"
+    );
   }
 
   // =====================================
@@ -282,7 +305,11 @@ export default async function RemindersPage() {
       );
     }
 
-    redirect("/reminders");
+    redirect(
+      isMyNestContext
+        ? "/reminders?context=my-nest"
+        : "/reminders"
+    );
   }
 
   return (

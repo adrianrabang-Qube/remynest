@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import {
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useSearchParams,
+} from "next/navigation";
 import {
   useQuery,
   useMutation,
@@ -68,8 +78,15 @@ function normalizeMemoryArray(
   return [];
 }
 
-export default function MemoriesPage() {
+function MemoriesPageContent() {
   const queryClient = useQueryClient();
+
+  const searchParams =
+  useSearchParams();
+
+const isMyNestContext =
+  searchParams.get("context") ===
+  "my-nest";
 
   const [showCreate, setShowCreate] =
     useState(false);
@@ -85,6 +102,12 @@ export default function MemoriesPage() {
   // =========================
   useEffect(() => {
     async function loadProfile() {
+
+      if (isMyNestContext) {
+  setActiveProfileId(null);
+  return;
+}
+
       try {
         const res = await fetch(
           "/api/active-profile",
@@ -109,7 +132,7 @@ export default function MemoriesPage() {
     }
 
     loadProfile();
-  }, []);
+  }, [isMyNestContext]);
 
   // =========================
   // SEMANTIC SEARCH STATE
@@ -842,5 +865,13 @@ const sortedMemories = [
         />
       )}
     </div>
+  );
+}
+
+export default function MemoriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MemoriesPageContent />
+    </Suspense>
   );
 }

@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 import {
   BillingPlan,
   BillingInterval,
-  getPlan,
+  getPriceId,
 } from "@/lib/billing/plans";
 
 import {
@@ -47,18 +47,20 @@ export async function POST(
       (body.interval as BillingInterval) ||
       "monthly";
 
-    const config =
-      getPlan(plan);
-
     const stripePriceId =
-      interval === "yearly"
-        ? config.yearlyPriceId
-        : config.monthlyPriceId;
+      getPriceId(
+        plan,
+        interval
+      );
 
     console.log("PLAN:", plan);
     console.log("INTERVAL:", interval);
     console.log("PRICE ID:", stripePriceId);
     console.log("USER EMAIL:", user.email);
+    console.log(
+      "PRICE RESOLVER SOURCE:",
+      `STRIPE_${plan}_${interval.toUpperCase()}_PRICE_ID`
+    );
 
     if (!stripePriceId) {
       return NextResponse.json(
@@ -86,11 +88,34 @@ export async function POST(
       email: user.email,
     });
 
+    // Find or reuse existing Stripe customer
+    const existingCustomers =
+      await stripe.customers.list({
+        email:
+          user.email ?? undefined,
+        limit: 1,
+      });
+
+    const existingCustomer =
+      existingCustomers.data[0];
+
+    console.log(
+      "EXISTING CUSTOMER:",
+      existingCustomer?.id
+    );
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-
-      customer_email: user.email ?? undefined,
+      ...(existingCustomer
+        ? {
+            customer:
+              existingCustomer.id,
+          }
+        : {
+            customer_email:
+              user.email ?? undefined,
+          }),
 
       line_items: [
         {

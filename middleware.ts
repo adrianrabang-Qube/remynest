@@ -29,6 +29,8 @@ const PUBLIC_STATIC_FILES = [
   "/manifest.webmanifest",
   "/manifest.json",
   "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
   "/sw.js",
   "/icon-192.png",
   "/icon-512.png",
@@ -65,8 +67,7 @@ function isPublicStaticFile(
 ) {
   return PUBLIC_STATIC_FILES.some(
     (path) =>
-      pathname === path ||
-      pathname.startsWith(path)
+      pathname === path
   );
 }
 
@@ -75,7 +76,10 @@ function isPublicApiRoute(
 ) {
   return PUBLIC_API_ROUTES.some(
     (route) =>
-      pathname.startsWith(route)
+      pathname === route ||
+      pathname.startsWith(
+        `${route}/`
+      )
   );
 }
 
@@ -127,8 +131,7 @@ export async function middleware(
 
   const method = req.method;
 
-  const res =
-    NextResponse.next();
+  const res = NextResponse.next();
 
   try {
     logMiddlewareStage(
@@ -313,7 +316,7 @@ export async function middleware(
       }
     );
 
-    return res;
+    return NextResponse.next();
   } catch (error) {
     logMiddlewareError(
       "middleware-engine-error",

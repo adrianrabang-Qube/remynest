@@ -1,17 +1,26 @@
 import { cookies } from "next/headers";
 
 const COOKIE_NAME =
-  "remynest-active-profile";
+  "remynest-active-context";
 
-export async function setActiveProfile(
-  profileId: string
+export type ActiveContext =
+  | {
+      type: "PERSONAL";
+    }
+  | {
+      type: "CARE";
+      profileId: string;
+    };
+
+export async function setActiveContext(
+  context: ActiveContext
 ) {
   const cookieStore =
     await cookies();
 
   cookieStore.set(
     COOKIE_NAME,
-    profileId,
+    JSON.stringify(context),
     {
       httpOnly: true,
       secure:
@@ -23,18 +32,34 @@ export async function setActiveProfile(
   );
 }
 
-export async function getActiveProfile() {
+export async function getActiveContext():
+Promise<ActiveContext> {
   const cookieStore =
     await cookies();
 
-  return (
+  const value =
     cookieStore.get(
       COOKIE_NAME
-    )?.value || null
-  );
+    )?.value;
+
+  if (!value) {
+    return {
+      type: "PERSONAL",
+    };
+  }
+
+  try {
+    return JSON.parse(
+      value
+    ) as ActiveContext;
+  } catch {
+    return {
+      type: "PERSONAL",
+    };
+  }
 }
 
-export async function clearActiveProfile() {
+export async function clearActiveContext() {
   const cookieStore =
     await cookies();
 

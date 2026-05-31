@@ -1,10 +1,21 @@
 type DashboardStatsProps = {
   memoryCount: number;
+  currentPlan?: string | null;
+  isPremium?: boolean;
 };
 
 export default function DashboardStats({
   memoryCount,
+  currentPlan,
+  isPremium = false,
 }: DashboardStatsProps) {
+  const normalizedPlan = currentPlan?.trim().toUpperCase();
+
+  const displayPlan =
+    isPremium || normalizedPlan === "PREMIUM"
+      ? "Premium Plan"
+      : "Free Plan";
+
   return (
     <div className="grid md:grid-cols-2 gap-6">
 
@@ -32,13 +43,13 @@ export default function DashboardStats({
         </p>
 
         <h2 className="text-3xl font-semibold text-[#2f3e34]">
-          Free Plan
+          {displayPlan}
         </h2>
 
         <p className="text-sm text-gray-400 mt-3">
-          Upgrade anytime for
-          advanced AI cognition
-          features.
+          {isPremium
+            ? "Your premium subscription is active. Premium cognition features are enabled."
+            : "Upgrade anytime for advanced AI cognition features."}
         </p>
 
       </div>

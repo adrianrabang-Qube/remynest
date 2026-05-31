@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { getActiveProfile } from "@/lib/active-profile";
+import { getActiveContext } from "@/lib/active-profile";
+
 
 import TimelineHeader from "./components/TimelineHeader";
 import TimelineSearch from "./components/TimelineSearch";
@@ -7,6 +8,8 @@ import TimelineCategories from "./components/TimelineCategories";
 import TimelineDayGroup from "./components/TimelineDayGroup";
 import TimelineViewToggle from "./components/TimelineViewToggle";
 import ChaptersView from "./components/ChaptersView";
+
+export const dynamic = "force-dynamic";
 
 type Memory = {
   id: string;
@@ -132,6 +135,7 @@ export default async function TimelinePage({
     search?: string;
     category?: string;
     view?: string;
+    context?: string;
   };
 }) {
   const supabase =
@@ -159,19 +163,31 @@ export default async function TimelinePage({
   // ACTIVE PROFILE
   // =====================================
 
+  const isMyNestContext =
+    searchParams?.context ===
+    "my-nest";
+
+  const activeContext =
+    await getActiveContext();
+
+  const isCareContext =
+    activeContext?.type === "CARE";
+
   const activeProfileId =
-    await getActiveProfile();
+    isMyNestContext
+      ? null
+      : isCareContext
+        ? activeContext.profileId
+        : null;
 
   if (!activeProfileId) {
     return (
       <div className="space-y-6 p-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          AI Timeline
-        </h1>
+        <TimelineHeader />
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-          <p className="text-yellow-700">
-            No active profile selected.
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+          <p className="text-blue-700">
+            My Nest mode active. Timeline is isolated from care profiles.
           </p>
         </div>
       </div>

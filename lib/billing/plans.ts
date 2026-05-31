@@ -110,6 +110,12 @@ export const BILLING_PLANS: Record<
 
     displayName: "Enterprise",
 
+    monthlyPriceId:
+      process.env.STRIPE_ENTERPRISE_MONTHLY_PRICE_ID,
+
+    yearlyPriceId:
+      process.env.STRIPE_ENTERPRISE_YEARLY_PRICE_ID,
+
     careProfiles: "unlimited",
 
     storageGB: "unlimited",
@@ -130,4 +136,52 @@ export function getPlan(
   plan: BillingPlan = "FREE"
 ) {
   return BILLING_PLANS[plan];
+}
+
+export function getPriceId(
+  plan: BillingPlan,
+  interval: BillingInterval = "monthly"
+) {
+  const config = getPlan(plan);
+
+  const priceId =
+    interval === "yearly"
+      ? config.yearlyPriceId
+      : config.monthlyPriceId;
+
+  console.info("[billing] price lookup", {
+    plan,
+    interval,
+    resolved: !!priceId,
+    envKey:
+      interval === "yearly"
+        ? `STRIPE_${plan}_YEARLY_PRICE_ID`
+        : `STRIPE_${plan}_MONTHLY_PRICE_ID`,
+  });
+
+  if (!priceId) {
+    console.error(
+      `[billing] Missing Stripe price id for ${plan} (${interval})`,
+      {
+        monthly: config.monthlyPriceId ?? null,
+        yearly: config.yearlyPriceId ?? null,
+        availableEnv: {
+          premiumMonthly:
+            !!process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
+          premiumYearly:
+            !!process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID,
+          familyMonthly:
+            !!process.env.STRIPE_FAMILY_MONTHLY_PRICE_ID,
+          familyYearly:
+            !!process.env.STRIPE_FAMILY_YEARLY_PRICE_ID,
+        },
+      }
+    );
+
+    throw new Error(
+      `Missing Stripe price id for ${plan} (${interval})`
+    );
+  }
+
+  return priceId;
 }

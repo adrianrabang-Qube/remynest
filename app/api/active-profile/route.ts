@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
-  getActiveProfile,
-  setActiveProfile,
+  getActiveContext,
+  setActiveContext,
 } from "@/lib/active-profile";
+
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,32 +33,19 @@ export async function GET() {
       );
     }
 
-    let activeProfileId =
-      await getActiveProfile();
+    const activeContext =
+      await getActiveContext();
 
-    // =========================
-    // FALLBACK PROFILE
-    // =========================
-    if (!activeProfileId) {
-      const { data: profiles } =
-        await supabase
-          .from("memory_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .limit(1);
+    const activeProfileId =
+      await resolveActiveProfileId();
 
-      const fallbackProfileId =
-        profiles?.[0]?.id;
-
-      if (fallbackProfileId) {
-        await setActiveProfile(
-          fallbackProfileId
-        );
-
-        activeProfileId =
-          fallbackProfileId;
+    console.info(
+      "[ACTIVE_PROFILE_API]",
+      {
+        activeContext,
+        activeProfileId,
       }
-    }
+    );
 
     if (!activeProfileId) {
       return NextResponse.json({
@@ -115,9 +104,10 @@ export async function POST(
       );
     }
 
-    await setActiveProfile(
-      profileId
-    );
+    await setActiveContext({
+      type: "CARE",
+      profileId,
+    });
 
     return NextResponse.json({
       success: true,

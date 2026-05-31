@@ -8,7 +8,7 @@ import {
 } from "@/lib/profile-access";
 
 import {
-  getActiveProfile,
+  getActiveContext,
 } from "@/lib/active-profile";
 
 import { redirect } from "next/navigation";
@@ -32,7 +32,15 @@ import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
 
-export default async function DashboardPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: {
+    context?: string;
+  };
+}) {
 
   // =====================================
   // REALTIME / DYNAMIC GOVERNANCE
@@ -76,11 +84,91 @@ export default async function DashboardPage() {
   const supabase =
     await createClient();
 
-  const accessibleProfiles =
-    await getAccessibleProfiles();
+  console.error(
+    "[DASHBOARD_RUNTIME_MARKER] page.tsx EXECUTING",
+    {
+      file: "app/(app)/dashboard/page.tsx",
+      dashboardRequestId,
+    }
+  );
+
+  let accessibleProfiles: any[] = [];
+
+  try {
+    console.error(
+      "[DASHBOARD_RUNTIME_MARKER] BEFORE getAccessibleProfiles"
+    );
+
+    accessibleProfiles =
+      await getAccessibleProfiles();
+
+    console.error(
+      "[DASHBOARD_RUNTIME_MARKER] AFTER getAccessibleProfiles",
+      {
+        count:
+          accessibleProfiles?.length || 0,
+        profiles:
+          accessibleProfiles,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "[DASHBOARD_RUNTIME_MARKER] getAccessibleProfiles FAILED",
+      error
+    );
+
+    accessibleProfiles = [];
+  }
+
+  console.error(
+    "[DASHBOARD_RUNTIME_MARKER] accessibleProfiles-final",
+    {
+      count:
+        accessibleProfiles?.length || 0,
+      profiles:
+        accessibleProfiles,
+    }
+  );
+
+  const activeContext =
+    await getActiveContext();
+
+  const resolvedActiveProfileId =
+    activeContext?.type === "CARE"
+      ? activeContext.profileId
+      : null;
+
+  const fallbackActiveProfileId =
+    !resolvedActiveProfileId &&
+    accessibleProfiles?.length > 0
+      ? accessibleProfiles[0]?.id
+      : null;
 
   const activeProfileId =
-    await getActiveProfile();
+    resolvedActiveProfileId ||
+    fallbackActiveProfileId;
+
+  const isMyNestContext =
+    searchParams?.context ===
+    "my-nest";
+
+  const effectiveActiveProfileId =
+    isMyNestContext
+      ? null
+      : activeProfileId;
+
+  console.info(
+    "[ACTIVE_PROFILE_RESOLUTION]",
+    {
+      activeContext,
+      resolvedActiveProfileId,
+      fallbackActiveProfileId,
+      finalActiveProfileId:
+        activeProfileId,
+      accessibleProfilesCount:
+        accessibleProfiles?.length || 0,
+    }
+  );
 
   const {
     data: { user },
@@ -113,14 +201,56 @@ export default async function DashboardPage() {
   if (user?.id) {
 
     const {
-      data: profileData,
+      data: profileById,
     } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    profile = profileData;
+    const {
+      data: profileByEmail,
+    } = user.email
+      ? await supabase
+          .from("profiles")
+          .select("*")
+          .eq("email", user.email)
+          .maybeSingle()
+      : { data: null };
+
+    const candidates = [
+      profileById,
+      profileByEmail,
+    ].filter(Boolean);
+
+    const premiumProfile =
+      candidates.find(
+        (candidate: any) =>
+          candidate?.is_premium === true ||
+          candidate?.subscription_status === "active" ||
+          candidate?.subscription_plan
+            ?.toUpperCase() === "PREMIUM" ||
+          candidate?.subscription_plan
+            ?.toUpperCase() === "FAMILY"
+      ) || null;
+
+    profile =
+      premiumProfile ||
+      profileById ||
+      profileByEmail ||
+      null;
+
+    console.info(
+      "[BILLING_DEBUG]",
+      {
+        userId: user.id,
+        userEmail: user.email,
+        profileById,
+        profileByEmail,
+        premiumProfile,
+        resolvedProfile: profile,
+      }
+    );
   }
 
   // =====================================
@@ -209,16 +339,42 @@ export default async function DashboardPage() {
   // PROFILE SWITCHER DATA
   // =====================================
 
-  const switcherProfiles =
-    accessibleProfiles?.map(
-      (profile: any) => ({
-        memory_profiles: {
-          id: profile.id,
-          profile_name:
-            profile.profile_name,
-        },
-      })
-    ) || [];
+  const switcherProfiles = Array.from(
+    new Map(
+      (accessibleProfiles || []).map(
+        (profile: any) => [
+          profile.id,
+          {
+            id: profile.id,
+            profile_name:
+              profile.profile_name,
+            preferred_name:
+              profile.preferred_name,
+            shared:
+              Boolean(profile.shared),
+            access_level:
+              profile.access_level ||
+              "owner",
+          },
+        ]
+      )
+    ).values()
+  );
+
+  console.error(
+    "[PROFILE_SWITCHER_PAYLOAD]",
+    switcherProfiles
+  );
+
+  console.error(
+    "[PROFILE_SWITCHER_DEDUPED_COUNT]",
+    {
+      rawCount:
+        accessibleProfiles?.length || 0,
+      dedupedCount:
+        switcherProfiles.length,
+    }
+  );
 
   // =====================================
   // ACTIVE PROFILE
@@ -256,7 +412,7 @@ export default async function DashboardPage() {
     | unknown
     | null = null;
 
-  if (activeProfileId) {
+  if (effectiveActiveProfileId) {
 
     const {
       count,
@@ -269,7 +425,7 @@ export default async function DashboardPage() {
       })
       .eq(
         "memory_profile_id",
-        activeProfileId
+        effectiveActiveProfileId
       );
 
     memoryCount =
@@ -333,6 +489,29 @@ export default async function DashboardPage() {
     },
   });
 
+  console.info(
+    "[dashboard-page] billing-state",
+    {
+      userId: user.id,
+      userEmail: user.email,
+      subscription_plan:
+        profile?.subscription_plan,
+      is_premium:
+        profile?.is_premium,
+      subscription_status:
+        profile?.subscription_status,
+      resolvedCurrentPlan:
+        profile?.is_premium ||
+        profile?.subscription_status === "active" ||
+        profile?.subscription_plan
+          ?.toUpperCase() === "PREMIUM" ||
+        profile?.subscription_plan
+          ?.toUpperCase() === "FAMILY"
+          ? "PREMIUM"
+          : profile?.subscription_plan || "FREE",
+    }
+  );
+
   return (
     <div className="min-h-screen bg-[#f5f1ea]">
 
@@ -346,23 +525,41 @@ export default async function DashboardPage() {
         />
 
         {/* PROFILE SWITCHER */}
-        <ProfileSwitcher
-          profiles={
-            switcherProfiles
-          }
-          activeProfileId={
-            activeProfileId
-          }
-        />
+        {!isMyNestContext && (
+          <ProfileSwitcher
+            profiles={
+              switcherProfiles
+            }
+            activeProfileId={
+              activeProfileId
+            }
+          />
+        )}
 
         {/* ACTIVE PROFILE WARNING */}
-        {!activeProfile && (
-          <DashboardActiveProfileWarning />
+        {!isMyNestContext &&
+          !activeProfile && (
+            <DashboardActiveProfileWarning />
         )}
 
         {/* STATS */}
         <DashboardStats
           memoryCount={memoryCount}
+          currentPlan={
+            profile?.is_premium ||
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan
+              ?.toUpperCase() === "PREMIUM" ||
+            profile?.subscription_plan
+              ?.toUpperCase() === "FAMILY"
+              ? "PREMIUM"
+              : profile?.subscription_plan || "FREE"
+          }
+          isPremium={Boolean(
+            profile?.is_premium ||
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan?.toUpperCase() === "FAMILY"
+          )}
         />
 
         {/* PENDING INVITES */}
@@ -380,14 +577,31 @@ export default async function DashboardPage() {
         />
 
         {/* ACTIVE PROFILE DETAILS */}
-        {activeProfile && (
-          <DashboardProfilePanel
-            activeProfile={activeProfile}
-          />
+        {!isMyNestContext &&
+          activeProfile && (
+            <DashboardProfilePanel
+              activeProfile={activeProfile}
+            />
         )}
 
         {/* ACCOUNT STATUS */}
-        <DashboardAccountStatus />
+        <DashboardAccountStatus
+          currentPlan={
+            profile?.is_premium ||
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan
+              ?.toUpperCase() === "PREMIUM" ||
+            profile?.subscription_plan
+              ?.toUpperCase() === "FAMILY"
+              ? "PREMIUM"
+              : profile?.subscription_plan || "FREE"
+          }
+          isPremium={Boolean(
+            profile?.is_premium ||
+            profile?.subscription_status === "active" ||
+            profile?.subscription_plan?.toUpperCase() === "FAMILY"
+          )}
+        />
 
         {/* CREATE PROFILE */}
         <DashboardCreateProfile />

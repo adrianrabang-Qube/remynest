@@ -69,15 +69,13 @@ export default function ProfileSwitcher({
     return profiles.filter(
       (profile: any) => {
         const profileData =
-          profile?.memory_profiles;
+          profile?.memory_profiles || profile;
 
         if (!profileData?.id) {
           return false;
         }
 
-        if (
-          seen.has(profileData.id)
-        ) {
+        if (seen.has(profileData.id)) {
           return false;
         }
 
@@ -95,8 +93,11 @@ export default function ProfileSwitcher({
   const [selectedProfile, setSelectedProfile] =
     useState(
       activeProfileId ||
-        uniqueProfiles[0]
-          ?.memory_profiles?.id ||
+        (
+          uniqueProfiles[0]
+            ?.memory_profiles ||
+          uniqueProfiles[0]
+        )?.id ||
         ""
     );
 
@@ -108,7 +109,7 @@ export default function ProfileSwitcher({
     return uniqueProfiles.map(
       (profile: any) => {
         const profileData =
-          profile?.memory_profiles;
+          profile?.memory_profiles || profile;
 
         return {
           id: profileData?.id,

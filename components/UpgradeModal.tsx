@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { BillingPlan } from "@/lib/billing/plans";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -16,6 +17,9 @@ export default function UpgradeModal({
   const [loading, setLoading] =
     useState(false);
 
+  const [selectedPlan, setSelectedPlan] =
+    useState<BillingPlan>("PREMIUM");
+
   async function handleUpgrade() {
     try {
       setLoading(true);
@@ -30,7 +34,7 @@ export default function UpgradeModal({
                 "application/json",
             },
             body: JSON.stringify({
-              plan: "PREMIUM",
+              plan: selectedPlan,
               interval: "monthly",
             }),
           }
@@ -76,23 +80,41 @@ export default function UpgradeModal({
 
         <div className="space-y-4 mb-8">
 
-          <div className="border rounded-2xl p-4">
+          <div
+            onClick={() =>
+              setSelectedPlan("PREMIUM")
+            }
+            className={`border rounded-2xl p-4 cursor-pointer transition ${
+              selectedPlan === "PREMIUM"
+                ? "border-black bg-gray-100"
+                : "border-gray-200"
+            }`}
+          >
             <h3 className="font-semibold">
               Premium
             </h3>
 
             <p className="text-sm text-gray-500">
-              Up to 3 care profiles
+              Up to 3 care profiles · €9.99/month
             </p>
           </div>
 
-          <div className="border rounded-2xl p-4">
+          <div
+            onClick={() =>
+              setSelectedPlan("FAMILY")
+            }
+            className={`border rounded-2xl p-4 cursor-pointer transition ${
+              selectedPlan === "FAMILY"
+                ? "border-black bg-gray-100"
+                : "border-gray-200"
+            }`}
+          >
             <h3 className="font-semibold">
               Family
             </h3>
 
             <p className="text-sm text-gray-500">
-              Up to 5 care profiles
+              Up to 5 care profiles · Family plan
             </p>
           </div>
 
@@ -114,7 +136,7 @@ export default function UpgradeModal({
           >
             {loading
               ? "Redirecting..."
-              : "Upgrade Now"}
+              : `Upgrade to ${selectedPlan}`}
           </button>
 
         </div>

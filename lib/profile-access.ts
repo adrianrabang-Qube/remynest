@@ -11,6 +11,14 @@ export async function getAccessibleProfiles() {
     return [];
   }
 
+  console.info(
+    "[PROFILE_ACCESS_USER]",
+    {
+      userId: user.id,
+      userEmail: user.email,
+    }
+  );
+
   // OWNED PROFILES
   const {
     data: ownedProfiles,
@@ -22,6 +30,16 @@ export async function getAccessibleProfiles() {
       "created_by_account_id",
       user.id
     );
+
+  console.info(
+    "[OWNED_PROFILES_DEBUG]",
+    {
+      userId: user.id,
+      ownedProfilesCount:
+        ownedProfiles?.length || 0,
+      ownedProfiles,
+    }
+  );
 
   if (ownedError) {
     console.error(
@@ -53,6 +71,19 @@ export async function getAccessibleProfiles() {
     !relationships ||
     relationships.length === 0
   ) {
+    console.log(
+      "[getAccessibleProfiles]",
+      {
+        ownedProfilesCount:
+          ownedProfiles?.length,
+        sharedProfilesCount: 0,
+        ownedProfiles,
+        sharedProfiles: [],
+        reason:
+          "no relationships found",
+      }
+    );
+
     return ownedProfiles || [];
   }
 
@@ -99,8 +130,43 @@ export async function getAccessibleProfiles() {
       }
     ) || [];
 
-  return [
+  console.log(
+    "[getAccessibleProfiles]",
+    {
+      ownedProfilesCount:
+        ownedProfiles?.length,
+      sharedProfilesCount:
+        sharedProfiles?.length,
+      ownedProfiles,
+      sharedProfiles,
+    }
+  );
+
+  const mergedProfiles = [
     ...(ownedProfiles || []),
     ...sharedProfiles,
   ];
+
+  const dedupedProfiles = Array.from(
+    new Map(
+      mergedProfiles.map(
+        (profile: any) => [
+          profile.id,
+          profile,
+        ]
+      )
+    ).values()
+  );
+
+  console.info(
+    "[ACCESSIBLE_PROFILES_DEBUG]",
+    {
+      userId: user.id,
+      count:
+        dedupedProfiles?.length || 0,
+      profiles: dedupedProfiles,
+    }
+  );
+
+  return dedupedProfiles;
 }
