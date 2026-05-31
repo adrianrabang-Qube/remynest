@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import {
+  Suspense,
   useEffect,
   useState,
 } from "react";
@@ -77,7 +78,7 @@ function normalizeMemoryArray(
   return [];
 }
 
-export default function MemoriesPage() {
+function MemoriesPageContent() {
   const queryClient = useQueryClient();
 
   const searchParams =
@@ -131,7 +132,7 @@ const isMyNestContext =
     }
 
     loadProfile();
-  }, []);
+  }, [isMyNestContext]);
 
   // =========================
   // SEMANTIC SEARCH STATE
@@ -864,5 +865,13 @@ const sortedMemories = [
         />
       )}
     </div>
+  );
+}
+
+export default function MemoriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MemoriesPageContent />
+    </Suspense>
   );
 }

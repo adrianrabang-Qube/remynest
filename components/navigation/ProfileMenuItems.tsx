@@ -3,16 +3,15 @@ import {
   PROFILE_MENU_ITEMS,
 } from "@/components/profile/config/profile-menu.config";
 import LogoutButton from "@/components/LogoutButton";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-export default function ProfileMenuItems() {
-  const searchParams =
-    useSearchParams();
+function ProfileMenuItemsContent() {
+  const searchParams = useSearchParams();
 
   const isMyNestContext =
-    searchParams.get("context") ===
-    "my-nest";
+    searchParams.get("context") === "my-nest";
 
   return (
     <div className="space-y-2">
@@ -44,5 +43,13 @@ export default function ProfileMenuItems() {
         <LogoutButton />
       </div>
     </div>
+  );
+}
+
+export default function ProfileMenuItems() {
+  return (
+    <Suspense fallback={null}>
+      <ProfileMenuItemsContent />
+    </Suspense>
   );
 }
