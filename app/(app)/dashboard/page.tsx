@@ -166,6 +166,7 @@ export default async function DashboardPage() {
       "there"
     );
 
+
   // =====================================
   // PENDING INVITES
   // =====================================
@@ -229,6 +230,21 @@ export default async function DashboardPage() {
         profile.id ===
         activeProfileId
     ) || null;
+
+  const isMyNestWorkspace =
+    !activeProfileId;
+
+  const workspaceType =
+    isMyNestWorkspace
+      ? "my-nest"
+      : "care";
+
+  const workspaceLabel =
+    isMyNestWorkspace
+      ? "Your personal memory space is ready."
+      : activeProfile?.profile_name
+        ? `Supporting ${activeProfile.profile_name}'s care journey.`
+        : "Your care workspace is ready.";
 
   // =====================================
   // MEMORY COUNT
@@ -325,6 +341,8 @@ export default async function DashboardPage() {
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
+          workspaceType={workspaceType}
+          workspaceLabel={workspaceLabel}
         />
 
         {/* PROFILE SWITCHER */}
