@@ -12,7 +12,7 @@ export default function InviteCaregiverForm({
 }: InviteCaregiverFormProps) {
   const [email, setEmail] = useState("");
   const [relationshipType, setRelationshipType] =
-    useState("caregiver");
+    useState("family");
 
   const [accessLevel, setAccessLevel] =
     useState("full");
@@ -45,7 +45,7 @@ export default function InviteCaregiverForm({
         }
 
         setMessage(
-          "✅ Caregiver invited successfully"
+          "✅ Invite sent successfully"
         );
 
         setEmail("");
@@ -53,7 +53,7 @@ export default function InviteCaregiverForm({
         console.error(err);
 
         setMessage(
-          "❌ Failed to invite caregiver"
+          "❌ Failed to send invite"
         );
       }
     });
@@ -62,7 +62,7 @@ export default function InviteCaregiverForm({
   return (
     <div className="mt-4 rounded-xl border p-4 bg-gray-50">
       <h3 className="font-semibold mb-4">
-        Invite Caregiver
+        Invite Access
       </h3>
 
       <form
@@ -71,7 +71,7 @@ export default function InviteCaregiverForm({
       >
         <input
           type="email"
-          placeholder="Caregiver email"
+          placeholder="Email"
           value={email}
           onChange={(e) =>
             setEmail(e.target.value)
@@ -89,16 +89,36 @@ export default function InviteCaregiverForm({
           }
           className="w-full rounded-lg border px-4 py-2"
         >
-          <option value="caregiver">
-            Caregiver
-          </option>
-
           <option value="family">
             Family
           </option>
 
+          <option value="caregiver">
+            Caregiver
+          </option>
+
           <option value="doctor">
             Doctor
+          </option>
+
+          <option value="friend">
+            Friend
+          </option>
+
+          <option value="support_worker">
+            Support Worker
+          </option>
+
+          <option value="case_manager">
+            Case Manager
+          </option>
+
+          <option value="emergency_contact">
+            Emergency Contact
+          </option>
+
+          <option value="other">
+            Other
           </option>
         </select>
 
@@ -129,7 +149,7 @@ export default function InviteCaregiverForm({
         >
           {isPending
             ? "Inviting..."
-            : "Invite Caregiver"}
+            : "Send Invite"}
         </button>
 
         {message && (
