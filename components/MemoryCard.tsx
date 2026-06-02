@@ -2,6 +2,15 @@
 
 import Link from "next/link";
 
+type Attachment = {
+  name?: string;
+  filename?: string;
+  type?: string;
+  url?: string;
+  mimeType?: string;
+  size?: number;
+};
+
 type Memory = {
   id: string;
 
@@ -13,6 +22,7 @@ type Memory = {
   ai_title?: string;
   ai_summary?: string;
   ai_tags?: string[];
+  attachments?: Attachment[];
 };
 
 export default function MemoryCard({
@@ -36,6 +46,46 @@ export default function MemoryCard({
         <p className="text-sm text-gray-600 mb-2 break-words whitespace-pre-wrap">
           {memory.content}
         </p>
+
+        {Array.isArray(memory.attachments) && memory.attachments.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {memory.attachments
+              .slice(0, 3)
+              .map((attachment, index) => {
+                const name =
+                  attachment.name ||
+                  attachment.filename ||
+                  "Attachment";
+
+                if (attachment.type === "image" && attachment.url) {
+                  return (
+                    <img
+                      key={index}
+                      src={attachment.url}
+                      alt={name}
+                      className="h-20 w-full rounded-2xl object-cover border border-gray-200"
+                    />
+                  );
+                }
+
+                const badgeLabel =
+                  attachment.type === "video"
+                    ? "Video"
+                    : attachment.type === "audio"
+                    ? "Audio"
+                    : "File";
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700"
+                  >
+                    {badgeLabel}
+                  </div>
+                );
+              })}
+          </div>
+        )}
 
         {/* AI Summary */}
         {memory.ai_summary && (

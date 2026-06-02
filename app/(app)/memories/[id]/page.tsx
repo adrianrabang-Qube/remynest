@@ -35,6 +35,10 @@ export default async function MemoryPage({
     return notFound();
   }
 
+  const attachments = Array.isArray(memory.attachments)
+    ? memory.attachments
+    : [];
+
   // 🔗 Semantic related memories
   let relatedMemories: any[] = [];
 
@@ -102,6 +106,17 @@ export default async function MemoryPage({
             )}
           </div>
         </div>
+
+        {/* Cover Image */}
+        {memory.cover_image_url && (
+          <div className="border-b border-gray-100 overflow-hidden">
+            <img
+              src={memory.cover_image_url}
+              alt={memory.title || "Memory image"}
+              className="w-full h-[420px] object-cover"
+            />
+          </div>
+        )}
 
         {/* Cognitive Metadata */}
         <div className="p-8 border-b border-gray-100 space-y-6">
@@ -179,6 +194,121 @@ export default async function MemoryPage({
             {memory.content}
           </div>
         </div>
+
+        {attachments.length > 0 && (
+          <div className="p-8 border-b border-gray-100 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Attachments
+            </h2>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {attachments.map((attachment: any, index: number) => {
+                const name =
+                  attachment.name ||
+                  attachment.filename ||
+                  "Attachment";
+                const url = attachment.url;
+                const size =
+                  typeof attachment.size === "number"
+                    ? `${(attachment.size / 1024).toFixed(1)} KB`
+                    : null;
+                const mimeType = attachment.mimeType || "";
+                const type = attachment.type || "file";
+
+                if (type === "image") {
+                  return (
+                    <div
+                      key={index}
+                      className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm"
+                    >
+                      <img
+                        src={url}
+                        alt={name}
+                        className="w-full h-56 object-cover"
+                      />
+                      <div className="p-4">
+                        <div className="font-semibold text-sm text-gray-900">
+                          {name}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {mimeType}
+                          {size ? ` · ${size}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (type === "video") {
+                  return (
+                    <div
+                      key={index}
+                      className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm"
+                    >
+                      <video
+                        src={url}
+                        controls
+                        className="w-full h-56 bg-black"
+                      />
+                      <div className="p-4">
+                        <div className="font-semibold text-sm text-gray-900">
+                          {name}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {mimeType}
+                          {size ? ` · ${size}` : ""}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (type === "audio") {
+                  return (
+                    <div
+                      key={index}
+                      className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm p-4"
+                    >
+                      <div className="font-semibold text-sm text-gray-900 mb-3">
+                        {name}
+                      </div>
+                      <audio
+                        src={url}
+                        controls
+                        className="w-full"
+                      />
+                      <div className="text-xs text-gray-500 mt-3">
+                        {mimeType}
+                        {size ? ` · ${size}` : ""}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <a
+                    key={index}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-3xl border border-gray-100 bg-white shadow-sm p-4 block hover:border-black transition"
+                  >
+                    <div className="font-semibold text-sm text-gray-900">
+                      {name}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {mimeType}
+                      {size ? ` · ${size}` : ""}
+                    </div>
+                    <div className="text-xs text-blue-600 mt-3">
+                      Open file
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* AI Summary */}
         {memory.ai_summary && (

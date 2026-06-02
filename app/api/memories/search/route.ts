@@ -145,6 +145,18 @@ export async function POST(req: Request) {
     const body =
       await req.json();
 
+    const workspaceType =
+      body.workspaceType ||
+      "care";
+
+    logSearchStage(
+      "workspace-context-detected",
+      {
+        requestId,
+        workspaceType,
+      }
+    );
+
     const normalizedQuery =
       normalizeSearchQuery(
         body.query || ""
@@ -227,6 +239,8 @@ export async function POST(req: Request) {
           SEARCH_MATCH_COUNT,
         user_id_input:
           user.id,
+        workspace_type_input:
+          workspaceType,
       }
     );
 

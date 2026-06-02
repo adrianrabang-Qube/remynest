@@ -1,6 +1,15 @@
 import IntelligenceStrip from "./IntelligenceStrip";
 import RelatedMemories from "./RelatedMemories";
 
+type Attachment = {
+  name?: string;
+  filename?: string;
+  type?: string;
+  url?: string;
+  mimeType?: string;
+  size?: number;
+};
+
 type Memory = {
   id: string;
   title: string;
@@ -10,6 +19,7 @@ type Memory = {
   ai_title?: string;
   ai_summary?: string;
   ai_tags?: string[];
+  attachments?: Attachment[];
 
   ai_mood?: string;
   ai_importance?: string;
@@ -119,6 +129,45 @@ export default function TimelineCard({
         <p className="text-gray-700 mt-8 text-2xl leading-relaxed break-words">
           {preview}
         </p>
+
+        {Array.isArray(memory.attachments) && memory.attachments.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {memory.attachments.slice(0, 3).map((attachment, index) => {
+              const name =
+                attachment.name ||
+                attachment.filename ||
+                "Attachment";
+
+              if (attachment.type === "image" && attachment.url) {
+                return (
+                  <img
+                    key={index}
+                    src={attachment.url}
+                    alt={name}
+                    className="h-12 w-12 rounded-2xl object-cover border border-gray-200"
+                  />
+                );
+              }
+
+              const icon =
+                attachment.type === "video"
+                  ? "🎬"
+                  : attachment.type === "audio"
+                  ? "🔊"
+                  : "📄";
+
+              return (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600"
+                >
+                  <span>{icon}</span>
+                  <span>{name}</span>
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         <IntelligenceStrip
           ai_mood={memory.ai_mood}

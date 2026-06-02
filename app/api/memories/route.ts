@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 export { POST } from "./create/route";
 
@@ -84,32 +85,20 @@ export async function GET(
     const searchParams =
       request.nextUrl.searchParams;
 
-    const profileId =
+    const explicitProfileId =
       searchParams.get(
         "profileId"
       );
 
-    if (!profileId) {
-      console.warn(
-        `${MEMORIES_API_TAG} missing-profile-id`,
-        {
-          requestId,
-          userId: user.id,
-        }
-      );
+    const resolvedProfileId =
+      await resolveActiveProfileId();
 
-      return NextResponse.json(
-        {
-          data: [],
-          metadata: {
-            requestId,
-            empty: true,
-            reason:
-              "NO_PROFILE_SELECTED",
-          },
-        }
-      );
-    }
+    const profileId =
+      explicitProfileId ??
+      resolvedProfileId;
+
+    const isPersonalWorkspace =
+      profileId === null;
 
     console.log(
       `${MEMORIES_API_TAG} fetch-started`,
@@ -117,21 +106,42 @@ export async function GET(
         requestId,
         userId: user.id,
         profileId,
+        workspaceType:
+          isPersonalWorkspace
+            ? "my-nest"
+            : "care",
       }
     );
 
-    const { data, error } =
-      await supabase
+    let memoriesQuery =
+      supabase
         .from("memories")
         .select("*")
-        .eq("user_id", user.id)
-        .eq(
+        .eq("user_id", user.id);
+
+    if (
+      isPersonalWorkspace
+    ) {
+      memoriesQuery =
+        memoriesQuery.is(
+          "memory_profile_id",
+          null
+        );
+    } else {
+      memoriesQuery =
+        memoriesQuery.eq(
           "memory_profile_id",
           profileId
-        )
-        .order("created_at", {
+        );
+    }
+
+    const { data, error } =
+      await memoriesQuery.order(
+        "created_at",
+        {
           ascending: false,
-        });
+        }
+      );
 
     if (error) {
       console.error(
@@ -178,6 +188,10 @@ export async function GET(
       metadata: {
         requestId,
         profileId,
+        workspaceType:
+          isPersonalWorkspace
+            ? "my-nest"
+            : "care",
         memoryCount:
           data?.length ?? 0,
         durationMs,

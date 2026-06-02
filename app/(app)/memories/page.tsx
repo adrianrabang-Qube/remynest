@@ -88,6 +88,11 @@ const isMyNestContext =
   searchParams.get("context") ===
   "my-nest";
 
+  const workspaceType =
+  isMyNestContext
+    ? "my-nest"
+    : "care";
+
   const [showCreate, setShowCreate] =
     useState(false);
 
@@ -176,15 +181,23 @@ const isMyNestContext =
     isFetching,
   } = useQuery<Memory[]>({
     queryKey: [
-      "memories",
-      activeProfileId,
-    ],
+  "memories",
+  workspaceType,
+  activeProfileId,
+],
 
-    enabled: !!activeProfileId,
+    enabled:
+      isMyNestContext ||
+      !!activeProfileId,
 
     queryFn: async () => {
+      const url =
+        activeProfileId
+          ? `/api/memories?profileId=${activeProfileId}`
+          : `/api/memories`;
+
       const res = await fetch(
-        `/api/memories?profileId=${activeProfileId}`,
+        url,
         {
           cache: "no-store",
         }
@@ -226,24 +239,44 @@ return normalizedMemories;
   // =========================
   const createMutation = useMutation({
     mutationFn: async (data: {
-      title: string;
-      content: string;
-    }) => {
-      const res = await fetch(
-        "/api/memories",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            ...data,
-            profileId:
-              activeProfileId,
-          }),
-        }
-      );
+  title: string;
+  content: string;
+  uploadedFiles?: File[];
+}) => {
+      const payload =
+  new FormData();
+
+payload.append(
+  "title",
+  data.title
+);
+
+payload.append(
+  "content",
+  data.content
+);
+
+payload.append(
+  "profileId",
+  activeProfileId ?? ""
+);
+
+data.uploadedFiles?.forEach(
+  (file) => {
+    payload.append(
+      "uploadedFiles",
+      file
+    );
+  }
+);
+
+const res = await fetch(
+  "/api/memories",
+  {
+    method: "POST",
+    body: payload,
+  }
+);
 
       if (!res.ok) {
         throw new Error(
@@ -258,6 +291,7 @@ return normalizedMemories;
       await queryClient.cancelQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -266,6 +300,7 @@ return normalizedMemories;
         queryClient.getQueryData<Memory[]>(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ]
         );
@@ -281,6 +316,7 @@ return normalizedMemories;
       queryClient.setQueryData<Memory[]>(
         [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
         (old = []) => [
@@ -301,6 +337,7 @@ return normalizedMemories;
         queryClient.setQueryData(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ],
           context.previous
@@ -312,6 +349,7 @@ return normalizedMemories;
       queryClient.invalidateQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -361,6 +399,7 @@ return normalizedMemories;
       await queryClient.cancelQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -369,6 +408,7 @@ return normalizedMemories;
         queryClient.getQueryData<Memory[]>(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ]
         );
@@ -376,6 +416,7 @@ return normalizedMemories;
       queryClient.setQueryData<Memory[]>(
         [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
         (old = []) =>
@@ -398,6 +439,7 @@ return normalizedMemories;
         queryClient.setQueryData(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ],
           context.previous
@@ -409,6 +451,7 @@ return normalizedMemories;
       queryClient.invalidateQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -440,6 +483,7 @@ return normalizedMemories;
       await queryClient.cancelQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -448,6 +492,7 @@ return normalizedMemories;
         queryClient.getQueryData<Memory[]>(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ]
         );
@@ -455,6 +500,7 @@ return normalizedMemories;
       queryClient.setQueryData<Memory[]>(
         [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
         (old = []) =>
@@ -473,6 +519,7 @@ return normalizedMemories;
         queryClient.setQueryData(
           [
             "memories",
+            workspaceType,
             activeProfileId,
           ],
           context.previous
@@ -484,6 +531,7 @@ return normalizedMemories;
       queryClient.invalidateQueries({
         queryKey: [
           "memories",
+          workspaceType,
           activeProfileId,
         ],
       });
@@ -514,6 +562,7 @@ return normalizedMemories;
             query: searchQuery,
             profileId:
               activeProfileId,
+            workspaceType,
           }),
         }
       );

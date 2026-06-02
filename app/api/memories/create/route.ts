@@ -6,6 +6,10 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
 
+import {
+  buildMemoryMediaPayload,
+} from "@/lib/memory-media-pipeline";
+
 const MEMORY_PIPELINE_TAG =
   "memory-cognition-pipeline";
 
@@ -166,24 +170,56 @@ export async function POST(req: Request) {
       }
     );
 
-    if (!activeProfileId) {
-      return NextResponse.json(
-        {
-          error:
-            "My Nest mode active. Memory creation requires an active care profile.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
+    // My Nest personal workspace is supported for MVP.
+    // In care workspace, activeProfileId is preserved.
+    // In personal workspace, memory_profile_id is intentionally null.
 
     // =====================================
     // REQUEST BODY
     // =====================================
 
-    const body =
-      await req.json();
+    const contentType =
+      req.headers.get(
+        "content-type"
+      ) || "";
+
+    let body: Record<
+      string,
+      unknown
+    >;
+
+    if (
+      contentType.includes(
+        "application/json"
+      )
+    ) {
+      body = await req.json();
+    } else {
+      const formData =
+        await req.formData();
+
+      body = {
+        title:
+          formData.get(
+            "title"
+          ),
+
+        content:
+          formData.get(
+            "content"
+          ),
+
+        profileId:
+          formData.get(
+            "profileId"
+          ),
+
+        uploadedFiles:
+          formData.getAll(
+            "uploadedFiles"
+          ),
+      };
+    }
 
     logPipelineStage(
       "request-body-received"
@@ -194,10 +230,24 @@ export async function POST(req: Request) {
       content,
     } = body;
 
+    const memoryMediaPayload =
+      await buildMemoryMediaPayload({
+        body,
+        userId: user.id,
+      });
+
+    const normalizedAttachments =
+      memoryMediaPayload.attachments;
+
+    const normalizedCoverImageUrl =
+      memoryMediaPayload.coverImageUrl;
+
     const normalizedContent =
       normalizeMemoryContent(
-        content || ""
-      );
+  typeof content === "string"
+    ? content
+    : ""
+);
 
     const contentValidationError =
       validateMemoryContent(
@@ -434,13 +484,19 @@ export async function POST(req: Request) {
         user.id,
 
       memory_profile_id:
-        activeProfileId,
+        activeProfileId ?? null,
 
       title:
         aiTitle,
 
       content:
         normalizedContent,
+
+        attachments:
+  normalizedAttachments,
+
+cover_image_url:
+  normalizedCoverImageUrl,
 
       ai_title:
         aiTitle,

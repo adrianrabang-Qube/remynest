@@ -1,21 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import {
+  buildMemoryUploadPayload,
+} from "@/lib/memory-upload-client";
 
 export default function CreateMemoryModal({
   onClose,
   onCreate,
 }: {
   onClose: () => void;
-  onCreate: (data: { title: string; content: string }) => Promise<void>;
+  onCreate: (data: {
+    title: string;
+    content: string;
+    uploadedFiles?: File[];
+  }) => Promise<void>;
 }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [uploadedFiles, setUploadedFiles] =
+    useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
     setLoading(true);
-    await onCreate({ title, content });
+
+    const payload =
+      await buildMemoryUploadPayload({
+        title,
+        content,
+        uploadedFiles,
+      });
+
+    await onCreate(payload);
+
     setLoading(false);
   }
 
@@ -36,6 +54,20 @@ export default function CreateMemoryModal({
           placeholder="Content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+        />
+
+        <input
+          type="file"
+          multiple
+          className="border p-2 w-full"
+          onChange={(e) => {
+            const files =
+              Array.from(
+                e.target.files ?? []
+              );
+
+            setUploadedFiles(files);
+          }}
         />
 
         <div className="flex gap-2">

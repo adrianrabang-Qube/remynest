@@ -180,14 +180,14 @@ export default async function TimelinePage({
         ? activeContext.profileId
         : null;
 
-  if (!activeProfileId) {
+  if (!isMyNestContext && !activeProfileId) {
     return (
       <div className="space-y-6 p-6">
         <TimelineHeader />
 
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <p className="text-blue-700">
-            My Nest mode active. Timeline is isolated from care profiles.
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+          <p className="text-yellow-700">
+            No active profile selected.
           </p>
         </div>
       </div>
@@ -198,19 +198,28 @@ export default async function TimelinePage({
   // FETCH MEMORIES
   // =====================================
 
-  const {
-    data: memories,
-    error,
-  } = await supabase
+  const memoriesQuery = supabase
     .from("memories")
     .select("*")
-    .eq(
-      "memory_profile_id",
-      activeProfileId
-    )
     .order("created_at", {
       ascending: false,
     });
+
+  const query =
+    isMyNestContext
+      ? memoriesQuery.is(
+          "memory_profile_id",
+          null
+        )
+      : memoriesQuery.eq(
+          "memory_profile_id",
+          activeProfileId
+        );
+
+  const {
+    data: memories,
+    error,
+  } = await query;
 
   if (error) {
     console.error(
