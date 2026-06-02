@@ -3,7 +3,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewMemoryPage() {
@@ -12,6 +12,7 @@ export default function NewMemoryPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const handleCreate = async () => {
     if (!title || !content) {
@@ -23,7 +24,18 @@ export default function NewMemoryPage() {
 
     const res = await fetch("/api/memories", {
       method: "POST",
-      body: JSON.stringify({ title, content }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        content,
+        attachments: files.map((file) => ({
+          filename: file.name,
+          type: file.type,
+          size: file.size,
+        })),
+      }),
     });
 
     if (!res.ok) {
@@ -33,6 +45,14 @@ export default function NewMemoryPage() {
     }
 
     router.push("/memories");
+  };
+
+  const handleFiles = (
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!e.target.files) return;
+
+    setFiles(Array.from(e.target.files));
   };
 
   return (
@@ -53,6 +73,25 @@ export default function NewMemoryPage() {
           onChange={(e) => setContent(e.target.value)}
           className="border p-3 rounded h-32 resize-none focus:outline-none focus:ring-2 focus:ring-black"
         />
+
+        <input
+          type="file"
+          multiple
+          accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+          onChange={handleFiles}
+          className="border p-3 rounded"
+        />
+
+        {files.length > 0 && (
+          <div className="border rounded p-3 text-sm space-y-2">
+            <p className="font-medium">Selected files</p>
+            {files.map((file) => (
+              <div key={`${file.name}-${file.size}`}>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        )}
 
         <button
           onClick={handleCreate}

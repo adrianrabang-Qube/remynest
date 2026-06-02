@@ -45,3 +45,18 @@ export async function setActiveProfile(
       normalizedProfileId,
   };
 }
+
+export async function setPersonalWorkspace() {
+  await setActiveContext({
+    type: "PERSONAL",
+  });
+
+  revalidatePath(
+    DASHBOARD_PATH
+  );
+
+  return {
+    success: true,
+    workspace: "my-nest",
+  };
+}

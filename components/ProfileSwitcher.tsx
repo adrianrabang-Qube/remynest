@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 
 import {
   setActiveProfile,
+  setPersonalWorkspace,
 } from "@/app/(app)/dashboard/profile-actions";
 
 const PROFILE_SWITCHER_TAG =
@@ -320,6 +321,21 @@ export default function ProfileSwitcher({
           Switching profile...
         </p>
       )}
+
+      <button
+        type="button"
+        disabled={isPending || isSwitching}
+        className="mt-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => {
+          startTransition(() => {
+            void setPersonalWorkspace().then(() => {
+              router.refresh();
+            });
+          });
+        }}
+      >
+        Switch to My Nest
+      </button>
     </div>
   );
 }

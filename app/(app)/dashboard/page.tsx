@@ -32,6 +32,9 @@ import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
 
+import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
+import { WorkspaceContextPanel } from "./components/workspace/WorkspaceContextPanel";
+
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage({
@@ -384,11 +387,12 @@ export default async function DashboardPage({
     accessibleProfiles?.find(
       (profile: any) =>
         profile.id ===
-        activeProfileId
+        effectiveActiveProfileId
     ) || null;
 
   const isMyNestWorkspace =
-    !activeProfileId;
+    isMyNestContext ||
+    !effectiveActiveProfileId;
 
   const workspaceType =
     isMyNestWorkspace
@@ -412,21 +416,28 @@ export default async function DashboardPage({
     | unknown
     | null = null;
 
-  if (effectiveActiveProfileId) {
-
-    const {
-      count,
-      error,
-    } = await supabase
+  if (isMyNestContext || effectiveActiveProfileId) {
+    const memoriesQuery = supabase
       .from("memories")
       .select("*", {
         count: "exact",
         head: true,
-      })
-      .eq(
-        "memory_profile_id",
-        effectiveActiveProfileId
-      );
+      });
+
+    const query = effectiveActiveProfileId
+      ? memoriesQuery.eq(
+          "memory_profile_id",
+          effectiveActiveProfileId
+        )
+      : memoriesQuery.is(
+          "memory_profile_id",
+          null
+        );
+
+    const {
+      count,
+      error,
+    } = await query;
 
     memoryCount =
       count || 0;
@@ -513,45 +524,56 @@ export default async function DashboardPage({
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f1ea]">
+    <WorkspaceShell>
 
       <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
 
+        
+
+        {/* DASHBOARD ENTRY */}
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
-          workspaceType={workspaceType}
-          workspaceLabel={workspaceLabel}
         />
 
-        {/* PROFILE SWITCHER */}
+        {/* PROFILE CONTEXT FIRST */}
         {!isMyNestContext && (
           <ProfileSwitcher
-            profiles={
-              switcherProfiles
-            }
-            activeProfileId={
-              activeProfileId
-            }
+            profiles={switcherProfiles}
+            activeProfileId={activeProfileId}
           />
         )}
 
-        {/* ACTIVE PROFILE WARNING */}
         {!isMyNestContext &&
           !activeProfile && (
             <DashboardActiveProfileWarning />
         )}
 
-        {/* STATS */}
+        {/* EXISTING PROFILE PANEL PRESERVED */}
+        {!isMyNestContext && activeProfile && (
+          <DashboardProfilePanel
+            activeProfile={activeProfile}
+          />
+        )}
+
+        {/* WORKSPACE CONTEXT — MOVED CLOSER TO PROFILE DETAILS */}
+        {!isMyNestContext &&
+          activeProfile && (
+            <WorkspaceContextPanel
+              activeProfile={activeProfile}
+              workspaceType={workspaceType}
+            />
+        )}
+
+        {/* PRIMARY METRICS LAYER */}
+
         <DashboardStats
           memoryCount={memoryCount}
           currentPlan={
             profile?.is_premium ||
             profile?.subscription_status === "active" ||
-            profile?.subscription_plan
-              ?.toUpperCase() === "PREMIUM" ||
-            profile?.subscription_plan
-              ?.toUpperCase() === "FAMILY"
+            profile?.subscription_plan?.toUpperCase() === "PREMIUM" ||
+            profile?.subscription_plan?.toUpperCase() === "FAMILY"
               ? "PREMIUM"
               : profile?.subscription_plan || "FREE"
           }
@@ -576,14 +598,6 @@ export default async function DashboardPage({
           }
         />
 
-        {/* ACTIVE PROFILE DETAILS */}
-        {!isMyNestContext &&
-          activeProfile && (
-            <DashboardProfilePanel
-              activeProfile={activeProfile}
-            />
-        )}
-
         {/* ACCOUNT STATUS */}
         <DashboardAccountStatus
           currentPlan={
@@ -603,12 +617,12 @@ export default async function DashboardPage({
           )}
         />
 
-        {/* CREATE PROFILE */}
-        <DashboardCreateProfile />
-
         {/* CREATE MEMORY */}
         <DashboardCreateMemory />
+
+        {/* CREATE PROFILE */}
+        <DashboardCreateProfile />
       </main>
-    </div>
+    </WorkspaceShell>
   );
 }
