@@ -141,31 +141,22 @@ export default async function DashboardPage({
       ? activeContext.profileId
       : null;
 
-  const fallbackActiveProfileId =
-    !resolvedActiveProfileId &&
-    accessibleProfiles?.length > 0
-      ? accessibleProfiles[0]?.id
-      : null;
-
   const activeProfileId =
     resolvedActiveProfileId ||
-    fallbackActiveProfileId;
+    null;
 
   const isMyNestContext =
-    searchParams?.context ===
-    "my-nest";
+    activeContext?.type ===
+    "PERSONAL";
 
   const effectiveActiveProfileId =
-    isMyNestContext
-      ? null
-      : activeProfileId;
+    activeProfileId;
 
   console.info(
     "[ACTIVE_PROFILE_RESOLUTION]",
     {
       activeContext,
       resolvedActiveProfileId,
-      fallbackActiveProfileId,
       finalActiveProfileId:
         activeProfileId,
       accessibleProfilesCount:

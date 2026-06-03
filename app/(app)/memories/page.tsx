@@ -9,9 +9,6 @@ import {
 } from "react";
 
 import {
-  useSearchParams,
-} from "next/navigation";
-import {
   useQuery,
   useMutation,
   useQueryClient,
@@ -81,18 +78,6 @@ function normalizeMemoryArray(
 function MemoriesPageContent() {
   const queryClient = useQueryClient();
 
-  const searchParams =
-  useSearchParams();
-
-const isMyNestContext =
-  searchParams.get("context") ===
-  "my-nest";
-
-  const workspaceType =
-  isMyNestContext
-    ? "my-nest"
-    : "care";
-
   const [showCreate, setShowCreate] =
     useState(false);
 
@@ -100,19 +85,21 @@ const isMyNestContext =
     useState<Memory | null>(null);
 
   const [activeProfileId, setActiveProfileId] =
-    useState<string | null>(null);
+    useState<string | null | undefined>(undefined);
+
+  const isMyNestContext =
+    activeProfileId === null;
+
+  const workspaceType =
+    isMyNestContext
+      ? "my-nest"
+      : "care";
 
   // =========================
   // LOAD ACTIVE PROFILE
   // =========================
   useEffect(() => {
     async function loadProfile() {
-
-      if (isMyNestContext) {
-  setActiveProfileId(null);
-  return;
-}
-
       try {
         const res = await fetch(
           "/api/active-profile",
@@ -127,9 +114,10 @@ const isMyNestContext =
 
         const data = await res.json();
 
-        // ✅ FIXED
         setActiveProfileId(
-          data.activeProfileId || null
+          data.activeProfileId === null
+            ? null
+            : data.activeProfileId || null
         );
       } catch (error) {
         console.error(error);
@@ -137,7 +125,7 @@ const isMyNestContext =
     }
 
     loadProfile();
-  }, [isMyNestContext]);
+  }, []);
 
   // =========================
   // SEMANTIC SEARCH STATE
@@ -187,8 +175,7 @@ const isMyNestContext =
 ],
 
     enabled:
-      isMyNestContext ||
-      !!activeProfileId,
+      activeProfileId !== undefined,
 
     queryFn: async () => {
       const url =
@@ -278,13 +265,17 @@ const res = await fetch(
   }
 );
 
+      const responseData = await res.json();
+
       if (!res.ok) {
         throw new Error(
-          "Failed to create memory"
+          responseData?.error ||
+            responseData?.details ||
+            "Failed to create memory"
         );
       }
 
-      return res.json();
+      return responseData;
     },
 
     onMutate: async (newMemory) => {
@@ -674,10 +665,10 @@ const sortedMemories = [
         Your Memories
       </h1>
 
-      {!activeProfileId && (
+      {activeProfileId === undefined && (
         <div className="rounded-xl border p-4 bg-yellow-50">
           <p className="text-sm text-yellow-700">
-            No active profile selected.
+            Loading workspace context...
           </p>
         </div>
       )}

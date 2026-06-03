@@ -148,10 +148,56 @@ export function resolveCoverImageUrl(
   return trimmed;
 }
 
+export class MemoryAttachmentValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MemoryAttachmentValidationError";
+  }
+}
+
+const MAX_MEMORY_ATTACHMENT_SIZE =
+  25 * 1024 * 1024;
+
+const ALLOWED_MEMORY_ATTACHMENT_TYPES = [
+  "image/",
+  "video/",
+  "audio/",
+  "application/pdf",
+];
+
+function validateMemoryAttachmentFile(
+  file: File
+) {
+  const type = file.type || "";
+
+  const isAllowedType = ALLOWED_MEMORY_ATTACHMENT_TYPES.some(
+    (allowed) =>
+      allowed.endsWith("/")
+        ? type.startsWith(allowed)
+        : type === allowed
+  );
+
+  if (!isAllowedType) {
+    throw new MemoryAttachmentValidationError(
+      `Unsupported file type: ${type || file.name}`
+    );
+  }
+
+  if (file.size > MAX_MEMORY_ATTACHMENT_SIZE) {
+    throw new MemoryAttachmentValidationError(
+      `File exceeds maximum size of ${
+        MAX_MEMORY_ATTACHMENT_SIZE / 1024 / 1024
+      } MB`
+    );
+  }
+}
+
 export async function uploadMemoryAttachment(
   file: File,
   userId: string
 ): Promise<MemoryAttachment> {
+  validateMemoryAttachmentFile(file);
+
   const supabase =
     await createClient();
 
@@ -236,37 +282,10 @@ export async function uploadMemoryAttachments(
     return [];
   }
 
-  const uploadResults =
-    await Promise.all(
-      files.map(
-        async (file) => {
-          try {
-            return await uploadMemoryAttachment(
-              file,
-              userId
-            );
-          } catch (error) {
-            console.error(
-              "[memory-media] upload-failed",
-              {
-                fileName:
-                  file.name,
-                error,
-              }
-            );
-
-            return null;
-          }
-        }
-      )
-    );
-
-  return uploadResults.filter(
-    (
-      item
-    ): item is NonNullable<
-      typeof item
-    > => item !== null
+  return await Promise.all(
+    files.map((file) =>
+      uploadMemoryAttachment(file, userId)
+    )
   );
 }
 

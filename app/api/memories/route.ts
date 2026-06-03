@@ -90,12 +90,50 @@ export async function GET(
         "profileId"
       );
 
+    const explicitWorkspaceType =
+      searchParams.get(
+        "workspaceType"
+      );
+
+    const normalizedExplicitProfileId =
+      explicitProfileId?.trim() || null;
+
+    const normalizedProfileId =
+      normalizedExplicitProfileId &&
+      normalizedExplicitProfileId !== "null" &&
+      normalizedExplicitProfileId !== "undefined"
+        ? normalizedExplicitProfileId
+        : null;
+
+    const normalizedWorkspaceType =
+      explicitWorkspaceType === "my-nest" ||
+      explicitWorkspaceType === "care"
+        ? explicitWorkspaceType
+        : null;
+
+    if (
+      explicitWorkspaceType &&
+      !normalizedWorkspaceType
+    ) {
+      console.warn(
+        `${MEMORIES_API_TAG} invalid-workspace-type`,
+        {
+          requestId,
+          workspaceType:
+            explicitWorkspaceType,
+        }
+      );
+    }
+
     const resolvedProfileId =
       await resolveActiveProfileId();
 
     const profileId =
-      explicitProfileId ??
-      resolvedProfileId;
+      normalizedWorkspaceType ===
+      "my-nest"
+        ? null
+        : normalizedProfileId ??
+          resolvedProfileId;
 
     const isPersonalWorkspace =
       profileId === null;

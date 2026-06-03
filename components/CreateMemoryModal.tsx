@@ -21,25 +21,36 @@ export default function CreateMemoryModal({
   const [uploadedFiles, setUploadedFiles] =
     useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit() {
     setLoading(true);
+    setError("");
 
-    const payload =
-      await buildMemoryUploadPayload({
-        title,
-        content,
-        uploadedFiles,
-      });
+    try {
+      const payload =
+        await buildMemoryUploadPayload({
+          title,
+          content,
+          uploadedFiles,
+        });
 
-    await onCreate(payload);
-
-    setLoading(false);
+      await onCreate(payload);
+    } catch (createError) {
+      console.error(createError);
+      setError(
+        createError instanceof Error
+          ? createError.message
+          : "Failed to create memory. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded w-[400px] space-y-4">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+      <div className="bg-white p-6 rounded w-full max-w-xl space-y-4">
         <h2 className="text-lg font-semibold">Create Memory</h2>
 
         <input
@@ -55,6 +66,12 @@ export default function CreateMemoryModal({
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
+
+        {error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
 
         <input
           type="file"

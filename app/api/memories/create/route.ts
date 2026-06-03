@@ -5,6 +5,9 @@ import { generateEmbedding } from "@/lib/embeddings";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
+import {
+  MemoryAttachmentValidationError,
+} from "@/lib/memory-media";
 
 import {
   buildMemoryMediaPayload,
@@ -756,6 +759,16 @@ cover_image_url:
     );
 
   } catch (error) {
+    if (error instanceof MemoryAttachmentValidationError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     logPipelineError(
       "memory-create-error",

@@ -163,12 +163,11 @@ export default async function TimelinePage({
   // ACTIVE PROFILE
   // =====================================
 
-  const isMyNestContext =
-    searchParams?.context ===
-    "my-nest";
-
   const activeContext =
     await getActiveContext();
+
+  const isMyNestContext =
+    activeContext?.type === "PERSONAL";
 
   const isCareContext =
     activeContext?.type === "CARE";
