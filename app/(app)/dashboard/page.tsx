@@ -31,6 +31,7 @@ import DashboardCreateProfile from "./components/DashboardCreateProfile";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
+import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
 import { WorkspaceContextPanel } from "./components/workspace/WorkspaceContextPanel";
@@ -445,6 +446,36 @@ export default async function DashboardPage() {
 
   const dashboardDurationMs = 0;
 
+  const recentMemories = [
+    {
+      id: "memories",
+      title: "View all memories",
+      href: "/memories",
+    },
+    {
+      id: "timeline",
+      title: "Open timeline",
+      href: "/timeline",
+    },
+    {
+      id: "memory-chat",
+      title: "Continue memory chat",
+      href: "/memory-chat",
+    },
+  ];
+
+  const todaysFocus = [
+    memoryCount === 0
+      ? "Create your first memory"
+      : `You currently have ${memoryCount} memories stored`,
+    pendingInvites?.length
+      ? `${pendingInvites.length} caregiver invite(s) waiting`
+      : "No pending caregiver invites",
+    isMyNestWorkspace
+      ? "Personal workspace active"
+      : "Care workspace active",
+  ];
+
   logDashboardStage(
     "dashboard-request-completed",
     {
@@ -515,6 +546,32 @@ export default async function DashboardPage() {
           displayName={displayName}
         />
 
+        <section className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="text-lg font-semibold">Today&apos;s Focus</h2>
+            <ul className="mt-3 space-y-2 text-sm">
+              {todaysFocus.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="text-lg font-semibold">Quick Resume</h2>
+            <div className="mt-3 flex flex-col gap-2">
+              {recentMemories.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className="text-sm underline"
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* PROFILE CONTEXT FIRST */}
         {!isMyNestContext && (
           <ProfileSwitcher
@@ -545,6 +602,25 @@ export default async function DashboardPage() {
         )}
 
         {/* PRIMARY METRICS LAYER */}
+
+        <section className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="text-lg font-semibold">Care Snapshot</h2>
+            <div className="mt-3 space-y-2 text-sm">
+              <p>Workspace: {workspaceType}</p>
+              <p>Accessible profiles: {accessibleProfiles.length}</p>
+              <p>Total memories: {memoryCount}</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-5">
+            <h2 className="text-lg font-semibold">AI Insight Preview</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Memory activity and cognitive insight summaries will appear here,
+              giving caregivers and users a quick overview before opening Insights.
+            </p>
+          </div>
+        </section>
 
         <DashboardStats
           memoryCount={memoryCount}
