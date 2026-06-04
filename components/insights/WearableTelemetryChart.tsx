@@ -12,10 +12,18 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type WearableDatum = {
+  date?: string;
+  heartRate?: number;
+  stress?: number;
+};
+
 const WearableTelemetryChart = memo(
   function WearableTelemetryChart({
     wearableData = [],
-  }: any) {
+  }: {
+    wearableData?: WearableDatum[];
+  }) {
 
     return (
 

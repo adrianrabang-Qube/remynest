@@ -12,10 +12,17 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type ContinuityDatum = {
+  date?: string;
+  continuity?: number;
+};
+
 const MemoryContinuityChart = memo(
   function MemoryContinuityChart({
     continuityData = [],
-  }: any) {
+  }: {
+    continuityData?: ContinuityDatum[];
+  }) {
 
     return (
 

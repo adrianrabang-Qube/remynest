@@ -171,8 +171,7 @@ function normalizeAIResponse(
 }
 
 async function executeAIRequest(
-  normalizedContent: string,
-  requestId: string
+  normalizedContent: string
 ) {
   return openai.chat.completions.create(
     {
@@ -250,8 +249,7 @@ export async function generateMemoryInsights(
 
     const completion =
       await executeAIRequest(
-        normalizedContent,
-        requestId
+        normalizedContent
       );
 
     const result =

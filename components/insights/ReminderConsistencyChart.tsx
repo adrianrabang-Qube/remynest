@@ -11,10 +11,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+type ReminderDatum = {
+  week?: string;
+  completed?: number;
+};
+
 const ReminderConsistencyChart = memo(
   function ReminderConsistencyChart({
     reminderData = [],
-  }: any) {
+  }: {
+    reminderData?: ReminderDatum[];
+  }) {
 
     return (
 

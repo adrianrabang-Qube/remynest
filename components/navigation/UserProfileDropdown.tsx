@@ -1,4 +1,5 @@
 import ProfileHub from "@/components/profile/ProfileHub";
+
 type UserProfileDropdownProps = {
   onClose?: () => void;
 };
@@ -34,6 +35,16 @@ export default function UserProfileDropdown({
         z-50
       "
     >
+      {onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          aria-label="Close profile dropdown"
+        >
+          ×
+        </button>
+      ) : null}
       <ProfileHub profile={profile} />
     </div>
   );

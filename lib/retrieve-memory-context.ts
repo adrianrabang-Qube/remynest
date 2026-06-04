@@ -1,6 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/embeddings";
 
+type MemoryMatch = {
+  id: string;
+  title?: string;
+  content?: string;
+  ai_summary?: string;
+  ai_category?: string;
+  ai_mood?: string;
+  similarity?: number;
+};
+
 export async function retrieveMemoryContext(
   userId: string,
   query: string
@@ -77,7 +87,7 @@ export async function retrieveMemoryContext(
 
     const memoryIds =
       matches.map(
-        (memory: any) =>
+        (memory: MemoryMatch) =>
           memory.id
       );
 
@@ -162,7 +172,7 @@ export async function retrieveMemoryContext(
 
     const context =
       matches.map(
-        (memory: any) => {
+        (memory: MemoryMatch) => {
 
           return `
 TITLE:

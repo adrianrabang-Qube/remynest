@@ -7,15 +7,22 @@ import {
   Area,
   XAxis,
   YAxis,
- Tooltip,
+  Tooltip,
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
 
+type AttentionDatum = {
+  date?: string;
+  focus?: number;
+};
+
 const AttentionAnalytics = memo(
   function AttentionAnalytics({
-  attentionData = [],
-}: any) {
+    attentionData = [],
+  }: {
+    attentionData?: AttentionDatum[];
+  }) {
 
   return (
 

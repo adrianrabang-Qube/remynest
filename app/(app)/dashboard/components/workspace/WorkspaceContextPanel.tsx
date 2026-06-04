@@ -1,5 +1,7 @@
 export type WorkspaceContextPanelProps = {
-  activeProfile: any;
+  activeProfile: {
+    profile_name?: string | null;
+  };
   workspaceType?: "my-nest" | "care";
 };
 
@@ -7,6 +9,11 @@ export function WorkspaceContextPanel({
   activeProfile,
   workspaceType = "my-nest",
 }: WorkspaceContextPanelProps) {
+  const profileLabel =
+    activeProfile.profile_name
+      ? `Supporting ${activeProfile.profile_name}`
+      : undefined;
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border bg-white/70 px-4 py-3">
@@ -23,7 +30,7 @@ export function WorkspaceContextPanel({
             </h3>
 
             <p className="text-sm text-neutral-600">
-              Active profile aware dashboard context.
+              {profileLabel || "Active profile aware dashboard context."}
             </p>
           </div>
         </div>

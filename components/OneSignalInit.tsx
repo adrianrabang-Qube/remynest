@@ -3,12 +3,6 @@
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-declare global {
-  interface Window {
-    OneSignal: any;
-  }
-}
-
 // Prevent double initialization in React dev mode
 let initialized = false;
 

@@ -7,6 +7,10 @@ export default function DashboardTelemetry({
   memoryCount,
   activeProfileName,
 }: DashboardTelemetryProps) {
+  const profileContext =
+    activeProfileName
+      ? `Active profile: ${activeProfileName}`
+      : "Active archive overview.";
 
   return (
     <div className="rounded-3xl border bg-white p-6 shadow-sm">
@@ -30,6 +34,10 @@ export default function DashboardTelemetry({
           <p className="text-sm text-gray-400 mt-3">
             Stored cognitive memories
             across your RemyNest archive.
+          </p>
+
+          <p className="text-sm text-gray-500 mt-2">
+            {profileContext}
           </p>
 
         </div>

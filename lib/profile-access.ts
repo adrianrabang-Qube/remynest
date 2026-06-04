@@ -1,5 +1,20 @@
 import { createClient } from "@/utils/supabase/server";
 
+type ProfileRelationship = {
+  memory_profile_id: string;
+  access_level?: string | null;
+  relationship_type?: string | null;
+};
+
+type MemoryProfile = {
+  id: string;
+  created_by_account_id?: string;
+  access_level?: string | null;
+  relationship_type?: string | null;
+  shared?: boolean;
+  [key: string]: unknown;
+};
+
 export async function getAccessibleProfiles() {
   const supabase = await createClient();
 
@@ -89,7 +104,7 @@ export async function getAccessibleProfiles() {
 
   // GET PROFILE IDS
   const profileIds = relationships.map(
-    (r: any) => r.memory_profile_id
+    (r: ProfileRelationship) => r.memory_profile_id
   );
 
   // FETCH SHARED PROFILES
@@ -111,10 +126,10 @@ export async function getAccessibleProfiles() {
   // MERGE RELATIONSHIP DATA
   const sharedProfiles =
     sharedProfilesData?.map(
-      (profile: any) => {
+      (profile: MemoryProfile) => {
         const relationship =
           relationships.find(
-            (r: any) =>
+            (r: ProfileRelationship) =>
               r.memory_profile_id ===
               profile.id
           );
@@ -150,7 +165,7 @@ export async function getAccessibleProfiles() {
   const dedupedProfiles = Array.from(
     new Map(
       mergedProfiles.map(
-        (profile: any) => [
+        (profile: MemoryProfile) => [
           profile.id,
           profile,
         ]

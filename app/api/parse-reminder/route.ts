@@ -111,7 +111,7 @@ User input:
       data: parsed,
       db: saved,
     })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Server crash' }, { status: 500 })
   }
 }

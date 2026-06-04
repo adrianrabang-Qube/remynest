@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import {
   Suspense,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -145,20 +146,79 @@ function MemoriesPageContent() {
   // =========================
   // LIVE SEARCH
   // =========================
-  useEffect(() => {
-    const trimmed = searchQuery.trim();
-
-    if (!trimmed) {
+  const handleSearch = useCallback(async () => {
+    if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
 
+    try {
+      setIsSearching(true);
+
+      const res = await fetch(
+        "/api/memories/search",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            query: searchQuery,
+            profileId:
+              activeProfileId,
+            workspaceType,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Search failed"
+        );
+      }
+
+      const responseData =
+        await res.json();
+
+      const normalizedResults = Array.isArray(
+        responseData
+      )
+        ? responseData
+        : Array.isArray(responseData.results)
+        ? responseData.results
+        : Array.isArray(responseData.data)
+        ? responseData.data
+        : [];
+
+      console.log(
+        "[memories-search-ui] normalized-results",
+        {
+          query: searchQuery,
+          resultCount:
+            normalizedResults.length,
+          rawResponse:
+            responseData,
+        }
+      );
+
+      setSearchResults(
+        normalizedResults
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [searchQuery, activeProfileId, workspaceType]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
-      handleSearch();
+      void handleSearch();
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [handleSearch]);
 
   // =========================
   // FETCH MEMORIES
@@ -528,75 +588,6 @@ const res = await fetch(
       });
     },
   });
-
-  // =========================
-  // SEMANTIC SEARCH
-  // =========================
-  async function handleSearch() {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      setIsSearching(true);
-
-      const res = await fetch(
-        "/api/memories/search",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            query: searchQuery,
-            profileId:
-              activeProfileId,
-            workspaceType,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error(
-          "Search failed"
-        );
-      }
-
-      const responseData =
-  await res.json();
-
-const normalizedResults = Array.isArray(
-  responseData
-)
-  ? responseData
-  : Array.isArray(responseData.results)
-  ? responseData.results
-  : Array.isArray(responseData.data)
-  ? responseData.data
-  : [];
-
-console.log(
-  "[memories-search-ui] normalized-results",
-  {
-    query: searchQuery,
-    resultCount:
-      normalizedResults.length,
-    rawResponse:
-      responseData,
-  }
-);
-
-setSearchResults(
-  normalizedResults
-);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsSearching(false);
-    }
-  }
 
   // =========================
   // SORT

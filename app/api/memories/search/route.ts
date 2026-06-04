@@ -78,8 +78,13 @@ function validateSearchQuery(
   return null;
 }
 
+type MemorySearchResult = {
+  similarity?: number;
+  [key: string]: unknown;
+};
+
 function normalizeSearchResults(
-  results: any[]
+  results: MemorySearchResult[]
 ) {
   return results
     .filter(Boolean)

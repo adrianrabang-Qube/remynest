@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ProfileSummary } from "@/components/profile/types";
 
 interface ProfileHeaderProps {
@@ -11,10 +12,13 @@ export default function ProfileHeader({
     <div className="mb-4 border-b pb-4">
       <div className="flex items-center gap-4">
         {profile.avatarUrl ? (
-          <img
+          <Image
             src={profile.avatarUrl}
             alt={profile.fullName}
+            width={56}
+            height={56}
             className="h-14 w-14 rounded-full object-cover"
+            unoptimized
           />
         ) : (
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-300 text-sm font-semibold text-neutral-700">

@@ -4,8 +4,10 @@ import { memo } from "react";
 
 const AIInsightSummary = memo(
   function AIInsightSummary({
-  insights = [],
-}: any) {
+    insights = [],
+  }: {
+    insights?: string[];
+  }) {
 
   return (
 

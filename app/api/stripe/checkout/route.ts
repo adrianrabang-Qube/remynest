@@ -144,17 +144,11 @@ export async function POST(
     return NextResponse.json({
       url: session.url,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ STRIPE CHECKOUT ERROR");
 
-    if (error && typeof error === "object") {
-      const stripeError = error as any;
-
-      console.error("MESSAGE:", stripeError.message);
-      console.error("TYPE:", stripeError.type);
-      console.error("CODE:", stripeError.code);
-      console.error("STATUS:", stripeError.statusCode);
-      console.error("RAW:", stripeError.raw);
+    if (error instanceof Error) {
+      console.error("MESSAGE:", error.message);
     }
 
     console.error(error);

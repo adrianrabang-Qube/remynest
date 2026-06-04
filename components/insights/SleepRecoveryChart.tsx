@@ -12,10 +12,19 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type SleepRecoveryDatum = {
+  date: string;
+  recovery: number;
+};
+
+type SleepRecoveryChartProps = {
+  sleepData?: SleepRecoveryDatum[];
+};
+
 const SleepRecoveryChart = memo(
   function SleepRecoveryChart({
     sleepData = [],
-  }: any) {
+  }: SleepRecoveryChartProps) {
 
     return (
 

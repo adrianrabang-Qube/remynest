@@ -97,11 +97,12 @@ export default function CreateMemoryForm() {
   // =====================================
 
   useEffect(() => {
+    const requestId = requestIdRef.current;
+
     logMemoryFormStage(
       "memory-form-mounted",
       {
-        requestId:
-          requestIdRef.current,
+        requestId,
       }
     );
 
@@ -109,8 +110,7 @@ export default function CreateMemoryForm() {
       logMemoryFormStage(
         "memory-form-unmounted",
         {
-          requestId:
-            requestIdRef.current,
+          requestId,
         }
       );
     };

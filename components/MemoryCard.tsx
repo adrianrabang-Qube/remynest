@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { useState } from "react";
 import Link from "next/link";
 
 const IMAGE_ATTACHMENT_FALLBACK =
@@ -37,6 +39,9 @@ export default function MemoryCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const [imageError, setImageError] =
+    useState<Record<number, boolean>>({});
+
   return (
     <Link href={`/memories/${memory.id}`}>
       <div className="border rounded-xl p-4 mb-4 bg-white shadow-sm hover:shadow-md transition overflow-hidden cursor-pointer">
@@ -62,14 +67,22 @@ export default function MemoryCard({
 
                 if (attachment.type === "image" && attachment.url) {
                   return (
-                    <img
+                    <Image
                       key={index}
-                      src={attachment.url}
+                      src={
+                        imageError[index]
+                          ? IMAGE_ATTACHMENT_FALLBACK
+                          : attachment.url
+                      }
                       alt={name}
-                      onError={(event) => {
-                        const target = event.currentTarget;
-                        target.onerror = null;
-                        target.src = IMAGE_ATTACHMENT_FALLBACK;
+                      width={96}
+                      height={80}
+                      unoptimized
+                      onError={() => {
+                        setImageError((prev) => ({
+                          ...prev,
+                          [index]: true,
+                        }));
                       }}
                       className="h-20 w-full rounded-2xl object-cover border border-gray-200"
                     />

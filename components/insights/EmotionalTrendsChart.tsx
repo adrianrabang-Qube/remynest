@@ -11,10 +11,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+type MoodTrendDatum = {
+  date?: string;
+  positive?: number;
+};
+
 const EmotionalTrendsChart = memo(
   function EmotionalTrendsChart({
     moodData = [],
-  }: any) {
+  }: {
+    moodData?: MoodTrendDatum[];
+  }) {
 
     return (
 

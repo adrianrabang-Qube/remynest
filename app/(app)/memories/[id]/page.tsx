@@ -1,14 +1,32 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-
-const IMAGE_ATTACHMENT_FALLBACK =
-  "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' fill='%23f3f4f6'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%236b7280'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+import MemoryCoverImage from "@/components/MemoryCoverImage";
 
 type Props = {
   params: {
     id: string;
   };
+};
+
+type MemoryAttachment = {
+  name?: string;
+  filename?: string;
+  url?: string;
+  mimeType?: string;
+  size?: number;
+  type?: string;
+};
+
+type RelatedMemory = {
+  id: string;
+  title?: string | null;
+  ai_title?: string | null;
+  content?: string | null;
+  ai_summary?: string | null;
+  similarity?: number | null;
+  ai_mood?: string | null;
 };
 
 export default async function MemoryPage({
@@ -43,7 +61,7 @@ export default async function MemoryPage({
     : [];
 
   // 🔗 Semantic related memories
-  let relatedMemories: any[] = [];
+  let relatedMemories: RelatedMemory[] = [];
 
   if (memory.embedding) {
     const { data } =
@@ -71,12 +89,12 @@ export default async function MemoryPage({
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Back */}
-      <a
+      <Link
         href="/memories"
         className="text-sm text-gray-500 hover:text-black"
       >
         ← Back to Memories
-      </a>
+      </Link>
 
       {/* Main Card */}
       <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
@@ -113,14 +131,9 @@ export default async function MemoryPage({
         {/* Cover Image */}
         {memory.cover_image_url && (
           <div className="border-b border-gray-100 overflow-hidden">
-            <img
+            <MemoryCoverImage
               src={memory.cover_image_url}
               alt={memory.title || "Memory image"}
-              onError={(event) => {
-                const target = event.currentTarget;
-                target.onerror = null;
-                target.src = IMAGE_ATTACHMENT_FALLBACK;
-              }}
               className="w-full h-[420px] object-cover"
             />
           </div>
@@ -210,7 +223,7 @@ export default async function MemoryPage({
             </h2>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              {attachments.map((attachment: any, index: number) => {
+              {attachments.map((attachment: MemoryAttachment, index: number) => {
                 const name =
                   attachment.name ||
                   attachment.filename ||
@@ -229,14 +242,9 @@ export default async function MemoryPage({
                       key={index}
                       className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm"
                     >
-                      <img
-                        src={url}
+                      <MemoryCoverImage
+                        src={url || ""}
                         alt={name}
-                        onError={(event) => {
-                          const target = event.currentTarget;
-                          target.onerror = null;
-                          target.src = IMAGE_ATTACHMENT_FALLBACK;
-                        }}
                         className="w-full h-56 object-cover"
                       />
                       <div className="p-4">
@@ -373,9 +381,9 @@ export default async function MemoryPage({
               <div className="space-y-4">
                 {relatedMemories.map(
                   (
-                    related: any
+                    related
                   ) => (
-                    <a
+                    <Link
                       key={related.id}
                       href={`/memories/${related.id}`}
                       className="block border border-gray-100 rounded-2xl p-5 hover:border-black transition"
@@ -413,7 +421,7 @@ export default async function MemoryPage({
                           </div>
                         )}
                       </div>
-                    </a>
+                    </Link>
                   )
                 )}
               </div>

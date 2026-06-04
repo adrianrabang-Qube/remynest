@@ -36,21 +36,28 @@ function createRelationshipRequestId() {
   return crypto.randomUUID();
 }
 
+interface RelationshipMatch {
+  id: string
+  similarity: number
+}
+
 function validateRelationshipMatch(
-  match: any
-) {
+  match: unknown
+): match is RelationshipMatch {
   return (
-    match &&
-    typeof match.id ===
+    typeof match === "object" &&
+    match !== null &&
+    typeof (match as { id?: unknown }).id ===
       "string" &&
-    typeof match.similarity ===
-      "number"
+    typeof (
+      match as { similarity?: unknown }
+    ).similarity === "number"
   );
 }
 
 function normalizeRelationshipMatches(
-  matches: any[]
-) {
+  matches: unknown[]
+): RelationshipMatch[] {
   return matches
     .filter(
       validateRelationshipMatch
@@ -68,7 +75,7 @@ function normalizeRelationshipMatches(
 
 function buildRelationshipPayload(
   memoryId: string,
-  matches: any[]
+  matches: RelationshipMatch[]
 ) {
   return matches.map(
     (match) => ({

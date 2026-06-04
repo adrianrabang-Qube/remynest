@@ -12,10 +12,19 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type AlzheimerRiskDatum = {
+  date: string;
+  risk: number;
+};
+
+type AlzheimerRiskSignalsProps = {
+  riskData?: AlzheimerRiskDatum[];
+};
+
 const AlzheimerRiskSignals = memo(
   function AlzheimerRiskSignals({
     riskData = [],
-  }: any) {
+  }: AlzheimerRiskSignalsProps) {
 
     return (
 

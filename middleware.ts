@@ -18,6 +18,16 @@ const PUBLIC_ROUTES = [
   "/signup",
 ];
 
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/memories",
+  "/timeline",
+  "/reminders",
+  "/insights",
+  "/memory-chat",
+  "/api",
+];
+
 const PUBLIC_API_ROUTES = [
   "/api/stripe/webhook",
   "/api/send-reminders",
@@ -36,6 +46,9 @@ const PUBLIC_STATIC_FILES = [
   "/icon-512.png",
   "/OneSignalSDKWorker.js",
   "/OneSignalSDKUpdaterWorker.js",
+  "/apple-touch-icon.png",
+  "/browserconfig.xml",
+  "/site.webmanifest",
 ];
 
 function logMiddlewareStage(
@@ -68,6 +81,18 @@ function isPublicStaticFile(
   return PUBLIC_STATIC_FILES.some(
     (path) =>
       pathname === path
+  );
+}
+
+function isBypassRequest(
+  pathname: string,
+  method: string
+) {
+  return (
+    method === "HEAD" ||
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/images/") ||
+    pathname.startsWith("/fonts/")
   );
 }
 
@@ -108,6 +133,18 @@ function isAuthRoute(
   );
 }
 
+function isProtectedRoute(
+  pathname: string
+) {
+  return PROTECTED_ROUTES.some(
+    (route) =>
+      pathname === route ||
+      pathname.startsWith(
+        `${route}/`
+      )
+  );
+}
+
 function createRedirectResponse(
   request: NextRequest,
   path: string
@@ -132,6 +169,23 @@ export async function middleware(
   const method = req.method;
 
   const res = NextResponse.next();
+
+    // =========================================
+    // EARLY BYPASS
+    // =========================================
+
+    if (
+      isBypassRequest(
+        pathname,
+        method
+      )
+    ) {
+      return res;
+    }
+
+  // =========================================
+  // PUBLIC STATIC FILES
+  // =========================================
 
   try {
     logMiddlewareStage(
@@ -188,64 +242,78 @@ export async function middleware(
     }
 
     // =========================================
-    // SUPABASE SSR CLIENT
+    // ROUTE CLASSIFICATION
     // =========================================
 
-    const supabase =
-      createServerClient(
-        process.env
-          .NEXT_PUBLIC_SUPABASE_URL!,
-
-        process.env
-          .NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-
-        {
-          cookies: {
-            getAll() {
-              return req.cookies.getAll();
-            },
-
-            setAll(cookies) {
-              cookies.forEach(
-                ({
-                  name,
-                  value,
-                  options,
-                }) => {
-                  res.cookies.set(
-                    name,
-                    value,
-                    options
-                  );
-                }
-              );
-            },
-          },
-        }
+    const protectedRoute =
+      isProtectedRoute(
+        pathname
       );
-
-    // =========================================
-    // AUTH LOOKUP
-    // =========================================
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError) {
-      logMiddlewareError(
-        "auth-lookup-error",
-        {
-          requestId,
-
-          authError,
-        }
-      );
-    }
 
     const publicRoute =
       isPublicRoute(pathname);
+
+    let user = null;
+
+    // =========================================
+    // CONDITIONAL AUTH LOOKUP
+    // =========================================
+
+    if (
+      protectedRoute ||
+      isAuthRoute(pathname)
+    ) {
+      const supabase =
+        createServerClient(
+          process.env
+            .NEXT_PUBLIC_SUPABASE_URL!,
+
+          process.env
+            .NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+
+          {
+            cookies: {
+              getAll() {
+                return req.cookies.getAll();
+              },
+
+              setAll(cookies) {
+                cookies.forEach(
+                  ({
+                    name,
+                    value,
+                    options,
+                  }) => {
+                    res.cookies.set(
+                      name,
+                      value,
+                      options
+                    );
+                  }
+                );
+              },
+            },
+          }
+        );
+
+      const {
+        data,
+        error: authError,
+      } =
+        await supabase.auth.getUser();
+
+      user = data.user;
+
+      if (authError) {
+        logMiddlewareError(
+          "auth-lookup-error",
+          {
+            requestId,
+            authError,
+          }
+        );
+      }
+    }
 
     // =========================================
     // UNAUTHORIZED
@@ -316,7 +384,7 @@ export async function middleware(
       }
     );
 
-    return NextResponse.next();
+    return res;
   } catch (error) {
     logMiddlewareError(
       "middleware-engine-error",
@@ -335,6 +403,6 @@ export async function middleware(
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|icon-192.png|icon-512.png|sw.js|robots.txt|sitemap.xml).*)",
   ],
 };

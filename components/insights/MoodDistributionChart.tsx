@@ -11,10 +11,17 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+type CategoryDatum = {
+  name?: string;
+  value?: number;
+};
+
 const MoodDistributionChart = memo(
   function MoodDistributionChart({
-  categoryData = [],
-}: any) {
+    categoryData = [],
+  }: {
+    categoryData?: CategoryDatum[];
+  }) {
 
   // =====================================
   // PRODUCTION COLOR SYSTEM
@@ -71,7 +78,7 @@ const MoodDistributionChart = memo(
 
               {categoryData.map(
                 (
-                  _: any,
+                  _: CategoryDatum,
                   index: number
                 ) => (
 

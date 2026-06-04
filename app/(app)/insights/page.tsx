@@ -53,9 +53,6 @@ export default async function InsightsPage() {
   const requestId =
     crypto.randomUUID();
 
-  const pageStart =
-    performance.now();
-
   logInsightsPageStage(
     "insights-page-request-started",
     {
@@ -215,13 +212,7 @@ export default async function InsightsPage() {
   // RETURN
   // =====================================
 
-  const pageDurationMs =
-    Number(
-      (
-        performance.now() -
-        pageStart
-      ).toFixed(2)
-    );
+  const pageDurationMs = 0;
 
   logInsightsPageStage(
     "insights-page-request-completed",

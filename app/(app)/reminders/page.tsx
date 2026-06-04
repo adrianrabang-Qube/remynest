@@ -328,7 +328,6 @@ export default async function RemindersPage({
 
       {/* Create Reminder */}
       <form
-        key={Date.now()}
         action={createReminder}
         className="bg-white border rounded-2xl p-6 shadow-sm mb-8"
       >

@@ -2,9 +2,17 @@
 
 import { useState } from "react";
 
+type SearchResult = {
+  id: string;
+  title?: string;
+  content?: string;
+  ai_summary?: string;
+  similarity?: number;
+};
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSearch() {
@@ -25,11 +33,11 @@ export default function SearchPage() {
         }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as SearchResult[];
 
       console.log("SEARCH RESULTS:", data);
 
-      setResults(data || []);
+      setResults(Array.isArray(data) ? data : []);
     } catch (error) {
       console.log("SEARCH ERROR:");
       console.log(error);

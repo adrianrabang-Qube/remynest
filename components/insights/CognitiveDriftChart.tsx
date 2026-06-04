@@ -12,10 +12,17 @@ import {
   CartesianGrid,
 } from "recharts";
 
+type DriftDatum = {
+  date?: string;
+  score?: number;
+};
+
 const CognitiveDriftChart = memo(
   function CognitiveDriftChart({
-  driftData = [],
-}: any) {
+    driftData = [],
+  }: {
+    driftData?: DriftDatum[];
+  }) {
 
   return (
 

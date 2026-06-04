@@ -3,7 +3,7 @@ import { createClient } from "../../../../lib/supabase/server"
 export default async function ReminderPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("reminders")
     .select("*")
     .eq("id", params.id)

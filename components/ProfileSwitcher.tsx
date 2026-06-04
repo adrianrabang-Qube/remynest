@@ -19,8 +19,17 @@ import {
 const PROFILE_SWITCHER_TAG =
   "profile-switcher";
 
+type ProfileRecord = {
+  id?: string | null;
+  profile_name?: string | null;
+  memory_profiles?: {
+    id?: string | null;
+    profile_name?: string | null;
+  };
+};
+
 interface Props {
-  profiles: any[];
+  profiles: ProfileRecord[];
   activeProfileId?: string | null;
 }
 
@@ -65,52 +74,40 @@ export default function ProfileSwitcher({
   // =====================================
 
   const uniqueProfiles = useMemo(() => {
-    const seen = new Set();
+    const seen = new Set<string>();
 
-    return profiles.filter(
-      (profile: any) => {
-        const profileData =
-          profile?.memory_profiles || profile;
+    return profiles.filter((profile) => {
+      const profileData =
+        profile?.memory_profiles || profile;
 
-        if (!profileData?.id) {
-          return false;
-        }
-
-        if (seen.has(profileData.id)) {
-          return false;
-        }
-
-        seen.add(profileData.id);
-
-        return true;
+      if (!profileData?.id) {
+        return false;
       }
-    );
+
+      if (seen.has(profileData.id)) {
+        return false;
+      }
+
+      seen.add(profileData.id);
+
+      return true;
+    });
   }, [profiles]);
 
-  // =====================================
-  // LOCAL SELECT STATE
-  // =====================================
-
-  const [selectedProfile, setSelectedProfile] =
-    useState(
-      activeProfileId ||
-        (
-          uniqueProfiles[0]
-            ?.memory_profiles ||
-          uniqueProfiles[0]
-        )?.id ||
-        ""
-    );
+  const selectedProfile =
+    activeProfileId ||
+    uniqueProfiles[0]?.memory_profiles?.id ||
+    uniqueProfiles[0]?.id ||
+    "";
 
   // =====================================
   // PROFILE OPTIONS
   // =====================================
 
   const profileOptions = useMemo(() => {
-    return uniqueProfiles.map(
-      (profile: any) => {
-        const profileData =
-          profile?.memory_profiles || profile;
+    return uniqueProfiles.map((profile) => {
+      const profileData =
+        profile?.memory_profiles || profile;
 
         return {
           id: profileData?.id,
@@ -124,31 +121,17 @@ export default function ProfileSwitcher({
   }, [uniqueProfiles]);
 
   // =====================================
-  // SYNC ACTIVE PROFILE
-  // =====================================
-
-  useEffect(() => {
-    if (activeProfileId) {
-      setSelectedProfile(
-        activeProfileId
-      );
-    }
-  }, [activeProfileId]);
-
-  // =====================================
   // LIFECYCLE OBSERVABILITY
   // =====================================
 
   useEffect(() => {
+    const requestId = requestIdRef.current;
+
     logProfileSwitcherStage(
       "profile-switcher-mounted",
       {
-        requestId:
-          requestIdRef.current,
-
-        profiles:
-          profileOptions.length,
-
+        requestId,
+        profiles: profileOptions.length,
         activeProfileId,
       }
     );
@@ -157,8 +140,7 @@ export default function ProfileSwitcher({
       logProfileSwitcherStage(
         "profile-switcher-unmounted",
         {
-          requestId:
-            requestIdRef.current,
+          requestId,
         }
       );
     };
@@ -190,10 +172,6 @@ export default function ProfileSwitcher({
 
         try {
           setIsSwitching(true);
-
-          setSelectedProfile(
-            newProfileId
-          );
 
           logProfileSwitcherStage(
             "profile-switch-started",
@@ -244,10 +222,6 @@ export default function ProfileSwitcher({
 
                     error,
                   }
-                );
-
-                setSelectedProfile(
-                  selectedProfile
                 );
               })
               .finally(() => {

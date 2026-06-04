@@ -12,13 +12,13 @@ export default function UpgradeModal({
   open,
   onClose,
 }: UpgradeModalProps) {
-  if (!open) return null;
-
   const [loading, setLoading] =
     useState(false);
 
   const [selectedPlan, setSelectedPlan] =
     useState<BillingPlan>("PREMIUM");
+
+  if (!open) return null;
 
   async function handleUpgrade() {
     try {

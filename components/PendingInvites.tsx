@@ -5,8 +5,17 @@ import {
   declineInvite,
 } from "@/app/(app)/dashboard/actions";
 
+type PendingInvite = {
+  id: string;
+  relationship_type?: string | null;
+  access_level?: string | null;
+  memory_profiles?: {
+    profile_name?: string | null;
+  } | null;
+};
+
 interface PendingInvitesProps {
-  invites: any[];
+  invites: PendingInvite[];
 }
 
 export default function PendingInvites({
@@ -23,7 +32,7 @@ export default function PendingInvites({
       </h2>
 
       <div className="space-y-4">
-        {invites.map((invite: any) => (
+        {invites.map((invite: PendingInvite) => (
           <div
             key={invite.id}
             className="border rounded-xl p-4"

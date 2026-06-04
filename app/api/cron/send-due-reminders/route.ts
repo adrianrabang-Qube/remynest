@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
@@ -72,7 +73,7 @@ function calculateNextReminderDate(
 }
 
 async function unlockReminder(
-  supabase: any,
+  supabase: SupabaseClient,
   reminderId: string
 ) {
   await supabase
@@ -84,7 +85,7 @@ async function unlockReminder(
 }
 
 async function completeReminder(
-  supabase: any,
+  supabase: SupabaseClient,
   reminderId: string
 ) {
   await supabase
@@ -97,7 +98,7 @@ async function completeReminder(
 }
 
 async function rescheduleReminder(
-  supabase: any,
+  supabase: SupabaseClient,
   reminderId: string,
   nextDate: string
 ) {
@@ -110,9 +111,14 @@ async function rescheduleReminder(
     .eq("id", reminderId);
 }
 
+type OneSignalReminderPayload = {
+  id: string;
+  title?: string | null;
+};
+
 async function sendOneSignalNotification(
   playerId: string,
-  reminder: any
+  reminder: OneSignalReminderPayload
 ) {
   const response = await fetch(
     "https://onesignal.com/api/v1/notifications",

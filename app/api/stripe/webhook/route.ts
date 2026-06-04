@@ -120,7 +120,6 @@ export async function POST(req: Request) {
 
     // ✅ VERIFY USER EXISTS FIRST
     const {
-      data: existingProfile,
       error: profileLookupError,
     } =
       await supabase
@@ -157,7 +156,7 @@ export async function POST(req: Request) {
         subscription?.id ?? null,
 
       subscription_status:
-        (subscription as any)?.status ??
+        subscription?.status ??
         "active",
 
       current_period_end: currentPeriodEnd
@@ -346,8 +345,8 @@ export async function POST(req: Request) {
         ? subscription.customer
         : null;
 
-    let data: any = null;
-    let error: any = null;
+    let data: Record<string, unknown> | null = null;
+    let error: unknown = null;
 
     // First attempt: stable customer lookup
     if (customerId) {
@@ -489,8 +488,8 @@ export async function POST(req: Request) {
         ? subscription.customer
         : null;
 
-    let data: any = null;
-    let error: any = null;
+    let data: Record<string, unknown> | null = null;
+    let error: unknown = null;
 
     // First attempt: stable customer lookup
     if (customerId) {
@@ -578,12 +577,13 @@ export async function POST(req: Request) {
       invoice.id
     );
 
+    const invoiceSubscription =
+      invoice.parent?.subscription_details?.subscription;
+
     const subscriptionId =
-      typeof (invoice as any)
-        .subscription === "string"
-        ? (invoice as any)
-            .subscription
-        : null;
+      typeof invoiceSubscription === "string"
+        ? invoiceSubscription
+        : invoiceSubscription?.id ?? null;
 
     if (!subscriptionId) {
       return NextResponse.json({

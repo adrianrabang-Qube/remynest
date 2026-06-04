@@ -302,7 +302,7 @@ export async function acceptInvite(
 export async function declineInvite(
   formData: FormData
 ) {
-  const { supabase, user } =
+  const { supabase } =
     await requireDashboardUser();
 
   const inviteId = formData.get(

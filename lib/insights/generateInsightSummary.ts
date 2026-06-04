@@ -1,22 +1,39 @@
+interface DriftDatum {
+  drift?: number
+}
+
+interface ReminderDatum {
+  completed?: number
+}
+
+interface InsightSummaryProps {
+  cognitionScore: number
+  driftData: DriftDatum[]
+  reminderData: ReminderDatum[]
+}
+
 export function generateInsightSummary({
   cognitionScore,
   driftData,
   reminderData,
-}: any) {
+}: InsightSummaryProps) {
 
   const latestDrift =
     driftData[
       driftData.length - 1
     ];
 
+  const latestDriftValue =
+    latestDrift?.drift ?? 0;
+
   const completedReminders =
     reminderData.reduce(
       (
         acc: number,
-        curr: any
+        curr: ReminderDatum
       ) => (
         acc +
-        curr.completed
+        (curr.completed || 0)
       ),
       0
     );
@@ -50,7 +67,7 @@ export function generateInsightSummary({
     "";
 
   if (
-    latestDrift?.drift <= 2
+    latestDriftValue <= 2
   ) {
 
     driftMessage =

@@ -36,21 +36,28 @@ function createClusterRequestId() {
   return crypto.randomUUID();
 }
 
+interface ClusterMatch {
+  id: string
+  similarity: number
+}
+
 function validateClusterMatch(
-  match: any
-) {
+  match: unknown
+): match is ClusterMatch {
   return (
-    match &&
-    typeof match.id ===
+    typeof match === "object" &&
+    match !== null &&
+    typeof (match as { id?: unknown }).id ===
       "string" &&
-    typeof match.similarity ===
-      "number"
+    typeof (
+      match as { similarity?: unknown }
+    ).similarity === "number"
   );
 }
 
 function normalizeClusterMatches(
-  matches: any[]
-) {
+  matches: unknown[]
+): ClusterMatch[] {
   return matches
     .filter(
       validateClusterMatch
@@ -69,7 +76,7 @@ function normalizeClusterMatches(
 function buildClusterItems(
   clusterId: string,
   memoryId: string,
-  matches: any[]
+  matches: ClusterMatch[]
 ) {
   const items = matches.map(
     (match) => ({

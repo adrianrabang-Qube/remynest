@@ -54,14 +54,23 @@ function normalizeQuery(
     .slice(0, MAX_QUERY_LENGTH);
 }
 
+type MemoryChatMemory = {
+  title?: string;
+  summary?: string;
+  category?: string;
+  mood?: string;
+  importance?: string;
+  similarity?: number;
+};
+
 function buildMemoryContext(
-  memories: any[]
+  memories: MemoryChatMemory[]
 ) {
   return memories
     .slice(0, MAX_CONTEXT_MEMORIES)
     .map(
       (
-        memory: any,
+        memory: MemoryChatMemory,
         index: number
       ) => `
 Memory ${index + 1}
@@ -83,7 +92,7 @@ ${memory.importance}
 
 Similarity:
 ${Math.round(
-        memory.similarity * 100
+        (memory.similarity ?? 0) * 100
       )}%
 `
     )

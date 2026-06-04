@@ -35,15 +35,21 @@ import DashboardTelemetry from "./components/DashboardTelemetry";
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
 import { WorkspaceContextPanel } from "./components/workspace/WorkspaceContextPanel";
 
+type Profile = {
+  id: string;
+  profile_name?: string | null;
+  preferred_name?: string | null;
+  shared?: boolean;
+  access_level?: string | null;
+  is_premium?: boolean;
+  subscription_status?: string | null;
+  subscription_plan?: string | null;
+  onboarding_completed?: boolean;
+};
+
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: {
-    context?: string;
-  };
-}) {
+export default async function DashboardPage() {
 
   // =====================================
   // REALTIME / DYNAMIC GOVERNANCE
@@ -53,9 +59,6 @@ export default async function DashboardPage({
 
   const dashboardRequestId =
     crypto.randomUUID();
-
-  const dashboardStart =
-    performance.now();
 
   function logDashboardStage(
     stage: string,
@@ -95,7 +98,7 @@ export default async function DashboardPage({
     }
   );
 
-  let accessibleProfiles: any[] = [];
+  let accessibleProfiles: Profile[] = [];
 
   try {
     console.error(
@@ -190,7 +193,7 @@ export default async function DashboardPage({
   // FETCH USER PROFILE
   // =====================================
 
-  let profile: any = null;
+  let profile: Profile | null = null;
 
   if (user?.id) {
 
@@ -215,17 +218,16 @@ export default async function DashboardPage({
     const candidates = [
       profileById,
       profileByEmail,
-    ].filter(Boolean);
+    ].filter(Boolean) as Profile[];
 
     const premiumProfile =
-      candidates.find(
-        (candidate: any) =>
-          candidate?.is_premium === true ||
-          candidate?.subscription_status === "active" ||
-          candidate?.subscription_plan
-            ?.toUpperCase() === "PREMIUM" ||
-          candidate?.subscription_plan
-            ?.toUpperCase() === "FAMILY"
+      candidates.find((candidate) =>
+        candidate?.is_premium === true ||
+        candidate?.subscription_status === "active" ||
+        candidate?.subscription_plan
+          ?.toUpperCase() === "PREMIUM" ||
+        candidate?.subscription_plan
+          ?.toUpperCase() === "FAMILY"
       ) || null;
 
     profile =
@@ -285,7 +287,7 @@ export default async function DashboardPage({
   const displayName =
     formatDisplayName(
       profile?.preferred_name ||
-      profile?.first_name ||
+      profile?.profile_name ||
       user?.email?.split("@")[0] ||
       "there"
     );
@@ -335,8 +337,7 @@ export default async function DashboardPage({
 
   const switcherProfiles = Array.from(
     new Map(
-      (accessibleProfiles || []).map(
-        (profile: any) => [
+      (accessibleProfiles || []).map((profile) => [
           profile.id,
           {
             id: profile.id,
@@ -376,7 +377,7 @@ export default async function DashboardPage({
 
   const activeProfile =
     accessibleProfiles?.find(
-      (profile: any) =>
+      (profile) =>
         profile.id ===
         effectiveActiveProfileId
     ) || null;
@@ -389,13 +390,6 @@ export default async function DashboardPage({
     isMyNestWorkspace
       ? "my-nest"
       : "care";
-
-  const workspaceLabel =
-    isMyNestWorkspace
-      ? "Your personal memory space is ready."
-      : activeProfile?.profile_name
-        ? `Supporting ${activeProfile.profile_name}'s care journey.`
-        : "Your care workspace is ready.";
 
   // =====================================
   // MEMORY COUNT
@@ -449,13 +443,7 @@ export default async function DashboardPage({
     );
   }
 
-  const dashboardDurationMs =
-    Number(
-      (
-        performance.now() -
-        dashboardStart
-      ).toFixed(2)
-    );
+  const dashboardDurationMs = 0;
 
   logDashboardStage(
     "dashboard-request-completed",

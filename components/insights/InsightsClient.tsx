@@ -167,7 +167,6 @@ import { generateInsightSummary } from "@/lib/insights/generateInsightSummary";
 import { analyzeBehavioralPatterns } from "@/lib/analytics/behavioralPatterns";
 import { analyzeReminderStreaks } from "@/lib/analytics/streakAnalysis";
 import { analyzeEmotionalVolatility } from "@/lib/analytics/emotionalVolatility";
-import { analyzeMemoryFrequency } from "@/lib/analytics/memoryFrequency";
 import { detectInactivityPatterns } from "@/lib/analytics/inactivityDetection";
 import { analyzeCognitiveDeclineSignals } from "@/lib/analytics/cognitiveDeclineSignals";
 
@@ -460,15 +459,6 @@ export default function InsightsClient({
       );
 
     }, [moodData]);
-
-  const memoryFrequency =
-    useMemo(() => {
-
-      return analyzeMemoryFrequency(
-        memories
-      );
-
-    }, [memories]);
 
   const inactivityDetection =
     useMemo(() => {

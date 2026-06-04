@@ -106,7 +106,10 @@ function buildLifeChapters(memories: Memory[]): LifeChapter[] {
       };
     })
     .sort((a, b) => b.score - a.score)
-    .map(({ score, ...chapter }) => chapter);
+    .map(({ score: _score, ...chapter }) => {
+      void _score;
+      return chapter;
+    });
 }
 
 export default function ChaptersView({ memories }: ChaptersViewProps) {
