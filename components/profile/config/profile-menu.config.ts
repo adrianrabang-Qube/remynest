@@ -21,13 +21,6 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
     requiresAuth: true,
   },
   {
-    label: "Vault",
-    href: "/vault",
-    icon: "🔐",
-    requiresAuth: true,
-    requiresPremium: true,
-  },
-  {
     label: "Settings",
     href: "/settings",
     icon: "⚙️",

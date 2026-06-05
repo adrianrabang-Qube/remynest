@@ -28,6 +28,7 @@ const PROTECTED_ROUTES = [
   "/reminders",
   "/insights",
   "/memory-chat",
+  "/settings",
   "/api",
 ];
 
