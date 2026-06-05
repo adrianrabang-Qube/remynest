@@ -44,7 +44,10 @@ export async function PUT(
     .eq("id", params.id)
     .eq("user_id", user.id);
 
-  if (error) return new Response(error.message, { status: 500 });
+  if (error) {
+    console.error("[memories/:id] mutation failed", error);
+    return new Response("Memory request failed", { status: 500 });
+  }
 
   return Response.json({ success: true });
 }
@@ -68,7 +71,10 @@ export async function DELETE(
     .eq("id", params.id)
     .eq("user_id", user.id);
 
-  if (error) return new Response(error.message, { status: 500 });
+  if (error) {
+    console.error("[memories/:id] mutation failed", error);
+    return new Response("Memory request failed", { status: 500 });
+  }
 
   return Response.json({ success: true });
 }

@@ -580,12 +580,6 @@ cover_image_url:
         {
           error:
             "Failed to create memory",
-
-          details:
-            error.message,
-
-          code:
-            error.code || null,
         },
         {
           status: 500,
