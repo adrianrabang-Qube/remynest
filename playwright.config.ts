@@ -100,6 +100,12 @@ export default defineConfig({
       testMatch: /cron-auth\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      // Public liveness health check — no session needed.
+      name: "health",
+      testMatch: /health\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
   ],
 
   // When E2E_BASE_URL is set we test that deployed URL and start no local server.
