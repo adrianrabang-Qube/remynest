@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import LegalLinks from "@/components/legal/LegalLinks";
 
 export default function SignupPage() {
   const supabase = createClient();
@@ -61,6 +62,13 @@ export default function SignupPage() {
       >
         {loading ? "Creating account..." : "Sign up"}
       </button>
+
+      <p className="mt-4 text-xs text-neutral-500">
+        By creating an account you agree to our Terms of Service and
+        Privacy Policy.
+      </p>
+
+      <LegalLinks className="mt-3 justify-center" />
     </div>
   );
 }

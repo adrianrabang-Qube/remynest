@@ -1,0 +1,125 @@
+import type { Metadata } from "next";
+
+import LegalPage from "@/components/legal/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Terms of Service — RemyNest",
+};
+
+const H = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => (
+  <h2 className="text-xl font-semibold text-[#243428]">
+    {children}
+  </h2>
+);
+
+export default function TermsPage() {
+  return (
+    <LegalPage
+      title="Terms of Service"
+      effectiveDate="2026-06-05"
+    >
+      <p>
+        These Terms govern your use of RemyNest. By creating an account or
+        using the service, you agree to these Terms.
+      </p>
+
+      <H>The service is not medical care</H>
+      <p>
+        RemyNest is a memory and reflection tool. It is{" "}
+        <strong>not a medical device</strong> and does not provide medical
+        advice, diagnosis, treatment, or disease detection. Always consult a
+        qualified healthcare professional for medical concerns.
+      </p>
+
+      <H>Eligibility</H>
+      <p>
+        You must be an adult capable of forming a binding contract to use
+        RemyNest.
+      </p>
+
+      <H>Your account</H>
+      <p>
+        You are responsible for safeguarding your credentials and for
+        activity under your account. Notify us of any unauthorized use.
+      </p>
+
+      <H>Acceptable use</H>
+      <p>
+        Do not misuse the service, attempt to bypass security or access
+        controls, upload unlawful content, or use the service to harm
+        others.
+      </p>
+
+      <H>Subscriptions &amp; billing</H>
+      <p>
+        Paid plans are billed through Stripe. Paid subscriptions renew
+        automatically until cancelled; you can cancel at any time, effective
+        at the end of the current billing period, unless otherwise required
+        by law. Prices and plan features are described in the app.
+      </p>
+
+      <H>AI features</H>
+      <p>
+        AI-generated content is produced from the information you provide,
+        may be inaccurate or incomplete, and is non-diagnostic. You are
+        responsible for how you use it.
+      </p>
+
+      <H>Your content</H>
+      <p>
+        You retain ownership of the content you create. You grant RemyNest
+        the limited license needed to host, process, and display your
+        content to operate the service (including AI processing and sharing
+        with caregivers you invite).
+      </p>
+
+      <H>Caregiver access</H>
+      <p>
+        If you invite caregivers, you authorize them to access the profiles
+        and content you share with them according to the access level you
+        assign.
+      </p>
+
+      <H>Termination</H>
+      <p>
+        You may stop using the service at any time. We may suspend or
+        terminate access for violations of these Terms or to protect the
+        service and its users.
+      </p>
+
+      <H>Disclaimers</H>
+      <p>
+        The service is provided &ldquo;as is&rdquo; without warranties of
+        any kind to the maximum extent permitted by law.
+      </p>
+
+      <H>Limitation of liability</H>
+      <p>
+        To the maximum extent permitted by law, RemyNest is not liable for
+        indirect, incidental, or consequential damages arising from your use
+        of the service.
+      </p>
+
+      <H>Governing law</H>
+      <p>
+        These Terms are governed by the laws of [Jurisdiction to be
+        confirmed by counsel].
+      </p>
+
+      <H>Changes</H>
+      <p>
+        We may update these Terms and will revise the effective date above.
+        Continued use after changes constitutes acceptance.
+      </p>
+
+      <H>Contact</H>
+      <p>
+        Questions: <strong>admin@remynest.com</strong>.
+      </p>
+    </LegalPage>
+  );
+}

@@ -16,6 +16,9 @@ const PUBLIC_ROUTES = [
   "/",
   "/login",
   "/signup",
+  "/privacy",
+  "/terms",
+  "/cookies",
 ];
 
 const PROTECTED_ROUTES = [
