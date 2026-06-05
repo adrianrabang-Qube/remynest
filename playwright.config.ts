@@ -84,6 +84,16 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      // GDPR deletion dry-run plan, run as the owner account.
+      name: "gdpr-deletion",
+      testMatch: /gdpr-deletion\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: ".auth/owner.json",
+      },
+      dependencies: ["setup"],
+    },
   ],
 
   // When E2E_BASE_URL is set we test that deployed URL and start no local server.
