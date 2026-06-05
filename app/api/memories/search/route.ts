@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/embeddings";
+import { checkPremium } from "@/lib/premium";
+import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -139,6 +141,37 @@ export async function POST(req: Request) {
         },
         {
           status: 401,
+        }
+      );
+    }
+
+    // =====================================
+    // ENTITLEMENT (semantic search is premium — plans.ts: semanticSearch)
+    // Enforced at the API so it cannot be bypassed if the UI gate is skipped.
+    // =====================================
+
+    const { plan } =
+      await checkPremium();
+
+    if (
+      !canUseSemanticSearch(plan)
+    ) {
+      logSearchStage(
+        "search-entitlement-blocked",
+        {
+          requestId,
+          plan,
+        }
+      );
+
+      return NextResponse.json(
+        {
+          error: "Upgrade required",
+          feature: "semantic_search",
+          code: "UPGRADE_REQUIRED",
+        },
+        {
+          status: 402,
         }
       );
     }
