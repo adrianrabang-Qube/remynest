@@ -38,16 +38,31 @@ test.describe("Caregiver IDOR Protection [P0]", () => {
     );
     const status = resp?.status() ?? 0;
 
-    // Secure outcomes: a hard deny (401/403/404) OR a 200 shell that renders
-    // no foreign content. A 200 that exposes the memory body is a P0 failure.
-    if (status === 200) {
-      const content = await page.content();
-      expect(content).not.toContain(
-        foreignMemoryId
+    // Determine the security signal WITHOUT relying on the memory UUID, which
+    // Next.js legitimately embeds in framework HTML (canonical URL) even on a 404.
+    const html = await page.content();
+
+    const hardDeny = [401, 403, 404].includes(status);
+    const notFoundState =
+      /content="not-found"|NEXT_NOT_FOUND|could not be found/i.test(
+        html
       );
-    } else {
-      expect([401, 403, 404]).toContain(status);
-    }
+
+    // These chrome strings render ONLY when a memory successfully loads
+    // (app/(app)/memories/[id]/page.tsx). Their presence would mean data leaked.
+    const memoryRendered =
+      html.includes("Original Memory") &&
+      html.includes("RemyNest Cognitive Engine");
+
+    expect(
+      memoryRendered,
+      "Foreign memory data must not be exposed to a caregiver"
+    ).toBe(false);
+
+    expect(
+      hardDeny || notFoundState,
+      "Access should be denied (4xx) or render the Next notFound() state"
+    ).toBeTruthy();
   });
 
   test("caregiver cannot switch into a non-shared profile and read its data", async ({
