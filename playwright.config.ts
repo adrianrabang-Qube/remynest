@@ -58,6 +58,32 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      // Pure entitlement-logic tests — no auth/browser interaction needed.
+      name: "premium-guards",
+      testMatch: /premium-guards\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      // API-layer enforcement, run as the free-tier owner account.
+      name: "premium-enforcement",
+      testMatch: /premium-enforcement\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: ".auth/owner.json",
+      },
+      dependencies: ["setup"],
+    },
+    {
+      // GDPR export, run as the owner account.
+      name: "gdpr-export",
+      testMatch: /gdpr-export\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: ".auth/owner.json",
+      },
+      dependencies: ["setup"],
+    },
   ],
 
   // When E2E_BASE_URL is set we test that deployed URL and start no local server.
