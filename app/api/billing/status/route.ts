@@ -70,12 +70,14 @@ export async function GET() {
         status === "cancelled",
     });
   } catch (error) {
+    console.error(
+      "[billing/status] failed to load billing status",
+      error,
+    );
+
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to load billing status.",
+        error: "Failed to load billing status.",
       },
       { status: 500 },
     );

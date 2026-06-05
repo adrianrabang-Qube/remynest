@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 type Memory = {
   id: string;
   ai_title?: string;
@@ -100,6 +102,11 @@ export default function MemoryChatPage() {
             ? "Thinking..."
             : "Search Memories"}
         </button>
+
+        <AIDisclaimer
+          variant="inline"
+          kind="memoryChat"
+        />
       </div>
 
       {/* AI Response */}
@@ -118,6 +125,11 @@ export default function MemoryChatPage() {
           <div className="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">
             {answer}
           </div>
+
+          <AIDisclaimer
+            variant="footnote"
+            kind="memoryChat"
+          />
         </div>
       )}
 

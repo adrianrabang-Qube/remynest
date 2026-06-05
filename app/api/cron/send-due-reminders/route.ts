@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
 const REMINDER_CRON_TAG =
   "reminder-cron-engine";
@@ -167,7 +168,10 @@ async function sendOneSignalNotification(
   return response.json();
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = authorizeCronRequest(req);
+  if (denied) return denied;
+
   const requestId =
     createReminderRequestId();
 

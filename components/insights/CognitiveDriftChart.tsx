@@ -12,6 +12,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 type DriftDatum = {
   date?: string;
   score?: number;
@@ -154,6 +156,11 @@ const CognitiveDriftChart = memo(
         </ResponsiveContainer>
 
       </div>
+
+      <AIDisclaimer
+        variant="footnote"
+        kind="cognitive"
+      />
 
     </div>
   );

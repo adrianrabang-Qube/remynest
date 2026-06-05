@@ -1,8 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = authorizeCronRequest(req);
+  if (denied) return denied;
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

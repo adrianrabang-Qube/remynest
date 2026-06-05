@@ -16,6 +16,9 @@ const PUBLIC_ROUTES = [
   "/",
   "/login",
   "/signup",
+  "/privacy",
+  "/terms",
+  "/cookies",
 ];
 
 const PROTECTED_ROUTES = [
@@ -33,6 +36,7 @@ const PUBLIC_API_ROUTES = [
   "/api/send-reminders",
   "/api/send-notification",
   "/api/cron",
+  "/api/health",
 ];
 
 const PUBLIC_STATIC_FILES = [

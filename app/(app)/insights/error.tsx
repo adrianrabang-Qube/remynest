@@ -1,7 +1,10 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
 interface ErrorPageProps {
-  error: Error;
+  error: Error & { digest?: string };
 
   reset: () => void;
 }
@@ -11,10 +14,13 @@ export default function InsightsErrorPage({
   reset,
 }: ErrorPageProps) {
 
-  console.error(
-    "Insights dashboard error:",
-    error
-  );
+  useEffect(() => {
+    console.error(
+      "Insights dashboard error:",
+      error
+    );
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
 

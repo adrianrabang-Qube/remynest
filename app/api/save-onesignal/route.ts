@@ -33,8 +33,9 @@ export async function POST(req: Request) {
       .single()
 
     if (error) {
+      console.error("[save-onesignal] upsert failed", error)
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Failed to save subscription' },
         { status: 500 }
       )
     }

@@ -4,6 +4,7 @@ import OpenAI from "openai";
 
 import { createClient } from "@/lib/supabase/server";
 import { retrieveMemoryContext } from "@/lib/retrieve-memory-context";
+import { PROMPT_SAFETY_PREAMBLE } from "@/lib/constants/disclaimers";
 
 const MEMORY_CHAT_TAG =
   "memory-chat-engine";
@@ -256,20 +257,14 @@ export async function POST(req: Request) {
           messages: [
             {
               role: "system",
-              content: `
-You are RemyNest AI.
+              content: `You are RemyNest AI.
 
-You help users retrieve memories from their cognitive timeline.
+You help users retrieve and reflect on memories from their personal timeline.
 
-Use ONLY the provided memories.
+Use ONLY the provided memories. Be warm, emotionally aware, and conversational.
+If the memories are unrelated to the question, say so honestly.
 
-Be intelligent,
-emotionally aware,
-and conversational.
-
-If memories are unrelated,
-say so honestly.
-`,
+${PROMPT_SAFETY_PREAMBLE}`,
             },
 
             {

@@ -2,6 +2,8 @@
 
 import { memo } from "react";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 const AIInsightSummary = memo(
   function AIInsightSummary({
     insights = [],
@@ -61,6 +63,11 @@ const AIInsightSummary = memo(
         )}
 
       </div>
+
+      <AIDisclaimer
+        variant="footnote"
+        kind="general"
+      />
 
     </div>
   );

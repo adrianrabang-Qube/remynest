@@ -12,6 +12,8 @@ import {
   CartesianGrid,
 } from "recharts";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 type AlzheimerRiskDatum = {
   date: string;
   risk: number;
@@ -47,6 +49,12 @@ const AlzheimerRiskSignals = memo(
           </p>
 
         </div>
+
+        <AIDisclaimer
+          variant="inline"
+          kind="cognitive"
+          className="mb-8"
+        />
 
         {/* RISK METRICS */}
 
