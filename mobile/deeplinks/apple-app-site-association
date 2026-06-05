@@ -1,0 +1,23 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.remynest.app",
+        "paths": [
+          "/dashboard",
+          "/dashboard/*",
+          "/memories",
+          "/memories/*",
+          "/timeline",
+          "/reminders",
+          "/insights",
+          "/memory-chat",
+          "/privacy",
+          "/terms",
+          "/cookies"
+        ]
+      }
+    ]
+  }
+}
