@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RemyNest</string>
+    <string name="title_activity_main">RemyNest</string>
+    <string name="package_name">com.remynest.app</string>
+    <string name="custom_url_scheme">com.remynest.app</string>
+</resources>
