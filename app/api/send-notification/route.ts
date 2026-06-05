@@ -2,8 +2,12 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { authorizeCronRequest } from "@/lib/cron-auth";
 
 export async function GET(req: Request) {
+  const denied = authorizeCronRequest(req);
+  if (denied) return denied;
+
   try {
     // Get query params
     const { searchParams } = new URL(req.url);

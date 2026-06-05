@@ -94,6 +94,12 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
+    {
+      // Public cron/notification endpoint auth — no session needed.
+      name: "cron-auth",
+      testMatch: /cron-auth\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
   ],
 
   // When E2E_BASE_URL is set we test that deployed URL and start no local server.
