@@ -10,6 +10,8 @@ RemyNest is a healthcare-focused memory platform helping individuals, families, 
 
 Phase: Launch Readiness
 
+Last Updated: 2026-06-05
+
 Build Status: PASSING
 Lint Status: PASSING
 Production Deployment: PASSING
@@ -41,9 +43,22 @@ Estimated Completion:
 
 ---
 
+## Testing & QA Status
+
+QA Phase: Active (manual)
+
+- All core features listed above are verified present in the codebase
+- No automated test suite is currently configured
+  (package.json scripts: dev, build, start, lint only)
+- QA is currently performed manually for the launch sprint
+- Recommended next step: add a smoke-level E2E suite for P0 flows
+  (auth, memory creation, profile-switch isolation, checkout)
+
+---
+
 ## Current Priorities
 
-1. QA testing
+1. QA testing (active)
 2. GDPR package
 3. Privacy Policy
 4. Terms & Conditions

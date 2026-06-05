@@ -2,17 +2,21 @@
 
 ## V1 Launch
 
+Last Updated: 2026-06-05
+
 ### Required Before Launch
 
-- QA Sprint
-- GDPR compliance review
-- Privacy Policy
-- Terms & Conditions
-- Cookie Policy
-- App Store assets
-- Play Store assets
-- Production monitoring
-- Launch testing
+Status reflects what is present in the codebase as of the date above.
+
+- QA Sprint — in progress (manual QA; no automated suite yet)
+- GDPR compliance review — not yet in codebase
+- Privacy Policy — not yet in codebase
+- Terms & Conditions — not yet in codebase
+- Cookie Policy — not yet in codebase
+- App Store assets — not yet in codebase
+- Play Store assets — not yet in codebase
+- Production monitoring — not yet in codebase
+- Launch testing — not started
 
 ---
 

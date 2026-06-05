@@ -1,5 +1,10 @@
 # RemyNest Launch Checklist
 
+Last Updated: 2026-06-05
+
+Checked Engineering items are verified present in the codebase.
+Unchecked items are confirmed not yet implemented.
+
 ## Engineering
 
 - [x] Authentication
@@ -15,7 +20,7 @@
 - [x] OneSignal Notifications
 - [x] Production Deployment
 
-- [ ] QA Sprint
+- [ ] QA Sprint (in progress — manual)
 - [ ] Production Monitoring
 - [ ] Error Tracking Validation
 - [ ] Backup Recovery Validation
