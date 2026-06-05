@@ -7,6 +7,19 @@ Status: Active — Launch Readiness QA Sprint
 
 ---
 
+## Security Validation
+
+Phase 1 authorization and data-isolation validation is **complete** — see
+[SECURITY_VALIDATION_REPORT.md](../SECURITY_VALIDATION_REPORT.md).
+
+Automated Playwright E2E (real login flows) covering Authentication Gate
+Protection, Profile Switching Data Isolation, and Caregiver IDOR Protection.
+Result: **4 / 4 P0 security tests passing.** This covers the security-critical
+items in §1 (Authentication), §10 (Caregiver workflows), and §11 (Profile
+switching) below.
+
+---
+
 ## How to use this plan
 
 - Execute every section as each applicable **role** (see below).
