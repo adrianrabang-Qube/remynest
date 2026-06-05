@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 interface CognitiveScoreChartProps {
   cognitionScore: number;
 }
@@ -82,6 +84,11 @@ const CognitiveScoreChart = memo(
           </div>
 
         </div>
+
+        <AIDisclaimer
+          variant="footnote"
+          kind="cognitive"
+        />
 
       </div>
     );

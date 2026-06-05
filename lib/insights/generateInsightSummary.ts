@@ -44,7 +44,7 @@ export function generateInsightSummary({
   if (cognitionScore >= 80) {
 
     cognitionMessage =
-      "Cognitive telemetry remains highly stable with strong continuity signals.";
+      "Your recorded memories show steady, consistent activity and mood entries.";
 
   }
 
@@ -53,14 +53,14 @@ export function generateInsightSummary({
   ) {
 
     cognitionMessage =
-      "Cognitive performance remains stable with moderate variability detected.";
+      "Your recorded memories show generally steady activity with some week-to-week variation.";
 
   }
 
   else {
 
     cognitionMessage =
-      "Cognitive telemetry indicates elevated variability and reduced continuity.";
+      "Your recorded memories show more variation in activity and mood entries recently.";
   }
 
   let driftMessage =
@@ -71,14 +71,14 @@ export function generateInsightSummary({
   ) {
 
     driftMessage =
-      "Minimal emotional drift detected across recent memory activity.";
+      "Mood entries in your recent memories have stayed fairly consistent.";
 
   }
 
   else {
 
     driftMessage =
-      "Elevated emotional variability detected in recent telemetry.";
+      "Mood entries in your recent memories have varied more than usual.";
   }
 
   let reminderMessage =
@@ -89,14 +89,14 @@ export function generateInsightSummary({
   ) {
 
     reminderMessage =
-      "Reminder adherence patterns remain highly consistent.";
+      "You've been completing your reminders consistently.";
 
   }
 
   else {
 
     reminderMessage =
-      "Reminder completion consistency has decreased recently.";
+      "Reminder completions have been less frequent recently.";
   }
 
   return [

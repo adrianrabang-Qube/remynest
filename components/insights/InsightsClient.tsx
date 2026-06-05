@@ -164,6 +164,8 @@ import { calculateWearableTelemetry } from "@/lib/cognition/wearableEngine";
 
 import { generateInsightSummary } from "@/lib/insights/generateInsightSummary";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
+
 import { analyzeBehavioralPatterns } from "@/lib/analytics/behavioralPatterns";
 import { analyzeReminderStreaks } from "@/lib/analytics/streakAnalysis";
 import { analyzeEmotionalVolatility } from "@/lib/analytics/emotionalVolatility";
@@ -532,6 +534,13 @@ export default function InsightsClient({
         </p>
 
       </div>
+
+      {/* AI SAFETY DISCLAIMER */}
+
+      <AIDisclaimer
+        variant="banner"
+        kind="insights"
+      />
 
       {/* AI INTERPRETATION */}
 

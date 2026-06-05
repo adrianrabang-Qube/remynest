@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import MemoryCoverImage from "@/components/MemoryCoverImage";
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
 
 type Props = {
   params: {
@@ -205,6 +206,14 @@ export default async function MemoryPage({
           </div>
         </div>
 
+        {/* AI safety disclaimer for cognitive analysis */}
+        <div className="px-8 pb-6 -mt-2">
+          <AIDisclaimer
+            variant="footnote"
+            kind="cognitive"
+          />
+        </div>
+
         {/* Original Memory */}
         <div className="p-8 border-b border-gray-100 space-y-4">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
@@ -341,6 +350,11 @@ export default async function MemoryPage({
             <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-gray-700 italic leading-relaxed whitespace-pre-wrap break-words">
               {memory.ai_summary}
             </div>
+
+            <AIDisclaimer
+              variant="footnote"
+              kind="general"
+            />
           </div>
         )}
 
