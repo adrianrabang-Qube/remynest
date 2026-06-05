@@ -6,6 +6,7 @@ import ProfileSection from "@/components/profile/ProfileSection";
 import AccountInformationSection from "@/components/profile/sections/AccountInformationSection";
 import ExportDataSection from "@/components/profile/sections/ExportDataSection";
 import PrivacyLinksSection from "@/components/profile/sections/PrivacyLinksSection";
+import DeleteAccountSection from "@/components/profile/sections/DeleteAccountSection";
 import type { ProfilePlan, ProfileSummary } from "@/components/profile/types";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,10 @@ export default async function SettingsPage() {
 
         <ProfileSection id="privacy" title="Privacy">
           <PrivacyLinksSection />
+        </ProfileSection>
+
+        <ProfileSection id="delete-account" title="Danger Zone">
+          <DeleteAccountSection />
         </ProfileSection>
       </div>
     </main>

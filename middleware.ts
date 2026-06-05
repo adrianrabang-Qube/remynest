@@ -19,6 +19,7 @@ const PUBLIC_ROUTES = [
   "/privacy",
   "/terms",
   "/cookies",
+  "/account-deletion",
 ];
 
 const PROTECTED_ROUTES = [

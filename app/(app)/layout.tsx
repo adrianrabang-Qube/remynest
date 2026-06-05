@@ -1,12 +1,30 @@
+import { redirect } from "next/navigation";
+
 import AppNavbar from "@/components/navigation/AppNavbar";
+import { createClient } from "@/lib/supabase/server";
+import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: AppLayoutProps) {
+  // Failure recovery: if a prior deletion completed data/storage but not the
+  // auth user, finish it now (next-login retry) and end the session.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    const wasPending = await retryPendingDeletionForUser(user.id);
+    if (wasPending) {
+      await supabase.auth.signOut();
+      redirect("/login?deleted=1");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-stone-50">
       <AppNavbar />

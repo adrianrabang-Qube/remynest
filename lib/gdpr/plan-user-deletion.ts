@@ -153,6 +153,7 @@ export async function planUserDeletion(
       .from("profile_relationships")
       .select("*", { count: "exact", head: true })
       .eq("memory_profile_id", p.id)
+      .eq("invite_status", "accepted")
       .neq("caregiver_account_id", userId);
 
     if ((count ?? 0) > 0) {
@@ -193,20 +194,22 @@ export async function planUserDeletion(
     .reduce((acc, s) => acc + counts[s], 0);
 
   // --- validation / blockers ---
+  // Shared owned profiles are NOT blockers: ownership is transferred to an
+  // accepted successor caregiver on deletion (or the profile is deleted if no
+  // accepted successor exists).
   const blockers: string[] = [];
-  if (sharedOwnedProfiles.length > 0) {
-    blockers.push(
-      `Account owns ${sharedOwnedProfiles.length} care profile(s) shared with other caregivers — requires product policy before deletion.`
-    );
-  }
 
   const notes: string[] = [
     "Dry-run only: no data was modified.",
-    "Destructive deletion is not implemented pending soft-vs-hard (schema) and shared-profile policy decisions.",
   ];
+  if (sharedOwnedProfiles.length > 0) {
+    notes.push(
+      `${sharedOwnedProfiles.length} shared care profile(s) will be transferred to another accepted caregiver.`
+    );
+  }
   if (crossAuthoredMemories > 0) {
     notes.push(
-      `${crossAuthoredMemories} memory(ies) authored by this account live in profiles it does not own — handling pending policy.`
+      `${crossAuthoredMemories} memory(ies) contributed to other profiles will be retained with authorship anonymised (or deleted if you choose).`
     );
   }
 
