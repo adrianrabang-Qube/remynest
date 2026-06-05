@@ -31,7 +31,7 @@ const db = createClient(URL, KEY);
 
 async function ensureProfileRow(id) {
   const { error } = await db.from("profiles").upsert(
-    { id, email: EMAIL, first_name: "Deleted", preferred_name: NAME, profile_name: NAME },
+    { id, email: EMAIL, first_name: "Deleted", preferred_name: NAME },
     { onConflict: "id" },
   );
   if (error) {

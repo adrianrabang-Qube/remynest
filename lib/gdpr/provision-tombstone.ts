@@ -67,7 +67,6 @@ async function ensureProfileRow(id: string): Promise<void> {
       email: TOMBSTONE_EMAIL,
       first_name: "Deleted",
       preferred_name: TOMBSTONE_DISPLAY_NAME,
-      profile_name: TOMBSTONE_DISPLAY_NAME,
     },
     { onConflict: "id" },
   );
