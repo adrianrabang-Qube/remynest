@@ -7,6 +7,10 @@ import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
 import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 
+// The navbar renders per-user, subscription-sensitive identity here — never
+// serve this segment (or its identity read) from cache.
+export const dynamic = "force-dynamic";
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }

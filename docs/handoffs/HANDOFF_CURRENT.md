@@ -33,6 +33,11 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
   Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
   the change immediately. No new workspace system introduced.
+- **Identity stale-cache fix**: Settings/Navbar showed "Free Member" for a premium
+  account because the identity read was served from Next's cache (pre-upgrade row),
+  while billing/dashboard bypass caching. Added `noStore()` to
+  `resolveAccountIdentity` and `force-dynamic` to `(app)/layout.tsx` so identity is
+  always fresh per user.
 - **Subscription resolution unified**: `lib/billing/resolve-subscription.ts` is
   the single authoritative resolver (premium if `is_premium` OR status
   active/trialing OR plan PREMIUM/FAMILY) used by `checkPremium`,

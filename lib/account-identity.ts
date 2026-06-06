@@ -1,3 +1,5 @@
+import { unstable_noStore as noStore } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 import { resolveSubscription } from "@/lib/billing/resolve-subscription";
 import type {
@@ -21,6 +23,10 @@ export interface AccountIdentity {
 }
 
 export async function resolveAccountIdentity(): Promise<AccountIdentity | null> {
+  // Per-user, subscription-sensitive identity must never be served from Next's
+  // Data Cache (the billing/dashboard paths bypass caching the same way).
+  noStore();
+
   const supabase = await createClient();
 
   const {
