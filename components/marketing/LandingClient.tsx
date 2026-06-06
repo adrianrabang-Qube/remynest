@@ -650,7 +650,7 @@ export default function LandingClient() {
               Security
             </a>
 
-            <a className="hover:text-[#243428] transition">
+            <a href="/contact" className="hover:text-[#243428] transition">
               Contact
             </a>
 

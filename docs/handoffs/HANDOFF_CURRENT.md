@@ -33,6 +33,10 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
   Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
   the change immediately. No new workspace system introduced.
+- **Contact page** (`/contact`, public): Enterprise Solutions + Investors &
+  Partnerships sections; emails configurable in `lib/contact.ts` (placeholders
+  `enterprise@`/`investors@remynest.com` — update before launch). Linked from the
+  landing footer. No billing/checkout/subscription/Stripe/DB changes.
 - **Identity stale-cache fix**: Settings/Navbar showed "Free Member" for a premium
   account because the identity read was served from Next's cache (pre-upgrade row),
   while billing/dashboard bypass caching. Added `noStore()` to
