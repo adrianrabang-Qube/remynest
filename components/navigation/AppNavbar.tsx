@@ -20,7 +20,7 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="relative flex justify-between items-center px-6 py-4 border-b">
+    <header className="sticky top-0 z-40 flex justify-between items-center px-6 py-3.5 border-b border-sand-deep/60 bg-sand/80 backdrop-blur-md">
       <NavLinks />
 
       <div className="flex items-center gap-4">
@@ -38,19 +38,21 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
             gap-3
             rounded-full
             border
-            px-4
-            py-2
-            hover:bg-neutral-100
+            border-sand-deep/70
+            bg-white/70
+            px-3
+            py-1.5
             transition
+            hover:bg-white
           "
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-300 text-sm font-semibold text-neutral-700">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white">
             {initial}
           </div>
 
-          <span className="text-sm font-medium">{displayName}</span>
+          <span className="text-sm font-medium text-charcoal">{displayName}</span>
 
-          <span>▼</span>
+          <span className="text-xs text-charcoal-muted">▾</span>
         </button>
 
           {open && profile && (

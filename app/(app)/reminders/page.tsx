@@ -38,7 +38,7 @@ export default async function RemindersPage({
   if (!activeProfileId) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-10">
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-2xl p-6">
+        <div className="rounded-3xl border border-gold/30 bg-gold/10 p-6 text-charcoal-soft">
           My Nest mode active. Reminders are isolated from care profiles.
         </div>
       </div>
@@ -328,11 +328,11 @@ export default async function RemindersPage({
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#2f3e34] mb-2">
+        <h1 className="text-4xl font-semibold text-charcoal mb-2">
           Reminders
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-charcoal-soft">
           Manage your future memory prompts and AI reminders.
         </p>
       </div>
@@ -340,9 +340,9 @@ export default async function RemindersPage({
       {/* Create Reminder */}
       <form
         action={createReminder}
-        className="bg-white border rounded-2xl p-6 shadow-sm mb-8"
+        className="bg-white border border-sand-deep/70 rounded-3xl p-6 shadow-soft mb-8"
       >
-        <h2 className="text-xl font-semibold mb-4">
+        <h2 className="text-xl font-semibold mb-4 text-charcoal">
           Create Reminder
         </h2>
 
@@ -354,22 +354,23 @@ export default async function RemindersPage({
             defaultValue=""
             placeholder="Take medicine every Tuesday at 2PM..."
             required
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
           />
 
           {/* Date (timezone-correct: converts local → UTC in the browser) */}
           <ReminderDateTimeField
             required
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
           />
 
           {/* Recurring */}
-          <div className="border rounded-xl p-4 space-y-3">
+          <div className="border border-sand-deep/70 rounded-2xl p-4 space-y-3 bg-sand/40">
 
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm text-charcoal-soft">
               <input
                 type="checkbox"
                 name="recurring"
+                className="accent-sage"
               />
 
               Recurring reminder
@@ -378,7 +379,7 @@ export default async function RemindersPage({
             <select
               name="frequency"
               defaultValue="daily"
-              className="w-full border rounded-xl px-4 py-3 outline-none"
+              className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
             >
               <option value="daily">
                 Daily
@@ -396,7 +397,7 @@ export default async function RemindersPage({
 
           <button
             type="submit"
-            className="bg-black text-white px-6 py-3 rounded-xl hover:opacity-90 transition"
+            className="bg-sage text-white px-6 py-3 rounded-full font-semibold shadow-soft hover:bg-sage-deep transition"
           >
             Create Reminder
           </button>
@@ -414,18 +415,18 @@ export default async function RemindersPage({
 
               <div
                 key={reminder.id}
-                className="bg-white border rounded-2xl p-5 shadow-sm"
+                className="bg-white border border-sand-deep/70 rounded-3xl p-5 shadow-soft transition hover:shadow-soft-lg"
               >
 
                 <div className="flex items-start justify-between gap-4">
 
                   <div>
 
-                    <h3 className="font-semibold text-lg text-[#2f3e34]">
+                    <h3 className="font-semibold text-lg text-charcoal">
                       {reminder.title}
                     </h3>
 
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-charcoal-muted mt-2">
                       Created{" "}
                       {reminder.created_at
                         ? new Date(
@@ -439,7 +440,7 @@ export default async function RemindersPage({
                         : "Unknown"}
                     </p>
 
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-charcoal-muted mt-1">
                       Reminds at{" "}
                       {reminder.remind_at
                         ? new Date(
@@ -455,7 +456,7 @@ export default async function RemindersPage({
 
                     {reminder.recurring &&
                       reminder.frequency && (
-                        <p className="text-sm text-blue-600 mt-1">
+                        <p className="text-sm text-sage mt-1">
                           Recurring:{" "}
                           {reminder.frequency}
                         </p>
@@ -490,8 +491,8 @@ export default async function RemindersPage({
                         type="submit"
                         className={`text-xs px-3 py-1 rounded-full transition ${
                           reminder.completed
-                            ? "bg-green-200 text-green-800"
-                            : "bg-gray-200 text-gray-700"
+                            ? "bg-sage-soft/25 text-sage-deep"
+                            : "bg-sand-deep/60 text-charcoal-soft"
                         }`}
                       >
                         {reminder.completed
@@ -516,7 +517,7 @@ export default async function RemindersPage({
 
                       <button
                         type="submit"
-                        className="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition"
+                        className="text-xs px-3 py-1 rounded-full bg-rose-50 text-rose-600/90 hover:bg-rose-100 transition"
                       >
                         Delete
                       </button>
@@ -530,7 +531,7 @@ export default async function RemindersPage({
 
         ) : (
 
-          <div className="bg-white border rounded-2xl p-10 text-center text-gray-500">
+          <div className="bg-white border border-sand-deep/70 rounded-3xl p-10 text-center text-charcoal-muted shadow-soft">
             No reminders yet.
           </div>
         )}

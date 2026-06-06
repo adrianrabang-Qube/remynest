@@ -684,7 +684,7 @@ const sortedMemories = [
         onClick={() =>
           setShowCreate(true)
         }
-        className="text-blue-600"
+        className="inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
       >
         + New Memory
       </button>

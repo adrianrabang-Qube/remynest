@@ -1,9 +1,20 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+
+const LINKS: { href: string; label: string }[] = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/memories", label: "Memories" },
+  { href: "/memory-chat", label: "Memory Chat" },
+  { href: "/memories/new", label: "New" },
+  { href: "/timeline", label: "Timeline" },
+  { href: "/reminders", label: "Reminders" },
+  { href: "/insights", label: "Insights" },
+];
 
 function NavLinksContent() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const context = searchParams.get("context");
 
@@ -11,14 +22,25 @@ function NavLinksContent() {
     context ? `${path}?context=${context}` : path;
 
   return (
-    <nav className="flex gap-6 text-sm font-medium">
-      <Link href={withContext("/dashboard")}>Dashboard</Link>
-      <Link href={withContext("/memories")}>Memories</Link>
-      <Link href={withContext("/memory-chat")}>Memory Chat</Link>
-      <Link href={withContext("/memories/new")}>New</Link>
-      <Link href={withContext("/timeline")}>Timeline</Link>
-      <Link href={withContext("/reminders")}>Reminders</Link>
-      <Link href={withContext("/insights")}>Insights</Link>
+    <nav className="flex gap-1 text-sm font-medium">
+      {LINKS.map(({ href, label }) => {
+        const active =
+          pathname === href || pathname.startsWith(`${href}/`);
+        return (
+          <Link
+            key={href}
+            href={withContext(href)}
+            aria-current={active ? "page" : undefined}
+            className={`rounded-full px-3 py-1.5 transition ${
+              active
+                ? "bg-sage/10 text-sage"
+                : "text-charcoal-soft hover:bg-white/70 hover:text-sage"
+            }`}
+          >
+            {label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

@@ -53,7 +53,7 @@ export default function DashboardProfilePanel({
               {activeProfile.relationship_type || "Unknown"}
             </p>
 
-            <span className="inline-block rounded-full bg-blue-100 text-blue-700 px-4 py-2 text-sm font-medium">
+            <span className="inline-block rounded-full bg-gold/15 text-[#9c7e3f] px-4 py-2 text-sm font-medium">
               Shared With You
             </span>
 

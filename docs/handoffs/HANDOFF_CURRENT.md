@@ -95,6 +95,15 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   action prefers it (idempotent passthrough), falling back to the raw value for
   no-JS. No schema change; existing reminder rows untouched. Verified: NY summer
   14:00→18:00Z, NY winter 14:00→19:00Z (DST), Manila 14:00→06:00Z.
+- **Design-system / UI modernization (visual only)**: established a unified brand
+  language — Tailwind tokens (`sage`/`sand`/`gold`/`moss`/`charcoal`, `shadow-soft`,
+  `rounded-4xl`), Fraunces serif headings + Inter body wired via `--font-serif`/
+  `--font-sans` in the root layout, brand-aligned `globals.css` tokens + softened
+  `.card` + reusable `@layer` primitives (`.rn-card`/`.rn-eyebrow`/`.rn-btn`).
+  Adopted on the highest-leverage surfaces: AppNavbar (sticky, soft, sage avatar),
+  NavLinks (active states), DashboardHeader/Stats/AccountStatus, MemoryCard,
+  Reminders page, BillingSection — replacing clinical blue/indigo/emerald/gray with
+  warm sage/sand/gold. No logic/schema/API/billing/reminder-functionality changes.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

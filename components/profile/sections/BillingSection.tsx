@@ -132,12 +132,12 @@ export default function BillingSection() {
   return (
     <div className="space-y-5">
 
-      <div className="rounded-xl border p-4">
-        <h4 className="font-semibold text-lg">
+      <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft">
+        <h4 className="font-semibold text-lg text-charcoal">
           Subscription
         </h4>
 
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-charcoal-muted">
           {billingLoading
             ? "Loading subscription..."
             : `${billing?.plan ?? "No Plan"} • ${
@@ -180,8 +180,8 @@ export default function BillingSection() {
             }
             className={`rounded-lg border px-4 py-2 text-sm ${
               selectedPlan === "PREMIUM"
-                ? "bg-black text-white border-black"
-                : "border-neutral-300"
+                ? "bg-sage text-white border-sage"
+                : "border-sand-deep text-charcoal-soft hover:border-sage/50"
             }`}
           >
             Premium (€9.99/mo)
@@ -194,8 +194,8 @@ export default function BillingSection() {
             }
             className={`rounded-lg border px-4 py-2 text-sm ${
               selectedPlan === "FAMILY"
-                ? "bg-black text-white border-black"
-                : "border-neutral-300"
+                ? "bg-sage text-white border-sage"
+                : "border-sand-deep text-charcoal-soft hover:border-sage/50"
             }`}
           >
             Family (€19.99/mo)
@@ -207,12 +207,16 @@ export default function BillingSection() {
             onClick={openCustomerPortal}
             disabled={loading}
             className="
-              rounded-lg
-              bg-black
-              px-4
+              rounded-full
+              bg-sage
+              px-5
               py-2
               text-sm
+              font-semibold
               text-white
+              shadow-soft
+              transition
+              hover:bg-sage-deep
               disabled:opacity-50
             "
           >
@@ -223,13 +227,13 @@ export default function BillingSection() {
         ) : (
           <div
             className="
-              rounded-lg
+              rounded-full
               border
-              border-neutral-200
-              px-4
+              border-sand-deep
+              px-5
               py-2
               text-sm
-              text-neutral-500
+              text-charcoal-muted
             "
           >
             Portal unavailable
@@ -240,11 +244,17 @@ export default function BillingSection() {
           onClick={upgradePlan}
           disabled={loading}
           className="
-            rounded-lg
+            rounded-full
             border
-            px-4
+            border-sand-deep
+            px-5
             py-2
             text-sm
+            font-medium
+            text-charcoal
+            transition
+            hover:border-sage/50
+            hover:text-sage
             disabled:opacity-50
           "
         >
@@ -257,13 +267,15 @@ export default function BillingSection() {
           onClick={cancelSubscription}
           disabled={loading}
           className="
-            rounded-lg
+            rounded-full
             border
-            border-red-300
-            px-4
+            border-rose-200
+            px-5
             py-2
             text-sm
-            text-red-600
+            text-rose-600/90
+            transition
+            hover:bg-rose-50
             disabled:opacity-50
           "
         >

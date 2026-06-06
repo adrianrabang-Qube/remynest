@@ -27,23 +27,23 @@ export default function DashboardAccountStatus({
     : "Free Plan";
 
   return (
-    <div className="rounded-3xl border bg-white p-6 shadow-sm">
-      <h2 className="text-2xl font-semibold mb-4 text-[#2f3e34]">
+    <div className="rounded-3xl border border-sand-deep/70 bg-white p-7 shadow-soft">
+      <h2 className="text-2xl font-semibold mb-5 text-charcoal">
         Account Status
       </h2>
 
       <div className="space-y-5">
         <div>
-          <p className="text-gray-600 mb-2">
+          <p className="text-xs font-medium uppercase tracking-wider text-charcoal-muted mb-2">
             Subscription Tier
           </p>
 
-          <h3 className="text-3xl font-bold text-[#2f3e34]">
+          <h3 className="text-3xl font-semibold text-charcoal">
             {displayPlan}
           </h3>
         </div>
 
-        <p className="text-gray-500 leading-relaxed">
+        <p className="text-charcoal-soft leading-relaxed">
           {isFamily
             ? "Your Family subscription is active. Collaboration, shared caregiving, and expanded family features are enabled."
             : isPremiumPlan
