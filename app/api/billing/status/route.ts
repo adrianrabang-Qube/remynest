@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveSubscription } from "@/lib/billing/resolve-subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,8 @@ export async function GET() {
       profile?.subscription_status ??
       "inactive";
 
-    const plan =
-      profile?.is_premium ||
-      status === "active" ||
-      status === "trialing"
-        ? "PREMIUM"
-        : profile?.subscription_plan ??
-          "FREE";
+    // Single authoritative resolver (no inline plan logic).
+    const { plan } = resolveSubscription(profile);
 
     return NextResponse.json({
       plan,

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { resolveSubscription } from "@/lib/billing/resolve-subscription";
 import type {
   ProfilePlan,
   ProfileSummary,
@@ -33,16 +34,13 @@ export async function resolveAccountIdentity(): Promise<AccountIdentity | null> 
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "first_name, preferred_name, profile_name, email, is_premium, subscription_plan"
+      "first_name, preferred_name, profile_name, email, is_premium, subscription_plan, subscription_status"
     )
     .eq("id", user.id)
     .maybeSingle();
 
-  const isPremium =
-    Boolean(profile?.is_premium) ||
-    (typeof profile?.subscription_plan === "string" &&
-      profile.subscription_plan !== "FREE");
-
+  // Single authoritative resolver (no inline plan logic).
+  const { isPremium } = resolveSubscription(profile);
   const plan: ProfilePlan = isPremium ? "premium" : "free";
 
   const firstName = profile?.first_name ?? "";

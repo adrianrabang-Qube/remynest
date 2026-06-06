@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import {
   BillingPlan,
 } from "@/lib/billing/plans";
+import { resolveSubscription } from "@/lib/billing/resolve-subscription";
 
 export interface PremiumStatus {
   user: unknown | null;
@@ -30,22 +31,13 @@ export async function checkPremium(): Promise<PremiumStatus> {
     await supabase
       .from("profiles")
       .select(
-        "is_premium, subscription_plan"
+        "is_premium, subscription_plan, subscription_status"
       )
       .eq("id", user.id)
       .single();
 
-  const plan =
-    (profile
-      ?.subscription_plan as BillingPlan | null) ??
-    (profile?.is_premium
-      ? "PREMIUM"
-      : "FREE");
+  // Single authoritative resolver (no inline plan logic).
+  const { isPremium, plan } = resolveSubscription(profile);
 
-  return {
-    user,
-    isPremium:
-      plan !== "FREE",
-    plan,
-  };
+  return { user, isPremium, plan };
 }

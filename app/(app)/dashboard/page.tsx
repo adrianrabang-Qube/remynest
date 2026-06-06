@@ -8,6 +8,8 @@ import {
   getAccessibleProfiles,
 } from "@/lib/profile-access";
 
+import { resolveSubscription } from "@/lib/billing/resolve-subscription";
+
 import {
   getActiveContext,
 } from "@/lib/active-profile";
@@ -223,13 +225,9 @@ export default async function DashboardPage() {
     ].filter(Boolean) as Profile[];
 
     const premiumProfile =
-      candidates.find((candidate) =>
-        candidate?.is_premium === true ||
-        candidate?.subscription_status === "active" ||
-        candidate?.subscription_plan
-          ?.toUpperCase() === "PREMIUM" ||
-        candidate?.subscription_plan
-          ?.toUpperCase() === "FAMILY"
+      candidates.find(
+        (candidate) =>
+          resolveSubscription(candidate).isPremium
       ) || null;
 
     profile =
@@ -250,6 +248,9 @@ export default async function DashboardPage() {
       }
     );
   }
+
+  // Single authoritative subscription resolution for the whole dashboard.
+  const resolvedSubscription = resolveSubscription(profile);
 
   // =====================================
   // ONBOARDING PROTECTION
@@ -522,15 +523,7 @@ export default async function DashboardPage() {
         profile?.is_premium,
       subscription_status:
         profile?.subscription_status,
-      resolvedCurrentPlan:
-        profile?.is_premium ||
-        profile?.subscription_status === "active" ||
-        profile?.subscription_plan
-          ?.toUpperCase() === "PREMIUM" ||
-        profile?.subscription_plan
-          ?.toUpperCase() === "FAMILY"
-          ? "PREMIUM"
-          : profile?.subscription_plan || "FREE",
+      resolvedCurrentPlan: resolvedSubscription.plan,
     }
   );
 
@@ -630,19 +623,8 @@ export default async function DashboardPage() {
 
         <DashboardStats
           memoryCount={memoryCount}
-          currentPlan={
-            profile?.is_premium ||
-            profile?.subscription_status === "active" ||
-            profile?.subscription_plan?.toUpperCase() === "PREMIUM" ||
-            profile?.subscription_plan?.toUpperCase() === "FAMILY"
-              ? "PREMIUM"
-              : profile?.subscription_plan || "FREE"
-          }
-          isPremium={Boolean(
-            profile?.is_premium ||
-            profile?.subscription_status === "active" ||
-            profile?.subscription_plan?.toUpperCase() === "FAMILY"
-          )}
+          currentPlan={resolvedSubscription.plan}
+          isPremium={resolvedSubscription.isPremium}
         />
 
         {/* PENDING INVITES */}
@@ -661,21 +643,8 @@ export default async function DashboardPage() {
 
         {/* ACCOUNT STATUS */}
         <DashboardAccountStatus
-          currentPlan={
-            profile?.is_premium ||
-            profile?.subscription_status === "active" ||
-            profile?.subscription_plan
-              ?.toUpperCase() === "PREMIUM" ||
-            profile?.subscription_plan
-              ?.toUpperCase() === "FAMILY"
-              ? "PREMIUM"
-              : profile?.subscription_plan || "FREE"
-          }
-          isPremium={Boolean(
-            profile?.is_premium ||
-            profile?.subscription_status === "active" ||
-            profile?.subscription_plan?.toUpperCase() === "FAMILY"
-          )}
+          currentPlan={resolvedSubscription.plan}
+          isPremium={resolvedSubscription.isPremium}
         />
 
         {/* CREATE MEMORY */}

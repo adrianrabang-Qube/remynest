@@ -33,6 +33,12 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
   Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
   the change immediately. No new workspace system introduced.
+- **Subscription resolution unified**: `lib/billing/resolve-subscription.ts` is
+  the single authoritative resolver (premium if `is_premium` OR status
+  active/trialing OR plan PREMIUM/FAMILY) used by `checkPremium`,
+  `resolveAccountIdentity`, `/api/billing/status`, and the dashboard. Removed all
+  inline plan logic; logs a warning on contradictory rows. Fixes `checkPremium`
+  previously mis-gating premium users whose `subscription_plan` was stale `FREE`.
 - **Workspace switching repaired** (was architecturally broken): added
   `EnterCareProfileList` (My Nest → Care entry that calls `setActiveProfile` →
   writes `remynest-active-context`); fixed `ProfileSwitcher` guard to use the real
@@ -47,6 +53,10 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 - `users` table missing → `save-onesignal` / `save-subscription` broken.
 - `/api/stripe/cancel` missing → BillingSection cancel broken.
 - Sentry env vars not set in Vercel (no prod error visibility).
+- Data drift: some `profiles` rows have contradictory `is_premium` vs
+  `subscription_plan` (e.g. `admin@remynest.com`: is_premium=true, plan=FREE). The
+  resolver now tolerates + logs this, but the Stripe webhook should reconcile the
+  two fields so they can't disagree.
 - Dev uses prod Supabase (no staging); media bucket `memory-media` is public.
 - Tech debt: duplicate export logic; two profile render paths; two search
   endpoints; schema not version-controlled; `npm audit` advisories.
