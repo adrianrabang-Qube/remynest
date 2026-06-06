@@ -39,6 +39,21 @@ export default function ContactPage() {
         share our mission of preserving memories and supporting cognitive care.
       </p>
 
+      {/* General Contact */}
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold">General Contact</h2>
+        <p className="mt-2 text-neutral-700">
+          For general questions or support, reach us at{" "}
+          <a
+            href={`mailto:${CONTACT.general}`}
+            className="font-medium text-blue-600 underline underline-offset-2"
+          >
+            {CONTACT.general}
+          </a>
+          .
+        </p>
+      </section>
+
       {/* Enterprise Solutions */}
       <section className="mt-10">
         <h2 className="text-xl font-semibold">Enterprise Solutions</h2>

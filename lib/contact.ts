@@ -6,6 +6,7 @@
  * them from here.
  */
 export const CONTACT = {
+  general: "contact@remynest.com",
   enterprise: "enterprise@remynest.com",
   investors: "investors@remynest.com",
 } as const;
