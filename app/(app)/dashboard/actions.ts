@@ -178,14 +178,52 @@ interface InviteCaregiverInput {
   memoryProfileId: string;
 }
 
+/**
+ * Caregiver collaboration is a FAMILY-tier entitlement. Like createProfile's
+ * limit, a blocked invite is EXPECTED business logic, not a system failure — so
+ * we return a structured result and NEVER throw (Next.js redacts thrown Server
+ * Action messages in production). The client switches on `code` to open the
+ * upgrade flow.
+ */
+export type InviteCaregiverResult =
+  | { success: true }
+  | { error: string }
+  | {
+      error: string;
+      code: "UPGRADE_REQUIRED";
+      plan: BillingPlan;
+    };
+
 export async function inviteCaregiver({
   email,
   relationshipType,
   accessLevel,
   memoryProfileId,
-}: InviteCaregiverInput) {
+}: InviteCaregiverInput): Promise<InviteCaregiverResult> {
   const { supabase, user } =
     await requireDashboardUser();
+
+  // Entitlement gate (server-enforced, single source of truth = BILLING_PLANS).
+  // FREE/PREMIUM: caregiver collaboration disabled → UPGRADE_REQUIRED.
+  // FAMILY (and above): enabled → proceed.
+  const { plan } = await checkPremium();
+
+  if (!getUsageLimits(plan).caregiverCollaborationEnabled) {
+    console.info(
+      "[dashboard] caregiver_collaboration_upgrade_required",
+      {
+        userId: user.id,
+        plan,
+      }
+    );
+
+    return {
+      error:
+        "Caregiver collaboration is available on the Family plan. Upgrade to invite caregivers and family members.",
+      code: "UPGRADE_REQUIRED",
+      plan: plan as BillingPlan,
+    };
+  }
 
   const { data: profiles, error: profilesError } =
     await supabase

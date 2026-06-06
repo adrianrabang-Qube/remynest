@@ -24,6 +24,16 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 - **Care-profile paywall**: plan-limit no longer crashes — server returns a
   structured result; client opens the upgrade modal (Premium/Family) instead of a
   Server Components error.
+- **Caregiver collaboration gated (FAMILY-tier)**: `inviteCaregiver()` now
+  enforces the entitlement server-side via `checkPremium()` +
+  `getUsageLimits(plan).caregiverCollaborationEnabled` (single source of truth =
+  `BILLING_PLANS`). FREE/PREMIUM → structured `{ code: "UPGRADE_REQUIRED", plan }`
+  (never throws, mirrors `createProfile`); FAMILY/ENTERPRISE → proceeds.
+  `InviteCaregiverForm` opens `UpgradeModal` on `UPGRADE_REQUIRED`. `UpgradeModal`
+  gained an optional `requiredFeature` filter so a Family-only feature never
+  offers PREMIUM (still BILLING_PLANS-derived — no duplicate logic). `inviteCaregiver`
+  is the sole invite-creation path (accept/decline only update existing invites;
+  `acceptInvite` requires a pre-existing pending invite), so no bypass route.
 - **Account identity single source of truth**: `lib/account-identity.ts`
   (`resolveAccountIdentity`) now feeds both `/settings` and the app-layout navbar;
   removed hardcoded placeholder identity from `AppNavbar`/`UserProfileDropdown`.

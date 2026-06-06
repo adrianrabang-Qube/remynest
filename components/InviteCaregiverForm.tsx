@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { inviteCaregiver } from "@/app/(app)/dashboard/actions";
+import type { BillingPlan } from "@/lib/billing/plans";
+import UpgradeModal from "@/components/UpgradeModal";
 
 interface InviteCaregiverFormProps {
   memoryProfileId: string;
@@ -18,6 +20,11 @@ export default function InviteCaregiverForm({
     useState("full");
 
   const [message, setMessage] = useState("");
+
+  const [showUpgrade, setShowUpgrade] =
+    useState(false);
+  const [upgradePlan, setUpgradePlan] =
+    useState<BillingPlan>("FREE");
 
   const [isPending, startTransition] =
     useTransition();
@@ -39,7 +46,18 @@ export default function InviteCaregiverForm({
             memoryProfileId,
           });
 
-        if (result?.error) {
+        // Entitlement gate — open the upgrade flow instead of showing an error.
+        if (
+          result &&
+          "code" in result &&
+          result.code === "UPGRADE_REQUIRED"
+        ) {
+          setUpgradePlan(result.plan);
+          setShowUpgrade(true);
+          return;
+        }
+
+        if ("error" in result) {
           setMessage(result.error);
           return;
         }
@@ -158,6 +176,14 @@ export default function InviteCaregiverForm({
           </p>
         )}
       </form>
+
+      <UpgradeModal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        currentPlan={upgradePlan}
+        reason="caregiver-collaboration"
+        requiredFeature="caregiverCollaboration"
+      />
     </div>
   );
 }

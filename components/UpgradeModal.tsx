@@ -12,7 +12,17 @@ interface UpgradeModalProps {
   /** Care-profile limit they hit, for the usage line. */
   limit?: number;
   currentCount?: number;
-  reason?: "care-profile-limit" | string;
+  reason?: "care-profile-limit" | "caregiver-collaboration" | string;
+  /**
+   * Restrict offered plans to those whose BILLING_PLANS config enables this
+   * feature (entitlement source stays BILLING_PLANS — no duplicate logic).
+   * Used for feature gates like caregiver collaboration where only some upper
+   * tiers qualify (e.g. FAMILY, not PREMIUM).
+   */
+  requiredFeature?: keyof Pick<
+    (typeof BILLING_PLANS)[BillingPlan],
+    "caregiverCollaboration" | "semanticSearch" | "voiceMemories"
+  >;
 }
 
 // Display prices are kept in sync with BillingSection. Source of truth for
@@ -31,6 +41,7 @@ export default function UpgradeModal({
   limit,
   currentCount,
   reason = "care-profile-limit",
+  requiredFeature,
 }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,10 +50,20 @@ export default function UpgradeModal({
 
   if (!open) return null;
 
-  // Offer only plans above the user's current one.
+  // Offer only plans above the user's current one — and, when a feature gate is
+  // in play, only those that actually unlock it (per BILLING_PLANS).
   const offers = OFFER_ORDER.filter(
-    (p) => p !== currentPlan
+    (p) =>
+      p !== currentPlan &&
+      (!requiredFeature || BILLING_PLANS[p][requiredFeature])
   );
+
+  // Default the selection to the first valid offer so the CTA can't point at a
+  // plan that doesn't unlock the requested feature.
+  const effectiveSelectedPlan =
+    requiredFeature && !offers.includes(selectedPlan)
+      ? offers[0] ?? selectedPlan
+      : selectedPlan;
 
   async function handleUpgrade() {
     setLoading(true);
@@ -53,7 +74,7 @@ export default function UpgradeModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          plan: selectedPlan,
+          plan: effectiveSelectedPlan,
           interval: "monthly",
         }),
       });
@@ -79,7 +100,9 @@ export default function UpgradeModal({
   const headline =
     reason === "care-profile-limit"
       ? "You've reached your care profile limit"
-      : "Upgrade your plan";
+      : reason === "caregiver-collaboration"
+        ? "Caregiver collaboration is a Family plan feature"
+        : "Upgrade your plan";
 
   return (
     <div
@@ -92,7 +115,13 @@ export default function UpgradeModal({
         <h2 className="text-2xl font-bold mb-2">{headline}</h2>
 
         <p className="text-gray-600 mb-6">
-          {typeof currentCount === "number" && typeof limit === "number" ? (
+          {reason === "caregiver-collaboration" ? (
+            <>
+              Invite caregivers and family members to collaborate on a care
+              profile. This feature is included with the Family plan.
+            </>
+          ) : typeof currentCount === "number" &&
+            typeof limit === "number" ? (
             <>
               You&apos;re using{" "}
               <strong>
@@ -109,7 +138,7 @@ export default function UpgradeModal({
         <div className="space-y-4 mb-6">
           {offers.map((plan) => {
             const cfg = BILLING_PLANS[plan];
-            const selected = selectedPlan === plan;
+            const selected = effectiveSelectedPlan === plan;
             return (
               <button
                 type="button"
@@ -169,7 +198,7 @@ export default function UpgradeModal({
           >
             {loading
               ? "Redirecting…"
-              : `Upgrade to ${BILLING_PLANS[selectedPlan].displayName}`}
+              : `Upgrade to ${BILLING_PLANS[effectiveSelectedPlan].displayName}`}
           </button>
         </div>
       </div>
