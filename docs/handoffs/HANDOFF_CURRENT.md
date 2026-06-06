@@ -116,6 +116,17 @@ shipped and validated** end-to-end. Single authoritative workflow established in
     long `ProfileHub` scrolled the whole page. Added `max-h-[calc(100vh-5rem)]
     overflow-y-auto overscroll-contain` (isolated scroll, no chaining) and made the
     close button `sticky`. Visual-only; no redesign.
+- **Profile dropdown: removed duplicate Billing nav item**: deleted the "Billing"
+  entry from `PROFILE_MENU_ITEMS` (`components/profile/config/profile-menu.config.ts`)
+  — it pointed at `/dashboard` (duplicate nav that redirected users to the
+  dashboard). Dropdown "Account" menu is now Switch to My Nest / Settings / Logout.
+  No handlers/imports/state were billing-only, so nothing else to remove.
+  Subscription controls are UNCHANGED — they live in `BillingSection`, rendered as
+  the **"Billing" section of the profile dropdown panel** (`PROFILE_SECTIONS`), not
+  the removed link. ⚠️ Note: the standalone `/settings` route does NOT render
+  `BillingSection` (only Account Info / Export / Privacy / Delete) — subscription
+  management is reached via the profile dropdown's Billing section. Slot reserved
+  for a future Vault entry (not implemented).
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
