@@ -2,145 +2,176 @@
 
 import { useState } from "react";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { BILLING_PLANS } from "@/lib/billing/plans";
 
 interface UpgradeModalProps {
   open: boolean;
   onClose: () => void;
+  /** The plan the user is currently on (drives which upgrades are offered). */
+  currentPlan?: BillingPlan;
+  /** Care-profile limit they hit, for the usage line. */
+  limit?: number;
+  currentCount?: number;
+  reason?: "care-profile-limit" | string;
 }
+
+// Display prices are kept in sync with BillingSection. Source of truth for
+// entitlements (profile counts, storage) is BILLING_PLANS.
+const PRICE_LABEL: Partial<Record<BillingPlan, string>> = {
+  PREMIUM: "€9.99 / month",
+  FAMILY: "€19.99 / month",
+};
+
+const OFFER_ORDER: BillingPlan[] = ["PREMIUM", "FAMILY"];
 
 export default function UpgradeModal({
   open,
   onClose,
+  currentPlan = "FREE",
+  limit,
+  currentCount,
+  reason = "care-profile-limit",
 }: UpgradeModalProps) {
-  const [loading, setLoading] =
-    useState(false);
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] =
     useState<BillingPlan>("PREMIUM");
 
   if (!open) return null;
 
+  // Offer only plans above the user's current one.
+  const offers = OFFER_ORDER.filter(
+    (p) => p !== currentPlan
+  );
+
   async function handleUpgrade() {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          interval: "monthly",
+        }),
+      });
 
-      const response =
-        await fetch(
-          "/api/stripe/checkout",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-            body: JSON.stringify({
-              plan: selectedPlan,
-              interval: "monthly",
-            }),
-          }
-        );
+      const data = await response.json();
 
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-            "Checkout failed"
-        );
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || "Checkout failed");
       }
 
-      window.location.href =
-        data.url;
+      window.location.href = data.url;
     } catch (err) {
-      console.error(err);
-
-      alert(
+      setError(
         err instanceof Error
           ? err.message
-          : "Checkout failed"
+          : "We couldn't start checkout. Please try again."
       );
     } finally {
       setLoading(false);
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
+  const headline =
+    reason === "care-profile-limit"
+      ? "You've reached your care profile limit"
+      : "Upgrade your plan";
 
-        <h2 className="text-2xl font-bold mb-4">
-          Free Plan Limit Reached
-        </h2>
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={headline}
+    >
+      <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
+        <h2 className="text-2xl font-bold mb-2">{headline}</h2>
 
         <p className="text-gray-600 mb-6">
-          You’ve reached your current
-          care profile limit.
+          {typeof currentCount === "number" && typeof limit === "number" ? (
+            <>
+              You&apos;re using{" "}
+              <strong>
+                {currentCount} of {limit}
+              </strong>{" "}
+              care profiles on the {BILLING_PLANS[currentPlan].displayName}{" "}
+              plan. Upgrade to add more and unlock additional features.
+            </>
+          ) : (
+            <>Upgrade to add more care profiles and unlock more features.</>
+          )}
         </p>
 
-        <div className="space-y-4 mb-8">
-
-          <div
-            onClick={() =>
-              setSelectedPlan("PREMIUM")
-            }
-            className={`border rounded-2xl p-4 cursor-pointer transition ${
-              selectedPlan === "PREMIUM"
-                ? "border-black bg-gray-100"
-                : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold">
-              Premium
-            </h3>
-
-            <p className="text-sm text-gray-500">
-              Up to 3 care profiles · €9.99/month
-            </p>
-          </div>
-
-          <div
-            onClick={() =>
-              setSelectedPlan("FAMILY")
-            }
-            className={`border rounded-2xl p-4 cursor-pointer transition ${
-              selectedPlan === "FAMILY"
-                ? "border-black bg-gray-100"
-                : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold">
-              Family
-            </h3>
-
-            <p className="text-sm text-gray-500">
-              Up to 5 care profiles · Family plan
-            </p>
-          </div>
-
+        <div className="space-y-4 mb-6">
+          {offers.map((plan) => {
+            const cfg = BILLING_PLANS[plan];
+            const selected = selectedPlan === plan;
+            return (
+              <button
+                type="button"
+                key={plan}
+                onClick={() => setSelectedPlan(plan)}
+                aria-pressed={selected}
+                className={`w-full text-left border rounded-2xl p-4 transition ${
+                  selected
+                    ? "border-black bg-gray-100"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{cfg.displayName}</h3>
+                  <span className="text-sm font-medium">
+                    {PRICE_LABEL[plan] ?? ""}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  {cfg.careProfiles === "unlimited"
+                    ? "Unlimited care profiles"
+                    : `Up to ${cfg.careProfiles} care profiles`}
+                  {" · "}
+                  {cfg.storageGB === "unlimited"
+                    ? "Unlimited storage"
+                    : `${cfg.storageGB} GB storage`}
+                  {cfg.semanticSearch ? " · Semantic search" : ""}
+                  {cfg.caregiverCollaboration
+                    ? " · Caregiver collaboration"
+                    : ""}
+                </p>
+              </button>
+            );
+          })}
         </div>
 
+        {error && (
+          <p className="text-sm text-red-600 mb-4" role="alert">
+            {error}
+          </p>
+        )}
+
         <div className="flex gap-3">
-
           <button
+            type="button"
             onClick={onClose}
-            className="flex-1 border rounded-xl py-3"
+            disabled={loading}
+            className="flex-1 border rounded-xl py-3 disabled:opacity-50"
           >
-            Maybe Later
+            Maybe later
           </button>
-
           <button
+            type="button"
             onClick={handleUpgrade}
             disabled={loading}
             className="flex-1 bg-black text-white rounded-xl py-3 disabled:opacity-50"
           >
             {loading
-              ? "Redirecting..."
-              : `Upgrade to ${selectedPlan}`}
+              ? "Redirecting…"
+              : `Upgrade to ${BILLING_PLANS[selectedPlan].displayName}`}
           </button>
-
         </div>
-
       </div>
     </div>
   );

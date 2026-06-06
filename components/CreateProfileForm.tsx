@@ -3,42 +3,50 @@
 import { useState } from "react";
 
 import { createProfile } from "@/app/(app)/dashboard/actions";
+import type { BillingPlan } from "@/lib/billing/plans";
 import UpgradeModal from "./UpgradeModal";
 
+interface LimitInfo {
+  plan: BillingPlan;
+  limit: number;
+  currentCount: number;
+}
+
 export default function CreateProfileForm() {
-  const [loading, setLoading] =
-    useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
 
-  async function handleSubmit(
-    formData: FormData
-  ) {
+  async function handleSubmit(formData: FormData) {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
+      const result = await createProfile(formData);
 
-      await createProfile(formData);
-
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to create profile";
-
-      if (
-        message.includes(
-          "Care profile limit reached"
-        )
-      ) {
-        setShowUpgradeModal(true);
-
+      if (result.ok) {
+        window.location.reload();
         return;
       }
 
-      alert(message);
+      switch (result.code) {
+        case "CARE_PROFILE_LIMIT_REACHED":
+          // Expected business rule → convert to upgrade flow, not an error.
+          setLimitInfo({
+            plan: result.plan,
+            limit: result.limit,
+            currentCount: result.currentCount,
+          });
+          break;
+        case "VALIDATION":
+          setError(result.message);
+          break;
+        default:
+          setError(result.message);
+      }
+    } catch {
+      // Only genuinely unexpected failures reach here (e.g. network).
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,19 +54,13 @@ export default function CreateProfileForm() {
 
   return (
     <div className="rounded-2xl border p-6 bg-white shadow-sm">
-      <h2 className="text-2xl font-semibold mb-6">
-        Create Profile
-      </h2>
+      <h2 className="text-2xl font-semibold mb-6">Create Profile</h2>
 
-      <form
-        action={handleSubmit}
-        className="space-y-4"
-      >
+      <form action={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">
             Profile Name
           </label>
-
           <input
             type="text"
             name="profile_name"
@@ -72,7 +74,6 @@ export default function CreateProfileForm() {
           <label className="block text-sm font-medium mb-2">
             Preferred Name
           </label>
-
           <input
             type="text"
             name="preferred_name"
@@ -85,7 +86,6 @@ export default function CreateProfileForm() {
           <label className="block text-sm font-medium mb-2">
             Date of Birth
           </label>
-
           <input
             type="date"
             name="date_of_birth"
@@ -93,21 +93,28 @@ export default function CreateProfileForm() {
           />
         </div>
 
+        {error && (
+          <p className="text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        )}
+
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-xl"
+          className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-50"
         >
-          {loading
-            ? "Creating..."
-            : "Create Profile"}
+          {loading ? "Creating..." : "Create Profile"}
         </button>
       </form>
+
       <UpgradeModal
-        open={showUpgradeModal}
-        onClose={() =>
-          setShowUpgradeModal(false)
-        }
+        open={limitInfo !== null}
+        onClose={() => setLimitInfo(null)}
+        currentPlan={limitInfo?.plan}
+        limit={limitInfo?.limit}
+        currentCount={limitInfo?.currentCount}
+        reason="care-profile-limit"
       />
     </div>
   );

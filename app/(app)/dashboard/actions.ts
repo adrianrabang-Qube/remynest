@@ -4,14 +4,15 @@ import { revalidatePath } from "next/cache";
 
 import { checkPremium } from "@/lib/premium";
 
+import type { BillingPlan } from "@/lib/billing/plans";
 import {
   canCreateCareProfile,
+  getUsageLimits,
 } from "@/lib/billing/usage-limits";
 
 import {
   normalizeFormValue,
   requireDashboardUser,
-  requireNonEmpty,
 } from "./lib/dashboard-guards";
 
 import {
@@ -21,107 +22,143 @@ import {
 
 const DASHBOARD_PATH = "/dashboard";
 
+/**
+ * Discriminated result for care-profile creation. A plan limit is EXPECTED
+ * business logic, not a system failure — Server Actions must NOT throw for it
+ * (Next.js redacts thrown Server Action messages in production, which both hides
+ * the reason and surfaces a generic "Server Components render" error dialog).
+ * The client switches on `code` and renders the upgrade flow.
+ */
+export type CreateProfileResult =
+  | { ok: true; profileId: string }
+  | {
+      ok: false;
+      code: "CARE_PROFILE_LIMIT_REACHED";
+      plan: BillingPlan;
+      limit: number;
+      currentCount: number;
+    }
+  | { ok: false; code: "VALIDATION"; message: string }
+  | { ok: false; code: "SERVER_ERROR"; message: string };
+
 export async function createProfile(
   formData: FormData
-) {
+): Promise<CreateProfileResult> {
+  // NOTE: requireDashboardUser() may redirect() — keep it OUT of try/catch so the
+  // Next redirect signal is never swallowed.
   const { supabase, user } =
     await requireDashboardUser();
 
-  const {
-    plan,
-  } = await checkPremium();
+  const profileName = normalizeFormValue(
+    formData.get("profile_name")
+  );
+  const preferredName = normalizeFormValue(
+    formData.get("preferred_name")
+  );
+
+  if (!profileName) {
+    return {
+      ok: false,
+      code: "VALIDATION",
+      message: "Profile name is required.",
+    };
+  }
+
+  const { plan } = await checkPremium();
 
   const {
     count: currentProfileCount,
     error: countError,
   } = await supabase
     .from("memory_profiles")
-    .select("id", {
-      count: "exact",
-      head: true,
-    })
-    .eq(
-      "created_by_account_id",
-      user.id
-    );
+    .select("id", { count: "exact", head: true })
+    .eq("created_by_account_id", user.id);
 
   if (countError) {
-    console.error(countError);
-
-    throw new Error(
-      "Failed to validate profile limits"
+    console.error(
+      "[createProfile] limit count failed",
+      countError
     );
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message:
+        "We couldn't verify your plan limits. Please try again.",
+    };
   }
 
-  const canCreate =
-    canCreateCareProfile(
-      currentProfileCount ?? 0,
-      plan
-    );
+  const currentCount = currentProfileCount ?? 0;
 
-  if (!canCreate) {
-    throw new Error(
-      `Care profile limit reached for ${plan} plan.`
-    );
+  // EXPECTED business rule — return structured response, never throw.
+  if (!canCreateCareProfile(currentCount, plan)) {
+    const max = getUsageLimits(plan).maxCareProfiles;
+    const limit =
+      max === "unlimited" ? Number.MAX_SAFE_INTEGER : max;
+
+    // High-intent upgrade signal (logged for conversion analytics).
+    console.info("[dashboard] care_profile_limit_reached", {
+      userId: user.id,
+      plan,
+      currentCount,
+    });
+
+    return {
+      ok: false,
+      code: "CARE_PROFILE_LIMIT_REACHED",
+      plan: plan as BillingPlan,
+      limit,
+      currentCount,
+    };
   }
 
-  const profileName =
-    normalizeFormValue(
-      formData.get(
-        "profile_name"
-      )
-    );
-
-  const preferredName =
-    normalizeFormValue(
-      formData.get(
-        "preferred_name"
-      )
-    );
-
-  requireNonEmpty(
-    profileName,
-    "Profile name"
-  );
-
-  const { data: profile, error } =
-    await supabase
-      .from("memory_profiles")
-      .insert({
-        profile_name: profileName,
-        preferred_name: preferredName,
-        created_by_account_id: user.id,
-        subscription_status: "free",
-      })
-      .select()
-      .single();
+  const { data: profile, error } = await supabase
+    .from("memory_profiles")
+    .insert({
+      profile_name: profileName,
+      preferred_name: preferredName,
+      created_by_account_id: user.id,
+      subscription_status: "free",
+    })
+    .select("id")
+    .single();
 
   if (error || !profile) {
-    console.error(error);
-
-    throw new Error(
-      "Failed to create profile"
-    );
+    console.error("[createProfile] insert failed", error);
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message:
+        "We couldn't create the profile. Please try again.",
+    };
   }
 
-  const { error: relationshipError } =
-    await supabase
-      .from("profile_relationships")
-      .insert({
-        memory_profile_id: profile.id,
-        caregiver_account_id: user.id,
-        relationship_type: "owner",
-        access_level: "admin",
-        invite_status: "accepted",
-        invited_by_account_id: user.id,
-      });
+  const { error: relationshipError } = await supabase
+    .from("profile_relationships")
+    .insert({
+      memory_profile_id: profile.id,
+      caregiver_account_id: user.id,
+      relationship_type: "owner",
+      access_level: "admin",
+      invite_status: "accepted",
+      invited_by_account_id: user.id,
+    });
 
   if (relationshipError) {
-    console.error(relationshipError);
-
-    throw new Error(
-      "Failed to create relationship"
+    console.error(
+      "[createProfile] relationship failed",
+      relationshipError
     );
+    // Roll back the orphaned profile so the count stays consistent.
+    await supabase
+      .from("memory_profiles")
+      .delete()
+      .eq("id", profile.id);
+    return {
+      ok: false,
+      code: "SERVER_ERROR",
+      message:
+        "We couldn't finish setting up the profile. Please try again.",
+    };
   }
 
   logProfileCreation({
@@ -129,9 +166,9 @@ export async function createProfile(
     profileId: profile.id,
   });
 
-  revalidatePath(
-    DASHBOARD_PATH
-  );
+  revalidatePath(DASHBOARD_PATH);
+
+  return { ok: true, profileId: profile.id };
 }
 
 interface InviteCaregiverInput {
