@@ -1,68 +1,58 @@
 # Handoff — Current
 
-> Update this after every major session. Keep it short and truthful. Date each
-> revision.
+> Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
+> short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-05 (Delete Account execution pass)
+**Last updated:** 2026-06-06
 
-## Completed features
-- Web app **live in production** (Vercel → `www.remynest.com`); launch-hardening
-  merged to `main`: Playwright security automation, AI disclaimers, premium 402,
-  GDPR export, legal pages (`/privacy`, `/terms`, `/cookies`), CRON_SECRET,
-  `/api/health`, error-message sanitisation, Sentry wiring + error boundaries.
-- Memory system (CRUD + AI enrichment + embeddings), reminders, semantic search,
-  memory chat, insights, caregiver sharing, Stripe subscriptions (checkout/
-  webhook/status), GDPR export.
-- **Settings v1** (`/settings`): account info (edit name), export data, privacy
-  links, danger-zone Delete Account; middleware-registered.
-- **Delete Account**: code complete + hardened. FK confirmed
-  `memories.user_id → auth.users(id)` (ON DELETE CASCADE, NOT NULL). Tombstone =
-  **Admin-API-provisioned auth user**, id in `TOMBSTONE_USER_ID` env; raw
-  `auth.users` SQL insert **removed**; RPC takes `tombstoneId` via options; RPC
-  hardened to clear child reminders/relationships before deleting sole-owned
-  profiles (RESTRICT-safe). Planner dry-run **validated against live schema**.
-  Remaining = apply migration + provision tombstone + set env + run A–F on
-  non-prod (see Immediate tasks).
-- **Mobile**: Capacitor remote-URL wrapper; iOS build verified; native projects
-  committed on `feat/capacitor-mobile`.
-- **Compliance pack**: `docs/compliance/*` (privacy policy, ToS, data deletion,
-  support, Apple labels, Play data-safety, permissions, AI transparency, risk
-  audits, store listing, launch checklist).
+## Current status
+Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
+shipped and validated** end-to-end. Single authoritative workflow established in
+`CLAUDE.md` (Investigation/Execution modes).
 
-## In progress
-- Developer documentation system (this `/docs` set).
+## Completed work
+- **Launch hardening** (merged to `main`): Playwright security automation, AI
+  disclaimers, premium 402, GDPR export, legal pages, CRON_SECRET, `/api/health`,
+  error-message sanitisation, Sentry wiring + error boundaries.
+- **Core product**: memory CRUD + AI enrichment/embeddings, reminders, semantic
+  search, memory chat, insights, caregiver sharing, Stripe subscriptions, GDPR export.
+- **Settings v1** (`/settings`): account info, export, privacy links, Delete Account.
+- **Delete Account — DONE**: migration applied; tombstone provisioned
+  (`TOMBSTONE_USER_ID` set local + Vercel); A–F scenarios **validated PASS** against
+  the live DB (own-only, transfer, retain/delete contributed, storage, auth
+  recovery). `memories.user_id → auth.users` (CASCADE, NOT NULL) confirmed.
+- **Care-profile paywall**: plan-limit no longer crashes — server returns a
+  structured result; client opens the upgrade modal (Premium/Family) instead of a
+  Server Components error.
+- **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
+- **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
+- **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
 
-## Known issues (verified)
-- ⚠️ `users` table **does not exist** → `save-onesignal`, `save-subscription`
-  broken.
-- ⚠️ `/api/stripe/cancel` **missing** → BillingSection cancel broken.
-- ⚠️ `UserProfileDropdown` shows **hardcoded** profile data.
-- ⚠️ Delete-account **migration not applied yet** and **tombstone not
-  provisioned** / `TOMBSTONE_USER_ID` not set. Destructive A–F tests not yet run
-  (must use a non-prod project — dev points at prod). FK strategy now resolved.
-- ⚠️ **Sentry inactive** (env vars not set in Vercel).
-- ⚠️ Dev uses **prod Supabase**; no staging.
-- ⚠️ Media bucket `memory-media` is **public**.
+## Open issues
+- `users` table missing → `save-onesignal` / `save-subscription` broken.
+- `/api/stripe/cancel` missing → BillingSection cancel broken.
+- `UserProfileDropdown` shows hardcoded profile data.
+- Sentry env vars not set in Vercel (no prod error visibility).
+- Dev uses prod Supabase (no staging); media bucket `memory-media` is public.
+- Tech debt: duplicate export logic; two profile render paths; two search
+  endpoints; schema not version-controlled; `npm audit` advisories.
 
-## Open technical debt
-- Export logic duplicated (`GDPRSection` vs `ExportDataSection`).
-- Two render paths (dropdown via ProfileHub vs settings page).
-- Two search endpoints. Schema not version-controlled. `npm audit` advisories.
+## Active branch
+`main` (production; auto-deploys). `feat/capacitor-mobile` holds mobile work
+(pushed, unmerged).
 
-## Deployment status
-- Prod: live, `main` auto-deploys. `CRON_SECRET` set; Sentry env missing.
-- **New env var required:** `TOMBSTONE_USER_ID` (provisioned tombstone auth user
-  id) — unset locally and in Vercel; set after running `provisionTombstone()`.
-- Branches: `feat/capacitor-mobile` (mobile, pushed), Delete Account + settings +
-  these docs currently **uncommitted** on the working branch.
+## Next priorities
+P0: fix `/api/stripe/cancel`; fix/remove broken OneSignal endpoints; confirm Sign
+in with Apple. P1: set Sentry env in Vercel; wire `UserProfileDropdown` to real
+data; native push; Android build + store submission; workspace-switching UX.
 
-## Next priority
-P0 in `roadmap/launch-roadmap.md`: apply+verify Delete Account migration; fix
-Stripe cancel; fix/remove broken OneSignal endpoints; confirm Apple Sign In.
+## Blockers
+None blocking web production. Mobile store submission blocked on Apple Developer /
+Play Console accounts + native push + Android SDK.
 
-## Immediate tasks (Delete Account → production)
-1. Apply `supabase/migrations/20260605120000_delete_account.sql` to the target DB.
-2. Run `provisionTombstone()` once; set `TOMBSTONE_USER_ID` env (prod + preview).
-3. Verify the `profiles` tombstone insert satisfies all NOT-NULL columns.
-4. Run scenarios A–F + guard tests on a **non-prod** project; fix any failures.
-5. Decide branch/commit strategy for the uncommitted Delete Account + docs work.
+## Recent commits
+- `399625a` docs: consolidate to a single authoritative Claude workflow
+- `c000ae8` fix(api): force-dynamic on `/api/billing/status`
+- `e227abe` test(gdpr): add delete account validation harness
+- `c78415e` fix(gdpr): remove invalid profile_name from tombstone provisioning
+- `cb739d4` feat: complete GDPR delete account system

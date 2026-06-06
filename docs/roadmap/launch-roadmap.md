@@ -5,9 +5,8 @@ Derived from current code reality (see MASTER_SPEC + HANDOFF_CURRENT). Web app i
 mobile store readiness.
 
 ## P0 — Critical (blockers / broken in prod)
-- [ ] **Delete Account: apply migration + verify** — confirm `memories.user_id`
-  FK target, replace raw `auth.users` insert (sentinel UUID or Admin-API),
-  run scenarios A–F. (Apple 5.1.1(v) / Play requirement.)
+- [x] **Delete Account** — DONE: migration applied, tombstone provisioned
+  (`TOMBSTONE_USER_ID` set), A–F scenarios validated PASS against live DB.
 - [ ] **Fix `/api/stripe/cancel`** (missing) — cancel is broken in `BillingSection`
   (or switch to Stripe Customer Portal).
 - [ ] **Fix or remove `save-onesignal` / `save-subscription`** — they write to a

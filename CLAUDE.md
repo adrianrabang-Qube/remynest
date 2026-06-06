@@ -1,61 +1,74 @@
 # RemyNest — Claude Workflow (authoritative)
 
-This is the **single source of workflow truth**. `/docs` is the source of **content
-truth**. Do not create parallel instruction files (no CLAUDE_BOOT.md, no second
-rules doc) — enhance this file instead.
+The **single source of workflow truth**. `/docs` is the source of **content truth**.
+Do not create parallel workflow/instruction files — enhance this one.
 
-## Mandatory startup protocol (every session)
-1. **Read `docs/handoffs/HANDOFF_CURRENT.md` FIRST** — current state, in‑progress
-   work, known issues, next priority.
-2. Read **only the docs relevant to the task**:
-   - Product/system → `docs/MASTER_SPEC.md`
-   - A feature → `docs/features/<feature>.md`
-   - Architecture → `docs/architecture/system-architecture.md`,
-     `database-overview.md`, `api-overview.md`
-   - Audit entry point → `docs/architecture/project-map.md`
-   - Priorities → `docs/roadmap/launch-roadmap.md`
-   - Prompt templates → `docs/CLAUDE_WORKFLOW.md`
-3. **Trust `/docs` over rediscovery.** Do not re-derive architecture the docs
-   already cover.
+## Start every session (mandatory)
+1. **Read `docs/handoffs/HANDOFF_CURRENT.md` FIRST.**
+2. Read **only the docs relevant to the task** (map below). Trust docs over rediscovery.
+3. **Do not scan unrelated files** or run repository-wide analysis unless the task
+   explicitly requires an audit. Identify the smallest set of files first.
+
+Doc map → product/system: `docs/MASTER_SPEC.md` · feature: `docs/features/<x>.md` ·
+architecture: `docs/architecture/{system-architecture,database-overview,api-overview}.md` ·
+audit entry: `docs/architecture/project-map.md` · priorities:
+`docs/roadmap/launch-roadmap.md` · prompt templates: `docs/CLAUDE_WORKFLOW.md`.
+
+## Operating modes
+
+### INVESTIGATION MODE — default
+Any prompt that does **not** contain the literal `EXECUTION MODE`. Read-only; no
+code/migration/infra changes. Output **exactly** these four sections, then STOP and
+wait for approval:
+- **Documents Read**
+- **Understanding**
+- **Suspected Files**
+- **Investigation Plan**
+
+### EXECUTION MODE — on keyword
+Triggered when the prompt contains `EXECUTION MODE`. Run the full cycle **without
+waiting for approval**: investigate → implement → test → `npm run lint` →
+`npm run build` → validate → update docs → commit → report (Completion Protocol).
 
 ## Token efficiency
-- **No repository-wide scanning** unless the task explicitly requires an audit.
-- Prefer targeted reads (named files/sections) over broad greps.
-- Reuse facts from `/docs`; only re-verify when asked to audit or when a fact is
-  marked _(verify)_.
-- Schema is **dashboard-managed** — confirm FK/RLS/columns in the Supabase SQL
-  editor, not by scanning code.
+- Documentation is authoritative; prefer it over rediscovery.
+- Read the minimum necessary; targeted reads over broad greps.
+- Never repository-wide scan when targeted inspection works.
+- Schema is dashboard-managed — verify FK/RLS/columns in the Supabase SQL editor,
+  not by scanning code.
 
-## Two modes
-**Investigation Mode** (audit / review / "why·where·is it safe"):
-- Read-only. No code, migration, Vercel, or Supabase mutations.
-- Output findings + `file:line` refs + a clear conclusion. No speculative fixes.
-
-**Execution Mode** (build / fix / implement):
-- Make the change → run `npm run lint` && `npm run build` → report results.
-- Respect: middleware route registration; RLS scoping (the service-role client
+## Engineering rules
+- Respect middleware route registration; RLS scoping (the service-role client
   **bypasses RLS** — scope every admin query by user id); **return structured
-  results, don't `throw`, for expected business rules** (Server Action errors are
-  redacted in prod); non-clinical AI language.
-- Don't commit/push/merge unless asked. **`main` auto-deploys to production.**
-- Destructive / outward-facing actions (DB migrations, deletions, Vercel, deploys)
-  are **operator steps** unless explicitly authorized — provide the exact command.
+  results, never `throw`, for expected business rules** (Server Action errors are
+  redacted in production); non-clinical AI language.
+- No `eslint-disable` / TS suppression; never weaken auth or validation; no Stripe
+  or schema changes without approval.
+- Destructive / outward-facing actions (DB migration, deletion, Vercel, deploy) are
+  **operator steps** unless explicitly authorized — provide the exact command.
+- **`main` auto-deploys to production.** Don't commit/push/merge unless asked
+  (EXECUTION MODE authorizes the commit step for the task at hand).
 
-## Critical systems — do not break
+### Critical systems — do not break
 Authentication · Supabase (RLS) · Stripe billing · OneSignal · memory CRUD ·
 media uploads · timeline · search · memory chat · AI insights (non-clinical) ·
 profile/workspace switching · caregiver workflows · GDPR export/delete.
 
-## Before implementation, state
-Files affected · risks · DB/schema/migration impact · testing.
+## Mandatory documentation maintenance (Definition of Done)
+A task is **not complete** until, in the **same commit**:
+- `docs/handoffs/HANDOFF_CURRENT.md` is updated;
+- the relevant `docs/features/*` is updated **if** architecture/behavior changed;
+- `docs/roadmap/launch-roadmap.md` is updated **if** priorities changed.
 
-## After implementation, always
-Run `npm run lint` and `npm run build` and report results. Update
-`docs/handoffs/HANDOFF_CURRENT.md` after major changes.
+### HANDOFF_CURRENT.md must always contain
+Current status · Completed work · Open issues · Active branch · Next priorities ·
+Blockers · Recent commits.
 
-## Standardized output format
-1. **Summary** — one line.
-2. **Findings / Changes** — bullets with `file:line`.
-3. **Verification** — lint/build/test results (Execution) or evidence (Investigation).
-4. **Risks / follow-ups** — including operator actions with exact commands.
-5. **Next step** — a single clear action.
+## Completion protocol (end every EXECUTION task with)
+1. Summary
+2. Files Changed
+3. Documentation Updated
+4. Tests Run
+5. Build Status
+6. Commit Hash
+7. Next Recommended Action
