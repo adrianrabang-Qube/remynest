@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 import {
   BillingPlan,
   BillingInterval,
+  planFromPriceId,
 } from "@/lib/billing/plans";
 
 import {
@@ -457,16 +458,24 @@ export async function POST(req: Request) {
       currentPeriodEnd,
     );
 
-    const updatePayload = {
-      is_premium:
-        subscription.status === "active" ||
-        subscription.status === "trialing",
+    const isActive =
+      subscription.status === "active" ||
+      subscription.status === "trialing";
 
-      subscription_plan:
-        subscription.status === "active" ||
-        subscription.status === "trialing"
-          ? "PREMIUM"
-          : "FREE",
+    const priceId =
+      subscription.items?.data?.[0]?.price?.id ?? null;
+
+    const derivedPlan = planFromPriceId(priceId);
+
+    if (isActive && priceId && !derivedPlan) {
+      console.warn(
+        "[stripe-webhook] unknown Stripe price id (subscription.updated) — preserving existing plan",
+        { subscriptionId: subscription.id, priceId }
+      );
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      is_premium: isActive,
 
       subscription_status:
         subscription.status,
@@ -482,6 +491,18 @@ export async function POST(req: Request) {
             ).toISOString()
           : null,
     };
+
+    // Plan is derived from the actual Stripe price — never hardcoded. Only write
+    // it when we can map the price (active) so a known price sets PREMIUM/FAMILY
+    // correctly; on an unknown price, preserve the existing plan (never downgrade
+    // FAMILY → PREMIUM). When inactive, the plan reverts to FREE.
+    if (isActive) {
+      if (derivedPlan) {
+        updatePayload.subscription_plan = derivedPlan;
+      }
+    } else {
+      updatePayload.subscription_plan = "FREE";
+    }
 
     const customerId =
       typeof subscription.customer === "string"

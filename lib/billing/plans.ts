@@ -138,6 +138,28 @@ export function getPlan(
   return BILLING_PLANS[plan];
 }
 
+/**
+ * Canonical reverse lookup: Stripe price id → BillingPlan, using the same
+ * BILLING_PLANS config that getPriceId() reads. Returns null for an unknown
+ * price id (e.g. unconfigured/legacy). FREE has no price ids and never matches.
+ */
+export function planFromPriceId(
+  priceId: string | null | undefined
+): BillingPlan | null {
+  if (!priceId) return null;
+
+  for (const config of Object.values(BILLING_PLANS)) {
+    if (
+      config.monthlyPriceId === priceId ||
+      config.yearlyPriceId === priceId
+    ) {
+      return config.name;
+    }
+  }
+
+  return null;
+}
+
 export function getPriceId(
   plan: BillingPlan,
   interval: BillingInterval = "monthly"

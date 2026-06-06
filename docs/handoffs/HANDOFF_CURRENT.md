@@ -33,6 +33,13 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
   Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
   the change immediately. No new workspace system introduced.
+- **FAMILY drift fixed (webhook)**: `customer.subscription.updated` no longer
+  hardcodes `subscription_plan: "PREMIUM"`. Added `planFromPriceId(priceId)`
+  (reverse lookup over `BILLING_PLANS`) and the webhook now derives the plan from
+  the Stripe price → FAMILY stays FAMILY across renewals/updates. Unknown price →
+  preserve existing plan + `console.warn`; inactive → FREE. checkout (metadata
+  plan) and deleted (FREE) paths unchanged; `subscription.created` writes no plan
+  (can't downgrade). Verified PREMIUM→PREMIUM, FAMILY→FAMILY.
 - **Contact page** (`/contact`, public): General Contact + Enterprise Solutions +
   Investors & Partnerships sections. All emails sourced from `lib/contact.ts`
   (`CONTACT.general`/`enterprise`/`investors` → `contact@`/`enterprise@`/
@@ -63,10 +70,11 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 - `users` table missing → `save-onesignal` / `save-subscription` broken.
 - `/api/stripe/cancel` missing → BillingSection cancel broken.
 - Sentry env vars not set in Vercel (no prod error visibility).
-- Data drift: some `profiles` rows have contradictory `is_premium` vs
-  `subscription_plan` (e.g. `admin@remynest.com`: is_premium=true, plan=FREE). The
-  resolver now tolerates + logs this, but the Stripe webhook should reconcile the
-  two fields so they can't disagree.
+- Data drift: the webhook now writes a correct, price-derived `subscription_plan`
+  (future drift prevented). **Pre-existing** drifted rows (e.g. `admin@remynest.com`:
+  is_premium=true, plan=FREE) are not auto-corrected until their next
+  subscription event with a known price — a one-time data reconciliation is still
+  advisable. `resolveSubscription` tolerates drift for premium/free.
 - Dev uses prod Supabase (no staging); media bucket `memory-media` is public.
 - Tech debt: duplicate export logic; two profile render paths; two search
   endpoints; schema not version-controlled; `npm audit` advisories.
