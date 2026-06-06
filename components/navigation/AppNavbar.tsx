@@ -4,13 +4,16 @@ import { useState } from "react";
 
 import NavLinks from "./NavLinks";
 import UserProfileDropdown from "./UserProfileDropdown";
+import WorkspaceIndicator from "./WorkspaceIndicator";
+import type { WorkspaceNavState } from "./workspace-nav";
 import type { ProfileSummary } from "@/components/profile/types";
 
 interface AppNavbarProps {
   profile: ProfileSummary | null;
+  workspace: WorkspaceNavState;
 }
 
-export default function AppNavbar({ profile }: AppNavbarProps) {
+export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
   const [open, setOpen] = useState(false);
 
   const displayName = profile?.fullName ?? "Account";
@@ -20,8 +23,14 @@ export default function AppNavbar({ profile }: AppNavbarProps) {
     <header className="relative flex justify-between items-center px-6 py-4 border-b">
       <NavLinks />
 
-      <div className="relative">
-        <button
+      <div className="flex items-center gap-4">
+        <WorkspaceIndicator
+          isMyNest={workspace.isMyNest}
+          activeProfileName={workspace.activeProfileName}
+        />
+
+        <div className="relative">
+          <button
           onClick={() => setOpen(!open)}
           className="
             flex
@@ -44,12 +53,13 @@ export default function AppNavbar({ profile }: AppNavbarProps) {
           <span>▼</span>
         </button>
 
-        {open && profile && (
-          <UserProfileDropdown
-            profile={profile}
-            onClose={() => setOpen(false)}
-          />
-        )}
+          {open && profile && (
+            <UserProfileDropdown
+              profile={profile}
+              onClose={() => setOpen(false)}
+            />
+          )}
+        </div>
       </div>
     </header>
   );

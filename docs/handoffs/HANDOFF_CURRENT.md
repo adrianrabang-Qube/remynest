@@ -28,6 +28,11 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   (`resolveAccountIdentity`) now feeds both `/settings` and the app-layout navbar;
   removed hardcoded placeholder identity from `AppNavbar`/`UserProfileDropdown`.
   Settings and navbar always show the same account/plan.
+- **Workspace context visibility**: persistent color-coded `WorkspaceIndicator`
+  in the navbar + Care-mode `WorkspaceBanner` (active profile + "Switch to My
+  Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
+  Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
+  the change immediately. No new workspace system introduced.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
@@ -47,7 +52,7 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 ## Next priorities
 P0: fix `/api/stripe/cancel`; fix/remove broken OneSignal endpoints; confirm Sign
 in with Apple. P1: set Sentry env in Vercel; native push;
-Android build + store submission; workspace-switching UX.
+Android build + store submission.
 
 ## Blockers
 None blocking web production. Mobile store submission blocked on Apple Developer /

@@ -14,8 +14,6 @@ import {
   setActiveContext,
 } from "@/lib/active-profile";
 
-const DASHBOARD_PATH = "/dashboard";
-
 export async function setActiveProfile(
   profileId: string
 ) {
@@ -35,9 +33,7 @@ export async function setActiveProfile(
       normalizedProfileId,
   });
 
-  revalidatePath(
-    DASHBOARD_PATH
-  );
+  revalidatePath("/", "layout");
 
   return {
     success: true,
@@ -51,9 +47,7 @@ export async function setPersonalWorkspace() {
     type: "PERSONAL",
   });
 
-  revalidatePath(
-    DASHBOARD_PATH
-  );
+  revalidatePath("/", "layout");
 
   return {
     success: true,
