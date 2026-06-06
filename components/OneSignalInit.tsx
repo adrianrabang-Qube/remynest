@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Script from "next/script";
 import { createClient } from "@/utils/supabase/client";
 
 // Prevent double initialization in React dev mode
@@ -134,5 +135,14 @@ export default function OneSignalInit() {
     initOneSignal();
   }, []);
 
-  return null;
+  // Load the OneSignal Web SDK (v16) — matches the existing /public service
+  // workers (OneSignalSDK.sw.js v16). Without this, `window.OneSignal` never
+  // exists and device registration cannot run. `initOneSignal()` above polls
+  // for `window.OneSignal`, so afterInteractive loading is fine.
+  return (
+    <Script
+      src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+      strategy="afterInteractive"
+    />
+  );
 }

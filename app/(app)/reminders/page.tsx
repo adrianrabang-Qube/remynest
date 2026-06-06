@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { redirect } from "next/navigation";
+import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField";
 
 export const dynamic = "force-dynamic";
 
@@ -102,9 +103,19 @@ export default async function RemindersPage({
       "title"
     ) as string;
 
-    const remindAt = formData.get(
+    // Prefer the browser-computed UTC instant (timezone/DST-correct). Fall back
+    // to the raw naive value only if JS was unavailable on the client.
+    const remindAtUtc = formData.get(
+      "remind_at_utc"
+    ) as string | null;
+
+    const remindAtRaw = formData.get(
       "remind_at"
-    ) as string;
+    ) as string | null;
+
+    const remindAt =
+      (remindAtUtc && remindAtUtc.trim()) ||
+      remindAtRaw;
 
     const recurring =
       formData.get("recurring") ===
@@ -139,12 +150,12 @@ export default async function RemindersPage({
         : null;
 
     // =====================================
-    // ✅ FINAL TIMEZONE FIX
+    // TIMEZONE
     // =====================================
 
-    // datetime-local already gives local user time.
-    // Convert ONCE to UTC ISO.
-    // DO NOT manually offset timezone.
+    // `remindAt` is already a UTC ISO instant computed in the user's browser
+    // (timezone/DST-correct). new Date(...).toISOString() is idempotent for that
+    // value; for the no-JS fallback (naive local) it preserves prior behavior.
 
     const utcDate =
       new Date(remindAt).toISOString();
@@ -346,11 +357,8 @@ export default async function RemindersPage({
             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
           />
 
-          {/* Date */}
-          <input
-            type="datetime-local"
-            name="remind_at"
-            defaultValue=""
+          {/* Date (timezone-correct: converts local → UTC in the browser) */}
+          <ReminderDateTimeField
             required
             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black"
           />

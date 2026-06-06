@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import AppNavbar from "@/components/navigation/AppNavbar";
+import OneSignalInit from "@/components/OneSignalInit";
 import { WorkspaceBanner } from "@/components/navigation/WorkspaceBanner";
 import { createClient } from "@/lib/supabase/server";
 import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
@@ -55,6 +56,10 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen bg-stone-50">
+      {/* Loads the OneSignal Web SDK + registers the device for push. Self-guards
+          on an authenticated user; this segment is already auth-gated. */}
+      <OneSignalInit />
+
       <AppNavbar
         profile={identity?.summary ?? null}
         workspace={workspace}

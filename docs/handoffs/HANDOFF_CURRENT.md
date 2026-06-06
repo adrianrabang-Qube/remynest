@@ -80,6 +80,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   existing `customerPortalEnabled` flag (= profile has `stripe_customer_id`).
   Verified: real customer → valid `billing.stripe.com` session URL (portal is
   configured/active in Stripe). No checkout/webhook/resolver/pricing changes.
+- **Reminder push delivery wired (Phase 1)**: `OneSignalInit` was never mounted
+  and the OneSignal Web SDK was never loaded → `device_registrations` stayed empty
+  → cron could never deliver. Fix: `OneSignalInit` now loads the v16 page SDK
+  (`OneSignalSDK.page.js`, matches the existing `/public` v16 service workers) and
+  is mounted in `(app)/layout.tsx` (self-guards on an authenticated user).
+  Verified end-to-end (minted session → `POST /api/register-device` → row created:
+  `user_id` matches, `player_id` saved; duplicate registration prevented via
+  upsert; unauth bounced by middleware). Cron/sender logic unchanged.
+- **Reminder timezone correction (Phase 2)**: reminder times were stored by
+  reinterpreting the naive `datetime-local` value on the UTC server → wrong fire
+  time for non-UTC users. New `ReminderDateTimeField` converts local→UTC in the
+  browser (DST-aware) and submits a hidden `remind_at_utc`; the create server
+  action prefers it (idempotent passthrough), falling back to the raw value for
+  no-JS. No schema change; existing reminder rows untouched. Verified: NY summer
+  14:00→18:00Z, NY winter 14:00→19:00Z (DST), Manila 14:00→06:00Z.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
