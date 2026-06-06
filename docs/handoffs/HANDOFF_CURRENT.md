@@ -24,6 +24,10 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 - **Care-profile paywall**: plan-limit no longer crashes — server returns a
   structured result; client opens the upgrade modal (Premium/Family) instead of a
   Server Components error.
+- **Account identity single source of truth**: `lib/account-identity.ts`
+  (`resolveAccountIdentity`) now feeds both `/settings` and the app-layout navbar;
+  removed hardcoded placeholder identity from `AppNavbar`/`UserProfileDropdown`.
+  Settings and navbar always show the same account/plan.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
@@ -31,7 +35,6 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 ## Open issues
 - `users` table missing → `save-onesignal` / `save-subscription` broken.
 - `/api/stripe/cancel` missing → BillingSection cancel broken.
-- `UserProfileDropdown` shows hardcoded profile data.
 - Sentry env vars not set in Vercel (no prod error visibility).
 - Dev uses prod Supabase (no staging); media bucket `memory-media` is public.
 - Tech debt: duplicate export logic; two profile render paths; two search
@@ -43,8 +46,8 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 
 ## Next priorities
 P0: fix `/api/stripe/cancel`; fix/remove broken OneSignal endpoints; confirm Sign
-in with Apple. P1: set Sentry env in Vercel; wire `UserProfileDropdown` to real
-data; native push; Android build + store submission; workspace-switching UX.
+in with Apple. P1: set Sentry env in Vercel; native push;
+Android build + store submission; workspace-switching UX.
 
 ## Blockers
 None blocking web production. Mobile store submission blocked on Apple Developer /

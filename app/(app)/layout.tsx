@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AppNavbar from "@/components/navigation/AppNavbar";
 import { createClient } from "@/lib/supabase/server";
 import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
+import { resolveAccountIdentity } from "@/lib/account-identity";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -25,9 +26,12 @@ export default async function AppLayout({
     }
   }
 
+  // Single source of truth for navbar identity (same resolver as /settings).
+  const identity = await resolveAccountIdentity();
+
   return (
     <div className="min-h-screen bg-stone-50">
-      <AppNavbar />
+      <AppNavbar profile={identity?.summary ?? null} />
 
       <main className="mx-auto w-full max-w-[1600px] px-6 py-6">
         {children}

@@ -1,23 +1,13 @@
 import ProfileHub from "@/components/profile/ProfileHub";
+import type { ProfileSummary } from "@/components/profile/types";
 
 type UserProfileDropdownProps = {
+  profile: ProfileSummary;
   onClose?: () => void;
 };
 
-const profile = {
-  fullName: "Adrian Rabang",
-  email: "admin@remynest.com",
-
-  plan: "premium" as const,
-  role: "admin" as const,
-
-  storageUsed: "2.4GB",
-  storageLimit: "10GB",
-
-  avatarUrl: null,
-};
-
 export default function UserProfileDropdown({
+  profile,
   onClose,
 }: UserProfileDropdownProps) {
   return (
