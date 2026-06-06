@@ -40,7 +40,7 @@ export async function resolveAccountIdentity(): Promise<AccountIdentity | null> 
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "first_name, preferred_name, profile_name, email, is_premium, subscription_plan, subscription_status"
+      "first_name, preferred_name, email, is_premium, subscription_plan, subscription_status"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -55,7 +55,6 @@ export async function resolveAccountIdentity(): Promise<AccountIdentity | null> 
   const fullName =
     preferredName ||
     firstName ||
-    profile?.profile_name ||
     user.email?.split("@")[0] ||
     "Your Account";
 
