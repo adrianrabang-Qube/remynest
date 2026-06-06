@@ -9,7 +9,7 @@ export default function BillingSection() {
   const [error, setError] =
     useState<string | null>(null);
   const [action, setAction] =
-    useState<"checkout" | "cancel" | null>(null);
+    useState<"checkout" | "cancel" | "portal" | null>(null);
   const [selectedPlan, setSelectedPlan] =
     useState<"PREMIUM" | "FAMILY">("PREMIUM");
   const {
@@ -57,6 +57,45 @@ export default function BillingSection() {
         error instanceof Error
           ? error.message
           : "Checkout failed.",
+      );
+    } finally {
+      setAction(null);
+      setLoading(false);
+    }
+  }
+
+  async function openCustomerPortal() {
+    try {
+      setError(null);
+      setAction("portal");
+      setLoading(true);
+
+      const response = await fetch(
+        "/api/stripe/portal",
+        {
+          method: "POST",
+        },
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Unable to open billing portal.",
+        );
+      }
+
+      if (data.url) {
+        window.location.href =
+          data.url;
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Billing portal failed.",
       );
     } finally {
       setAction(null);
@@ -165,7 +204,7 @@ export default function BillingSection() {
 
         {billing?.customerPortalEnabled ? (
           <button
-            onClick={upgradePlan}
+            onClick={openCustomerPortal}
             disabled={loading}
             className="
               rounded-lg
@@ -177,8 +216,8 @@ export default function BillingSection() {
               disabled:opacity-50
             "
           >
-            {loading && action === "checkout"
-              ? "Opening Checkout..."
+            {loading && action === "portal"
+              ? "Opening Portal..."
               : "Manage Subscription"}
           </button>
         ) : (

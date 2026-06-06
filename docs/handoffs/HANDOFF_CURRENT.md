@@ -72,6 +72,14 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   `activeProfileId` (selecting a profile from PERSONAL now switches); unified the
   account menu to call `setPersonalWorkspace` (removed the divergent `?context=`
   URL system). Single source of truth = the cookie.
+- **Stripe Customer Portal shipped**: new `app/api/stripe/portal/route.ts`
+  (auth → RLS-scoped read of `profiles.stripe_customer_id` →
+  `stripe.billingPortal.sessions.create({ customer, return_url })` → returns
+  hosted URL). `BillingSection` "Manage Subscription" now opens the portal
+  (`/api/stripe/portal`) instead of routing through checkout. Gated by the
+  existing `customerPortalEnabled` flag (= profile has `stripe_customer_id`).
+  Verified: real customer → valid `billing.stripe.com` session URL (portal is
+  configured/active in Stripe). No checkout/webhook/resolver/pricing changes.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
