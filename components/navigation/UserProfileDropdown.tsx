@@ -17,6 +17,9 @@ export default function UserProfileDropdown({
         right-0
         top-14
         w-[360px]
+        max-h-[calc(100vh-5rem)]
+        overflow-y-auto
+        overscroll-contain
         rounded-xl
         border
         bg-white
@@ -29,7 +32,7 @@ export default function UserProfileDropdown({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+          className="sticky top-0 float-right -mt-1 -mr-1 text-gray-500 hover:text-gray-700"
           aria-label="Close profile dropdown"
         >
           ×

@@ -104,6 +104,18 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   NavLinks (active states), DashboardHeader/Stats/AccountStatus, MemoryCard,
   Reminders page, BillingSection — replacing clinical blue/indigo/emerald/gray with
   warm sage/sand/gold. No logic/schema/API/billing/reminder-functionality changes.
+- **Post-UI-pass regression fixes**:
+  - *Insights ChunkLoadError / `GET /_next/undefined 404`*: root cause was **stale
+    build artifacts** — the UI pass changed `tailwind.config.js`/`layout.tsx`(fonts)/
+    `globals.css` with only incremental builds, desyncing the webpack chunk manifest.
+    No source bug (InsightsClient dynamic imports are all correct). Fixed by a clean
+    rebuild (`rm -rf .next && npm run build`). Verified: `/insights` → 200, 17 chunks
+    all resolve (0 broken), no `/_next/undefined`. Browsers with a stale client/SW
+    need a hard refresh; production self-resolves on next deploy.
+  - *Profile panel scrolling*: `UserProfileDropdown` had no height bound, so the
+    long `ProfileHub` scrolled the whole page. Added `max-h-[calc(100vh-5rem)]
+    overflow-y-auto overscroll-contain` (isolated scroll, no chaining) and made the
+    close button `sticky`. Visual-only; no redesign.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
