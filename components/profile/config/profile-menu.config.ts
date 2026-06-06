@@ -8,12 +8,9 @@ export interface ProfileMenuItem {
 }
 
 export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  {
-    label: "My Nest",
-    href: "/dashboard?context=my-nest",
-    icon: "🏡",
-    requiresAuth: true,
-  },
+  // "My Nest" is rendered as an action button in ProfileMenuItems that calls the
+  // setPersonalWorkspace server action (writes remynest-active-context) — not a
+  // URL ?context= link. Single source of truth = the cookie.
   {
     label: "Billing",
     href: "/dashboard",

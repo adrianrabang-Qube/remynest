@@ -33,6 +33,12 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   Nest"), resolved in `(app)/layout.tsx` from the existing active-context cookie.
   Workspace switches now `revalidatePath("/", "layout")` so all routes reflect
   the change immediately. No new workspace system introduced.
+- **Workspace switching repaired** (was architecturally broken): added
+  `EnterCareProfileList` (My Nest → Care entry that calls `setActiveProfile` →
+  writes `remynest-active-context`); fixed `ProfileSwitcher` guard to use the real
+  `activeProfileId` (selecting a profile from PERSONAL now switches); unified the
+  account menu to call `setPersonalWorkspace` (removed the divergent `?context=`
+  URL system). Single source of truth = the cookie.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

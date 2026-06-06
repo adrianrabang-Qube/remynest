@@ -1,5 +1,6 @@
 import PendingInvites from "@/components/PendingInvites";
 import ProfileSwitcher from "@/components/ProfileSwitcher";
+import EnterCareProfileList from "@/components/EnterCareProfileList";
 
 import { createClient } from "@/utils/supabase/server";
 
@@ -571,6 +572,11 @@ export default async function DashboardPage() {
             </div>
           </div>
         </section>
+
+        {/* MY NEST → CARE ENTRY (writes remynest-active-context) */}
+        {isMyNestContext && (
+          <EnterCareProfileList profiles={switcherProfiles} />
+        )}
 
         {/* PROFILE CONTEXT FIRST */}
         {!isMyNestContext && (

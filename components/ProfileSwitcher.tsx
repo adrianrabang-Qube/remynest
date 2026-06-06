@@ -158,10 +158,13 @@ export default function ProfileSwitcher({
       async (
         newProfileId: string
       ) => {
+        // Guard on the ACTUAL active profile (null in PERSONAL), not the
+        // first-profile fallback used for the <select> value — otherwise
+        // selecting the pre-selected/first profile from PERSONAL is a false
+        // no-op and never switches into CARE.
         if (
           !newProfileId ||
-          newProfileId ===
-            selectedProfile ||
+          newProfileId === (activeProfileId ?? "") ||
           isSwitching
         ) {
           return;
@@ -244,6 +247,7 @@ export default function ProfileSwitcher({
       },
       [
         router,
+        activeProfileId,
         selectedProfile,
         isSwitching,
       ]
