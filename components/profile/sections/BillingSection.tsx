@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useBillingStatus } from "../hooks/useBillingStatus";
-import { getPlanPriceLabel } from "@/lib/billing/plans";
+import type { BillingPlan } from "@/lib/billing/plans";
+import { BILLING_PLANS, getPlanPriceLabel } from "@/lib/billing/plans";
 
 export default function BillingSection() {
   const [loading, setLoading] =
@@ -19,6 +20,40 @@ export default function BillingSection() {
     error: billingError,
   } = useBillingStatus();
 
+  // Current plan is the authoritative subscription tier from the resolver.
+  const currentPlan = (
+    billing?.plan ?? "FREE"
+  ).toUpperCase() as BillingPlan;
+
+  const PLAN_TIER_ORDER: BillingPlan[] = [
+    "FREE",
+    "PREMIUM",
+    "FAMILY",
+    "ENTERPRISE",
+  ];
+  const tier = (p: BillingPlan) =>
+    PLAN_TIER_ORDER.indexOf(p);
+
+  // Self-serve upgrade offers, restricted to STRICTLY higher tiers than current.
+  const OFFER_PLANS: Array<"PREMIUM" | "FAMILY"> = [
+    "PREMIUM",
+    "FAMILY",
+  ];
+  const upgradePlans = OFFER_PLANS.filter(
+    (p) => tier(p) > tier(currentPlan)
+  );
+  const canUpgrade = upgradePlans.length > 0;
+
+  // CTA target derived from currentPlan + selectedPlan (no extra flags): keep
+  // the user's choice when it is a valid upgrade, else fall back to the lowest
+  // available upgrade. A Premium user therefore can never target "PREMIUM".
+  const effectiveSelectedPlan: "PREMIUM" | "FAMILY" =
+    canUpgrade
+      ? upgradePlans.includes(selectedPlan)
+        ? selectedPlan
+        : upgradePlans[0]
+      : selectedPlan;
+
   async function upgradePlan() {
     try {
       setError(null);
@@ -33,7 +68,7 @@ export default function BillingSection() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            plan: selectedPlan,
+            plan: effectiveSelectedPlan,
             interval: "monthly",
           }),
         },
@@ -174,33 +209,46 @@ export default function BillingSection() {
       <div className="flex flex-wrap gap-3">
 
         <div className="flex gap-2 w-full">
-          <button
-            type="button"
-            onClick={() =>
-              setSelectedPlan("PREMIUM")
-            }
-            className={`rounded-lg border px-4 py-2 text-sm ${
-              selectedPlan === "PREMIUM"
-                ? "bg-sage text-white border-sage"
-                : "border-sand-deep text-charcoal-soft hover:border-sage/50"
-            }`}
-          >
-            Premium ({getPlanPriceLabel("PREMIUM")})
-          </button>
+          {OFFER_PLANS.map((plan) => {
+            const isCurrent = plan === currentPlan;
+            const isUpgrade = tier(plan) > tier(currentPlan);
 
-          <button
-            type="button"
-            onClick={() =>
-              setSelectedPlan("FAMILY")
+            // Hide downgrade options (e.g. Premium for a Family user).
+            if (!isCurrent && !isUpgrade) {
+              return null;
             }
-            className={`rounded-lg border px-4 py-2 text-sm ${
-              selectedPlan === "FAMILY"
-                ? "bg-sage text-white border-sage"
-                : "border-sand-deep text-charcoal-soft hover:border-sage/50"
-            }`}
-          >
-            Family ({getPlanPriceLabel("FAMILY")})
-          </button>
+
+            if (isCurrent) {
+              return (
+                <span
+                  key={plan}
+                  className="rounded-lg border border-sage bg-sage/10 px-4 py-2 text-sm font-medium text-sage"
+                >
+                  {BILLING_PLANS[plan].displayName} ✓ Current Plan
+                </span>
+              );
+            }
+
+            const selected =
+              effectiveSelectedPlan === plan;
+
+            return (
+              <button
+                key={plan}
+                type="button"
+                onClick={() =>
+                  setSelectedPlan(plan)
+                }
+                className={`rounded-lg border px-4 py-2 text-sm ${
+                  selected
+                    ? "bg-sage text-white border-sage"
+                    : "border-sand-deep text-charcoal-soft hover:border-sage/50"
+                }`}
+              >
+                {BILLING_PLANS[plan].displayName} ({getPlanPriceLabel(plan)})
+              </button>
+            );
+          })}
         </div>
 
         {billing?.customerPortalEnabled ? (
@@ -241,28 +289,30 @@ export default function BillingSection() {
           </div>
         )}
 
-        <button
-          onClick={upgradePlan}
-          disabled={loading}
-          className="
-            rounded-full
-            border
-            border-sand-deep
-            px-5
-            py-2
-            text-sm
-            font-medium
-            text-charcoal
-            transition
-            hover:border-sage/50
-            hover:text-sage
-            disabled:opacity-50
-          "
-        >
-          {loading && action === "checkout"
-            ? "Loading..."
-            : `Upgrade to ${selectedPlan}`}
-        </button>
+        {canUpgrade && (
+          <button
+            onClick={upgradePlan}
+            disabled={loading}
+            className="
+              rounded-full
+              border
+              border-sand-deep
+              px-5
+              py-2
+              text-sm
+              font-medium
+              text-charcoal
+              transition
+              hover:border-sage/50
+              hover:text-sage
+              disabled:opacity-50
+            "
+          >
+            {loading && action === "checkout"
+              ? "Loading..."
+              : `Upgrade to ${effectiveSelectedPlan}`}
+          </button>
+        )}
 
         <button
           onClick={cancelSubscription}

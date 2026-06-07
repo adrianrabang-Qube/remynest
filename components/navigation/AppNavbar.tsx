@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import NavLinks from "./NavLinks";
 import UserProfileDropdown from "./UserProfileDropdown";
@@ -16,6 +16,30 @@ interface AppNavbarProps {
 export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
   const [open, setOpen] = useState(false);
 
+  // Wraps the toggle button + dropdown so a pointer event INSIDE (button or
+  // drawer) never counts as "outside".
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the drawer when the user clicks/taps anywhere outside it. `pointerdown`
+  // covers mouse + touch (desktop, mobile Safari, Android Chrome) in one listener.
+  // Only attached while open; cleaned up on close/unmount — no leaks.
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () =>
+      document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
+
   const displayName = profile?.fullName ?? "Account";
   const initial = displayName.charAt(0).toUpperCase();
 
@@ -29,7 +53,7 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
           activeProfileName={workspace.activeProfileName}
         />
 
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
           onClick={() => setOpen(!open)}
           className="

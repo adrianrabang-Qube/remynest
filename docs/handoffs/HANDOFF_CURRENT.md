@@ -166,6 +166,20 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   — to use it. No hardcoded prices remain in those components. Display-only;
   checkout still resolves real prices from Stripe price ids via `getPriceId()`.
   Verified: Account Status now shows "Premium (€9.99/mo)" / "Family (€19.99/mo)".
+- **Two billing/profile UX fixes**:
+  - *Outside-click closes the profile drawer*: `AppNavbar` now attaches a
+    `pointerdown` listener (mouse + touch; desktop/iOS/Android) while the dropdown
+    is open, closing it when the event target is outside a `menuRef` wrapping the
+    toggle button + drawer. Listener is attached only while open and removed on
+    close/unmount (no leaks); the X button still works; inside clicks don't close.
+  - *Billing CTA matches current plan*: `BillingSection` now derives the CTA from
+    `currentPlan` (from `useBillingStatus`) + `selectedPlan` (no new flags). The
+    current tier shows "✓ Current Plan" (disabled), downgrades are hidden, and the
+    upgrade CTA only renders for strictly-higher tiers using `effectiveSelectedPlan`.
+    Verified matrix: FREE→Upgrade to PREMIUM/FAMILY; PREMIUM→Upgrade to FAMILY only
+    (never "Upgrade to PREMIUM"); FAMILY→no upgrade CTA (Manage Subscription). No
+    Stripe/checkout/subscription/pricing logic changed (checkout still posts to
+    `/api/stripe/checkout`).
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
