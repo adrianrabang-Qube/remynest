@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { BillingPlan } from "@/lib/billing/plans";
-import { BILLING_PLANS } from "@/lib/billing/plans";
+import { BILLING_PLANS, getPlanPriceLabel } from "@/lib/billing/plans";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -24,13 +24,6 @@ interface UpgradeModalProps {
     "caregiverCollaboration" | "semanticSearch" | "voiceMemories"
   >;
 }
-
-// Display prices are kept in sync with BillingSection. Source of truth for
-// entitlements (profile counts, storage) is BILLING_PLANS.
-const PRICE_LABEL: Partial<Record<BillingPlan, string>> = {
-  PREMIUM: "€9.99 / month",
-  FAMILY: "€19.99 / month",
-};
 
 const OFFER_ORDER: BillingPlan[] = ["PREMIUM", "FAMILY"];
 
@@ -154,7 +147,7 @@ export default function UpgradeModal({
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{cfg.displayName}</h3>
                   <span className="text-sm font-medium">
-                    {PRICE_LABEL[plan] ?? ""}
+                    {getPlanPriceLabel(plan)}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">

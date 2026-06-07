@@ -157,6 +157,15 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   content). Authenticated routes kept out of the index via robots Disallow (no
   `(app)` files modified). FOLLOW-UP: og image is `/logo.png` (not a 1200×630
   card) and `/public` icons are ~2.27 MB each — optimize before heavy promotion.
+- **Plan price labels unified (display-only)**: Dashboard Account Status omitted
+  the Family price ("Family" with no "€19.99/mo") because `UpgradeButton`
+  hardcoded its labels and forgot Family. Added a single source of truth
+  `PLAN_PRICE_LABELS` + `getPlanPriceLabel()` in `lib/billing/plans.ts`
+  (PREMIUM=€9.99/mo, FAMILY=€19.99/mo) and refactored all three consumers —
+  `UpgradeButton` (dashboard), `UpgradeModal` (billing modal), `BillingSection`
+  — to use it. No hardcoded prices remain in those components. Display-only;
+  checkout still resolves real prices from Stripe price ids via `getPriceId()`.
+  Verified: Account Status now shows "Premium (€9.99/mo)" / "Family (€19.99/mo)".
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

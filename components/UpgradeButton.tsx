@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { getPlanPriceLabel } from "@/lib/billing/plans";
+
 export default function UpgradeButton() {
   const [selectedPlan, setSelectedPlan] = useState<"PREMIUM" | "FAMILY">("PREMIUM");
   const [loading, setLoading] = useState(false);
@@ -45,7 +47,7 @@ export default function UpgradeButton() {
               : "bg-white text-black border-gray-300"
           }`}
         >
-          Premium (€9.99/mo)
+          Premium ({getPlanPriceLabel("PREMIUM")})
         </button>
 
         <button
@@ -57,7 +59,7 @@ export default function UpgradeButton() {
               : "bg-white text-black border-gray-300"
           }`}
         >
-          Family
+          Family ({getPlanPriceLabel("FAMILY")})
         </button>
       </div>
 

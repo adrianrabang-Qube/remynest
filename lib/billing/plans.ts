@@ -139,6 +139,23 @@ export function getPlan(
 }
 
 /**
+ * SINGLE SOURCE OF TRUTH for human-readable monthly price labels shown in the
+ * UI (Account Status, Billing modal, Billing section). Display-only — checkout
+ * still resolves real prices from Stripe price ids via getPriceId(). Keep these
+ * in sync with Stripe; do not hardcode prices in components.
+ */
+export const PLAN_PRICE_LABELS: Partial<Record<BillingPlan, string>> = {
+  PREMIUM: "€9.99/mo",
+  FAMILY: "€19.99/mo",
+};
+
+export function getPlanPriceLabel(
+  plan: BillingPlan
+): string {
+  return PLAN_PRICE_LABELS[plan] ?? "";
+}
+
+/**
  * Canonical reverse lookup: Stripe price id → BillingPlan, using the same
  * BILLING_PLANS config that getPriceId() reads. Returns null for an unknown
  * price id (e.g. unconfigured/legacy). FREE has no price ids and never matches.

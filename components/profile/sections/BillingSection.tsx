@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useBillingStatus } from "../hooks/useBillingStatus";
+import { getPlanPriceLabel } from "@/lib/billing/plans";
 
 export default function BillingSection() {
   const [loading, setLoading] =
@@ -184,7 +185,7 @@ export default function BillingSection() {
                 : "border-sand-deep text-charcoal-soft hover:border-sage/50"
             }`}
           >
-            Premium (€9.99/mo)
+            Premium ({getPlanPriceLabel("PREMIUM")})
           </button>
 
           <button
@@ -198,7 +199,7 @@ export default function BillingSection() {
                 : "border-sand-deep text-charcoal-soft hover:border-sage/50"
             }`}
           >
-            Family (€19.99/mo)
+            Family ({getPlanPriceLabel("FAMILY")})
           </button>
         </div>
 
