@@ -127,6 +127,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   `BillingSection` (only Account Info / Export / Privacy / Delete) — subscription
   management is reached via the profile dropdown's Billing section. Slot reserved
   for a future Vault entry (not implemented).
+- **My Nest semantic search FIXED + care-leak closed**: `/api/memories/search`
+  previously filtered via `match_memories(workspace_type_input)`. Verified RCA:
+  personal memories are stored `workspace_type='care'` (creation never sets it),
+  the RPC can't scope to a profile and doesn't return `memory_profile_id`, so
+  `'my-nest'` → 0 results, and `'care'` returned ALL the user's memories
+  (personal + every care profile = cross-workspace leak). Fix (app-layer, no DB
+  change): use `match_memories` purely for vector RANKING (over-fetch 100, no
+  workspace param), then SCOPE by `memory_profile_id` server-side via
+  `resolveActiveProfileId()` — the SAME authoritative discriminator the memories
+  list path uses (NULL = My Nest; profile id = that care profile). The route now
+  ignores client-supplied workspace/profile (resolves from the cookie). Verified
+  on prod data: My Nest 2 results (was 0), Care 20 results scoped to the active
+  profile, My Nest∩Care overlap = 0. `workspace_type` is now **deprecated/unused
+  by search** (kept for backward compat; no data migration required since
+  `memory_profile_id` was already correct).
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

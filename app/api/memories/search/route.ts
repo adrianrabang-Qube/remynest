@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateEmbedding } from "@/lib/embeddings";
 import { checkPremium } from "@/lib/premium";
 import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
+import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -13,6 +14,11 @@ const SEARCH_MATCH_THRESHOLD =
 
 const SEARCH_MATCH_COUNT =
   20;
+
+// Over-fetch semantic candidates from match_memories, then scope to the active
+// workspace by memory_profile_id. Generous so workspace scoping keeps full recall.
+const SEARCH_RANK_CANDIDATES =
+  100;
 
 const SEARCH_QUERY_MAX_LENGTH =
   500;
@@ -78,23 +84,6 @@ function validateSearchQuery(
   }
 
   return null;
-}
-
-type MemorySearchResult = {
-  similarity?: number;
-  [key: string]: unknown;
-};
-
-function normalizeSearchResults(
-  results: MemorySearchResult[]
-) {
-  return results
-    .filter(Boolean)
-    .sort(
-      (a, b) =>
-        (b.similarity || 0) -
-        (a.similarity || 0)
-    );
 }
 
 function createEmptySearchResults() {
@@ -183,15 +172,24 @@ export async function POST(req: Request) {
     const body =
       await req.json();
 
-    const workspaceType =
-      body.workspaceType ||
-      "care";
+    // Authoritative workspace scoping uses memory_profile_id, resolved
+    // SERVER-SIDE from the active-context cookie (same source as the memories
+    // list path) — never trust a client-supplied workspace/profile. NULL = My
+    // Nest (personal); a profile id = that specific care profile.
+    const activeProfileId =
+      await resolveActiveProfileId();
+
+    const isPersonalWorkspace =
+      activeProfileId === null;
 
     logSearchStage(
       "workspace-context-detected",
       {
         requestId,
-        workspaceType,
+        workspace: isPersonalWorkspace
+          ? "my-nest"
+          : "care",
+        activeProfileId,
       }
     );
 
@@ -263,8 +261,12 @@ export async function POST(req: Request) {
     // SEMANTIC SEARCH
     // =====================================
 
+    // 1) RANK semantically across the user's memories. match_memories is used
+    //    purely for vector ranking here: its legacy workspace_type_input filter
+    //    is unreliable (personal rows are mislabeled 'care') and it cannot scope
+    //    to a specific care profile. We over-fetch candidates, then scope below.
     const {
-      data,
+      data: ranked,
       error,
     } = await supabase.rpc(
       "match_memories",
@@ -274,11 +276,9 @@ export async function POST(req: Request) {
         match_threshold:
           SEARCH_MATCH_THRESHOLD,
         match_count:
-          SEARCH_MATCH_COUNT,
+          SEARCH_RANK_CANDIDATES,
         user_id_input:
           user.id,
-        workspace_type_input:
-          workspaceType,
       }
     );
 
@@ -302,10 +302,100 @@ export async function POST(req: Request) {
       );
     }
 
-    const normalizedResults =
-      normalizeSearchResults(
-        data || []
+    const rankedRows = Array.isArray(ranked)
+      ? (ranked as Array<{ id?: string; similarity?: number }>)
+      : [];
+
+    const rankedIds = rankedRows
+      .map((r) => r.id)
+      .filter(
+        (id): id is string => typeof id === "string"
       );
+
+    if (rankedIds.length === 0) {
+      return NextResponse.json(
+        createEmptySearchResults()
+      );
+    }
+
+    // 2) SCOPE to the active workspace by memory_profile_id — the SAME rule as
+    //    the memories list path (app/api/memories/route.ts). This is the single
+    //    authoritative discriminator and prevents any cross-workspace leakage
+    //    (personal <-> care, and across distinct care profiles).
+    let scopedQuery = supabase
+      .from("memories")
+      .select("*")
+      .eq("user_id", user.id)
+      .in("id", rankedIds);
+
+    scopedQuery = isPersonalWorkspace
+      ? scopedQuery.is(
+          "memory_profile_id",
+          null
+        )
+      : scopedQuery.eq(
+          "memory_profile_id",
+          activeProfileId
+        );
+
+    const {
+      data: scopedRows,
+      error: scopeError,
+    } = await scopedQuery;
+
+    if (scopeError) {
+      logSearchError(
+        "search-scope-error",
+        {
+          requestId,
+          error: scopeError,
+        }
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Search failed",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    // 3) Re-apply the semantic ranking order and attach similarity for the client.
+    const similarityById = new Map(
+      rankedRows
+        .filter(
+          (
+            r
+          ): r is {
+            id: string;
+            similarity?: number;
+          } => typeof r.id === "string"
+        )
+        .map((r) => [
+          r.id,
+          typeof r.similarity === "number"
+            ? r.similarity
+            : 0,
+        ])
+    );
+
+    const normalizedResults = (
+      scopedRows || []
+    )
+      .map((row) => ({
+        ...row,
+        similarity:
+          similarityById.get(row.id) ?? 0,
+      }))
+      .sort(
+        (a, b) =>
+          (b.similarity || 0) -
+          (a.similarity || 0)
+      )
+      .slice(0, SEARCH_MATCH_COUNT);
 
     const durationMs = Number(
       (
