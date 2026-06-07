@@ -1,12 +1,14 @@
 import Link from "next/link";
 
 import { CONTACT } from "@/lib/contact";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Contact — RemyNest",
+export const metadata = pageMetadata({
+  title: "Contact",
   description:
     "Contact RemyNest about Enterprise solutions, partnerships, and investment opportunities.",
-};
+  path: "/contact",
+});
 
 const ENTERPRISE_FOR = [
   "Care Homes",

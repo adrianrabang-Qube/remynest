@@ -142,6 +142,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   profile, My Nest∩Care overlap = 0. `workspace_type` is now **deprecated/unused
   by search** (kept for backward compat; no data migration required since
   `memory_profile_id` was already correct).
+- **Production SEO shipped**: central `lib/seo.ts` (SITE_URL, brand strings,
+  `pageMetadata` helper). Root `app/layout.tsx` now sets `metadataBase`, default
+  title + `%s — RemyNest` template, description, `robots: index/follow`, default
+  Open Graph + Twitter (with image), icons. Added `app/robots.ts` (allow
+  marketing, disallow `/dashboard /memories /timeline /reminders /insights
+  /memory-chat /settings /onboarding /api/ /auth/ /callback`, sitemap ref) and
+  `app/sitemap.ts` (6 public routes). Homepage (`app/page.tsx`) gets metadata +
+  JSON-LD (`Organization` + `SoftwareApplication`) via `components/seo/JsonLd`.
+  Marketing/legal pages (privacy, terms, cookies, contact, account-deletion) now
+  carry per-page canonical + description + OG/Twitter via `pageMetadata`. Verified
+  on the prod build: correct titles (single suffix), distinct canonicals,
+  og:image on every page, robots.txt/sitemap.xml return 200. No FAQPage (no FAQ
+  content). Authenticated routes kept out of the index via robots Disallow (no
+  `(app)` files modified). FOLLOW-UP: og image is `/logo.png` (not a 1200×630
+  card) and `/public` icons are ~2.27 MB each — optimize before heavy promotion.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

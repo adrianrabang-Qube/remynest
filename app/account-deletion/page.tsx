@@ -1,10 +1,13 @@
 import Link from "next/link";
 
-export const metadata = {
-  title: "Account & Data Deletion — RemyNest",
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: "Account & Data Deletion",
   description:
     "How to delete your RemyNest account and what happens to your data.",
-};
+  path: "/account-deletion",
+});
 
 /**
  * Public account-deletion information page (Apple 5.1.1(v) / Google Play

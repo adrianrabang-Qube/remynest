@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
-
 import LegalPage from "@/components/legal/LegalPage";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — RemyNest",
-};
+export const metadata = pageMetadata({
+  title: "Privacy Policy",
+  description:
+    "How RemyNest collects, uses, and protects your personal information and memory data.",
+  path: "/privacy",
+});
 
 const H = ({
   children,
