@@ -107,7 +107,7 @@ All three are config/process steps, achievable quickly; none require code change
 
 ## 6. Low-risk items
 
-- **L1 — `app/api/parse-reminder/route.ts` lacks try/catch** (P2).
+- **L1 — Dead AI reminder-parser endpoint removed** (was missing try/catch; P2). ✅
 - **L2 — Dead endpoints.** `send-reminders` / `send-notification` have no in-app
   callers; consider removing to shrink surface.
 - **L3 — Sentry minor gaps.** Legacy `sentry.client.config.ts` vs
@@ -152,7 +152,7 @@ All three are config/process steps, achievable quickly; none require code change
 4. Execute the **full manual QA** plan (billing, notifications, AI, timeline,
    search, profile switching). *(M3–M5)*
 5. Add **automated tests** for billing webhooks and notification flows.
-6. Address Sentry minor gaps (G2/G3/G5); add `try/catch` to `parse-reminder`;
+6. Address Sentry minor gaps (G2/G3/G5);
    remove dead notification endpoints.
 7. Begin **App Store / Play Store** workstream (native wrapper + assets) if mobile
    distribution is desired.

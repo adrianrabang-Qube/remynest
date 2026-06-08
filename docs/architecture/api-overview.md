@@ -24,8 +24,7 @@ confirmed — open the file before relying on exact field names.
 | `/api/search` | POST | Session (premium) | Semantic search | `{query}` _(verify)_ | matches[]; **402** for free |
 | `/api/timeline` | GET | Session | Timeline feed | query _(verify)_ | items[] |
 | `/api/memory-chat` | POST | Session | RAG chat over memories | `{input}` (+history _(verify)_) | AI reply |
-| `/api/parse-reminder` | POST | Session | NL → structured reminder | `{text}` _(verify)_ | parsed reminder |
-| `/api/create-reminder` | POST | Session | Create reminder | reminder fields _(verify)_ | created reminder |
+| `/api/create-reminder` | POST | Session | Create reminder (profile-ownership verified) | reminder fields | created reminder |
 | `/api/build-relationships` | POST | Session | Build/derive caregiver relationships | _(verify)_ | result |
 | `/api/register-device` | POST | Session | Register push device | `{token/deviceId}` _(verify)_ | ok |
 | `/api/save-onesignal` | POST | Session | ⚠️ Save OneSignal id → **broken** (`users` table missing) | `{email,onesignal_id}` | error |

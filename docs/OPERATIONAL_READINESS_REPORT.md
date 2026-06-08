@@ -38,7 +38,8 @@
   release/source-map upload, and alert rules. (Separate implementation workstream.)
 
 ## 3. Server / API error handling — 🟡 Partial (P1; one P0 within)
-- **23 API routes; 22 use try/catch.** Only [parse-reminder](../app/api/parse-reminder/route.ts) lacks one (P2).
+- **API routes all use try/catch.** (The prior lone exception — a dead
+  AI reminder-parser endpoint — has been removed.)
 - **Information leakage (P1):** 7 routes return `error.message` directly to the
   client — [create-reminder](../app/api/create-reminder/route.ts),
   [save-onesignal](../app/api/save-onesignal/route.ts),

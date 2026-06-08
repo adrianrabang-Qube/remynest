@@ -55,9 +55,10 @@ CRUD: `/api/memories` (GET list), `/api/memories/create` (POST),
 `/api/memories/[id]` (PUT/DELETE); UI under `app/(app)/memories`.
 
 ## 7. Reminder System
-`reminders` (FK → `memory_profiles`) drive scheduled prompts. Natural-language
-parsing via `/api/parse-reminder` (OpenAI). Creation `/api/create-reminder`;
-UI `app/(app)/reminders`. Delivery via the cron pipeline (see §11).
+`reminders` (FK → `memory_profiles`) drive scheduled prompts. Creation via
+`/api/create-reminder` (session-auth, profile-ownership verified) and the
+reminders-page server action; UI `app/(app)/reminders`. Delivery via the cron
+pipeline (see §11).
 
 ## 8. AI Features
 OpenAI-backed (`lib/openai.ts`, `lib/ai-memory.ts`, `lib/embeddings.ts`):

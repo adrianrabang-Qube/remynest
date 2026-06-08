@@ -234,8 +234,15 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   got the same `userCanAccessProfile` check (the active-context cookie is
   client-settable). Re-validated: foreign create → 403 (0 planted), authorized
   My Nest + own-care create → 200. Reminder edit/delete have no API endpoint
-  (RLS-scoped server actions). NOTE: `/api/parse-reminder` still writes a random
-  `user_id` (broken, not IDOR-targetable) — recommend removal.
+  (RLS-scoped server actions).
+- **Dead AI reminder-parser endpoint removed**: deleted the unused, broken
+  natural-language reminder route (no callers; service-role + random `user_id`;
+  inserted a non-existent `message` column → always 500, so it could not even
+  write; localhost notify fallback). Audit confirmed it was unreachable
+  unauthenticated and not IDOR-targetable; only residual was authenticated
+  OpenAI cost-abuse. Scrubbed all doc references. Reminder creation remains via
+  `/api/create-reminder` (session-auth + ownership) and the reminders-page server
+  action. If NL reminders return in V2, rebuild securely.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

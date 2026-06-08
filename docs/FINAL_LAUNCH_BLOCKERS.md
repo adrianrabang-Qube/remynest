@@ -60,7 +60,7 @@
   deletion interim).
 - Premium entitlement gaps: caregiver collaboration, memory chat, storage quota.
 - Staging environment isolation (dev currently uses prod Supabase).
-- `npm audit` triage; manual functional QA; `parse-reminder` try/catch; remove dead
+- `npm audit` triage; manual functional QA; remove dead
   notification endpoints.
 
 ---
