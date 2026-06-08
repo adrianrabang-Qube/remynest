@@ -183,7 +183,8 @@ export function resolveCoverImageUrl(
     return null;
   }
 
-  return trimmed;
+  // Persist the storage PATH only — never a public or (transient) signed URL.
+  return deriveStoragePath(undefined, trimmed) ?? trimmed;
 }
 
 export class MemoryAttachmentValidationError extends Error {

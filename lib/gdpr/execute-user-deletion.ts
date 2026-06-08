@@ -36,14 +36,28 @@ export interface ExecuteDeletionResult {
   authError?: string;
 }
 
-type AttachmentLike = { url?: string };
+type AttachmentLike = { url?: string; storagePath?: string };
 
-/** Extract the in-bucket path from a public storage URL, else null. */
-function pathFromPublicUrl(url: string): string | null {
-  const marker = `/object/public/${MEDIA_BUCKET}/`;
-  const i = url.indexOf(marker);
-  if (i === -1) return null;
-  return url.slice(i + marker.length).split("?")[0];
+/**
+ * Resolve the in-bucket path from a stored media value, which may be a bare
+ * storage path (current format), a legacy public URL, or a signed URL. Returns
+ * null for foreign (non-storage) absolute URLs.
+ */
+function mediaPath(value: string | null | undefined): string | null {
+  if (!value || typeof value !== "string") return null;
+  const v = value.trim();
+  if (!v) return null;
+  for (const marker of [
+    `/object/public/${MEDIA_BUCKET}/`,
+    `/object/sign/${MEDIA_BUCKET}/`,
+  ]) {
+    const i = v.indexOf(marker);
+    if (i !== -1) {
+      return decodeURIComponent(v.slice(i + marker.length).split("?")[0]);
+    }
+  }
+  if (/^https?:\/\//i.test(v)) return null; // foreign URL
+  return v.replace(/^\/+/, ""); // already a bare path
 }
 
 /** Media paths (within the bucket) of cross-contributed memories to retain. */
@@ -67,18 +81,16 @@ async function snapshotRetainedMediaPaths(
   for (const m of memories ?? []) {
     const pid = (m as { memory_profile_id?: string }).memory_profile_id;
     if (!pid || ownedIds.has(pid)) continue; // only cross-contributed
-    const cover = (m as { cover_image_url?: string }).cover_image_url;
-    if (typeof cover === "string" && cover) {
-      const p = pathFromPublicUrl(cover);
-      if (p) keep.add(p);
-    }
+    const coverPath = mediaPath(
+      (m as { cover_image_url?: string }).cover_image_url,
+    );
+    if (coverPath) keep.add(coverPath);
+
     const atts = (m as { attachments?: unknown }).attachments;
     if (Array.isArray(atts)) {
       for (const a of atts as AttachmentLike[]) {
-        if (a && typeof a.url === "string") {
-          const p = pathFromPublicUrl(a.url);
-          if (p) keep.add(p);
-        }
+        const p = mediaPath(a?.storagePath ?? a?.url);
+        if (p) keep.add(p);
       }
     }
   }

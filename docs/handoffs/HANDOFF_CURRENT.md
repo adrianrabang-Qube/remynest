@@ -206,6 +206,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   `memory-media` `public=false`. Signed URLs work whether the bucket is public or
   private, so deploy-then-flip has zero broken-image window. Rollback = flip back
   to `public=true` (signed URLs still resolve) and/or revert the commit.
+- **Media privacy migration validated (zero regressions) + 2 fixes**: full
+  validation of the signed-URL migration. Phase 1 PASS — `/api/memories` (My Nest
+  + Care), `/api/memories/search`, `/api/timeline`, and the memory-detail page all
+  serve `/object/sign/` URLs (0 public; signed GET → 200; dashboard renders no
+  media). Validation found and fixed TWO regressions introduced by storing paths:
+  (1) edit (`resolveCoverImageUrl`) persisted a SIGNED `cover_image_url` → now
+  strips to a storage PATH; (2) retain-mode GDPR delete (`snapshotRetainedMediaPaths`)
+  parsed only public URLs → would wrongly delete transferred media → now resolves
+  paths from `storagePath`/bare path/public/signed. Re-validated: create + edit
+  persist PATH only (no signed/public URL ever stored). Phase 3 export represents
+  media via `storagePath`. Phase 4: per-memory delete removes the row only —
+  **storage file is RETAINED** (orphaned); account-deletion cleanup removes files
+  under `users/{id}/` (legacy bucket-root `<uid>/<file>` objects are a PRE-EXISTING
+  gap). Phase 5: no `getPublicUrl` remains anywhere. **Safe to flip bucket private
+  after deploy.**
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
