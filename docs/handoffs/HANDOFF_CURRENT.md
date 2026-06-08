@@ -180,6 +180,17 @@ shipped and validated** end-to-end. Single authoritative workflow established in
     (never "Upgrade to PREMIUM"); FAMILY→no upgrade CTA (Manage Subscription). No
     Stripe/checkout/subscription/pricing logic changed (checkout still posts to
     `/api/stripe/checkout`).
+- **Password reset flow shipped** (Supabase Auth): new public `/forgot-password`
+  (`resetPasswordForEmail` → redirectTo `/reset-password`, anti-enumeration generic
+  success) and `/reset-password` (establishes the recovery session via PKCE
+  `?code` `exchangeCodeForSession` OR the hash `PASSWORD_RECOVERY` event, then
+  `updateUser({ password })` → redirect to `/memories`). Both routes added to
+  middleware `PUBLIC_ROUTES`; both `noindex`. Login page links to it. Login/
+  registration logic untouched; shared `/callback` route untouched. Pages are
+  brand-styled + mobile-friendly (email/new-password autocomplete). Build verified;
+  routes return 200 unauthenticated. ⚠️ OPERATOR: add the reset redirect URL(s)
+  (`https://www.remynest.com/reset-password` + localhost) to Supabase Auth
+  "Redirect URLs", and confirm the recovery email template, before relying on it.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
