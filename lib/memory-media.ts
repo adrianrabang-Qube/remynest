@@ -42,6 +42,38 @@ export type MemoryAttachment = {
   };
 };
 
+const MEDIA_PUBLIC_PREFIX =
+  "/storage/v1/object/public/memory-media/";
+const MEDIA_SIGN_PREFIX =
+  "/storage/v1/object/sign/memory-media/";
+
+/**
+ * Resolve the canonical `memory-media` storage PATH from whatever is stored:
+ * a bare path, a legacy public URL, or a (transient) signed URL. The DB must
+ * only ever hold paths — never public or signed URLs — so signed tokens are
+ * never persisted on edit and no permanent public URL is stored on upload.
+ */
+function deriveStoragePath(
+  storagePath?: unknown,
+  url?: unknown
+): string | undefined {
+  if (typeof storagePath === "string" && storagePath.trim()) {
+    return storagePath.replace(/^\/+/, "");
+  }
+  if (typeof url !== "string" || !url.trim()) return undefined;
+  const u = url.trim();
+  for (const marker of [MEDIA_PUBLIC_PREFIX, MEDIA_SIGN_PREFIX]) {
+    const i = u.indexOf(marker);
+    if (i !== -1) {
+      return decodeURIComponent(
+        u.slice(i + marker.length).split("?")[0]
+      );
+    }
+  }
+  if (/^https?:\/\//i.test(u)) return undefined; // foreign URL — leave as-is
+  return u.replace(/^\/+/, "");
+}
+
 export function normalizeAttachments(
   attachments: unknown
 ): MemoryAttachment[] {
@@ -72,11 +104,17 @@ export function normalizeAttachments(
           ? item.name
           : "";
 
+      // Persist the storage PATH only (strip any public/signed URL).
+      const resolvedPath = deriveStoragePath(
+        item.storagePath,
+        item.url
+      );
+
       return {
         id: item.id,
-        url: item.url,
+        url: resolvedPath ?? item.url,
         name: item.name,
-        storagePath: item.storagePath,
+        storagePath: resolvedPath ?? item.storagePath,
 
         type:
           item.type === "image" ||
@@ -225,19 +263,14 @@ export async function uploadMemoryAttachment(
     );
   }
 
-  const { data } =
-    supabase.storage
-      .from("memory-media")
-      .getPublicUrl(
-        storagePath
-      );
-
+  // Private bucket: store the storage PATH, never a public URL. Read paths mint
+  // short-lived signed URLs server-side (lib/memory-media-signing).
   return {
     id: crypto.randomUUID(),
     name: file.name,
     filename: file.name,
     storagePath,
-    url: data.publicUrl,
+    url: storagePath,
 
     type: file.type.startsWith(
       "image/"

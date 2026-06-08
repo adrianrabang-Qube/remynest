@@ -5,6 +5,7 @@ import { generateEmbedding } from "@/lib/embeddings";
 import { checkPremium } from "@/lib/premium";
 import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { signMemories } from "@/lib/memory-media-signing";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -415,7 +416,7 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json(
-      normalizedResults
+      await signMemories(normalizedResults)
     );
   } catch (error) {
     logSearchError(

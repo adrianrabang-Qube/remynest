@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { signMemories } from "@/lib/memory-media-signing";
 
 export { POST } from "./create/route";
 
@@ -221,8 +222,10 @@ export async function GET(
       }
     );
 
+    const signedData = await signMemories(data ?? []);
+
     return NextResponse.json({
-      data,
+      data: signedData,
       metadata: {
         requestId,
         profileId,

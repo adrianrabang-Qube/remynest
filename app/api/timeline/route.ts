@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { signMemories } from "@/lib/memory-media-signing";
 
 export async function GET() {
   try {
@@ -68,7 +69,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      data || []
+      await signMemories(data || [])
     );
   } catch (error) {
     console.log(error);

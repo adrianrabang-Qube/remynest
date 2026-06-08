@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
+import { signMemories } from "@/lib/memory-media-signing";
 
 
 import TimelineHeader from "./components/TimelineHeader";
@@ -228,9 +229,9 @@ export default async function TimelinePage({
   }
 
   const allMemories: Memory[] =
-    Array.isArray(memories)
-      ? memories
-      : [];
+    await signMemories(
+      Array.isArray(memories) ? memories : []
+    );
 
   // =====================================
   // NORMALIZATION

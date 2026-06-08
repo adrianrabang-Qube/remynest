@@ -13,6 +13,8 @@ import {
   buildMemoryMediaPayload,
 } from "@/lib/memory-media-pipeline";
 
+import { signMemory } from "@/lib/memory-media-signing";
+
 const MEMORY_PIPELINE_TAG =
   "memory-cognition-pipeline";
 
@@ -749,7 +751,7 @@ cover_image_url:
     );
 
     return NextResponse.json(
-      data
+      await signMemory(data)
     );
 
   } catch (error) {

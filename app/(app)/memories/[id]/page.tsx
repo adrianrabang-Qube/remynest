@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { signMemory, signMemories } from "@/lib/memory-media-signing";
 import MemoryCoverImage from "@/components/MemoryCoverImage";
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
 
@@ -45,7 +46,7 @@ export default async function MemoryPage({
   }
 
   // 📦 Memory
-  const { data: memory, error } =
+  const { data: rawMemory, error } =
     await supabase
       .from("memories")
       .select("*")
@@ -53,9 +54,13 @@ export default async function MemoryPage({
       .eq("user_id", user.id)
       .single();
 
-  if (error || !memory) {
+  if (error || !rawMemory) {
     return notFound();
   }
+
+  // Private media → short-lived signed URLs for this authorized memory.
+  const memory =
+    (await signMemory(rawMemory)) ?? rawMemory;
 
   const attachments = Array.isArray(memory.attachments)
     ? memory.attachments
@@ -80,7 +85,7 @@ export default async function MemoryPage({
       );
 
     relatedMemories =
-      data || [];
+      await signMemories(data || []);
   }
 
   // 🎨 Confidence Width

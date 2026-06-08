@@ -191,6 +191,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   routes return 200 unauthenticated. ⚠️ OPERATOR: add the reset redirect URL(s)
   (`https://www.remynest.com/reset-password` + localhost) to Supabase Auth
   "Redirect URLs", and confirm the recovery email template, before relying on it.
+- **Media privacy migration (private bucket + signed URLs)** — *launch blocker*:
+  audit proved `memory-media` was PUBLIC (anonymous GET → 200 on real photos).
+  New `lib/memory-media-signing.ts` mints short-lived (1h) **signed URLs**
+  server-side via the service-role client (rows already authorized by RLS),
+  batched (`createSignedUrls`), backward-compatible (derives the storage path
+  from `storagePath` OR a legacy public URL → **no data migration**). Applied at
+  every emit/render surface: `/api/memories` (list), `/api/memories/search`,
+  `/api/memories/create` (response), `/api/timeline`, `timeline/page.tsx`,
+  `memories/[id]/page.tsx`. Write side now stores **paths only** (upload +
+  `normalizeAttachments` strip any public/signed URL → no token ever persisted).
+  Validated: private bucket → public URL 400, signed URL 200; restored to public.
+  ⚠️ **OPERATOR (final go-live step, AFTER this code deploys):** set bucket
+  `memory-media` `public=false`. Signed URLs work whether the bucket is public or
+  private, so deploy-then-flip has zero broken-image window. Rollback = flip back
+  to `public=true` (signed URLs still resolve) and/or revert the commit.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
