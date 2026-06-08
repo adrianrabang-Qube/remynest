@@ -3,6 +3,9 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { userCanAccessProfile } from "@/lib/profile-ownership";
 import { redirect } from "next/navigation";
 import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField";
+import ReminderCenter, {
+  type ReminderRecord,
+} from "@/components/reminders/ReminderCenter";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +71,19 @@ export default async function RemindersPage({
 
     console.log(remindersError);
   }
+
+  // Care-profile name for the Caregiver-context framing.
+  const { data: activeProfile } =
+    await supabase
+      .from("memory_profiles")
+      .select("preferred_name, profile_name")
+      .eq("id", activeProfileId)
+      .maybeSingle();
+
+  const careProfileName =
+    activeProfile?.preferred_name ||
+    activeProfile?.profile_name ||
+    null;
 
   // =====================================
   // CREATE REMINDER
@@ -343,22 +359,26 @@ export default async function RemindersPage({
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-semibold text-charcoal mb-2">
-          Reminders
+          Reminder Center
         </h1>
 
         <p className="text-charcoal-soft">
-          Manage your future memory prompts and AI reminders.
+          Today&apos;s focus, routines, and gentle reminders for care and daily life.
         </p>
       </div>
 
       {/* Create Reminder */}
+      <details className="group bg-white border border-sand-deep/70 rounded-3xl p-6 shadow-soft mb-2">
+      <summary className="cursor-pointer list-none flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-charcoal">
+          Add a reminder
+        </h2>
+        <span className="text-charcoal-muted text-sm group-open:rotate-180 transition">▾</span>
+      </summary>
       <form
         action={createReminder}
-        className="bg-white border border-sand-deep/70 rounded-3xl p-6 shadow-soft mb-8"
+        className="mt-4"
       >
-        <h2 className="text-xl font-semibold mb-4 text-charcoal">
-          Create Reminder
-        </h2>
 
         <div className="space-y-4">
 
@@ -417,139 +437,14 @@ export default async function RemindersPage({
           </button>
         </div>
       </form>
+      </details>
 
-      {/* Reminder List */}
-      <div className="space-y-4">
-
-        {reminders &&
-        reminders.length > 0 ? (
-
-          reminders.map(
-            (reminder) => (
-
-              <div
-                key={reminder.id}
-                className="bg-white border border-sand-deep/70 rounded-3xl p-5 shadow-soft transition hover:shadow-soft-lg"
-              >
-
-                <div className="flex items-start justify-between gap-4">
-
-                  <div>
-
-                    <h3 className="font-semibold text-lg text-charcoal">
-                      {reminder.title}
-                    </h3>
-
-                    <p className="text-sm text-charcoal-muted mt-2">
-                      Created{" "}
-                      {reminder.created_at
-                        ? new Date(
-                            reminder.created_at
-                          ).toLocaleString(
-                            "en-IE",
-                            {
-                              hour12: false,
-                            }
-                          )
-                        : "Unknown"}
-                    </p>
-
-                    <p className="text-sm text-charcoal-muted mt-1">
-                      Reminds at{" "}
-                      {reminder.remind_at
-                        ? new Date(
-                            reminder.remind_at
-                          ).toLocaleString(
-                            "en-IE",
-                            {
-                              hour12: false,
-                            }
-                          )
-                        : "Unknown"}
-                    </p>
-
-                    {reminder.recurring &&
-                      reminder.frequency && (
-                        <p className="text-sm text-sage mt-1">
-                          Recurring:{" "}
-                          {reminder.frequency}
-                        </p>
-                      )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-
-                    {/* Toggle */}
-                    <form
-                      action={
-                        toggleReminderComplete
-                      }
-                    >
-                      <input
-                        type="hidden"
-                        name="id"
-                        value={
-                          reminder.id
-                        }
-                      />
-
-                      <input
-                        type="hidden"
-                        name="completed"
-                        value={String(
-                          reminder.completed
-                        )}
-                      />
-
-                      <button
-                        type="submit"
-                        className={`text-xs px-3 py-1 rounded-full transition ${
-                          reminder.completed
-                            ? "bg-sage-soft/25 text-sage-deep"
-                            : "bg-sand-deep/60 text-charcoal-soft"
-                        }`}
-                      >
-                        {reminder.completed
-                          ? "Completed"
-                          : "Active"}
-                      </button>
-                    </form>
-
-                    {/* Delete */}
-                    <form
-                      action={
-                        deleteReminder
-                      }
-                    >
-                      <input
-                        type="hidden"
-                        name="id"
-                        value={
-                          reminder.id
-                        }
-                      />
-
-                      <button
-                        type="submit"
-                        className="text-xs px-3 py-1 rounded-full bg-rose-50 text-rose-600/90 hover:bg-rose-100 transition"
-                      >
-                        Delete
-                      </button>
-                    </form>
-
-                  </div>
-                </div>
-              </div>
-            )
-          )
-
-        ) : (
-
-          <div className="bg-white border border-sand-deep/70 rounded-3xl p-10 text-center text-charcoal-muted shadow-soft">
-            No reminders yet.
-          </div>
-        )}
-      </div>
+      <ReminderCenter
+        reminders={(reminders ?? []) as ReminderRecord[]}
+        careProfileName={careProfileName}
+        toggleAction={toggleReminderComplete}
+        deleteAction={deleteReminder}
+      />
     </div>
   );
 }

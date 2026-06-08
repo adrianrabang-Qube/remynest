@@ -276,6 +276,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
     update/delete device rows). Cron senders remain `CRON_SECRET`-gated.
   Follow-up (not done): remove broken `save-onesignal`/`save-subscription`; scrub
   `player_id` from logs.
+- **Reminder Center V2 — Phase 1 shipped** (UX overhaul, current schema, no DDL):
+  new client `components/reminders/ReminderCenter.tsx` restructures the flat list
+  into a calm, hierarchical center — **Today's Focus (hero: next/overdue/today)**,
+  **Upcoming (Tomorrow/This Week/Later)**, **Daily Routines (recurring)**,
+  **Caregiver context**, **Completed history**, plus forward-compatible
+  **Priority/Pinned** sections that light up once Phase-2 columns exist. **Timezone
+  fixed:** times now render **client-side in the user's local tz** (no more
+  server-side UTC `en-IE`). Lifecycle chips read `sent`/`completed`
+  ("Awaiting confirmation" appears once the Phase-2 cron sets `sent`). Create form
+  is now a collapsible "Add a reminder"; all server actions preserved. Verified:
+  `/reminders` → 200, all sections render, old UTC formatting gone.
+  - **Phase 2 (operator + code, NOT applied):** migration
+    `supabase/migrations/20260608210000_reminder_center_v2.sql` adds `priority`,
+    `pinned`, `notified_at`, `completed_at`, `skipped` (+ indexes, idempotent).
+    Pairs with code (per the migration's footer): cron sets `sent`/`notified_at`
+    instead of auto-completing (decouples delivery from completion — fixes the
+    "Sent = Completed" problem); new skip/priority/pin actions; AI-insight hooks
+    via the timestamps. Deferred because DDL is operator-only and `main`
+    auto-deploys (code referencing new columns must land AFTER the migration).
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
