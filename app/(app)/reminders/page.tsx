@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { userCanAccessProfile } from "@/lib/profile-ownership";
 import { redirect } from "next/navigation";
 import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField";
 
@@ -96,6 +97,19 @@ export default async function RemindersPage({
     if (!activeProfileId) {
       throw new Error(
         "My Nest mode active. Reminder creation requires an active care profile."
+      );
+    }
+
+    // Server-side ownership check — the active-context cookie is client-settable,
+    // so verify the user actually owns / has caregiver access to this profile.
+    if (
+      !(await userCanAccessProfile(
+        user.id,
+        activeProfileId
+      ))
+    ) {
+      throw new Error(
+        "You don't have access to this care profile."
       );
     }
 

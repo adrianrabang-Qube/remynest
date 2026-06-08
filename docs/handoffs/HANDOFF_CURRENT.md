@@ -221,6 +221,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   under `users/{id}/` (legacy bucket-root `<uid>/<file>` objects are a PRE-EXISTING
   gap). Phase 5: no `getPublicUrl` remains anywhere. **Safe to flip bucket private
   after deploy.**
+- **Reminder IDOR write FIXED** (security): `POST /api/create-reminder` had no
+  auth, used the **service-role client** (bypassing RLS), and took `user_id` +
+  `memory_profile_id` from the **request body** → any authenticated user could
+  inject a reminder into another user's account (push-notification injection).
+  **Exploit proven** (User A created a reminder owned by User B → 200) then fixed:
+  the route now authenticates via the session, derives `user_id` from the session
+  (never the body), verifies care-profile access against the DB
+  (`lib/profile-ownership.ts` — owner OR caregiver, same model as
+  `getAccessibleProfiles`) returning **403** on a foreign profile, and inserts
+  with the RLS-scoped client. The reminders-page `createReminder` server action
+  got the same `userCanAccessProfile` check (the active-context cookie is
+  client-settable). Re-validated: foreign create → 403 (0 planted), authorized
+  My Nest + own-care create → 200. Reminder edit/delete have no API endpoint
+  (RLS-scoped server actions). NOTE: `/api/parse-reminder` still writes a random
+  `user_id` (broken, not IDOR-targetable) — recommend removal.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
