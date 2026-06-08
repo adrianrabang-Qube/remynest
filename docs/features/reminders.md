@@ -6,16 +6,15 @@ Reminders tied to a memory profile, with scheduled delivery via cron + OneSignal
 ## Architecture
 - Create: `/api/create-reminder` (session-auth, profile-ownership verified) and
   the reminders-page `createReminder` server action.
-- Delivery: Vercel Cron → `/api/cron/send-due-reminders` → `send-reminder(s)` /
-  `send-notification` (OneSignal). Cron guarded by `CRON_SECRET`.
+- Delivery: Vercel Cron → `/api/cron/send-due-reminders` → OneSignal (push to
+  the user's registered device). Cron guarded by `CRON_SECRET`.
 
 ## Database dependencies
 `reminders` (`user_id`, `memory_profile_id` **FK→memory_profiles**, schedule
 fields _(verify)_).
 
 ## API routes
-`/api/create-reminder` (POST), `/api/send-reminder` (POST),
-`/api/send-reminders` (GET, CRON_SECRET),
+`/api/create-reminder` (POST), `/api/send-reminders` (GET, CRON_SECRET),
 `/api/cron/send-due-reminders` (GET, CRON_SECRET).
 
 ## UI components

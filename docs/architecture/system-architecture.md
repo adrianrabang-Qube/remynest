@@ -10,7 +10,7 @@ Next.js 14.2.5 App Router. Top-level `app/` segments:
 - `(auth)` — `login`, `signup`, `register`.
 - `(marketing)` — marketing surfaces.
 - Public top-level: `/` (`app/page.tsx`), `/privacy`, `/terms`, `/cookies`,
-  `/account-deletion`, `/search`, `/test-notification`.
+  `/account-deletion`, `/search`.
 - `app/api/*` — 25 route handlers.
 - Root: `layout.tsx`, `error.tsx`, `global-error.tsx`, `manifest.ts`,
   `instrumentation.ts` (Sentry), `sentry.*.config.ts`.

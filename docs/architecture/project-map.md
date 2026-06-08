@@ -11,7 +11,7 @@ app/            Next.js App Router (pages, route groups, 25 API routes)
   (marketing)/  marketing
   api/          25 route handlers
   auth/logout/  logout route
-  account-deletion, privacy, terms, cookies, search, test-notification, page.tsx
+  account-deletion, privacy, terms, cookies, search, page.tsx
 components/     UI (+ ai, insights, legal, marketing, navigation, profile subdirs)
 lib/            domain logic (supabase, billing, gdpr, ai, analytics, cognition, …)
 utils/supabase/ admin (service role), client, server

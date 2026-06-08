@@ -16,11 +16,11 @@ delivery driven by Vercel Cron.
 
 ## API routes
 `/api/register-device` (POST), `/api/send-notification` (GET, CRON_SECRET),
-`/api/send-reminder` (POST), `/api/send-reminders` (GET, CRON_SECRET),
+`/api/send-reminders` (GET, CRON_SECRET),
 `/api/cron/send-due-reminders` (GET, CRON_SECRET).
 
 ## UI components
-`components/OneSignalInit.tsx`; `app/test-notification/page.tsx`;
+`components/OneSignalInit.tsx`;
 `components/profile/sections/NotificationsSection.tsx` (placeholder — no prefs
 backend).
 

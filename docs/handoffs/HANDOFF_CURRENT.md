@@ -260,6 +260,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
     OPEN** (verified: A's direct insert still succeeds). Cannot apply from repo (no
     DDL access) — run in Supabase SQL editor, then re-run the direct-insert probe to
     confirm BLOCKED. SELECT policies intentionally unchanged (reads already scoped).
+- **OneSignal/notification hardening**: audit found (HIGH) `/api/send-reminder` —
+  any authenticated user could push **attacker-controlled content to any
+  `external_user_id`** with zero authorization; and (MEDIUM) `/api/register-device`
+  would **reassign a `player_id` already owned by another user** (service-role
+  upsert onConflict player_id → device-notification hijack). Fixes:
+  - **P1:** removed `/api/send-reminder` (only caller was the `test-notification`
+    demo page, also removed) + scrubbed docs. Verified: `POST /api/send-reminder`
+    → 404.
+  - **P2:** `register-device` now rejects (409) a `player_id` already registered to
+    a different account; same-user re-registration unaffected. Verified: A reusing
+    B's player_id → 409 (B's device intact); A new device → 200; A re-register same
+    device → 200 (1 row).
+  - Device-registration confidentiality already solid (RLS: A can't read/insert/
+    update/delete device rows). Cron senders remain `CRON_SECRET`-gated.
+  Follow-up (not done): remove broken `save-onesignal`/`save-subscription`; scrub
+  `player_id` from logs.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

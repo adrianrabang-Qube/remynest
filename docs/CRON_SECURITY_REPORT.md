@@ -18,8 +18,8 @@ authentication:
 | `/api/send-notification` | GET | sends a push to a user | none found |
 
 `/api/stripe/webhook` is also public but already verifies a Stripe signature —
-**left unchanged**. `/api/send-reminder` (singular) is **not** public (requires a
-session) and is out of scope.
+**left unchanged**. (The legacy singular reminder sender — an
+unauthenticated-target notification endpoint — has since been removed.)
 
 **Risk (before):** anyone with a URL could trigger reminder/notification sends —
 abuse, spam, and OneSignal cost.

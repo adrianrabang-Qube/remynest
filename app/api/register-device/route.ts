@@ -192,6 +192,47 @@ export async function POST(req: Request) {
     );
 
     // =========================================
+    // CROSS-USER PLAYER_ID GUARD
+    // =========================================
+    // This route uses the service-role client (bypasses RLS). A player_id is a
+    // device-level push subscription id; an upsert onConflict("player_id") would
+    // silently REASSIGN a player_id already owned by another account, hijacking
+    // that device's notifications. Refuse cross-user reassignment. Same-user
+    // re-registration (refresh last_seen / change profile) is unaffected.
+    const {
+      data: existingDevice,
+    } = await supabase
+      .from("device_registrations")
+      .select("user_id")
+      .eq("player_id", playerId)
+      .maybeSingle();
+
+    if (
+      existingDevice &&
+      existingDevice.user_id !== user.id
+    ) {
+      logDeviceRegistrationError(
+        "device-player-id-conflict",
+        {
+          requestId,
+
+          playerIdLength:
+            playerId.length,
+        }
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "This device is already registered to another account.",
+        },
+        {
+          status: 409,
+        }
+      );
+    }
+
+    // =========================================
     // UPSERT DEVICE
     // =========================================
 

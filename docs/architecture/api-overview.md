@@ -30,7 +30,6 @@ confirmed — open the file before relying on exact field names.
 | `/api/save-onesignal` | POST | Session | ⚠️ Save OneSignal id → **broken** (`users` table missing) | `{email,onesignal_id}` | error |
 | `/api/save-subscription` | POST | Session | ⚠️ → **broken** (`users` table missing) | `{email,onesignal_id}` | error |
 | `/api/send-notification` | GET | Public (CRON_SECRET) | Send a notification | – | result |
-| `/api/send-reminder` | POST | Session _(verify)_ | Send one reminder | _(verify)_ | result |
 | `/api/send-reminders` | GET | Public (CRON_SECRET) | Batch reminder send | – | result |
 | `/api/cron/send-due-reminders` | GET | Public (CRON_SECRET) | Vercel Cron entry | Bearer CRON_SECRET | `{processed}` _(verify)_ |
 | `/api/gdpr/export` | GET | Session | Export all user data (JSON) | – | full export payload |
