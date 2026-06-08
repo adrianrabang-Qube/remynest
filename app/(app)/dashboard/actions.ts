@@ -11,6 +11,10 @@ import {
 } from "@/lib/billing/usage-limits";
 
 import {
+  userOwnsProfile,
+} from "@/lib/profile-ownership";
+
+import {
   normalizeFormValue,
   requireDashboardUser,
 } from "./lib/dashboard-guards";
@@ -225,6 +229,24 @@ export async function inviteCaregiver({
     };
   }
 
+  // Authorization: only the OWNER of the target care profile may invite
+  // caregivers to it (never trust a client-supplied memoryProfileId).
+  if (
+    !(await userOwnsProfile(
+      user.id,
+      memoryProfileId
+    ))
+  ) {
+    console.warn(
+      "[dashboard] invite_forbidden_not_owner",
+      { userId: user.id, memoryProfileId }
+    );
+    return {
+      error:
+        "You don't have permission to invite caregivers to this profile.",
+    };
+  }
+
   const { data: profiles, error: profilesError } =
     await supabase
       .from("profiles")
@@ -323,6 +345,33 @@ export async function acceptInvite(
 
     throw new Error(
       "Invite not found"
+    );
+  }
+
+  // Authorization: only the addressed recipient may accept, and only while the
+  // invite is still pending. Prevents accepting invitations meant for others.
+  const inviteEmail = (
+    invite.email ?? ""
+  ).toLowerCase();
+  const userEmail = (
+    user.email ?? ""
+  ).toLowerCase();
+
+  if (
+    !inviteEmail ||
+    inviteEmail !== userEmail ||
+    invite.status !== "pending"
+  ) {
+    console.warn(
+      "[dashboard] accept_invite_forbidden",
+      {
+        userId: user.id,
+        inviteId,
+        status: invite.status,
+      }
+    );
+    throw new Error(
+      "This invitation is not addressed to you."
     );
   }
 

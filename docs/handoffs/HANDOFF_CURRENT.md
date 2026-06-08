@@ -243,6 +243,23 @@ shipped and validated** end-to-end. Single authoritative workflow established in
   OpenAI cost-abuse. Scrubbed all doc references. Reminder creation remains via
   `/api/create-reminder` (session-auth + ownership) and the reminders-page server
   action. If NL reminders return in V2, rebuild securely.
+- **Caregiver authorization P0 (two-part)**: audit proved any authenticated user
+  could directly INSERT `profile_relationships` / `caregiver_invites` rows for ANY
+  profile (write-IDOR; confidentiality was contained by ownership-based RLS on
+  memories/memory_profiles, but integrity + the `userCanAccessProfile` gate were
+  undermined). Plus logic gaps: `inviteCaregiver` didn't verify profile ownership,
+  `acceptInvite` didn't verify the invitee email. Fixes:
+  - **App layer (shipped + validated):** added `userOwnsProfile()`; `inviteCaregiver`
+    now requires the caller OWNS the target profile; `acceptInvite` now requires
+    `invite.email === user.email` AND `status==="pending"`. Validated: A→B.profile
+    invite rejected; A accepting a foreign invite rejected; owner/own-invite allowed.
+  - **DB layer (OPERATOR MUST APPLY — the actual direct-IDOR fix):** new migration
+    `supabase/migrations/20260608180000_caregiver_authz_rls.sql` adds least-privilege
+    INSERT/UPDATE/DELETE RLS on both tables (owner-only invite/manage; invitee-only
+    accept; no self-grant). ⚠️ **Until applied, the direct PostgREST IDOR is STILL
+    OPEN** (verified: A's direct insert still succeeds). Cannot apply from repo (no
+    DDL access) — run in Supabase SQL editor, then re-run the direct-insert probe to
+    confirm BLOCKED. SELECT policies intentionally unchanged (reads already scoped).
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).

@@ -34,3 +34,25 @@ export async function userCanAccessProfile(
 
   return Boolean(shared);
 }
+
+/**
+ * Strict OWNERSHIP check (not mere caregiver access). Use for actions only the
+ * profile owner may perform — e.g. inviting caregivers. Service-role query, so
+ * `userId` MUST be session-derived. Does NOT trust `profile_relationships`
+ * (which is the table being protected against forgery).
+ */
+export async function userOwnsProfile(
+  userId: string,
+  profileId: string
+): Promise<boolean> {
+  if (!userId || !profileId) return false;
+
+  const { data } = await supabaseAdmin
+    .from("memory_profiles")
+    .select("id")
+    .eq("id", profileId)
+    .eq("created_by_account_id", userId)
+    .maybeSingle();
+
+  return Boolean(data);
+}
