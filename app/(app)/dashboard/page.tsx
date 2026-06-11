@@ -43,6 +43,7 @@ import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
+import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
 import { buildRemySignals } from "@/lib/remy/signals";
 import { generateRemyObservations } from "@/lib/remy/observations";
 import {
@@ -51,6 +52,7 @@ import {
 } from "@/lib/remy/activities";
 import { getRemyCollections } from "@/lib/remy/collections";
 import { getRemyConnections } from "@/lib/remy/connections";
+import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -583,6 +585,14 @@ export default async function DashboardPage() {
       { limit: 4 }
     );
 
+  // Life Chapters (most significant periods — title + range + count).
+  const remyLifeChapters =
+    await getRemyLifeChapters(
+      supabase,
+      user.id,
+      { sort: "count", limit: 4 }
+    );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -688,6 +698,16 @@ export default async function DashboardPage() {
         {/* REMY CONNECTIONS — related-moments layer */}
         <RemyConnections
           connections={remyConnections}
+        />
+
+        {/* LIFE CHAPTERS — narrative layer */}
+        <RemyLifeChapters
+          chapters={remyLifeChapters}
+          subjectName={
+            !isMyNestWorkspace
+              ? remySubjectName
+              : null
+          }
         />
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}

@@ -13,6 +13,27 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Life Chapters V1** (read-only; no schema/migrations/AI; existing data only):
+  Remy's **narrative layer**, the top of the stack (Memories → Collections →
+  Connections → Life Chapters). New `lib/remy/life-chapters.ts`
+  (`getRemyLifeChapters`, `getRemyLifeChapterById`, `formatChapterRange`) groups
+  memories deterministically by their EXISTING `ai_category` (assigned at capture —
+  no new AI) into narrative chapters: title (the category, Title-Cased; slug = id),
+  date range from effective memory dates ("1975 → 1988", "2016 → Present"), memory
+  count, dominant themes (top moods), and connected-collection count (collections
+  sharing the chapter category). Generic categories are skipped. Sort:
+  chronological on `/chapters` (narrative), by count on the dashboard (significance).
+  Best-effort/user-scoped (recent ≤600 memories), human language only (never
+  cluster/vector/similarity).
+  - **Dashboard**: `RemyLifeChapters` section ("I've started identifying important
+    chapters in <subject>'s life / your story." → top 4 → "View all chapters →");
+    hides gracefully when empty.
+  - **/chapters**: chronological `ChapterCard` grid (title · range · count · themes).
+  - **/chapters/[id]**: header ("Many of these memories belong to the same period.
+    This chapter contains N connected memories.", range, themes, related collections)
+    + chronological member-memory list linking to `/memories/[id]` (reuses date
+    helpers). Mirrors the older timeline `ChaptersView` concept as a proper Remy
+    model + standalone pages. Degrades to empty.
 - **Remy Relationship Discovery V1 (Remy Connections)** (read-only; no
   schema/migrations/AI; existing data only): exposes the stored
   `memory_relationships` data as a human **Connections** capability — never
@@ -494,7 +515,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Remy Connections V1 — relationship discovery (connections page + detail + dashboard)
+- `feat(remy)` Life Chapters V1 — narrative layer (chapters page + detail + dashboard)
+- `0282b3e` feat(remy): Remy Connections V1 — relationship discovery (connections page + detail + dashboard)
 - `bce6d2b` feat(remy): Remy Collections V1 — Organize layer (collections page + detail + dashboard)
 - `29dbeef` feat(remy): Remy Activity Feed V1 — evidence layer
 - `187229f` feat(remy): dashboard intelligence engine (real workspace summaries)
