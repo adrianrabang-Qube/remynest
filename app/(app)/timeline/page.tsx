@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
 import { signMemories } from "@/lib/memory-media-signing";
+import {
+  effectiveSortValue,
+  formatMemoryGroupLabel,
+} from "@/lib/memories/memory-date";
 
 
 import TimelineHeader from "./components/TimelineHeader";
@@ -17,6 +21,10 @@ type Memory = {
   title: string;
   content: string;
   created_at: string;
+
+  // Historical dating — effective date = memory_date ?? created_at.
+  memory_date?: string | null;
+  memory_date_precision?: string | null;
 
   ai_title?: string;
   ai_summary?: string;
@@ -104,18 +112,19 @@ function groupMemoriesByDate(
     NormalizedMemory[]
   > = {};
 
-  memories.forEach((memory) => {
-    const date = new Date(
-      memory.created_at
-    ).toLocaleDateString(
-      "en-IE",
-      {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }
-    );
+  // Place each memory on its EFFECTIVE date (memory_date ?? created_at) and
+  // order groups newest-first by that date, so historical memories slot into
+  // their true position. Pre-migration rows have no memory_date, so this is
+  // identical to the previous created_at grouping.
+  const ordered = [...memories].sort(
+    (a, b) =>
+      effectiveSortValue(b) -
+      effectiveSortValue(a)
+  );
+
+  ordered.forEach((memory) => {
+    const date =
+      formatMemoryGroupLabel(memory);
 
     if (!groupedMemories[date]) {
       groupedMemories[date] = [];

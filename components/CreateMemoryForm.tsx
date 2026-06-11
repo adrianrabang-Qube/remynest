@@ -11,8 +11,33 @@ import {
 
 import { useRouter } from "next/navigation";
 
+import {
+  buildMemoryDate,
+  formatMemoryDate,
+  type MemoryDateMode,
+} from "@/lib/memories/memory-date";
+
 const MEMORY_FORM_TAG =
   "create-memory-form";
+
+const MEMORY_DATE_OPTIONS: {
+  mode: MemoryDateMode;
+  label: string;
+}[] = [
+  { mode: "today", label: "Today" },
+  { mode: "yesterday", label: "Yesterday" },
+  { mode: "last-week", label: "Last week" },
+  { mode: "custom", label: "Custom date" },
+  { mode: "year", label: "A year" },
+  { mode: "decade", label: "A decade" },
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const DECADE_OPTIONS = Array.from(
+  { length: 13 },
+  (_unused, i) => 1900 + i * 10
+).filter((d) => d <= CURRENT_YEAR);
 
 const MAX_TITLE_LENGTH =
   120;
@@ -68,6 +93,23 @@ export default function CreateMemoryForm() {
   const [content, setContent] =
     useState("");
 
+  // ── When did this memory happen? (historical dating) ──────────────────────
+  const [dateMode, setDateMode] =
+    useState<MemoryDateMode>("today");
+
+  const [customDate, setCustomDate] =
+    useState("");
+
+  const [yearValue, setYearValue] =
+    useState(String(CURRENT_YEAR));
+
+  const [decadeValue, setDecadeValue] =
+    useState(
+      String(
+        Math.floor(CURRENT_YEAR / 10) * 10
+      )
+    );
+
   const [loading, setLoading] =
     useState(false);
 
@@ -91,6 +133,34 @@ export default function CreateMemoryForm() {
       MAX_CONTENT_LENGTH
     );
   }, [content]);
+
+  const resolvedMemoryDate = useMemo(() => {
+    return buildMemoryDate({
+      mode: dateMode,
+      customDate: customDate || undefined,
+      year: Number(yearValue) || CURRENT_YEAR,
+      decade:
+        Number(decadeValue) || undefined,
+    });
+  }, [
+    dateMode,
+    customDate,
+    yearValue,
+    decadeValue,
+  ]);
+
+  const memoryDatePreview = useMemo(() => {
+    if (!resolvedMemoryDate.memoryDate) {
+      return "Today";
+    }
+    return formatMemoryDate(
+      new Date(
+        resolvedMemoryDate.memoryDate
+      ),
+      resolvedMemoryDate.precision,
+      { relative: true }
+    );
+  }, [resolvedMemoryDate]);
 
   // =====================================
   // LIFECYCLE OBSERVABILITY
@@ -194,6 +264,12 @@ export default function CreateMemoryForm() {
 
               content:
                 normalizedContent,
+
+              memoryDate:
+                resolvedMemoryDate.memoryDate,
+
+              memoryDatePrecision:
+                resolvedMemoryDate.precision,
             }),
           }
         );
@@ -273,6 +349,7 @@ export default function CreateMemoryForm() {
       validationError,
       normalizedTitle,
       normalizedContent,
+      resolvedMemoryDate,
       router,
     ]
   );
@@ -313,6 +390,103 @@ export default function CreateMemoryForm() {
         }}
         className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none"
       />
+
+      {/* When did this happen? — historical dating */}
+      <div className="space-y-3 rounded-xl border border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-700">
+            When did this happen?
+          </label>
+          <span className="text-xs text-gray-400">
+            {memoryDatePreview}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {MEMORY_DATE_OPTIONS.map(
+            (option) => {
+              const active =
+                dateMode === option.mode;
+              return (
+                <button
+                  key={option.mode}
+                  type="button"
+                  onClick={() =>
+                    setDateMode(
+                      option.mode
+                    )
+                  }
+                  className={`rounded-full px-3 py-1.5 text-sm transition ${
+                    active
+                      ? "bg-black text-white"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            }
+          )}
+        </div>
+
+        {dateMode === "custom" && (
+          <input
+            type="date"
+            value={customDate}
+            max={
+              new Date()
+                .toISOString()
+                .split("T")[0]
+            }
+            onChange={(e) =>
+              setCustomDate(
+                e.target.value
+              )
+            }
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+          />
+        )}
+
+        {dateMode === "year" && (
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1900}
+            max={CURRENT_YEAR}
+            value={yearValue}
+            onChange={(e) =>
+              setYearValue(
+                e.target.value
+              )
+            }
+            placeholder="e.g. 1995"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+          />
+        )}
+
+        {dateMode === "decade" && (
+          <select
+            value={decadeValue}
+            onChange={(e) =>
+              setDecadeValue(
+                e.target.value
+              )
+            }
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+          >
+            {DECADE_OPTIONS.map(
+              (decade) => (
+                <option
+                  key={decade}
+                  value={decade}
+                >
+                  {decade}s
+                </option>
+              )
+            )}
+          </select>
+        )}
+      </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400">
         <span>

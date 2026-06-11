@@ -13,6 +13,23 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Historical Memory Creation** (additive, deploy-safe; existing memories
+  unchanged): memories can now be dated to any past moment, not just today. A
+  memory carries `created_at` (insertion, unchanged) plus an optional
+  `memory_date` + `memory_date_precision` (`day`/`month`/`year`/`decade`); the
+  **effective date = memory_date ?? created_at** drives the timeline, so rows
+  without a memory_date behave exactly as before. New shared model
+  `lib/memories/memory-date.ts` (`buildMemoryDate` for Today/Yesterday/Last
+  week/Custom/Year/Decade, precision-aware `formatMemoryDate`/group label,
+  `validateAndResolveMemoryDate` server guard rejecting future/out-of-range).
+  `CreateMemoryForm` gained a "When did this happen?" control. API
+  `/api/memories/create` validates the date and applies it via a **best-effort
+  follow-up UPDATE** (deploy-safe — no-ops with PGRST204 until the columns are
+  migrated; memory creation is never blocked). Timeline sorts + groups by
+  effective date with precision-aware headings ("2020", "1980s"). **OPERATOR:
+  apply `20260611120000_memory_historical_dating.sql`** to activate persistence
+  (until then, historical dates are silently dropped and memories keep today's
+  date). The legacy `/memories/new` basic form is unchanged (defaults to today).
 - **Remy Companion Foundation** (read-only; no schema/migration/cron/lifecycle/
   billing/auth changes): the AI companion layer (NOT a chatbot) that turns
   existing data into calm, supportive observations. Engine + presence are
@@ -346,6 +363,13 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
 
 ## Open issues
+- **Operator migration pending — Historical Memory Dating**: apply
+  `supabase/migrations/20260611120000_memory_historical_dating.sql` (adds
+  `memories.memory_date` + `memory_date_precision`). Code is deployed and
+  deploy-safe; until applied, chosen historical dates are silently dropped
+  (memories keep today's date). No backfill needed.
+- **Operator migration pending — Reminder Lifecycle**: apply
+  `20260609120000_reminder_lifecycle_foundation.sql` (see Completed work).
 - `users` table missing → `save-onesignal` / `save-subscription` broken.
 - `/api/stripe/cancel` missing → BillingSection cancel broken.
 - Sentry env vars not set in Vercel (no prod error visibility).
@@ -372,7 +396,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Remy Companion Foundation — observation engine + avatar-ready presence
+- `feat(memories)` Historical Memory Creation — effective-date dating + timeline
+- `c7e61f4` feat(remy): Remy Companion Foundation — observation engine + avatar-ready presence
 - `18581e4` feat(dashboard): Dashboard V3 — reminder-driven command center
 - `962db0c` feat(reminders): Reminder Center V2 — Phase 1 (sectioned UX + local timezone)
 - `b35a668` feat(reminders): Reminder Lifecycle Foundation — Phase 1 (events + status, deploy-safe)

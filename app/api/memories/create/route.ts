@@ -14,6 +14,7 @@ import {
 } from "@/lib/memory-media-pipeline";
 
 import { signMemory } from "@/lib/memory-media-signing";
+import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 const MEMORY_PIPELINE_TAG =
   "memory-cognition-pipeline";
@@ -266,6 +267,27 @@ export async function POST(req: Request) {
         {
           error:
             contentValidationError,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // =====================================
+    // HISTORICAL MEMORY DATE (optional)
+    // =====================================
+
+    const memoryDateResult =
+      validateAndResolveMemoryDate(
+        body.memoryDate,
+        body.memoryDatePrecision
+      );
+
+    if (!memoryDateResult.ok) {
+      return NextResponse.json(
+        {
+          error: memoryDateResult.error,
         },
         {
           status: 400,
@@ -599,6 +621,38 @@ cover_image_url:
           data.id,
       }
     );
+
+    // =====================================
+    // HISTORICAL DATE — best-effort, deploy-safe
+    //   The primary insert already succeeded. If the memory_date columns are
+    //   not yet migrated this no-ops (PGRST204) and the memory simply keeps its
+    //   creation date — memory creation is never blocked.
+    // =====================================
+
+    if (memoryDateResult.memoryDate) {
+      const { error: memoryDateError } =
+        await supabase
+          .from("memories")
+          .update({
+            memory_date:
+              memoryDateResult.memoryDate,
+            memory_date_precision:
+              memoryDateResult.precision,
+          })
+          .eq("id", data.id)
+          .eq("user_id", user.id);
+
+      if (memoryDateError) {
+        logPipelineStage(
+          "memory-date-skipped",
+          {
+            requestId:
+              pipelineRequestId,
+            code: memoryDateError.code,
+          }
+        );
+      }
+    }
 
     // =====================================
     // ASYNC COGNITION TASKS
