@@ -152,14 +152,14 @@ export function generateRemyObservations(
     );
   }
 
-  // ── Memory clusters Remy has grouped ───────────────────────────────────────
+  // ── Collections Remy has organized ─────────────────────────────────────────
   if (i && i.clustersDiscovered > 0) {
     add(
-      "clusters",
+      "collections",
       46,
       "informative",
-      `I've grouped ${v.possessive} memories into ${i.clustersDiscovered} ${i.clustersDiscovered === 1 ? "theme" : "themes"}.`,
-      { label: "See insights", href: "/insights" }
+      `I've organized ${v.possessive} memories into ${i.clustersDiscovered} ${i.clustersDiscovered === 1 ? "collection" : "collections"}.`,
+      { label: "View collections", href: "/collections" }
     );
   }
 

@@ -120,17 +120,22 @@ export function buildRemyActivities(
     });
   }
 
-  // 5 — Theme / cluster discovery (existing cluster data only).
+  // 5 — Collection discovery (existing grouping data only; human language).
   for (const c of sources.clusters) {
     if (!validTime(c.created_at)) continue;
+    const rawLabel = c.title?.trim() || c.category?.trim() || "";
+    const label =
+      rawLabel && !/cluster/i.test(rawLabel)
+        ? rawLabel
+        : "Memory Collection";
     items.push({
-      id: `theme-${c.id}`,
-      kind: "theme-discovered",
+      id: `collection-${c.id}`,
+      kind: "collection-discovered",
       icon: "🧠",
-      title: "New theme discovered",
-      description: c.title?.trim() || c.category?.trim() || "New theme",
+      title: "New collection discovered",
+      description: label,
       timestamp: c.created_at as string,
-      href: "/insights",
+      href: "/collections",
     });
   }
 

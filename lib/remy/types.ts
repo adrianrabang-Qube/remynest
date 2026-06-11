@@ -101,7 +101,7 @@ export type RemyActivityKind =
   | "historical-preserved"
   | "memory-added"
   | "reminder-completed"
-  | "theme-discovered";
+  | "collection-discovered";
 
 export interface RemyActivity {
   /** Stable id (kind + source row id) so the feed can diff/animate later. */

@@ -41,12 +41,14 @@ import {
 } from "@/lib/reminders/focus";
 import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
+import RemyCollections from "@/components/remy/RemyCollections";
 import { buildRemySignals } from "@/lib/remy/signals";
 import { generateRemyObservations } from "@/lib/remy/observations";
 import {
   fetchRemyActivitySources,
   buildRemyActivities,
 } from "@/lib/remy/activities";
+import { getRemyCollections } from "@/lib/remy/collections";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -563,6 +565,14 @@ export default async function DashboardPage() {
         remyActivitySources.clusters,
     });
 
+  // Remy Collections (top, lightweight — title + count only).
+  const remyCollections =
+    await getRemyCollections(
+      supabase,
+      user.id,
+      { limit: 4 }
+    );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -658,6 +668,11 @@ export default async function DashboardPage() {
         {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
         <RemyActivityFeed
           activities={remyActivities}
+        />
+
+        {/* REMY COLLECTIONS — the organize layer */}
+        <RemyCollections
+          collections={remyCollections}
         />
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}

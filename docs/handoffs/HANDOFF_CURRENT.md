@@ -13,6 +13,27 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Remy Collections V1** (read-only; no schema/migrations/AI; existing grouping
+  data only): Remy's "Organize" capability — surfaces existing stored memory
+  groupings as human **Collections** (never "cluster"/technical language). New
+  dedicated model `lib/remy/collections.ts` (`getRemyCollections`,
+  `getRemyCollectionById`, `formatCollectionRange`) is the ONLY reader of
+  `memory_clusters` + `memory_cluster_items` for this feature: best-effort,
+  user-scoped, 2–3 queries (clusters → item membership → member memories),
+  deriving title (sanitized of "cluster"), memory count, date range (effective
+  memory dates), and emotional themes (top member moods, fallback
+  `emotional_theme`). Sorted by memory count desc then most-recently-active.
+  - **Dashboard**: new `RemyCollections` section under Companion + Activity
+    ("I've started organizing memories into collections." → top 4 title+count →
+    "View all collections →"); hides gracefully when empty.
+  - **/collections**: `CollectionCard` grid (title · count · range · themes).
+  - **/collections/[id]**: header (title, summary, count, range, themes) + a
+    read-only member-memory list linking to `/memories/[id]` (MemoryCard needs
+    client edit/delete handlers, so a read-only list reuses the date helpers).
+  - **Terminology**: Remy Activity "New theme discovered" → **"New collection
+    discovered"** (kind `collection-discovered`, links to /collections); the
+    dashboard intelligence observation now says "organized … into N collections"
+    (→ /collections). No clustering/generation changed; degrades to empty.
 - **Remy Activity Feed V1** (read-only; no schema/migrations/cron/notifications):
   Remy's **evidence layer** — "what Remy noticed", not a notification center or raw
   audit log. New `lib/remy/activities.ts` is deliberately separate from observation
@@ -452,7 +473,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Remy Activity Feed V1 — evidence layer (historical/added/reminder/theme)
+- `feat(remy)` Remy Collections V1 — Organize layer (collections page + detail + dashboard)
+- `29dbeef` feat(remy): Remy Activity Feed V1 — evidence layer
 - `187229f` feat(remy): dashboard intelligence engine (real workspace summaries)
 - `f9cb9c1` feat(memories): Memory Date is the primary date; Added date is metadata
 - `3e36338` feat(memories): complete Historical Memory UX (create modal, edit, cards)
