@@ -13,6 +13,23 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Remy Companion Foundation** (read-only; no schema/migration/cron/lifecycle/
+  billing/auth changes): the AI companion layer (NOT a chatbot) that turns
+  existing data into calm, supportive observations. Engine + presence are
+  decoupled so the future avatar plugs into the same system. `lib/remy/`:
+  `types.ts` (`RemyObservation`/`RemySignals`, with `mood` as the avatar seam),
+  `persona.ts` (`REMY`, tone→mood map, `remyVoice()` for human grammar —
+  "Mary has" vs "You have"), `observations.ts` (`generateRemyObservations` —
+  pure, priority-ranked rules over reminders + memory activity/trend/staleness +
+  invites + onboarding + calm-presence fallback), `signals.ts`
+  (`buildRemySignals` — read-only `memories` counts scoped like the dashboard,
+  best-effort → 0 on failure, never throws). `components/remy/`:
+  `RemyAvatar.tsx` (mood-aware mark + **the documented avatar plug-in point** —
+  future animated avatar swaps internals behind the same `{mood,size}` props),
+  `RemyCompanion.tsx` (reusable client presence usable on any surface). Dashboard
+  renders a Remy section below the header; the old "Remy Insight Preview" teaser
+  in DashboardFocus was superseded and removed. No LLM call — deterministic and
+  production-safe.
 - **Dashboard V3 — command center** (build-safe; no lifecycle/cron/notification
   changes): replaced the admin "Today's Focus" metric list with a reminder-driven
   focus surface — **Right Now · Upcoming Today · Routine Progress · Reminder Summary ·
@@ -355,7 +372,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(dashboard)` Dashboard V3 — reminder-driven command center + shared Focus model
+- `feat(remy)` Remy Companion Foundation — observation engine + avatar-ready presence
+- `18581e4` feat(dashboard): Dashboard V3 — reminder-driven command center
 - `962db0c` feat(reminders): Reminder Center V2 — Phase 1 (sectioned UX + local timezone)
 - `b35a668` feat(reminders): Reminder Lifecycle Foundation — Phase 1 (events + status, deploy-safe)
 - `866acce` fix(security): remove send-reminder injection vector + block device hijack

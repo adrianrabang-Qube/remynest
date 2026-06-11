@@ -175,26 +175,6 @@ export default function DashboardFocus({
           <SummaryChip label="Done today" value={summary.completedToday} />
         </div>
       </div>
-
-      {/* REMY INSIGHT PREVIEW */}
-      <div className="rounded-3xl border border-sage/25 bg-sage/[0.05] p-6 shadow-soft">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sage/15 text-sage-deep">
-            ✦
-          </span>
-          <h2 className="text-lg font-semibold text-charcoal">
-            Remy Insight Preview
-          </h2>
-        </div>
-        <p className="mt-3 text-sm text-charcoal-soft">
-          Remy is learning{careProfileName ? ` ${careProfileName}’s` : "the"}{" "}
-          routines. Soon you&apos;ll see gentle, personalized observations about
-          adherence and the day ahead here.
-        </p>
-        <span className="mt-3 inline-flex items-center rounded-full bg-sand-deep/40 px-3 py-1 text-xs font-semibold text-charcoal-muted">
-          Coming soon
-        </span>
-      </div>
     </section>
   );
 }

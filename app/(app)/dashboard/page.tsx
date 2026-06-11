@@ -35,7 +35,13 @@ import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
 import DashboardFocus from "./components/DashboardFocus";
-import type { FocusReminder } from "@/lib/reminders/focus";
+import {
+  type FocusReminder,
+  deriveDashboardFocus,
+} from "@/lib/reminders/focus";
+import RemyCompanion from "@/components/remy/RemyCompanion";
+import { buildRemySignals } from "@/lib/remy/signals";
+import { generateRemyObservations } from "@/lib/remy/observations";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -485,6 +491,51 @@ export default async function DashboardPage() {
     }
   }
 
+  // =====================================
+  // REMY COMPANION (read-only, existing data only)
+  //   Deterministic observations — NOT a chatbot, no AI call. Signals are
+  //   gathered from `memories`/`reminders` only; failures degrade gracefully.
+  // =====================================
+
+  const remySubjectName =
+    activeProfile?.preferred_name ||
+    activeProfile?.profile_name ||
+    null;
+
+  const remyReminderSummary =
+    deriveDashboardFocus(focusReminders).summary;
+
+  const remySignals = await buildRemySignals(
+    supabase,
+    {
+      memoryProfileId:
+        effectiveActiveProfileId,
+      totalMemories: memoryCount,
+      reminders: {
+        today: remyReminderSummary.todayTotal,
+        overdue: remyReminderSummary.overdue,
+        upcomingToday:
+          remyReminderSummary.upcomingToday,
+        completedToday:
+          remyReminderSummary.completedToday,
+        routines:
+          remyReminderSummary.routines,
+      },
+      subjectName: remySubjectName,
+      isCareContext: !isMyNestWorkspace,
+      pendingInvites:
+        pendingInvites?.length ?? 0,
+      accessibleProfiles:
+        accessibleProfiles.length,
+    }
+  );
+
+  const remyObservations =
+    generateRemyObservations(
+      remySignals,
+      "dashboard"
+    );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -565,6 +616,16 @@ export default async function DashboardPage() {
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
+        />
+
+        {/* REMY COMPANION — AI companion layer above the command center */}
+        <RemyCompanion
+          observations={remyObservations}
+          subjectName={
+            !isMyNestWorkspace
+              ? remySubjectName
+              : null
+          }
         />
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}
