@@ -6,6 +6,10 @@ import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField"
 import ReminderCenter, {
   type ReminderRecord,
 } from "@/components/reminders/ReminderCenter";
+import {
+  logReminderEvent,
+  REMINDER_STATUS,
+} from "@/lib/reminders/lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -249,6 +253,22 @@ export default async function RemindersPage({
 
     console.log(data);
 
+    // Best-effort lifecycle event — NEVER blocks creation (the insert above
+    // already succeeded). `status` defaults to 'scheduled' via the migration and
+    // is intentionally not set on the insert (pre-migration safe).
+    await logReminderEvent({
+      reminderId: data.id,
+      memoryProfileId: activeProfileId,
+      eventType: "created",
+      actorId: user.id,
+      actorRole: "caregiver",
+      occurrenceAt: utcDate,
+      metadata: {
+        recurring,
+        frequency: finalFrequency,
+      },
+    });
+
     redirect(
       isMyNestContext
         ? "/reminders?context=my-nest"
@@ -268,6 +288,10 @@ export default async function RemindersPage({
     const supabase =
       await createClient();
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const id = formData.get(
       "id"
     ) as string;
@@ -277,11 +301,14 @@ export default async function RemindersPage({
         "completed"
       ) === "true";
 
+    const newCompleted = !completed;
+
+    // PRIMARY (backward-compatible) write — the source of truth today.
     const { error } =
       await supabase
         .from("reminders")
         .update({
-          completed: !completed,
+          completed: newCompleted,
         })
         .eq("id", id)
         .eq(
@@ -301,6 +328,47 @@ export default async function RemindersPage({
       );
     }
 
+    // Best-effort lifecycle mirror — no-op until the migration adds these
+    // columns. NEVER blocks completion: the `completed` write above succeeded.
+    const {
+      error: lifecycleError,
+    } = await supabase
+      .from("reminders")
+      .update({
+        status: newCompleted
+          ? REMINDER_STATUS.COMPLETED
+          : REMINDER_STATUS.SCHEDULED,
+        completed_at: newCompleted
+          ? new Date().toISOString()
+          : null,
+        completed_by: newCompleted
+          ? user?.id ?? null
+          : null,
+        actor_role: "caregiver",
+      })
+      .eq("id", id)
+      .eq(
+        "memory_profile_id",
+        activeProfileId
+      );
+
+    if (lifecycleError) {
+      console.warn(
+        "[reminder-lifecycle] status write skipped",
+        { code: lifecycleError.code }
+      );
+    }
+
+    await logReminderEvent({
+      reminderId: id,
+      memoryProfileId: activeProfileId,
+      eventType: newCompleted
+        ? "completed"
+        : "reopened",
+      actorId: user?.id ?? null,
+      actorRole: "caregiver",
+    });
+
     redirect(
       isMyNestContext
         ? "/reminders?context=my-nest"
@@ -319,6 +387,10 @@ export default async function RemindersPage({
 
     const supabase =
       await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const id = formData.get(
       "id"
@@ -345,6 +417,16 @@ export default async function RemindersPage({
         error.message
       );
     }
+
+    // Best-effort audit event — survives reminder deletion (no FK on
+    // reminder_events.reminder_id). NEVER blocks the delete.
+    await logReminderEvent({
+      reminderId: id,
+      memoryProfileId: activeProfileId,
+      eventType: "deleted",
+      actorId: user?.id ?? null,
+      actorRole: "caregiver",
+    });
 
     redirect(
       isMyNestContext

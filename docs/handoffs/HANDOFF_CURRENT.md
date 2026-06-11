@@ -295,6 +295,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
     "Sent = Completed" problem); new skip/priority/pin actions; AI-insight hooks
     via the timestamps. Deferred because DDL is operator-only and `main`
     auto-deploys (code referencing new columns must land AFTER the migration).
+- **Reminder Lifecycle Foundation — Sprint 1 Phase 1** (foundation only; no cron/
+  notification/UI/dashboard behavior change): new `lib/reminders/lifecycle.ts`
+  (`REMINDER_STATUS` constants + best-effort `logReminderEvent` via service role)
+  and migration `supabase/migrations/20260609120000_reminder_lifecycle_foundation.sql`
+  (adds `status` + `missed_at/snoozed_until/snooze_count/completed_by/skipped_by/
+  actor_role`, the append-only **`reminder_events`** audit table + RLS (read =
+  owner/caregiver; writes service-role only), `completed→'completed'` backfill).
+  Wired best-effort event logging + a best-effort `status`/`completed_at`/
+  `completed_by` mirror into create / complete / delete — writes that **never block
+  the primary action**. Verified: build/typecheck pass; create/complete/delete all
+  still succeed; lifecycle writes no-op gracefully (`PGRST205`/`PGRST204`) while the
+  migration is unapplied. ⚠️ OPERATOR: the migration is **NOT applied yet** (verified:
+  `reminders.status` 42703 / `reminder_events` PGRST205). Apply it to activate event
+  writes (no code change needed), then verify events populate. Phase 2 (cron decouple)
+  is NOT started.
 - **Deploy fix**: `/api/billing/status` `force-dynamic` (DYNAMIC_SERVER_USAGE).
 - **Docs + workflow**: `/docs` system + consolidated `CLAUDE.md`.
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
