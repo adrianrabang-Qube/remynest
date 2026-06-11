@@ -42,6 +42,7 @@ import {
 import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
 import RemyCollections from "@/components/remy/RemyCollections";
+import RemyConnections from "@/components/remy/RemyConnections";
 import { buildRemySignals } from "@/lib/remy/signals";
 import { generateRemyObservations } from "@/lib/remy/observations";
 import {
@@ -49,6 +50,7 @@ import {
   buildRemyActivities,
 } from "@/lib/remy/activities";
 import { getRemyCollections } from "@/lib/remy/collections";
+import { getRemyConnections } from "@/lib/remy/connections";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -573,6 +575,14 @@ export default async function DashboardPage() {
       { limit: 4 }
     );
 
+  // Remy Connections (top stories — anchor title + connected count).
+  const remyConnections =
+    await getRemyConnections(
+      supabase,
+      user.id,
+      { limit: 4 }
+    );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -673,6 +683,11 @@ export default async function DashboardPage() {
         {/* REMY COLLECTIONS — the organize layer */}
         <RemyCollections
           collections={remyCollections}
+        />
+
+        {/* REMY CONNECTIONS — related-moments layer */}
+        <RemyConnections
+          connections={remyConnections}
         />
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}

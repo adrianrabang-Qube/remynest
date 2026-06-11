@@ -13,6 +13,27 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Remy Relationship Discovery V1 (Remy Connections)** (read-only; no
+  schema/migrations/AI; existing data only): exposes the stored
+  `memory_relationships` data as a human **Connections** capability — never
+  surfaces "similarity"/"vector"/"embedding"/score. New dedicated model
+  `lib/remy/connections.ts` (`getRemyConnections`, `getRemyConnectionById`) is the
+  ONLY reader of `memory_relationships` for this feature: user-scoped via
+  `.in("memory_id"/"related_memory_id", <user memory ids>)`, best-effort, builds an
+  undirected adjacency among the user's accessible memories (recent ≤400), and
+  anchors a Connection on a memory + its connected moments (≥2 → a "shared story").
+  Each connection: title (anchor memory), theme (anchor category), connectedCount,
+  recency. Sorted by connectedCount desc then recency.
+  - **Dashboard**: new `RemyConnections` section ("Connections Remy Found —
+    Memories that may be part of the same story." → top 4 → "View all
+    connections →"); hides gracefully when empty.
+  - **/connections**: grid of connection cards (title · N connected moments ·
+    "Connected to {theme}").
+  - **/connections/[id]**: header (anchor title, "These memories appear connected
+    to {theme}." / "…same story.", count, "Open this memory →") + read-only
+    connected-memory list linking to `/memories/[id]` (reuses the date helpers).
+  Distinct from the memory detail page's live `match_memories` RPC — Connections
+  reads the STORED relationships (no recompute). Degrades to empty when missing.
 - **Remy Collections V1** (read-only; no schema/migrations/AI; existing grouping
   data only): Remy's "Organize" capability — surfaces existing stored memory
   groupings as human **Collections** (never "cluster"/technical language). New
@@ -473,7 +494,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Remy Collections V1 — Organize layer (collections page + detail + dashboard)
+- `feat(remy)` Remy Connections V1 — relationship discovery (connections page + detail + dashboard)
+- `bce6d2b` feat(remy): Remy Collections V1 — Organize layer (collections page + detail + dashboard)
 - `29dbeef` feat(remy): Remy Activity Feed V1 — evidence layer
 - `187229f` feat(remy): dashboard intelligence engine (real workspace summaries)
 - `f9cb9c1` feat(memories): Memory Date is the primary date; Added date is metadata
