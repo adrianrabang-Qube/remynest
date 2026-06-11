@@ -13,6 +13,22 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Insights V2 — Remy Insights Center** (read-only; no schema/queries added; all
+  existing telemetry preserved): reframes Insights from a statistics dashboard into
+  a companion experience. Reuses the existing user-scoped memory/reminder telemetry
+  (`fetchInsightsTelemetry`) plus Remy Signals + Observations — added a pure
+  in-memory `deriveRemySignals(memories, opts)` to `lib/remy/signals.ts` so Insights
+  feeds the SAME observation engine as the dashboard (zero extra queries). New
+  `lib/remy/insights.ts` (`buildRemyInsights`) produces the sections: **Remy
+  Summary** (reuses `generateRemyObservations` + `RemyCompanion`), **Memory Health**,
+  **Routine Health** (follow-through), **Family Engagement** (category breadth /
+  family-moment proxy — forward-compatible with caregiver data), **Trends**
+  (week-over-week + mood direction), **Achievements** (unlock badges), **Gentle
+  Recommendations** (reuses gentle/actionable observations + insight-specific
+  nudges). New `components/insights/RemyInsightsCenter.tsx` renders them above the
+  charts. `InsightsClient` computes the model in-memory, leads with the center, and
+  **keeps every existing chart** under a "Detailed analytics" heading. No
+  cron/lifecycle/billing/auth changes.
 - **Historical Memory Creation** (additive, deploy-safe; existing memories
   unchanged): memories can now be dated to any past moment, not just today. A
   memory carries `created_at` (insertion, unchanged) plus an optional
@@ -396,7 +412,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(memories)` Historical Memory Creation — effective-date dating + timeline
+- `feat(insights)` Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
+- `b2eaa36` feat(memories): Historical Memory Creation — effective-date dating + timeline
 - `c7e61f4` feat(remy): Remy Companion Foundation — observation engine + avatar-ready presence
 - `18581e4` feat(dashboard): Dashboard V3 — reminder-driven command center
 - `962db0c` feat(reminders): Reminder Center V2 — Phase 1 (sectioned UX + local timezone)

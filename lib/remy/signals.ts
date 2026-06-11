@@ -91,6 +91,80 @@ async function countMemories(
   }
 }
 
+/** Minimal memory shape Remy needs from already-fetched telemetry. */
+export interface TelemetryMemory {
+  created_at: string;
+}
+
+/**
+ * Derive Remy signals from in-memory telemetry (no DB) — lets surfaces that
+ * already hold memory rows (e.g. Insights) feed the SAME observation engine the
+ * dashboard uses, with zero extra queries. Reminder buckets are left at 0
+ * because adherence-grade reminder data is computed per-surface where available.
+ */
+export function deriveRemySignals(
+  memories: TelemetryMemory[],
+  opts: {
+    subjectName: string | null;
+    isCareContext: boolean;
+    now?: Date;
+  }
+): RemySignals {
+  const now = opts.now ?? new Date();
+  const weekAgo = now.getTime() - 7 * 86_400_000;
+  const monthStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1
+  ).getTime();
+  const lastMonthStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  ).getTime();
+
+  let addedThisWeek = 0;
+  let addedThisMonth = 0;
+  let addedLastMonth = 0;
+  let lastAddedAt: string | null = null;
+  let lastAddedMs = -Infinity;
+
+  for (const m of memories) {
+    const t = new Date(m.created_at).getTime();
+    if (Number.isNaN(t)) continue;
+    if (t >= weekAgo) addedThisWeek += 1;
+    if (t >= monthStart) addedThisMonth += 1;
+    else if (t >= lastMonthStart) addedLastMonth += 1;
+    if (t > lastAddedMs) {
+      lastAddedMs = t;
+      lastAddedAt = m.created_at;
+    }
+  }
+
+  return {
+    subjectName: opts.subjectName,
+    isCareContext: opts.isCareContext,
+    memories: {
+      total: memories.length,
+      addedThisWeek,
+      addedThisMonth,
+      addedLastMonth,
+      lastAddedAt,
+    },
+    reminders: {
+      today: 0,
+      overdue: 0,
+      upcomingToday: 0,
+      completedToday: 0,
+      routines: 0,
+    },
+    workspace: {
+      pendingInvites: 0,
+      accessibleProfiles: 0,
+    },
+  };
+}
+
 async function latestMemoryAt(
   supabase: DashboardSupabase,
   memoryProfileId: string | null

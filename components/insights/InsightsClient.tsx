@@ -163,6 +163,8 @@ import { calculateSleepRecoveryTelemetry } from "@/lib/cognition/sleepRecoveryEn
 import { calculateWearableTelemetry } from "@/lib/cognition/wearableEngine";
 
 import { generateInsightSummary } from "@/lib/insights/generateInsightSummary";
+import { buildRemyInsights } from "@/lib/remy/insights";
+import RemyInsightsCenter from "@/components/insights/RemyInsightsCenter";
 
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
 
@@ -511,6 +513,23 @@ export default function InsightsClient({
       reminderData,
     ]);
 
+  // =====================================
+  // REMY INSIGHTS CENTER (companion layer)
+  //   Reuses existing telemetry + Remy signals/observations. Read-only.
+  // =====================================
+
+  const remyInsights =
+    useMemo(() => {
+
+      return buildRemyInsights({
+        memories,
+        reminders,
+        subjectName: null,
+        isCareContext: false,
+      });
+
+    }, [memories, reminders]);
+
   return (
 
     <div className="max-w-7xl mx-auto p-6 space-y-8">
@@ -520,17 +539,16 @@ export default function InsightsClient({
       <div>
 
         <div className="inline-flex items-center rounded-full bg-white border px-4 py-2 text-sm text-gray-600 mb-6">
-          Cognitive Analytics
+          Remy Insights Center
         </div>
 
-        <h1 className="text-6xl font-bold tracking-tight text-[#243428]">
-          Insights Dashboard
+        <h1 className="text-5xl font-bold tracking-tight text-[#243428]">
+          How things are going
         </h1>
 
         <p className="text-gray-500 text-xl mt-4">
-          Longitudinal cognitive insights,
-          emotional trends,
-          and continuity analytics.
+          A calm, companion view of memories, routines, and the days ahead —
+          with the full analytics preserved below.
         </p>
 
       </div>
@@ -541,6 +559,21 @@ export default function InsightsClient({
         variant="banner"
         kind="insights"
       />
+
+      {/* REMY INSIGHTS CENTER — companion experience */}
+
+      <RemyInsightsCenter
+        model={remyInsights}
+      />
+
+      {/* DETAILED ANALYTICS — full telemetry preserved */}
+
+      <div className="pt-4">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+          Detailed analytics
+        </h2>
+        <div className="mt-1 h-px w-full bg-gray-200" />
+      </div>
 
       {/* AI INTERPRETATION */}
 
