@@ -3,14 +3,28 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-06
+**Last updated:** 2026-06-11
 
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
 shipped and validated** end-to-end. Single authoritative workflow established in
-`CLAUDE.md` (Investigation/Execution modes).
+`CLAUDE.md` (Investigation/Execution modes). **Dashboard V3** shipped (reminder-driven
+command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
+(`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Dashboard V3 — command center** (build-safe; no lifecycle/cron/notification
+  changes): replaced the admin "Today's Focus" metric list with a reminder-driven
+  focus surface — **Right Now · Upcoming Today · Routine Progress · Reminder Summary ·
+  Remy Insight Preview** — rendered in the user's local timezone. New shared Focus
+  model `lib/reminders/focus.ts` (`deriveDashboardFocus`) is the single source both
+  the Dashboard (now) and the future status-based Focus engine / Reminder Center
+  consume; forward-compatible with the lifecycle `status` column (falls back to
+  `completed`). New client widget `components/.../DashboardFocus.tsx`. Dashboard
+  fetches reminders read-only (existing columns only) scoped to the active care
+  profile; My Nest shows a gentle "enter a care profile" state. Administrative
+  context (Care Snapshot, Memory Insights, invites, account status) moved under a
+  separate **Account & Workspace** section.
 - **Launch hardening** (merged to `main`): Playwright security automation, AI
   disclaimers, premium 402, GDPR export, legal pages, CRON_SECRET, `/api/health`,
   error-message sanitisation, Sentry wiring + error boundaries.
@@ -341,6 +355,11 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
+- `feat(dashboard)` Dashboard V3 — reminder-driven command center + shared Focus model
+- `962db0c` feat(reminders): Reminder Center V2 — Phase 1 (sectioned UX + local timezone)
+- `b35a668` feat(reminders): Reminder Lifecycle Foundation — Phase 1 (events + status, deploy-safe)
+- `866acce` fix(security): remove send-reminder injection vector + block device hijack
+- `22fc8ff` fix(security): caregiver authz P0 — ownership checks + RLS write hardening
 - `399625a` docs: consolidate to a single authoritative Claude workflow
 - `c000ae8` fix(api): force-dynamic on `/api/billing/status`
 - `e227abe` test(gdpr): add delete account validation harness

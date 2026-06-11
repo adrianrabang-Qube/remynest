@@ -34,6 +34,8 @@ import DashboardCreateProfile from "./components/DashboardCreateProfile";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
+import DashboardFocus from "./components/DashboardFocus";
+import type { FocusReminder } from "@/lib/reminders/focus";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -446,6 +448,43 @@ export default async function DashboardPage() {
     );
   }
 
+  // =====================================
+  // REMINDER FOCUS (read-only)
+  //   Reminders are care-only; only fetched for an active care profile.
+  //   Selects existing columns only (lifecycle `status` is not yet migrated);
+  //   the shared Focus model falls back to `completed`. No lifecycle write.
+  // =====================================
+
+  let focusReminders: FocusReminder[] = [];
+
+  if (effectiveActiveProfileId) {
+    const {
+      data: reminderRows,
+      error: reminderError,
+    } = await supabase
+      .from("reminders")
+      .select(
+        "id, title, remind_at, completed, recurring, frequency, completed_at"
+      )
+      .eq(
+        "memory_profile_id",
+        effectiveActiveProfileId
+      );
+
+    if (reminderError) {
+      logDashboardError(
+        "reminder-focus-error",
+        {
+          dashboardRequestId,
+          reminderError,
+        }
+      );
+    } else {
+      focusReminders = (reminderRows ||
+        []) as FocusReminder[];
+    }
+  }
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -464,18 +503,6 @@ export default async function DashboardPage() {
       title: "Continue memory chat",
       href: "/memory-chat",
     },
-  ];
-
-  const todaysFocus = [
-    memoryCount === 0
-      ? "Create your first memory"
-      : `You currently have ${memoryCount} memories stored`,
-    pendingInvites?.length
-      ? `${pendingInvites.length} caregiver invite(s) waiting`
-      : "No pending caregiver invites",
-    isMyNestWorkspace
-      ? "Personal workspace active"
-      : "Care workspace active",
   ];
 
   logDashboardStage(
@@ -540,31 +567,31 @@ export default async function DashboardPage() {
           displayName={displayName}
         />
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border bg-card p-5">
-            <h2 className="text-lg font-semibold">Today&apos;s Focus</h2>
-            <ul className="mt-3 space-y-2 text-sm">
-              {todaysFocus.map((item) => (
-                <li key={item}>• {item}</li>
-              ))}
-            </ul>
-          </div>
+        {/* PRIMARY COMMAND CENTER — reminder-driven focus */}
+        <DashboardFocus
+          reminders={focusReminders}
+          careProfileName={
+            activeProfile?.preferred_name ||
+            activeProfile?.profile_name ||
+            null
+          }
+          isMyNest={isMyNestWorkspace}
+        />
 
-          <div className="rounded-xl border bg-card p-5">
-            <h2 className="text-lg font-semibold">Quick Resume</h2>
-            <div className="mt-3 flex flex-col gap-2">
-              {recentMemories.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="text-sm underline"
-                >
-                  {item.title}
-                </Link>
-              ))}
-            </div>
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+          <h2 className="text-lg font-semibold text-charcoal">Quick Resume</h2>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+            {recentMemories.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="text-sm font-medium text-sage-deep underline-offset-2 hover:underline"
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
-        </section>
+        </div>
 
         {/* MY NEST → CARE ENTRY (writes remynest-active-context) */}
         {isMyNestContext && (
@@ -600,21 +627,31 @@ export default async function DashboardPage() {
             />
         )}
 
-        {/* PRIMARY METRICS LAYER */}
+        {/* =====================================================
+            ACCOUNT & WORKSPACE
+            Administrative context (workspace state, invites,
+            account status) — separated from the focus surface.
+        ===================================================== */}
+        <div className="pt-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-charcoal-muted">
+            Account &amp; Workspace
+          </h2>
+          <div className="mt-1 h-px w-full bg-sand-deep/60" />
+        </div>
 
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border bg-card p-5">
-            <h2 className="text-lg font-semibold">Care Snapshot</h2>
-            <div className="mt-3 space-y-2 text-sm">
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+            <h3 className="text-lg font-semibold text-charcoal">Care Snapshot</h3>
+            <div className="mt-3 space-y-2 text-sm text-charcoal-soft">
               <p>Workspace: {workspaceType}</p>
               <p>Accessible profiles: {accessibleProfiles.length}</p>
               <p>Total memories: {memoryCount}</p>
             </div>
           </div>
 
-          <div className="rounded-xl border bg-card p-5">
-            <h2 className="text-lg font-semibold">AI Insight Preview</h2>
-            <p className="mt-3 text-sm text-muted-foreground">
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+            <h3 className="text-lg font-semibold text-charcoal">Memory Insights</h3>
+            <p className="mt-3 text-sm text-charcoal-soft">
               Memory activity and cognitive insight summaries will appear here,
               giving caregivers and users a quick overview before opening Insights.
             </p>
