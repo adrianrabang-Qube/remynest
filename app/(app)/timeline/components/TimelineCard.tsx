@@ -1,6 +1,12 @@
 import IntelligenceStrip from "./IntelligenceStrip";
 import RelatedMemories from "./RelatedMemories";
 import TimelineAttachmentImage from "./TimelineAttachmentImage";
+import {
+  isHistoricalMemory,
+  resolveEffectiveDate,
+  resolveEffectivePrecision,
+  formatMemoryDate,
+} from "@/lib/memories/memory-date";
 
 type Attachment = {
   name?: string;
@@ -16,6 +22,8 @@ type Memory = {
   title: string;
   content: string;
   created_at: string;
+  memory_date?: string | null;
+  memory_date_precision?: string | null;
 
   ai_title?: string;
   ai_summary?: string;
@@ -104,6 +112,14 @@ export default function TimelineCard({
       minute: "2-digit",
     });
 
+  const historical = isHistoricalMemory(memory);
+  const historicalLabel = historical
+    ? formatMemoryDate(
+        resolveEffectiveDate(memory),
+        resolveEffectivePrecision(memory)
+      )
+    : null;
+
   return (
     <details className="group bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md open:shadow-md">
       <summary className="list-none cursor-pointer p-7 transition-colors group-open:bg-gray-50/40">
@@ -114,7 +130,13 @@ export default function TimelineCard({
             </h3>
 
             <p className="text-gray-400 mt-3 text-lg">
-              {formattedTime}
+              {historicalLabel ? (
+                <span className="inline-flex items-center gap-1 text-sage-deep font-medium">
+                  🕰 {historicalLabel}
+                </span>
+              ) : (
+                formattedTime
+              )}
             </p>
           </div>
 

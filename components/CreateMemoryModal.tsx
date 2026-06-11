@@ -4,6 +4,8 @@ import { useState } from "react";
 import {
   buildMemoryUploadPayload,
 } from "@/lib/memory-upload-client";
+import MemoryDateField from "@/components/memories/MemoryDateField";
+import type { ResolvedMemoryDate } from "@/lib/memories/memory-date";
 
 export default function CreateMemoryModal({
   onClose,
@@ -14,12 +16,19 @@ export default function CreateMemoryModal({
     title: string;
     content: string;
     uploadedFiles?: File[];
+    memoryDate?: string | null;
+    memoryDatePrecision?: string;
   }) => Promise<void>;
 }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [uploadedFiles, setUploadedFiles] =
     useState<File[]>([]);
+  const [memoryDate, setMemoryDate] =
+    useState<ResolvedMemoryDate>({
+      memoryDate: null,
+      precision: "day",
+    });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,7 +44,11 @@ export default function CreateMemoryModal({
           uploadedFiles,
         });
 
-      await onCreate(payload);
+      await onCreate({
+        ...payload,
+        memoryDate: memoryDate.memoryDate,
+        memoryDatePrecision: memoryDate.precision,
+      });
     } catch (createError) {
       console.error(createError);
       setError(
@@ -66,6 +79,8 @@ export default function CreateMemoryModal({
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
+
+        <MemoryDateField onChange={setMemoryDate} />
 
         {error ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

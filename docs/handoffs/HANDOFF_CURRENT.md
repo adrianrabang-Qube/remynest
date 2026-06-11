@@ -29,23 +29,23 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   charts. `InsightsClient` computes the model in-memory, leads with the center, and
   **keeps every existing chart** under a "Detailed analytics" heading. No
   cron/lifecycle/billing/auth changes.
-- **Historical Memory Creation** (additive, deploy-safe; existing memories
-  unchanged): memories can now be dated to any past moment, not just today. A
-  memory carries `created_at` (insertion, unchanged) plus an optional
-  `memory_date` + `memory_date_precision` (`day`/`month`/`year`/`decade`); the
-  **effective date = memory_date ?? created_at** drives the timeline, so rows
-  without a memory_date behave exactly as before. New shared model
-  `lib/memories/memory-date.ts` (`buildMemoryDate` for Today/Yesterday/Last
-  week/Custom/Year/Decade, precision-aware `formatMemoryDate`/group label,
-  `validateAndResolveMemoryDate` server guard rejecting future/out-of-range).
-  `CreateMemoryForm` gained a "When did this happen?" control. API
-  `/api/memories/create` validates the date and applies it via a **best-effort
-  follow-up UPDATE** (deploy-safe — no-ops with PGRST204 until the columns are
-  migrated; memory creation is never blocked). Timeline sorts + groups by
-  effective date with precision-aware headings ("2020", "1980s"). **OPERATOR:
-  apply `20260611120000_memory_historical_dating.sql`** to activate persistence
-  (until then, historical dates are silently dropped and memories keep today's
-  date). The legacy `/memories/new` basic form is unchanged (defaults to today).
+- **Historical Memory Creation** (additive; existing memories unchanged;
+  migration LIVE in production): memories can be dated to any past moment. A
+  memory carries `created_at` (insertion, unchanged) plus optional `memory_date`
+  + `memory_date_precision` (`day`/`month`/`year`/`decade`); the **effective date
+  = memory_date ?? created_at** drives the timeline + memories list, so rows
+  without a memory_date behave exactly as before. Shared model
+  `lib/memories/memory-date.ts` (`buildMemoryDate`, precision-aware
+  `formatMemoryDate`/group label, `validateAndResolveMemoryDate` guard,
+  `selectionFromMemoryDate` for edit prefill).
+  - **Full UX coverage (2nd pass)**: new shared `components/memories/MemoryDateField.tsx`
+    (Today/Yesterday/Custom/Month/Year/Decade) wired into BOTH **CreateMemoryModal**
+    (memories page) and **EditMemoryModal** — the modal posts multipart, so
+    `create/route.ts` now reads `memoryDate`/`memoryDatePrecision` in its FormData
+    branch too. Edit persists via `PUT /api/memories/[id]` (validated; only touched
+    when the field is sent). **MemoryCard** + **TimelineCard** show the historical
+    date (🕰 badge); memories list buckets by effective date. `CreateMemoryForm`
+    (dashboard) retains its own inline control (JSON path).
 - **Remy Companion Foundation** (read-only; no schema/migration/cron/lifecycle/
   billing/auth changes): the AI companion layer (NOT a chatbot) that turns
   existing data into calm, supportive observations. Engine + presence are
@@ -379,11 +379,6 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 - **Mobile**: Capacitor remote-URL wrapper; iOS build verified (`feat/capacitor-mobile`).
 
 ## Open issues
-- **Operator migration pending — Historical Memory Dating**: apply
-  `supabase/migrations/20260611120000_memory_historical_dating.sql` (adds
-  `memories.memory_date` + `memory_date_precision`). Code is deployed and
-  deploy-safe; until applied, chosen historical dates are silently dropped
-  (memories keep today's date). No backfill needed.
 - **Operator migration pending — Reminder Lifecycle**: apply
   `20260609120000_reminder_lifecycle_foundation.sql` (see Completed work).
 - `users` table missing → `save-onesignal` / `save-subscription` broken.
@@ -412,7 +407,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(insights)` Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
+- `feat(memories)` Historical Memory UX — date field in create/edit modals + cards
+- `649993b` feat(insights): Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
 - `b2eaa36` feat(memories): Historical Memory Creation — effective-date dating + timeline
 - `c7e61f4` feat(remy): Remy Companion Foundation — observation engine + avatar-ready presence
 - `18581e4` feat(dashboard): Dashboard V3 — reminder-driven command center

@@ -3,6 +3,7 @@ import {
   normalizeAttachments,
   resolveCoverImageUrl,
 } from "@/lib/memory-media";
+import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 export async function PUT(
   req: Request,
@@ -29,6 +30,34 @@ export async function PUT(
       body.coverImageUrl
     );
 
+  // Historical date — only touched when the caller includes it, so other PUT
+  // callers are unaffected. Effective date = coalesce(memory_date, created_at).
+  const memoryDateUpdate: {
+    memory_date?: string | null;
+    memory_date_precision?: string | null;
+  } = {};
+
+  if ("memoryDate" in body) {
+    const resolved =
+      validateAndResolveMemoryDate(
+        body.memoryDate,
+        body.memoryDatePrecision
+      );
+
+    if (!resolved.ok) {
+      return new Response(resolved.error, {
+        status: 400,
+      });
+    }
+
+    memoryDateUpdate.memory_date =
+      resolved.memoryDate;
+    memoryDateUpdate.memory_date_precision =
+      resolved.memoryDate
+        ? resolved.precision
+        : null;
+  }
+
   const { error } = await supabase
     .from("memories")
     .update({
@@ -40,6 +69,8 @@ export async function PUT(
 
       cover_image_url:
         normalizedCoverImageUrl,
+
+      ...memoryDateUpdate,
     })
     .eq("id", params.id)
     .eq("user_id", user.id);

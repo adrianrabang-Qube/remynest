@@ -18,12 +18,18 @@ import {
 import MemoryCard from "@/components/MemoryCard";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
+import {
+  resolveEffectiveDate,
+  effectiveSortValue,
+} from "@/lib/memories/memory-date";
 
 type Memory = {
   id: string;
   title: string;
   content: string;
   created_at: string;
+  memory_date?: string | null;
+  memory_date_precision?: string | null;
 };
 
 type ApiMetadata = {
@@ -289,6 +295,8 @@ return normalizedMemories;
   title: string;
   content: string;
   uploadedFiles?: File[];
+  memoryDate?: string | null;
+  memoryDatePrecision?: string;
 }) => {
       const payload =
   new FormData();
@@ -297,6 +305,18 @@ payload.append(
   "title",
   data.title
 );
+
+if (data.memoryDate) {
+  payload.append(
+    "memoryDate",
+    data.memoryDate
+  );
+
+  payload.append(
+    "memoryDatePrecision",
+    data.memoryDatePrecision ?? "day"
+  );
+}
 
 payload.append(
   "content",
@@ -417,10 +437,14 @@ const res = await fetch(
       id,
       title,
       content,
+      memoryDate,
+      memoryDatePrecision,
     }: {
       id: string;
       title: string;
       content: string;
+      memoryDate?: string | null;
+      memoryDatePrecision?: string;
     }) => {
       const res = await fetch(
         `/api/memories/${id}`,
@@ -435,6 +459,10 @@ const res = await fetch(
             content,
             profileId:
               activeProfileId,
+            memoryDate:
+              memoryDate ?? null,
+            memoryDatePrecision:
+              memoryDatePrecision ?? "day",
           }),
         }
       );
@@ -601,12 +629,8 @@ const sortedMemories = [
   ...normalizedMemories,
 ].sort(
     (a, b) =>
-      new Date(
-        b.created_at
-      ).getTime() -
-      new Date(
-        a.created_at
-      ).getTime()
+      effectiveSortValue(b) -
+      effectiveSortValue(a)
   );
 
   // =========================
@@ -634,9 +658,8 @@ const sortedMemories = [
 
   sortedMemories.forEach(
     (memory) => {
-      const date = new Date(
-        memory.created_at
-      );
+      const date =
+        resolveEffectiveDate(memory);
 
       if (date >= startOfToday) {
         today.push(memory);

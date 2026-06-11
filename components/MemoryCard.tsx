@@ -3,6 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
+import {
+  resolveEffectiveDate,
+  resolveEffectivePrecision,
+  formatMemoryDate,
+  isHistoricalMemory,
+} from "@/lib/memories/memory-date";
 
 const IMAGE_ATTACHMENT_FALLBACK =
   "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' fill='%23f3f4f6'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%236b7280'%3EImage unavailable%3C/text%3E%3C/svg%3E";
@@ -23,6 +29,8 @@ type Memory = {
   content: string;
 
   created_at?: string;
+  memory_date?: string | null;
+  memory_date_precision?: string | null;
 
   ai_title?: string;
   ai_summary?: string;
@@ -42,6 +50,23 @@ export default function MemoryCard({
   const [imageError, setImageError] =
     useState<Record<number, boolean>>({});
 
+  const historical = isHistoricalMemory(memory);
+  const dateLabel = memory.created_at
+    ? formatMemoryDate(
+        resolveEffectiveDate({
+          created_at: memory.created_at,
+          memory_date: memory.memory_date,
+          memory_date_precision: memory.memory_date_precision,
+        }),
+        resolveEffectivePrecision({
+          created_at: memory.created_at,
+          memory_date: memory.memory_date,
+          memory_date_precision: memory.memory_date_precision,
+        }),
+        { relative: true }
+      )
+    : null;
+
   return (
     <Link href={`/memories/${memory.id}`}>
       <div className="rounded-3xl border border-sand-deep/70 p-5 mb-4 bg-white shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5 transition overflow-hidden cursor-pointer">
@@ -49,6 +74,19 @@ export default function MemoryCard({
         <h3 className="font-semibold text-lg text-charcoal break-words whitespace-pre-wrap">
           {memory.ai_title || memory.title}
         </h3>
+
+        {/* Effective date — highlights historical memories */}
+        {dateLabel && (
+          <p
+            className={`mt-0.5 text-xs ${
+              historical
+                ? "font-medium text-sage-deep"
+                : "text-charcoal-muted"
+            }`}
+          >
+            {historical ? `🕰 ${dateLabel}` : dateLabel}
+          </p>
+        )}
 
         {/* Content */}
         <p className="text-sm text-charcoal-soft mt-1 mb-2 break-words whitespace-pre-wrap">

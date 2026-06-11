@@ -51,7 +51,9 @@ export function resolveEffectivePrecision(
 }
 
 /** True when the memory was explicitly dated to a past moment. */
-export function isHistoricalMemory(m: DatedMemory): boolean {
+export function isHistoricalMemory(m: {
+  memory_date?: string | null;
+}): boolean {
   return Boolean(m.memory_date);
 }
 
@@ -127,6 +129,7 @@ export type MemoryDateMode =
   | "yesterday"
   | "last-week"
   | "custom"
+  | "month"
   | "year"
   | "decade";
 
@@ -134,6 +137,8 @@ export interface MemoryDateSelection {
   mode: MemoryDateMode;
   /** yyyy-mm-dd, for the "custom" mode. */
   customDate?: string;
+  /** yyyy-mm, for the "month" mode. */
+  month?: string;
   /** e.g. 1995, for the "year" mode. */
   year?: number;
   /** decade start, e.g. 1980, for the "decade" mode. */
@@ -184,6 +189,18 @@ export function buildMemoryDate(
       return {
         memoryDate: new Date(y, mo - 1, da, 12, 0, 0).toISOString(),
         precision: "day",
+      };
+    }
+    case "month": {
+      if (!sel.month) return { memoryDate: null, precision: "day" };
+      const parts = sel.month.split("-").map(Number);
+      if (parts.length !== 2 || parts.some(Number.isNaN)) {
+        return { memoryDate: null, precision: "day" };
+      }
+      const [y, mo] = parts;
+      return {
+        memoryDate: new Date(y, mo - 1, 1, 12, 0, 0).toISOString(),
+        precision: "month",
       };
     }
     case "year": {
@@ -241,4 +258,43 @@ export function validateAndResolveMemoryDate(
     memoryDate: d.toISOString(),
     precision: isPrecision(precision) ? precision : "day",
   };
+}
+
+// ---------------------------------------------------------------------------
+// Editing — turn an existing stored memory_date back into a UI selection
+// ---------------------------------------------------------------------------
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * Derive the initial UI selection for editing a memory's historical date.
+ * No memory_date → "today" (effective date stays created_at).
+ */
+export function selectionFromMemoryDate(
+  memoryDate: string | null | undefined,
+  precision: string | null | undefined
+): MemoryDateSelection {
+  if (!memoryDate) return { mode: "today" };
+  const d = new Date(memoryDate);
+  if (Number.isNaN(d.getTime())) return { mode: "today" };
+
+  const p = isPrecision(precision) ? precision : "day";
+  const y = d.getFullYear();
+
+  switch (p) {
+    case "decade":
+      return { mode: "decade", decade: Math.floor(y / 10) * 10 };
+    case "year":
+      return { mode: "year", year: y };
+    case "month":
+      return { mode: "month", month: `${y}-${pad2(d.getMonth() + 1)}` };
+    case "day":
+    default:
+      return {
+        mode: "custom",
+        customDate: `${y}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`,
+      };
+  }
 }

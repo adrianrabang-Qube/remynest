@@ -220,6 +220,16 @@ export async function POST(req: Request) {
             "profileId"
           ),
 
+        memoryDate:
+          formData.get(
+            "memoryDate"
+          ),
+
+        memoryDatePrecision:
+          formData.get(
+            "memoryDatePrecision"
+          ),
+
         uploadedFiles:
           formData.getAll(
             "uploadedFiles"
