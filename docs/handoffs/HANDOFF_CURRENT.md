@@ -43,9 +43,19 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     (memories page) and **EditMemoryModal** — the modal posts multipart, so
     `create/route.ts` now reads `memoryDate`/`memoryDatePrecision` in its FormData
     branch too. Edit persists via `PUT /api/memories/[id]` (validated; only touched
-    when the field is sent). **MemoryCard** + **TimelineCard** show the historical
-    date (🕰 badge); memories list buckets by effective date. `CreateMemoryForm`
-    (dashboard) retains its own inline control (JSON path).
+    when the field is sent). `CreateMemoryForm` (dashboard) retains its own inline
+    control (JSON path).
+  - **Date hierarchy (3rd pass — presentation only)**: Memory Date is now the
+    PRIMARY date everywhere; created_at is secondary "Added" metadata. Two canonical
+    formatters in `lib/memories/memory-date.ts`: `formatMemoryDateLabel` (always the
+    actual event date, NEVER relative — day "July 4, 1980", month "May 1980", year
+    "1980", decade "1980s") and `formatAddedDate` ("June 11, 2026"). Applied to
+    **MemoryCard** (+ memories-page search results), **memory detail page**,
+    **TimelineCard**, and **RelatedMemories** preview: each shows "🕰 Memory Date: …"
+    prominently and "Added to RemyNest on …" subtly. No relative labels
+    (Today/Yesterday) anywhere. Standalone `/search` page is unchanged — it uses the
+    `match_memories` RPC whose projection lacks date columns (surfacing them would
+    require an RPC/schema change). No schema/grouping/effective-date logic changed.
 - **Remy Companion Foundation** (read-only; no schema/migration/cron/lifecycle/
   billing/auth changes): the AI companion layer (NOT a chatbot) that turns
   existing data into calm, supportive observations. Engine + presence are
@@ -407,7 +417,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(memories)` Historical Memory UX — date field in create/edit modals + cards
+- `feat(memories)` Memory Date hierarchy — primary memory date + secondary Added date
+- `3e36338` feat(memories): complete Historical Memory UX (create modal, edit, cards)
 - `649993b` feat(insights): Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
 - `b2eaa36` feat(memories): Historical Memory Creation — effective-date dating + timeline
 - `c7e61f4` feat(remy): Remy Companion Foundation — observation engine + avatar-ready presence

@@ -5,6 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { signMemory, signMemories } from "@/lib/memory-media-signing";
 import MemoryCoverImage from "@/components/MemoryCoverImage";
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
+import {
+  formatMemoryDateLabel,
+  formatAddedDate,
+} from "@/lib/memories/memory-date";
 
 type Props = {
   params: {
@@ -117,11 +121,9 @@ export default async function MemoryPage({
                   memory.title}
               </h1>
 
-              <p className="text-sm text-gray-400 mt-3">
-                Created{" "}
-                {new Date(
-                  memory.created_at
-                ).toLocaleString()}
+              <p className="text-base font-medium text-sage-deep mt-3">
+                🕰 Memory Date:{" "}
+                {formatMemoryDateLabel(memory)}
               </p>
             </div>
 
@@ -449,6 +451,13 @@ export default async function MemoryPage({
 
         {/* Footer */}
         <div className="px-8 py-6 bg-gray-50">
+          {formatAddedDate(memory.created_at) && (
+            <p className="text-xs text-gray-400 mb-3">
+              Added to RemyNest on{" "}
+              {formatAddedDate(memory.created_at)}
+            </p>
+          )}
+
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="text-sm text-gray-500">
               Semantic Memory Stored

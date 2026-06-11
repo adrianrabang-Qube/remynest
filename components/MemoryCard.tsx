@@ -4,10 +4,8 @@ import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import {
-  resolveEffectiveDate,
-  resolveEffectivePrecision,
-  formatMemoryDate,
-  isHistoricalMemory,
+  formatMemoryDateLabel,
+  formatAddedDate,
 } from "@/lib/memories/memory-date";
 
 const IMAGE_ATTACHMENT_FALLBACK =
@@ -50,22 +48,15 @@ export default function MemoryCard({
   const [imageError, setImageError] =
     useState<Record<number, boolean>>({});
 
-  const historical = isHistoricalMemory(memory);
-  const dateLabel = memory.created_at
-    ? formatMemoryDate(
-        resolveEffectiveDate({
-          created_at: memory.created_at,
-          memory_date: memory.memory_date,
-          memory_date_precision: memory.memory_date_precision,
-        }),
-        resolveEffectivePrecision({
-          created_at: memory.created_at,
-          memory_date: memory.memory_date,
-          memory_date_precision: memory.memory_date_precision,
-        }),
-        { relative: true }
-      )
+  const memoryDateLabel = memory.created_at
+    ? formatMemoryDateLabel({
+        created_at: memory.created_at,
+        memory_date: memory.memory_date,
+        memory_date_precision: memory.memory_date_precision,
+      })
     : null;
+
+  const addedDate = formatAddedDate(memory.created_at);
 
   return (
     <Link href={`/memories/${memory.id}`}>
@@ -75,16 +66,10 @@ export default function MemoryCard({
           {memory.ai_title || memory.title}
         </h3>
 
-        {/* Effective date — highlights historical memories */}
-        {dateLabel && (
-          <p
-            className={`mt-0.5 text-xs ${
-              historical
-                ? "font-medium text-sage-deep"
-                : "text-charcoal-muted"
-            }`}
-          >
-            {historical ? `🕰 ${dateLabel}` : dateLabel}
+        {/* Primary date — when the memory happened */}
+        {memoryDateLabel && (
+          <p className="mt-0.5 text-sm font-medium text-sage-deep">
+            🕰 Memory Date: {memoryDateLabel}
           </p>
         )}
 
@@ -191,6 +176,13 @@ export default function MemoryCard({
             Delete
           </button>
         </div>
+
+        {/* Added/recorded date — secondary metadata */}
+        {addedDate && (
+          <p className="mt-3 text-[11px] text-charcoal-muted">
+            Added to RemyNest on {addedDate}
+          </p>
+        )}
       </div>
     </Link>
   );

@@ -120,6 +120,42 @@ export function formatMemoryGroupLabel(m: DatedMemory): string {
   );
 }
 
+/**
+ * Primary "Memory Date" label — the ACTUAL event date, NEVER relative.
+ * day → "July 4, 1980", month → "May 1980", year → "1980", decade → "1980s".
+ * This is the canonical date users should always see for a memory.
+ */
+export function formatMemoryDateLabel(m: DatedMemory): string {
+  const date = resolveEffectiveDate(m);
+  const precision = resolveEffectivePrecision(m);
+  if (precision === "day") {
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+  // decade / year / month reuse the shared formatter (no weekday, no relative).
+  return formatMemoryDate(date, precision);
+}
+
+/**
+ * Secondary "Added/Recorded" metadata date — when the memory was recorded into
+ * RemyNest (created_at). e.g. "June 11, 2026". Low hierarchy.
+ */
+export function formatAddedDate(
+  createdAt: string | null | undefined
+): string | null {
+  if (!createdAt) return null;
+  const d = new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Building a memory date from a UI selection (client) — shared with the form
 // ---------------------------------------------------------------------------

@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { formatMemoryDateLabel } from "@/lib/memories/memory-date";
 
 type RelatedMemory = {
   id: string;
   title: string;
   ai_title?: string;
   created_at: string;
+  memory_date?: string | null;
+  memory_date_precision?: string | null;
 
   ai_category?: string;
   ai_importance?: string;
@@ -21,30 +24,6 @@ function buildDisplayTitle(
     memory.ai_title?.trim() ||
     memory.title?.trim() ||
     "Untitled Memory"
-  );
-}
-
-function buildFormattedDate(
-  createdAt: string
-) {
-  const parsedDate =
-    new Date(createdAt);
-
-  if (
-    Number.isNaN(
-      parsedDate.getTime()
-    )
-  ) {
-    return "Unknown date";
-  }
-
-  return parsedDate.toLocaleDateString(
-    "en-IE",
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }
   );
 }
 
@@ -92,9 +71,9 @@ export default function RelatedMemories({
                 memory
               );
 
-            const formattedDate =
-              buildFormattedDate(
-                memory.created_at
+            const memoryDateLabel =
+              formatMemoryDateLabel(
+                memory
               );
 
             return (
@@ -109,8 +88,8 @@ export default function RelatedMemories({
                       {displayTitle}
                     </p>
 
-                    <p className="text-sm text-gray-500 mt-1">
-                      {formattedDate}
+                    <p className="text-sm text-sage-deep font-medium mt-1">
+                      🕰 {memoryDateLabel}
                     </p>
                   </div>
 

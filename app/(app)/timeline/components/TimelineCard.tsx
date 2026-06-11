@@ -2,10 +2,8 @@ import IntelligenceStrip from "./IntelligenceStrip";
 import RelatedMemories from "./RelatedMemories";
 import TimelineAttachmentImage from "./TimelineAttachmentImage";
 import {
-  isHistoricalMemory,
-  resolveEffectiveDate,
-  resolveEffectivePrecision,
-  formatMemoryDate,
+  formatMemoryDateLabel,
+  formatAddedDate,
 } from "@/lib/memories/memory-date";
 
 type Attachment = {
@@ -104,21 +102,12 @@ export default function TimelineCard({
     )
   );
 
-  const formattedTime =
-    new Date(
-      memory.created_at
-    ).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const memoryDateLabel =
+    formatMemoryDateLabel(memory);
 
-  const historical = isHistoricalMemory(memory);
-  const historicalLabel = historical
-    ? formatMemoryDate(
-        resolveEffectiveDate(memory),
-        resolveEffectivePrecision(memory)
-      )
-    : null;
+  const addedDate = formatAddedDate(
+    memory.created_at
+  );
 
   return (
     <details className="group bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md open:shadow-md">
@@ -129,14 +118,8 @@ export default function TimelineCard({
               {displayTitle}
             </h3>
 
-            <p className="text-gray-400 mt-3 text-lg">
-              {historicalLabel ? (
-                <span className="inline-flex items-center gap-1 text-sage-deep font-medium">
-                  🕰 {historicalLabel}
-                </span>
-              ) : (
-                formattedTime
-              )}
+            <p className="mt-3 text-lg font-medium text-sage-deep">
+              🕰 Memory Date: {memoryDateLabel}
             </p>
           </div>
 
@@ -238,6 +221,13 @@ export default function TimelineCard({
         <RelatedMemories
           memories={relatedMemories}
         />
+
+        {/* Added/recorded date — secondary metadata */}
+        {addedDate && (
+          <p className="mt-6 text-xs text-gray-400">
+            Added to RemyNest on {addedDate}
+          </p>
+        )}
       </div>
     </details>
   );
