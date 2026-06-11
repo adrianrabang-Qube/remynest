@@ -1,5 +1,5 @@
 import type { createClient } from "@/utils/supabase/server";
-import type { RemySignals } from "./types";
+import type { RemySignals, RemyIntelligence } from "./types";
 
 type DashboardSupabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -13,7 +13,17 @@ interface BuildRemySignalsArgs {
   isCareContext: boolean;
   pendingInvites: number;
   accessibleProfiles: number;
+  /** Account id — used for user-scoped signals (clusters). */
+  userId: string;
 }
+
+const GENERIC_CATEGORIES = new Set([
+  "",
+  "general",
+  "uncategorized",
+  "memory",
+  "other",
+]);
 
 /**
  * Gather Remy's signals from EXISTING data only — read-only `memories` counts
@@ -38,18 +48,29 @@ export async function buildRemySignals(
     1
   ).toISOString();
 
-  const [addedThisWeek, addedThisMonth, addedLastMonth, lastAddedAt] =
-    await Promise.all([
-      countMemories(supabase, args.memoryProfileId, weekAgo),
-      countMemories(supabase, args.memoryProfileId, startOfMonth),
-      countMemories(
-        supabase,
-        args.memoryProfileId,
-        startOfLastMonth,
-        startOfMonth
-      ),
-      latestMemoryAt(supabase, args.memoryProfileId),
-    ]);
+  const [
+    addedThisWeek,
+    addedThisMonth,
+    addedLastMonth,
+    lastAddedAt,
+    intelligence,
+  ] = await Promise.all([
+    countMemories(supabase, args.memoryProfileId, weekAgo),
+    countMemories(supabase, args.memoryProfileId, startOfMonth),
+    countMemories(
+      supabase,
+      args.memoryProfileId,
+      startOfLastMonth,
+      startOfMonth
+    ),
+    latestMemoryAt(supabase, args.memoryProfileId),
+    buildIntelligence(
+      supabase,
+      args.memoryProfileId,
+      args.userId,
+      now
+    ),
+  ]);
 
   return {
     subjectName: args.subjectName,
@@ -66,7 +87,174 @@ export async function buildRemySignals(
       pendingInvites: args.pendingInvites,
       accessibleProfiles: args.accessibleProfiles,
     },
+    intelligence,
   };
+}
+
+/**
+ * Deeper workspace intelligence from existing stored data. Best-effort and
+ * deterministic: each piece degrades to a safe zero/null on failure or sparse
+ * data, so Remy never invents or breaks the dashboard.
+ */
+async function buildIntelligence(
+  supabase: DashboardSupabase,
+  memoryProfileId: string | null,
+  userId: string,
+  now: Date
+): Promise<RemyIntelligence> {
+  const weekAgoMs = now.getTime() - 7 * 86_400_000;
+
+  const [historicalTotal, earliestYear, clustersDiscovered, sample] =
+    await Promise.all([
+      countHistoricalMemories(supabase, memoryProfileId),
+      earliestMemoryYear(supabase, memoryProfileId),
+      countClusters(supabase, userId),
+      sampleRecentMemories(supabase, memoryProfileId),
+    ]);
+
+  // ── Category signals (top theme + most-recent theme) ─────────────────────
+  const overall = new Map<string, { label: string; count: number }>();
+  const recent = new Map<string, { label: string; count: number }>();
+
+  const tally = (
+    map: Map<string, { label: string; count: number }>,
+    raw: string | null | undefined
+  ) => {
+    const label = (raw ?? "").trim();
+    if (!label || GENERIC_CATEGORIES.has(label.toLowerCase())) return;
+    const key = label.toLowerCase();
+    const entry = map.get(key) ?? { label, count: 0 };
+    entry.count += 1;
+    map.set(key, entry);
+  };
+
+  sample.forEach((row, index) => {
+    tally(overall, row.ai_category);
+    if (index < 12) tally(recent, row.ai_category);
+  });
+
+  const topCategory = pickTop(overall);
+  const recentTop = pickTop(recent);
+  const recentTheme =
+    recentTop && recentTop.count >= 2 ? recentTop.label : null;
+
+  // ── Historical memories preserved this week (+ shared decade) ─────────────
+  let historicalThisWeek = 0;
+  const decades = new Set<number>();
+  for (const row of sample) {
+    if (!row.memory_date) continue;
+    const recordedMs = new Date(row.created_at).getTime();
+    if (Number.isNaN(recordedMs) || recordedMs < weekAgoMs) continue;
+    historicalThisWeek += 1;
+    const year = new Date(row.memory_date).getFullYear();
+    if (!Number.isNaN(year)) decades.add(Math.floor(year / 10) * 10);
+  }
+  const historicalThisWeekEra =
+    decades.size === 1 ? `${[...decades][0]}s` : null;
+
+  return {
+    historicalTotal,
+    historicalThisWeek,
+    historicalThisWeekEra,
+    topCategory,
+    recentTheme,
+    earliestYear,
+    clustersDiscovered,
+  };
+}
+
+function pickTop(
+  map: Map<string, { label: string; count: number }>
+): { label: string; count: number } | null {
+  let top: { label: string; count: number } | null = null;
+  for (const entry of map.values()) {
+    if (!top || entry.count > top.count) top = entry;
+  }
+  return top;
+}
+
+async function countHistoricalMemories(
+  supabase: DashboardSupabase,
+  memoryProfileId: string | null
+): Promise<number> {
+  try {
+    let q = supabase
+      .from("memories")
+      .select("id", { count: "exact", head: true })
+      .not("memory_date", "is", null);
+    q = memoryProfileId
+      ? q.eq("memory_profile_id", memoryProfileId)
+      : q.is("memory_profile_id", null);
+    const { count } = await q;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function earliestMemoryYear(
+  supabase: DashboardSupabase,
+  memoryProfileId: string | null
+): Promise<number | null> {
+  try {
+    let q = supabase
+      .from("memories")
+      .select("memory_date")
+      .not("memory_date", "is", null)
+      .order("memory_date", { ascending: true })
+      .limit(1);
+    q = memoryProfileId
+      ? q.eq("memory_profile_id", memoryProfileId)
+      : q.is("memory_profile_id", null);
+    const { data } = await q.maybeSingle();
+    const iso = (data as { memory_date?: string } | null)?.memory_date;
+    if (!iso) return null;
+    const year = new Date(iso).getFullYear();
+    return Number.isNaN(year) ? null : year;
+  } catch {
+    return null;
+  }
+}
+
+async function countClusters(
+  supabase: DashboardSupabase,
+  userId: string
+): Promise<number> {
+  try {
+    const { count } = await supabase
+      .from("memory_clusters")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+interface SampleRow {
+  ai_category: string | null;
+  created_at: string;
+  memory_date: string | null;
+}
+
+async function sampleRecentMemories(
+  supabase: DashboardSupabase,
+  memoryProfileId: string | null
+): Promise<SampleRow[]> {
+  try {
+    let q = supabase
+      .from("memories")
+      .select("ai_category, created_at, memory_date")
+      .order("created_at", { ascending: false })
+      .limit(250);
+    q = memoryProfileId
+      ? q.eq("memory_profile_id", memoryProfileId)
+      : q.is("memory_profile_id", null);
+    const { data } = await q;
+    return (data as SampleRow[] | null) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 async function countMemories(

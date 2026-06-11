@@ -13,6 +13,24 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Remy Dashboard Intelligence** (read-only; no schema/migrations): the dashboard
+  Remy card is now an intelligence summary engine, not a placeholder counter.
+  Added an optional `intelligence` block to `RemySignals` (`RemyIntelligence`),
+  computed best-effort in `buildRemySignals` from existing stored data, scoped like
+  the dashboard (active care profile / My Nest): historical memories preserved
+  (total + this-week + shared decade/era), top + most-recent memory category/theme,
+  earliest `memory_date` year (timeline reach), and user-scoped `memory_clusters`
+  count. `generateRemyObservations` gained priority-ranked rules that surface real
+  summaries — e.g. "Mary's memory archive grew this week — 3 memories from the 1980s
+  were preserved.", "I've found 12 memories connected to Family.", "Most recently
+  preserved memories relate to Childhood.", "I've grouped your memories into 5
+  themes.", "Your timeline now reaches back to 1962." The plain "N new memories this
+  week" placeholder is replaced (historical preservation leads; plain weekly count is
+  the fallback). All deterministic (no LLM/hallucination), gracefully degrading on
+  sparse data; `intelligence` is optional so Insights' `deriveRemySignals` is
+  unaffected. Dashboard stays fast (best-effort reads in parallel; one ~250-row
+  sample drives the category/era signals). `memory_relationships` left untouched
+  (per-profile counting needs a join — too heavy for a fast dashboard).
 - **Insights V2 — Remy Insights Center** (read-only; no schema/queries added; all
   existing telemetry preserved): reframes Insights from a statistics dashboard into
   a companion experience. Reuses the existing user-scoped memory/reminder telemetry
@@ -417,7 +435,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(memories)` Memory Date hierarchy — primary memory date + secondary Added date
+- `feat(remy)` Dashboard intelligence engine — historical/theme/cluster/timeline summaries
+- `f9cb9c1` feat(memories): Memory Date is the primary date; Added date is metadata
 - `3e36338` feat(memories): complete Historical Memory UX (create modal, edit, cards)
 - `649993b` feat(insights): Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
 - `b2eaa36` feat(memories): Historical Memory Creation — effective-date dating + timeline

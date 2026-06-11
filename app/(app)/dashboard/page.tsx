@@ -527,6 +527,7 @@ export default async function DashboardPage() {
         pendingInvites?.length ?? 0,
       accessibleProfiles:
         accessibleProfiles.length,
+      userId: user.id,
     }
   );
 

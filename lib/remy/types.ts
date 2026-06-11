@@ -66,4 +66,27 @@ export interface RemySignals {
     pendingInvites: number;
     accessibleProfiles: number;
   };
+  /**
+   * Deeper, read-only workspace intelligence (dashboard only). Optional so
+   * lighter surfaces (e.g. Insights) can omit it. Every field is derived from
+   * existing stored data — never inferred or hallucinated.
+   */
+  intelligence?: RemyIntelligence;
+}
+
+export interface RemyIntelligence {
+  /** Memories explicitly dated to the past (memory_date set). */
+  historicalTotal: number;
+  /** Historical memories preserved (recorded) in the last 7 days. */
+  historicalThisWeek: number;
+  /** Single shared decade of this week's historical memories, e.g. "1980s". */
+  historicalThisWeekEra: string | null;
+  /** Most frequent (non-generic) memory category, with its count. */
+  topCategory: { label: string; count: number } | null;
+  /** Dominant theme among the most recently preserved memories. */
+  recentTheme: string | null;
+  /** Earliest memory_date year — how far the timeline reaches back. */
+  earliestYear: number | null;
+  /** Memory clusters Remy has discovered (user-scoped, best-effort). */
+  clustersDiscovered: number;
 }
