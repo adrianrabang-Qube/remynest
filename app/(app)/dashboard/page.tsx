@@ -40,8 +40,13 @@ import {
   deriveDashboardFocus,
 } from "@/lib/reminders/focus";
 import RemyCompanion from "@/components/remy/RemyCompanion";
+import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
 import { buildRemySignals } from "@/lib/remy/signals";
 import { generateRemyObservations } from "@/lib/remy/observations";
+import {
+  fetchRemyActivitySources,
+  buildRemyActivities,
+} from "@/lib/remy/activities";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -537,6 +542,27 @@ export default async function DashboardPage() {
       "dashboard"
     );
 
+  // Remy Activity (evidence layer) — separate from observation generation.
+  // Reuses the already-fetched reminders; fetches recent memories + clusters.
+  const remyActivitySources =
+    await fetchRemyActivitySources(
+      supabase,
+      {
+        memoryProfileId:
+          effectiveActiveProfileId,
+        userId: user.id,
+      }
+    );
+
+  const remyActivities =
+    buildRemyActivities({
+      memories:
+        remyActivitySources.memories,
+      reminders: focusReminders,
+      clusters:
+        remyActivitySources.clusters,
+    });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -627,6 +653,11 @@ export default async function DashboardPage() {
               ? remySubjectName
               : null
           }
+        />
+
+        {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
+        <RemyActivityFeed
+          activities={remyActivities}
         />
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}

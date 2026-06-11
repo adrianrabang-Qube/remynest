@@ -90,3 +90,31 @@ export interface RemyIntelligence {
   /** Memory clusters Remy has discovered (user-scoped, best-effort). */
   clustersDiscovered: number;
 }
+
+/**
+ * Remy Activity — the evidence layer behind Remy's observations ("what Remy
+ * noticed"), NOT a raw event log. Each item is fully human-readable; internal
+ * system language never reaches this type. Designed to later feed notifications,
+ * digest emails, push summaries, and family-workspace updates.
+ */
+export type RemyActivityKind =
+  | "historical-preserved"
+  | "memory-added"
+  | "reminder-completed"
+  | "theme-discovered";
+
+export interface RemyActivity {
+  /** Stable id (kind + source row id) so the feed can diff/animate later. */
+  id: string;
+  kind: RemyActivityKind;
+  /** Human icon (emoji) — never an internal status code. */
+  icon: string;
+  /** Human title, e.g. "Historical memory preserved". */
+  title: string;
+  /** Secondary human detail, e.g. "July 4, 1980" or a memory title. */
+  description: string;
+  /** ISO instant the activity happened (rendered relative client-side). */
+  timestamp: string;
+  /** Optional deep link to the underlying surface. */
+  href?: string;
+}

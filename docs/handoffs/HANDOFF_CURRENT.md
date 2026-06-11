@@ -13,6 +13,23 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Remy Activity Feed V1** (read-only; no schema/migrations/cron/notifications):
+  Remy's **evidence layer** — "what Remy noticed", not a notification center or raw
+  audit log. New `lib/remy/activities.ts` is deliberately separate from observation
+  generation (Signals→Observations *and* Signals→Activities, both off existing
+  dashboard data): pure `buildRemyActivities(sources, limit)` + best-effort
+  `fetchRemyActivitySources`. New `RemyActivity`/`RemyActivityKind` types. Activity
+  kinds (existing data only): **Historical memory preserved** (memory_date set →
+  shows the memory date label), **Memory added** (non-historical → memory title),
+  **Reminder completed** (reuses the dashboard's `focusReminders` + `completed_at`),
+  **New theme discovered** (`memory_clusters`, user-scoped). Every item is
+  human-readable (icon + plain title + detail + relative time); no internal system
+  language. **Memory updated is intentionally skipped** — no reliable update signal
+  on `memories` (no maintained `updated_at`); deferred per spec. New client
+  `components/remy/RemyActivityFeed.tsx` renders 5–10 newest-first under the Remy
+  Companion ("Remy Activity · Recent things I've noticed"). Built for reuse by future
+  notifications / digests / push / family updates. Clusters are user-scoped (same
+  limitation as the intelligence count). Gracefully degrades to an empty state.
 - **Remy Dashboard Intelligence** (read-only; no schema/migrations): the dashboard
   Remy card is now an intelligence summary engine, not a placeholder counter.
   Added an optional `intelligence` block to `RemySignals` (`RemyIntelligence`),
@@ -435,7 +452,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Dashboard intelligence engine — historical/theme/cluster/timeline summaries
+- `feat(remy)` Remy Activity Feed V1 — evidence layer (historical/added/reminder/theme)
+- `187229f` feat(remy): dashboard intelligence engine (real workspace summaries)
 - `f9cb9c1` feat(memories): Memory Date is the primary date; Added date is metadata
 - `3e36338` feat(memories): complete Historical Memory UX (create modal, edit, cards)
 - `649993b` feat(insights): Insights V2 — Remy Insights Center (companion-led, telemetry preserved)
