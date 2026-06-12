@@ -5,24 +5,23 @@ import {
 } from "./remy-moods";
 
 /**
- * Remy avatar assets — the binding between a mood and its rendered art.
+ * Remy avatar assets — the binding between a mood and its real artwork.
  *
- * `src` points at the OFFICIAL blueprint export for the mood and is null until
- * the exports are placed in `/public/remy/remy-<mood>.png`. Until then the
- * avatar renders a brand-styled fallback (Remy's purple palette + the mood's
- * expression glyph). When the official art lands, set `src` here — no other
- * change is required anywhere Remy is mounted.
+ * `src` points at the OFFICIAL blueprint export for the mood:
+ *   /public/remy/remy-<mood>.png  (square bust, transparent background)
+ *
+ * RemyAvatar renders this artwork. If an export is not yet present it falls back
+ * to a brand mark (Remy's purple + the gold heart pendant) — never an emoji. To
+ * add or update Remy's art, drop the PNGs in /public/remy; no code change needed.
  */
 export interface RemyAvatarAsset {
   mood: RemyMood;
-  /** Official blueprint PNG path, or null while pending. */
-  src: string | null;
+  /** Official artwork path (square bust PNG, transparent background). */
+  src: string;
   alt: string;
-  /** Fallback expression glyph (placeholder for the official art). */
-  glyph: string;
-  /** Tailwind gradient (Remy's purple palette, per the blueprint). */
+  /** Tailwind gradient (Remy's purple palette) — used by the brand fallback. */
   gradient: string;
-  /** Tailwind ring accent — gold for celebration, purple otherwise. */
+  /** Tailwind ring accent — gold for celebration/sharing, purple otherwise. */
   ring: string;
 }
 
@@ -40,10 +39,8 @@ function buildAssets(): Record<RemyMood, RemyAvatarAsset> {
     const spec = REMY_MOOD_SPECS[mood];
     assets[mood] = {
       mood,
-      // Official blueprint exports pending — fallback renders until provided.
-      src: null,
+      src: `/remy/remy-${mood}.png`,
       alt: `Remy — ${spec.label}`,
-      glyph: spec.expression,
       gradient: BASE_GRADIENT,
       ring: RING_BY_MOOD[mood] ?? "ring-[#7C5CBF]/40",
     };

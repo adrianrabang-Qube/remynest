@@ -36,8 +36,8 @@ export interface RemyMoodSpec {
   label: string;
   /** The canonical blueprint state this mood renders as. */
   blueprintState: string;
-  /** Placeholder expression glyph until the official blueprint art is placed. */
-  expression: string;
+  /** Textual description of the blueprint expression (no emoji). */
+  cue: string;
   description: string;
 }
 
@@ -46,63 +46,63 @@ export const REMY_MOOD_SPECS: Record<RemyMood, RemyMoodSpec> = {
     id: "welcoming",
     label: "Welcoming",
     blueprintState: "Chatting (greeting)",
-    expression: "👋",
+    cue: "Soft smile, open beak, gentle wing wave.",
     description: "A warm hello — the dashboard welcome.",
   },
   listening: {
     id: "listening",
     label: "Listening",
     blueprintState: "Listening",
-    expression: "👂",
+    cue: "Attentive eyes, head tilted, sound-wave glow.",
     description: "Attentive and present.",
   },
   thinking: {
     id: "thinking",
     label: "Thinking",
     blueprintState: "Thinking",
-    expression: "💭",
+    cue: "Eyes up, small thought bubble.",
     description: "Quietly working something out.",
   },
   analyzing: {
     id: "analyzing",
     label: "Analyzing",
     blueprintState: "Analyzing",
-    expression: "🔍",
+    cue: "Holding a magnifying glass, focused.",
     description: "Looking closely — Timeline / insights.",
   },
   reflecting: {
     id: "reflecting",
     label: "Reflecting",
     blueprintState: "Thoughtful",
-    expression: "🤔",
+    cue: "Wing to chin, thoughtful gaze.",
     description: "Thoughtful — Story Mode / Biography.",
   },
   sharing: {
     id: "sharing",
     label: "Sharing",
     blueprintState: "Sharing",
-    expression: "💜",
+    cue: "Warm smile with a speech bubble.",
     description: "Caring and giving — Family / Notifications.",
   },
   celebrating: {
     id: "celebrating",
     label: "Celebrating",
     blueprintState: "Celebrating",
-    expression: "🎉",
+    cue: "Wings up, sparkles, joyful.",
     description: "Joyful — milestones and discoveries.",
   },
   resting: {
     id: "resting",
     label: "Resting",
     blueprintState: "Resting",
-    expression: "😴",
+    cue: "Eyes closed, calm and content.",
     description: "Calm and at ease — nothing needs attention.",
   },
   neutral: {
     id: "neutral",
     label: "Neutral",
     blueprintState: "Neutral",
-    expression: "🐦",
+    cue: "Calm, attentive resting expression.",
     description: "Remy's resting expression.",
   },
 };

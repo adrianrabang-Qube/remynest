@@ -318,6 +318,22 @@ p {
   animation: slideIn 0.25s ease-out forwards;
 }
 
+/* ── Remy Avatar — smooth crossfade between moods ── */
+@keyframes remyFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.remy-fade-in {
+  animation: remyFadeIn 320ms ease-out;
+}
+
 /* ── Export Engine V1 — print isolation (PDF via the browser print engine) ── */
 .break-page {
   break-before: page;

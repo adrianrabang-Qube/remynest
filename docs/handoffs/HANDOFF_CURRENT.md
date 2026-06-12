@@ -41,6 +41,17 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     `src` in `remy-assets.ts` — every surface (web/iOS/Android/notifications/voice/
     Story Mode/Biography/Memory Book) gains the real art with no other change; the
     same `RemyMood` + mapping drive future animation/Voice Engine V2.
+  - **Real-artwork pass:** emoji rendering **removed**. `RemyAvatar` now renders
+    Remy's real art via `next/image` from `/remy/remy-<mood>.png` (set in
+    `remy-assets.ts`; `remy-moods.ts` `cue` replaced the emoji), with a **smooth
+    crossfade** between moods (`.remy-fade-in` keyframe in `globals.css` + a
+    two-layer stack) and a **brand fallback** (Remy's purple + gold heart pendant
+    SVG — never an emoji) when an export is absent. **Asset contract** in
+    `public/remy/README.md`: 9 square transparent bust PNGs (`remy-<mood>.png`)
+    cropped from the blueprint sprites. NOTE: the raster PNGs are a design/export
+    step (cannot be generated in-repo) — the code renders them the instant they're
+    added; until then the brand fallback shows. No redesign, no new moods, no
+    DB/queries/AI; V1 architecture intact.
 - **Export Engine V1 — PDF-ready export layer** (read-only; no cloud/sharing/
   email/AI/migrations). Converts a MemoryBook/Biography into a printable document
   and generates a PDF via the browser print engine (zero new deps).
@@ -927,7 +938,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
+- `feat(remy)` Avatar real artwork — image rendering + mood crossfade, emoji removed, asset contract
+- `6e915de` feat(remy): Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
 - `779f045` feat(remy): Export Engine V1 — PDF-ready ExportDocument + print page + download flow
 - `aa652a4` feat(remy): Memory Books V1 — structured book model (cover/TOC/chapters from the biography)
 - `c7aa4cf` feat(remy): Biography V1 — structured life narrative (pure composition of existing summaries)
