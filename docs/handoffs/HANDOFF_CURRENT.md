@@ -27,15 +27,15 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   the same normalized→background-position math; `next dev` /dev page 200, blueprint asset
   200 image/png; lint (no new errors — 6 pre-existing `no-assign-module-variable` in
   generated workers), build (49 routes). **All 9 moods now calibrated.**
-- **TEMP dev page — `/dev/remy-avatar-test`** (remove before launch): renders all 9
-  Remy moods in a 3×3 grid at 200px with labels, using the real `RemyAvatar`. No DB,
-  no auth (added `/dev` to middleware `PUBLIC_ROUTES`), **dev-only** (`notFound()` in
-  production). Temporary dev-only link from the dashboard header (hidden in prod).
-  Validated in `next dev`: 200, 9 `data-remy-mood` avatars, all labels, blueprint
-  sprite wired; lint clean; build (49 routes). To remove: delete `app/dev/`, the
-  `/dev` entry in `middleware.ts`, and the temp link in `dashboard/page.tsx`. (Note:
-  local `next start` 500s on SSR pages due to a pre-existing `@opentelemetry`
-  instrumentation chunk issue — unrelated to this page.)
+- **Removed: temp avatar QA tooling** (all 9 moods calibrated → the QA grid is no longer
+  needed). Deleted `app/dev/remy-avatar-test/` (and the now-empty `app/dev/`), removed the
+  `/dev` exemption from `middleware.ts` `PUBLIC_ROUTES`, and removed the dev-only
+  avatar-test link from the dashboard header. `Link` import kept (still used elsewhere on
+  the page). No route now exposes the calibration grid. Verified: build ✓ (**48** static
+  pages, was 49 — the `/dev` page is gone), lint unchanged (6 pre-existing
+  generated-worker `no-assign-module-variable` errors, none introduced here), and the
+  dashboard header avatar still renders from the blueprint sheet (`DashboardHeader` →
+  `<RemyAvatar mood={remyHeaderMood}>`).
 - **Avatar crop calibration — 4 problem moods finalized** (`remy-sprite-map.ts` only).
   After visual review on `/dev/remy-avatar-test`, re-measured welcoming/reflecting/
   neutral/resting from the decoded 1254² PNG (row/column band profiling — no
