@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Native iOS push notifications — implemented** (fixes "reminders arrive on Mac, not
+  iPhone"). Root cause (investigated): the remote-URL WKWebView ran the OneSignal **Web
+  SDK**, which cannot create an iOS APNs subscription → no iOS device ever existed for
+  reminders to target. No DB schema, no API-contract, no reminder-pipeline change.
+  - `ios/App/App/AppDelegate.swift` — native `OneSignal.initialize(appId, withLaunchOptions:)`
+    + `Notifications.requestPermission` (OneSignal swizzles the APNs callbacks → creates the
+    iOS subscription). App ID read from Info.plist `ONESIGNAL_APP_ID`.
+  - **Identity bridge** — AppDelegate registers a `WKScriptMessageHandler` (`oneSignalBridge`)
+    on the Capacitor WebView; after auth the web app posts the Supabase user id → native
+    `OneSignal.login(externalId)`, so reminder **external_id** targeting reaches the iPhone.
+  - `components/OneSignalInit.tsx` — branches on `Capacitor.isNativePlatform()`: native →
+    bridge login (Web SDK left inert); browser → **unchanged** Web SDK + `/api/register-device`.
+    **Web push preserved.**
+  - `Info.plist` — `ONESIGNAL_APP_ID` placeholder (operator replaces with the public id).
+  - Validated: lint (0 new errors), web build ✓, `npx cap sync ios` ✓, **unsigned iOS build
+    `BUILD SUCCEEDED`** (App now links `OneSignalFramework` + WebKit; AppDelegate compiles).
+  - **Operator actions to make push DELIVER (config side):** (1) Apple Developer → create
+    **APNs Auth Key** + enable **Push** on App ID `com.remynest.app`; (2) **OneSignal dashboard**
+    → add the iOS platform with that APNs key (Key ID, Team ID, bundle id), under the **same**
+    OneSignal app as web; (3) replace `ONESIGNAL_APP_ID` in Info.plist with the real id;
+    (4) set signing **Team** → archive → TestFlight; (5) on device, confirm the iPhone shows
+    as an **iOS** subscription in OneSignal and a reminder delivers.
 - **TestFlight Readiness — Phase A+B (code portion)** (no new features; no schema change).
   Cleared the code-ownable launch-gap items from the TestFlight Readiness Report:
   - **iOS permission strings** — added `NSCameraUsageDescription`,

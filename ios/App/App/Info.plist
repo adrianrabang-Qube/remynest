@@ -55,5 +55,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>ONESIGNAL_APP_ID</key>
+	<string>REPLACE_WITH_ONESIGNAL_APP_ID</string>
 </dict>
 </plist>
