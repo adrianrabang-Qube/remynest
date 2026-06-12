@@ -35,6 +35,12 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     (read-only preflight; locally reports all 5 vars MISSING — confirms the prod gap).
   - Validated: lint (no new errors — 6 pre-existing generated-worker errors only),
     build ✓ (cancel route present, dead routes absent), plists `plutil`-OK.
+  - **iOS build-ready (validated 2026-06-12):** `npx cap sync ios` clean
+    (onesignal-cordova-plugin@5.3.11 recognized, `pod install` OK); **unsigned simulator
+    build `BUILD SUCCEEDED`** (Xcode 26.5) with the Push entitlement linked. The native
+    project compiles end-to-end — only **code signing** (Development Team + provisioning,
+    both requiring the Apple Developer account) remains before `xcodebuild archive` /
+    Xcode Organizer → App Store Connect upload.
   - **Operator / Xcode-required (cannot be performed or validated from the CLI env):**
     (a) create APNs auth key in Apple Developer portal → upload to OneSignal; (b) enable
     **Push Notifications** on the App ID + set the signing **Team** (the `App.entitlements`
