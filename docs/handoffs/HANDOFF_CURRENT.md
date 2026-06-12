@@ -19,7 +19,11 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     `ios/App/App/Info.plist` (fixes on-device camera/library crash; copy from
     `compliance/07`). **No microphone string** (voice not shipped — per `09`/`12`).
   - **Push scaffolding** — `ios/App/App/App.entitlements` (`aps-environment=development`)
-    + `UIBackgroundModes=[remote-notification]` in Info.plist. Both `plutil -lint` OK.
+    + `UIBackgroundModes=[remote-notification]` in Info.plist, now **linked into the build**
+    via `CODE_SIGN_ENTITLEMENTS = App/App.entitlements` in `project.pbxproj` (Debug+Release).
+    Validated: `plutil -lint` OK, `xcodebuild -showBuildSettings -scheme App` resolves the
+    entitlement. The Push capability is wired in the project (no manual Xcode link needed) —
+    operator still enables Push on the App ID + sets the signing Team.
   - **Stripe cancel** — new `app/api/stripe/cancel/route.ts`: cancels at period end
     (`cancel_at_period_end`), resolves customer by email like checkout, structured
     non-throwing results; webhook syncs the profile. Fixes the BillingSection cancel
@@ -32,9 +36,10 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   - Validated: lint (no new errors — 6 pre-existing generated-worker errors only),
     build ✓ (cancel route present, dead routes absent), plists `plutil`-OK.
   - **Operator / Xcode-required (cannot be performed or validated from the CLI env):**
-    (a) create APNs auth key in Apple Developer portal → upload to OneSignal; (b) in Xcode
-    add the **Push Notifications** capability to the App target (links `App.entitlements` /
-    sets `CODE_SIGN_ENTITLEMENTS`); (c) native OneSignal push for the **remote-URL** WebView
+    (a) create APNs auth key in Apple Developer portal → upload to OneSignal; (b) enable
+    **Push Notifications** on the App ID + set the signing **Team** (the `App.entitlements`
+    file is already linked via `CODE_SIGN_ENTITLEMENTS` — no manual Xcode link needed);
+    (c) native OneSignal push for the **remote-URL** WebView
     is non-trivial — the cordova plugin JS isn't injected into the remote page, so it needs
     a dedicated native-init task (track separately); (d) set the 5 **Sentry env vars in
     Vercel** (`vercel env add …`); (e) run the **physical-iPhone QA** workflow
