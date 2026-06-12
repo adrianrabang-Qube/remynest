@@ -8,9 +8,6 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (8.0.2):
     - Capacitor
-  - CordovaPluginsStatic (8.4.0):
-    - CapacitorCordova
-    - OneSignalXCFramework (= 5.5.2)
   - OneSignalXCFramework (5.5.2):
     - OneSignalXCFramework/OneSignalComplete (= 5.5.2)
   - OneSignalXCFramework/OneSignal (5.5.2):
@@ -67,7 +64,7 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
-  - CordovaPluginsStatic (from `../capacitor-cordova-ios-plugins`)
+  - OneSignalXCFramework (= 5.5.2)
 
 SPEC REPOS:
   trunk:
@@ -84,8 +81,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
-  CordovaPluginsStatic:
-    :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
   Capacitor: 75bd117ba037a51bb0f19ded32c67f4b3bc16600
@@ -93,9 +88,8 @@ SPEC CHECKSUMS:
   CapacitorCordova: 71d81f350e6c30bf2a846593b5c480fbd68e9bac
   CapacitorSplashScreen: 4b46c72298db552b3c57ce021ef028b6dc7f1fa7
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
-  CordovaPluginsStatic: 2b140aa5baa353226e286348fbb5e992bef43c6a
   OneSignalXCFramework: 2f46ff87ccefd9afe8e3b5f9fe357072191205ff
 
-PODFILE CHECKSUM: 9d6514295ed4005f448402157d2aef46da48907c
+PODFILE CHECKSUM: 78144ce2efb4fe286fef19225f476d0fc4a7ef49
 
 COCOAPODS: 1.16.2

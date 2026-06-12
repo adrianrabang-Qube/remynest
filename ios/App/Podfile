@@ -14,12 +14,16 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorSplashScreen', :path => '../../node_modules/@capacitor/splash-screen'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
-  pod 'CordovaPluginsStatic', :path => '../capacitor-cordova-ios-plugins'
 end
 
 target 'App' do
   capacitor_pods
-  # Add your Pods here
+  # OneSignal iOS SDK — DIRECT dependency. Previously pulled in transitively by
+  # onesignal-cordova-plugin, which was removed because its JS never loads on the
+  # remote-URL page and it auto-initialized OneSignal with a nil appId (the
+  # double-init conflict). AppDelegate now owns the single native init. Pinned to
+  # the version the native code was built against. Module: OneSignalFramework.
+  pod 'OneSignalXCFramework', '5.5.2'
 end
 
 post_install do |installer|

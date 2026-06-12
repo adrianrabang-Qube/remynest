@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Native push — double-init conflict fixed** (follow-up to the `5c74190` audit). The
+  `onesignal-cordova-plugin` auto-swizzled `didFinishLaunchingWithOptions` and called
+  `OneSignal.initialize(nil)` at launch, conflicting with AppDelegate's native
+  `initialize(realAppId)` (two inits/launch; nil could win → broken push). The plugin's JS
+  is never injected into the remote-URL page → it gave **no usable runtime API** → removed:
+  - `npm uninstall onesignal-cordova-plugin`; added **direct** `pod 'OneSignalXCFramework',
+    '5.5.2'` to `ios/App/Podfile` (was only transitive via the plugin — needed so
+    `import OneSignalFramework` survives).
+  - `cap sync` → **0 Cordova plugins**, `CordovaPluginsStatic` + `OneSignalPush.m` nil-init
+    swizzle gone. **Exactly one `OneSignal.initialize`** remains (AppDelegate).
+  - **No regression:** web push (`/public/OneSignalSDK*Worker.js` + Web SDK CDN), reminder
+    delivery, external_id targeting, and notification APIs (`register-device`/`send-*`/`cron`)
+    are server-/web-side and untouched; `OneSignalInit.tsx` web branch unchanged.
+  - Validated: lint **4 errors/160 warnings** (fewer — removed the plugin's flagged JS; 0
+    introduced), web build ✓, `cap sync` ✓, **unsigned iOS build `BUILD SUCCEEDED`** (App
+    links `OneSignalFramework` directly, no `CordovaPluginsStatic`).
+  - Integration path (OneSignal v5): App ID via Info.plist `ONESIGNAL_APP_ID` (operator
+    replaces placeholder — real id is env-only/public, not committed); until then the native
+    init safely no-ops (no crash, no push).
 - **Native iOS push notifications — implemented** (fixes "reminders arrive on Mac, not
   iPhone"). Root cause (investigated): the remote-URL WKWebView ran the OneSignal **Web
   SDK**, which cannot create an iOS APNs subscription → no iOS device ever existed for
