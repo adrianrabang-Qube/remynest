@@ -13,6 +13,15 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Dashboard Remy Activity — curated preview** (presentation-only): the dashboard
+  "Remy Activity" section now behaves like a concise insight preview, not an
+  ever-growing feed. Shows the **3 most recent** items by default; a footer CTA
+  ("Show more insights →" / "Show less") expands/collapses **in-place** when >3
+  exist (`expanded ? activities : activities.slice(0,3)`). No nested scroll
+  containers; **descriptions no longer truncate** (wrap via `break-words`); mobile
+  responsive (full-width CTA on small screens). Activity generation logic
+  (`buildRemyActivities`) is unchanged — `components/remy/RemyActivityFeed.tsx`
+  only. Addresses the audit's "dashboard risks becoming a timeline" concern.
 - **Reminiscence Mode V1** (read-only; existing data only; no AI/embeddings/
   clustering/migrations): the first dedicated caregiver/family memory experience.
   New `lib/remy/reminiscence.ts` (`getReminiscence`) reuses historical (dated)
@@ -559,7 +568,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(reminisce)` Reminiscence Mode V1 — caregiver/family era-based memory experience
+- `feat(dashboard)` Remy Activity — collapse to 3 with in-place show more/less (presentation only)
+- `c99a9a0` feat(reminisce): Reminiscence Mode V1 — caregiver/family era-based memory experience
 - `9c0cfd9` feat(memories): Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
 - `d1d2a3c` feat(remy): Life Chapters V1 — narrative layer (chapters page + detail + dashboard)
 - `0282b3e` feat(remy): Remy Connections V1 — relationship discovery (connections page + detail + dashboard)

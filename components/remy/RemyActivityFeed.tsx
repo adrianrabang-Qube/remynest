@@ -1,18 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { RemyActivity } from "@/lib/remy/types";
 
+const DEFAULT_VISIBLE = 3;
+
 /**
- * Remy Activity feed — "what Remy noticed". The evidence layer beneath Remy's
- * observations. Renders human activity items (icon + title + detail + relative
- * time), newest first. Read-only; relative time is computed client-side.
+ * Remy Activity feed — "what Remy noticed". A curated insight preview, not an
+ * ever-growing event log: it shows the 3 most recent items and expands in-place
+ * when there are more. The evidence layer beneath Remy's observations.
+ * Read-only; relative time is computed client-side.
  */
 export default function RemyActivityFeed({
   activities,
 }: {
   activities: RemyActivity[];
 }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const hasMore = activities.length > DEFAULT_VISIBLE;
+  const visibleActivities = expanded
+    ? activities
+    : activities.slice(0, DEFAULT_VISIBLE);
+
   return (
     <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
@@ -28,11 +39,24 @@ export default function RemyActivityFeed({
           here as they happen.
         </p>
       ) : (
-        <ul className="mt-4 space-y-1">
-          {activities.map((item) => (
-            <ActivityRow key={item.id} item={item} />
-          ))}
-        </ul>
+        <>
+          <ul className="mt-4 space-y-1">
+            {visibleActivities.map((item) => (
+              <ActivityRow key={item.id} item={item} />
+            ))}
+          </ul>
+
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+              className="mt-3 w-full rounded-2xl px-3 py-2 text-left text-sm font-semibold text-sage-deep transition hover:bg-sand/40 sm:w-auto"
+            >
+              {expanded ? "Show less" : "Show more insights →"}
+            </button>
+          )}
+        </>
       )}
     </section>
   );
@@ -49,7 +73,7 @@ function ActivityRow({ item }: { item: RemyActivity }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-charcoal">{item.title}</p>
-        <p className="truncate text-sm text-charcoal-soft">
+        <p className="text-sm text-charcoal-soft break-words">
           {item.description}
         </p>
       </div>
