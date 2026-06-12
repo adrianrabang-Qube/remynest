@@ -12,6 +12,36 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Notifications V1 — intelligence-driven updates layer** (read-only; no
+  push/email/persistence/cron/AI/migrations). The synthesis engine that turns
+  existing Remy intelligence into ranked notification candidates; future Digest
+  Emails / Push will CONSUME this rather than re-deriving.
+  - **Investigation:** `generateRemyObservations()` = `RemySignals → RemyObservation[]`
+    (`{id,surface,tone,mood,priority,text,cta?}`, priority desc, tone→mood);
+    surfaces are Remy Companion / Remy Activity / Family Intelligence. All
+    notification inputs are **already computed on the dashboard** — `remyDateCoverage`,
+    `remyCollections`, `remyConnections`, `remyLifeChapters`, `familyIntelligence`.
+  - **Architecture decision:** `getRemyNotifications(input)` is a **PURE synthesizer**
+    (no DB, no queries) consuming those already-computed outputs — no duplicated
+    business logic, Notifications = single source of truth.
+  - **Model** `lib/remy/notifications.ts`: `RemyNotification {id, priority, title,
+    message, category, href, createdAt}`; categories `memory-date | collection |
+    connection | chapter | family`. **Ranking:** chapter 90 > family-shared 85 >
+    collection 80 > connection-cross-era 72 / connection 65 > family-active 55 >
+    memory-date 40; sort desc, cap 10. Reuses `formatChapterRange`/
+    `formatCollectionRange` and maps `family.observations` directly.
+  - **Dashboard:** `components/remy/RemyNotifications.tsx` ("Remy Updates") — the
+    EXACT Remy Activity pattern (3 visible, "Show more →"/"Show less", in-place,
+    no nested scroll, no fixed heights, mobile responsive); hidden when empty.
+    Placed **between Remy Activity and Collections** in `dashboard/page.tsx`.
+  - **Validation (real-data-shaped):** visible = The 1980s chapter (90) · Fitness
+    largest collection (80) · connected story (65); show-more = Family activity
+    (55) · dates nudge (40); empty account → hidden. Date/Collection/Connection/
+    Chapter/Family sources each produce their notification when present.
+  - **Scalability:** notifications add **0 queries** and **0 scans** — pure synthesis
+    over already-bounded inputs (collections/connections/chapters limited to 4 on
+    the dashboard; family bounded). Cost is **O(1)** w.r.t. memory volume, identical
+    at 100/1k/10k memories; dashboard impact = +1 pure call + 1 component.
 - **Family Workspace Intelligence V1** (read-only; no schema/migrations/AI;
   intelligence only — no notifications/alerts/predictions). First family-level
   layer above Memory Dates / Collections V2 / Connections V2 / Life Chapters V2.
@@ -714,7 +744,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Family Workspace Intelligence V1 — per-profile stats, family themes, observations
+- `feat(remy)` Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
+- `5e0fe01` feat(remy): Family Workspace Intelligence V1 — per-profile stats, family themes, observations
 - `6f67254` feat(remy): Life Chapters V2 — time-based life periods (decade chapters from memory dates)
 - `46c13e7` feat(remy): Connections V2 — diversity-ranked, narrative relationship discovery
 - `ebe2f98` feat(remy): Collections V2 — theme-consolidated, deduplicated collections (category grouping)

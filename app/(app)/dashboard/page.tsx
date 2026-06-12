@@ -41,6 +41,8 @@ import {
 } from "@/lib/reminders/focus";
 import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
+import RemyNotifications from "@/components/remy/RemyNotifications";
+import { getRemyNotifications } from "@/lib/remy/notifications";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
 import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
@@ -624,6 +626,17 @@ export default async function DashboardPage() {
         )
       : null;
 
+  // Remy Notifications — pure synthesis of the intelligence already computed
+  // above (no extra queries). Single source of truth for the updates layer.
+  const remyNotifications =
+    getRemyNotifications({
+      coverage: remyDateCoverage,
+      collections: remyCollections,
+      connections: remyConnections,
+      chapters: remyLifeChapters,
+      family: familyIntelligence,
+    });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -734,6 +747,11 @@ export default async function DashboardPage() {
         {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
         <RemyActivityFeed
           activities={remyActivities}
+        />
+
+        {/* REMY UPDATES — synthesized intelligence notifications */}
+        <RemyNotifications
+          notifications={remyNotifications}
         />
 
         {/* REMY COLLECTIONS — the organize layer */}
