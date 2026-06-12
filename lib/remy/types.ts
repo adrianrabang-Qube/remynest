@@ -100,6 +100,7 @@ export interface RemyIntelligence {
 export type RemyActivityKind =
   | "historical-preserved"
   | "memory-added"
+  | "memory-date-added"
   | "reminder-completed"
   | "collection-discovered";
 

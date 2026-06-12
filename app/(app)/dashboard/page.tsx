@@ -53,6 +53,8 @@ import {
 import { getRemyCollections } from "@/lib/remy/collections";
 import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
+import { computeCoverage } from "@/lib/remy/date-coverage";
+import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -593,6 +595,12 @@ export default async function DashboardPage() {
       { sort: "count", limit: 4 }
     );
 
+  // Memory date coverage — reuses existing counts (no extra query).
+  const remyDateCoverage = computeCoverage(
+    memoryCount,
+    remySignals.intelligence?.historicalTotal ?? 0
+  );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -684,6 +692,14 @@ export default async function DashboardPage() {
               : null
           }
         />
+
+        {/* MEMORY DATE ADOPTION — nudge when coverage is low */}
+        {remyDateCoverage.total > 0 &&
+          remyDateCoverage.percentage < 50 && (
+            <DateCompletionCard
+              coverage={remyDateCoverage}
+            />
+        )}
 
         {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
         <RemyActivityFeed

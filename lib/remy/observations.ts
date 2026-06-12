@@ -185,6 +185,28 @@ export function generateRemyObservations(
     );
   }
 
+  // ── Memory date adoption — gently encourage dating when coverage is low ────
+  if (i && m.total >= 5) {
+    const datedPct = Math.round((i.historicalTotal / m.total) * 100);
+    if (datedPct < 50) {
+      add(
+        "date-coverage",
+        44,
+        "gentle",
+        `Most memories still need dates — adding them helps me understand ${v.possessive} story.`,
+        { label: "Add memory dates", href: "/memory-dates" }
+      );
+    } else if (datedPct < 100) {
+      add(
+        "date-coverage",
+        30,
+        "reassuring",
+        `${v.isCare ? `${v.subject} has` : "You've"} dated ${datedPct}% of memories.`,
+        { label: "Add memory dates", href: "/memory-dates" }
+      );
+    }
+  }
+
   // ── Gentle nudge when things have gone quiet ───────────────────────────────
   if (m.total > 0 && m.addedThisWeek === 0) {
     const stale = m.lastAddedAt

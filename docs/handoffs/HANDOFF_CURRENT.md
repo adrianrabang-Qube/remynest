@@ -13,6 +13,32 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Memory Date Adoption V1** (read-only reads + a dedicated date-only write; no
+  schema migrations): drives historical-date coverage up to improve every Remy
+  narrative layer (only ~3% of memories are dated today). New
+  `lib/remy/date-coverage.ts` (`computeCoverage`, `getDateCoverage`,
+  `getMemoriesMissingDates`, `coverageMilestone`) — workspace-scoped (care profile
+  / My Nest), best-effort. Surfaces:
+  - **Dashboard Date Completion Card** (`components/memory-dates/DateCompletionCard`)
+    shown when coverage < 50%: total · dated · missing · % complete + "Add memory
+    dates" (reuses existing dashboard counts — no extra query).
+  - **/memory-dates backfill flow**: lists memories with `memory_date IS NULL`
+    (title, preview, added date); per-memory options Exact date / Month + year /
+    Year only / Decade only / Not sure (reuses `buildMemoryDate`); a progress bar
+    with 0–25/25–50/50–75/75–100 milestones; and a live "Dates you just added"
+    session feed (`🕰 Memory date added`, new `memory-date-added` activity kind).
+    Saves via a **dedicated server action that updates ONLY `memory_date` +
+    `memory_date_precision`** (validated, scoped by user_id) — never touches
+    title/content/attachments (the generic PUT would have wiped them), and
+    `revalidatePath`s timeline/dashboard so newly dated memories appear instantly.
+  - **Intelligence observation**: "Most memories still need dates…" (<50%) or
+    "You've dated N% of memories." (reuses `intelligence.historicalTotal`).
+  - **Timeline validation**: timeline groups by effective date + is force-dynamic,
+    so backfilled memories immediately slot into their historical position and feed
+    historical intelligence/observations. Memories have NO `updated_at` column, so
+    a timestamped dashboard "date added" event isn't possible without a migration —
+    handled gracefully via the on-page session feed (no schema change). Mobile
+    responsive; graceful when nothing is missing.
 - **Life Chapters V1** (read-only; no schema/migrations/AI; existing data only):
   Remy's **narrative layer**, the top of the stack (Memories → Collections →
   Connections → Life Chapters). New `lib/remy/life-chapters.ts`
@@ -515,7 +541,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Life Chapters V1 — narrative layer (chapters page + detail + dashboard)
+- `feat(memories)` Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
+- `d1d2a3c` feat(remy): Life Chapters V1 — narrative layer (chapters page + detail + dashboard)
 - `0282b3e` feat(remy): Remy Connections V1 — relationship discovery (connections page + detail + dashboard)
 - `bce6d2b` feat(remy): Remy Collections V1 — Organize layer (collections page + detail + dashboard)
 - `29dbeef` feat(remy): Remy Activity Feed V1 — evidence layer
