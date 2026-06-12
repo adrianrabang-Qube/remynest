@@ -4,27 +4,32 @@ import { resolveEffectiveDate } from "@/lib/memories/memory-date";
 type DashboardSupabase = Awaited<ReturnType<typeof createClient>>;
 
 /**
- * Life Chapters — Remy's narrative layer.
+ * Life Chapters (V2) — Remy's narrative layer, the top of the stack
+ * (Memories → Collections → Connections → Life Chapters).
  *
- * The top of the Remy stack:
- *   Memories → Collections → Connections → Life Chapters
+ * V1 grouped by `ai_category`, which produced topical, present-dated pseudo
+ * chapters ("Cognition 2026") — technical groupings, not a life. V2 builds
+ * chapters from TIME: memories with a real historical `memory_date` are grouped
+ * into life PERIODS (decades) using the shared effective-date helper. Within a
+ * period, the dominant THEMES reuse the Collections V2 category model, and the
+ * "spans multiple periods" framing is the counterpart to Connections V2.
  *
- * A chapter is a meaningful period of a life, derived deterministically from
- * EXISTING data — the memory's own category (already assigned at capture; no new
- * AI) becomes the chapter, with a date range from effective memory dates, themes
- * from moods, and a count of related collections. Read-only, best-effort, human
- * language only (never "cluster"/"vector"/"similarity"). Degrades to empty.
+ * Read-only, best-effort, no AI, no migrations, existing fields only. Gated on
+ * dated-memory sufficiency so it never fabricates a chapter — it grows as Memory
+ * Date Adoption fills in dates.
  */
 export interface RemyLifeChapter {
-  /** Category slug — stable id for routing. */
+  /** Decade slug — stable id for routing, e.g. "1980s". */
   id: string;
   title: string;
+  /** One-line human narrative for the period. */
+  summary: string;
   startYear: number | null;
   endYear: number | null;
   memoryCount: number;
-  /** Dominant human emotional themes. */
+  /** Dominant human themes in the period (categories). */
   themes: string[];
-  /** Collections that share this chapter's theme. */
+  /** Distinct collections (themes) represented in this period. */
   connectedCollections: number;
   lastActiveAt: string | null;
 }
@@ -48,19 +53,13 @@ const GENERIC_CATEGORIES = new Set([
   "other",
 ]);
 
+// A life narrative needs at least a couple of placed-in-time memories.
+const MIN_TOTAL_DATED = 2;
 const MEMORY_LIMIT = 600;
 
 function clean(value: string | null | undefined): string | null {
   const t = value?.trim();
   return t ? t : null;
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 function titleCase(value: string): string {
@@ -71,15 +70,16 @@ function titleCase(value: string): string {
     .join(" ");
 }
 
-function isNarrativeCategory(category: string | null): category is string {
-  if (!category) return false;
-  return !GENERIC_CATEGORIES.has(category.toLowerCase());
+function themeOf(m: ChapterMemory): string | null {
+  const c = clean(m.ai_category);
+  if (!c || GENERIC_CATEGORIES.has(c.toLowerCase())) return null;
+  return titleCase(c);
 }
 
-function deriveThemes(moods: (string | null)[]): string[] {
+function dominantThemes(memories: ChapterMemory[]): string[] {
   const counts = new Map<string, { label: string; count: number }>();
-  for (const raw of moods) {
-    const label = raw?.trim();
+  for (const m of memories) {
+    const label = themeOf(m);
     if (!label) continue;
     const key = label.toLowerCase();
     const entry = counts.get(key) ?? { label, count: 0 };
@@ -88,21 +88,32 @@ function deriveThemes(moods: (string | null)[]): string[] {
   }
   return [...counts.values()]
     .sort((a, b) => b.count - a.count)
-    .slice(0, 3)
-    .map((e) => e.label.charAt(0).toUpperCase() + e.label.slice(1));
+    .map((e) => e.label);
 }
 
-function summarize(mems: ChapterMemory[]): {
-  startYear: number | null;
-  endYear: number | null;
-  lastActiveAt: string | null;
-} {
+function chapterSummary(themes: string[]): string {
+  if (themes.length === 0) {
+    return "A period of life captured in memories.";
+  }
+  if (themes.length === 1) {
+    return `A period centered on ${themes[0]}.`;
+  }
+  const [first, second] = themes;
+  return `A period spanning ${first} and ${second}${
+    themes.length > 2 ? " and more" : ""
+  }.`;
+}
+
+function buildChapter(
+  decadeStart: number,
+  memories: ChapterMemory[]
+): RemyLifeChapter {
   let startYear: number | null = null;
   let endYear: number | null = null;
   let lastActiveAt: string | null = null;
   let lastMs = -Infinity;
 
-  for (const m of mems) {
+  for (const m of memories) {
     const year = resolveEffectiveDate(m).getFullYear();
     if (!Number.isNaN(year)) {
       startYear = startYear === null ? year : Math.min(startYear, year);
@@ -114,7 +125,19 @@ function summarize(mems: ChapterMemory[]): {
       lastActiveAt = m.created_at;
     }
   }
-  return { startYear, endYear, lastActiveAt };
+
+  const themes = dominantThemes(memories);
+  return {
+    id: `${decadeStart}s`,
+    title: `The ${decadeStart}s`,
+    summary: chapterSummary(themes),
+    startYear,
+    endYear,
+    memoryCount: memories.length,
+    themes: themes.slice(0, 3),
+    connectedCollections: themes.length,
+    lastActiveAt,
+  };
 }
 
 export async function getRemyLifeChapters(
@@ -122,49 +145,30 @@ export async function getRemyLifeChapters(
   userId: string,
   opts: { sort?: "chronological" | "count"; limit?: number } = {}
 ): Promise<RemyLifeChapter[]> {
-  const [memories, collectionCategoryCounts] = await Promise.all([
-    fetchUserMemories(supabase, userId),
-    fetchCollectionCategoryCounts(supabase, userId),
-  ]);
-  if (memories.length === 0) return [];
+  const dated = await fetchDatedMemories(supabase, userId);
+  if (dated.length < MIN_TOTAL_DATED) return [];
 
-  const groups = new Map<string, { title: string; mems: ChapterMemory[] }>();
-  for (const m of memories) {
-    const category = clean(m.ai_category);
-    if (!isNarrativeCategory(category)) continue;
-    const slug = slugify(category);
-    if (!slug) continue;
-    let group = groups.get(slug);
-    if (!group) {
-      group = { title: titleCase(category), mems: [] };
-      groups.set(slug, group);
-    }
-    group.mems.push(m);
+  const byDecade = new Map<number, ChapterMemory[]>();
+  for (const m of dated) {
+    const year = resolveEffectiveDate(m).getFullYear();
+    if (Number.isNaN(year)) continue;
+    const decadeStart = Math.floor(year / 10) * 10;
+    const list = byDecade.get(decadeStart) ?? [];
+    list.push(m);
+    byDecade.set(decadeStart, list);
   }
 
-  const chapters: RemyLifeChapter[] = [];
-  for (const [slug, group] of groups) {
-    const { startYear, endYear, lastActiveAt } = summarize(group.mems);
-    chapters.push({
-      id: slug,
-      title: group.title,
-      startYear,
-      endYear,
-      memoryCount: group.mems.length,
-      themes: deriveThemes(group.mems.map((m) => m.ai_mood)),
-      connectedCollections: collectionCategoryCounts.get(slug) ?? 0,
-      lastActiveAt,
-    });
-  }
+  const chapters = [...byDecade.entries()].map(([decadeStart, memories]) =>
+    buildChapter(decadeStart, memories)
+  );
 
   if (opts.sort === "count") {
     chapters.sort(
       (a, b) =>
         b.memoryCount - a.memoryCount ||
-        (b.endYear ?? 0) - (a.endYear ?? 0)
+        (b.startYear ?? 0) - (a.startYear ?? 0)
     );
   } else {
-    // Chronological — the narrative order. Undated chapters sort last.
     chapters.sort(
       (a, b) =>
         (a.startYear ?? Infinity) - (b.startYear ?? Infinity) ||
@@ -185,19 +189,17 @@ export async function getRemyLifeChapterById(
   chapter: RemyLifeChapter;
   memories: ChapterMemory[];
 } | null> {
-  const [memories, collectionCategoryCounts] = await Promise.all([
-    fetchUserMemories(supabase, userId),
-    fetchCollectionCategoryCounts(supabase, userId),
-  ]);
+  const decadeStart = parseInt(id, 10);
+  if (Number.isNaN(decadeStart)) return null;
 
-  const matched = memories.filter((m) => {
-    const category = clean(m.ai_category);
-    return isNarrativeCategory(category) && slugify(category) === id;
+  const dated = await fetchDatedMemories(supabase, userId);
+  const matched = dated.filter((m) => {
+    const year = resolveEffectiveDate(m).getFullYear();
+    return (
+      !Number.isNaN(year) && Math.floor(year / 10) * 10 === decadeStart
+    );
   });
   if (matched.length === 0) return null;
-
-  const title = titleCase(clean(matched[0].ai_category) as string);
-  const { startYear, endYear, lastActiveAt } = summarize(matched);
 
   // Oldest → newest, so the chapter reads as a story unfolding.
   matched.sort(
@@ -206,35 +208,23 @@ export async function getRemyLifeChapterById(
   );
 
   return {
-    chapter: {
-      id,
-      title,
-      startYear,
-      endYear,
-      memoryCount: matched.length,
-      themes: deriveThemes(matched.map((m) => m.ai_mood)),
-      connectedCollections: collectionCategoryCounts.get(id) ?? 0,
-      lastActiveAt,
-    },
+    chapter: buildChapter(decadeStart, matched),
     memories: matched,
   };
 }
 
-/** Human "1975 → 1988" / "2016 → Present" / "1990". */
+/** Human "1975 → 1988" / "1980" / null. */
 export function formatChapterRange(
   chapter: Pick<RemyLifeChapter, "startYear" | "endYear">
 ): string | null {
-  const { startYear } = chapter;
+  const { startYear, endYear } = chapter;
   if (startYear === null) return null;
-  const end = chapter.endYear ?? startYear;
-  if (startYear === end) return String(startYear);
-  const currentYear = new Date().getFullYear();
-  const endLabel = end >= currentYear ? "Present" : String(end);
-  return `${startYear} → ${endLabel}`;
+  if (endYear === null || startYear === endYear) return String(startYear);
+  return `${startYear} → ${endYear}`;
 }
 
-// ── Best-effort reads ───────────────────────────────────────────────────────
-async function fetchUserMemories(
+// ── best-effort read ─────────────────────────────────────────────────────────
+async function fetchDatedMemories(
   supabase: DashboardSupabase,
   userId: string
 ): Promise<ChapterMemory[]> {
@@ -245,35 +235,11 @@ async function fetchUserMemories(
         "id, title, ai_title, created_at, memory_date, memory_date_precision, ai_category, ai_mood"
       )
       .eq("user_id", userId)
-      .order("created_at", { ascending: false })
+      .not("memory_date", "is", null)
+      .order("memory_date", { ascending: true })
       .limit(MEMORY_LIMIT);
     return (data as ChapterMemory[] | null) ?? [];
   } catch {
     return [];
   }
-}
-
-async function fetchCollectionCategoryCounts(
-  supabase: DashboardSupabase,
-  userId: string
-): Promise<Map<string, number>> {
-  const counts = new Map<string, number>();
-  try {
-    const { data } = await supabase
-      .from("memory_clusters")
-      .select("category")
-      .eq("user_id", userId)
-      .limit(500);
-    for (const row of (data as { category: string | null }[] | null) ?? []) {
-      const category = clean(row.category);
-      if (!isNarrativeCategory(category)) continue;
-      const slug = slugify(category);
-      if (!slug) continue;
-      counts.set(slug, (counts.get(slug) ?? 0) + 1);
-    }
-  } catch {
-    // best-effort
-    return counts;
-  }
-  return counts;
 }

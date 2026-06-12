@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
@@ -31,9 +32,18 @@ export default async function ChaptersPage() {
       </header>
 
       {chapters.length === 0 ? (
-        <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-charcoal-soft shadow-soft">
-          Remy hasn&apos;t shaped any chapters yet. As more memories are added —
-          especially historical ones — life chapters will begin to take form.
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 shadow-soft">
+          <p className="text-charcoal-soft">
+            Life chapters take shape once memories are placed in time. Add dates
+            — even a rough year or decade — and Remy will gather them into the
+            periods of a life.
+          </p>
+          <Link
+            href="/memory-dates"
+            className="mt-5 inline-flex items-center rounded-full bg-sage px-6 py-3 text-base font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+          >
+            Add memory dates
+          </Link>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

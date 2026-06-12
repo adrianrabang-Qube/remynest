@@ -54,10 +54,12 @@ export default async function ChapterDetailPage({
           <p className="mt-2 text-lg font-medium text-sage-deep">{range}</p>
         )}
 
-        <p className="mt-3 text-charcoal-soft">
-          Many of these memories belong to the same period. This chapter
-          contains {chapter.memoryCount} connected{" "}
-          {chapter.memoryCount === 1 ? "memory" : "memories"}.
+        <p className="mt-3 text-lg text-charcoal-soft break-words">
+          {chapter.summary}
+        </p>
+        <p className="mt-2 text-charcoal-soft">
+          Many of these memories belong to the same period — {chapter.memoryCount}{" "}
+          {chapter.memoryCount === 1 ? "memory" : "memories"} from this chapter.
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">

@@ -12,6 +12,31 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Life Chapters V2 — time-based life periods** (read-only; no
+  schema/migrations/AI; existing fields only). Rewrote `lib/remy/life-chapters.ts`;
+  pages/components updated (no route changes).
+  - **Investigation:** V1 grouped by `ai_category` → fragmented, present-dated
+    pseudo-chapters ("Cognition 2026", "Request 2026") — technical groupings, not a
+    life, because <3% of memories are dated so effective dates collapsed to 2026.
+  - **Architecture decision — chapters from TIME:** build chapters from memories
+    with a real historical `memory_date`, grouped into **decade periods** ("The
+    1980s") via the shared effective-date helper. Dominant **themes** per period
+    reuse the Collections V2 category model (`connectedCollections` = distinct
+    themes in the era); the "spans multiple periods" framing is the Connections V2
+    counterpart. A one-line narrative **summary** is derived from the themes
+    ("A period centered on Family." / "A period spanning Family and Travel."). All
+    three Remy layers (Collections/Connections/Chapters) now rest on the same
+    date + theme primitives.
+  - **Thresholds / graceful degradation:** gated on **≥2 dated memories** total
+    (`MIN_TOTAL_DATED`); otherwise returns empty → the /chapters page shows an
+    actionable empty state linking **/memory-dates** (dating is the prerequisite).
+    No fabricated present-day topics. Grows as Memory Date Adoption fills dates.
+  - **Real-data result:** V1 = ~19 topical "category 2026" pseudo-chapters; V2 =
+    **one real chapter "The 1980s"** (2 memories; themes Personal Memory · Social).
+  - **Scalability:** one bounded read — dated memories, user-scoped, `limit 600`,
+    `memory_date IS NOT NULL`. Grouping O(dated memories); no per-chapter queries,
+    no full-table scans, no N². Dashboard (`sort:"count"`, top 4) stays light;
+    /chapters is chronological.
 - **Connections V2 — meaningful relationship discovery** (read-only; no
   schema/migrations/AI; existing stored relationships only). Rewrote
   `lib/remy/connections.ts`; pages/components updated to narrative (no regressions).
@@ -655,7 +680,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Connections V2 — diversity-ranked, narrative relationship discovery
+- `feat(remy)` Life Chapters V2 — time-based life periods (decade chapters from memory dates)
+- `46c13e7` feat(remy): Connections V2 — diversity-ranked, narrative relationship discovery
 - `ebe2f98` feat(remy): Collections V2 — theme-consolidated, deduplicated collections (category grouping)
 - `6bbfd50` feat(dashboard): Remy Activity concise summary card + investigation findings
 - `1938ae4` feat(dashboard): Remy Activity — collapse to 3 with in-place show more/less (presentation only)

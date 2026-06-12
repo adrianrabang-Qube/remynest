@@ -28,7 +28,11 @@ export default function ChapterCard({
         <p className="mt-1 text-sm font-medium text-sage-deep">{range}</p>
       )}
 
-      <p className="mt-2 text-sm text-charcoal-soft">
+      <p className="mt-2 text-sm text-charcoal-soft break-words">
+        {chapter.summary}
+      </p>
+
+      <p className="mt-2 text-xs text-charcoal-muted">
         {chapter.memoryCount}{" "}
         {chapter.memoryCount === 1 ? "memory" : "memories"}
       </p>
