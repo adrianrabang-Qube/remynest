@@ -45,6 +45,8 @@ import RemyNotifications from "@/components/remy/RemyNotifications";
 import { getRemyNotifications } from "@/lib/remy/notifications";
 import RemyTimeline from "@/components/remy/RemyTimeline";
 import { getRemyTimeline } from "@/lib/remy/timeline";
+import RemyStoryMode from "@/components/remy/RemyStoryMode";
+import { getRemyStories } from "@/lib/remy/story-mode";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
 import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
@@ -648,6 +650,13 @@ export default async function DashboardPage() {
     connections: remyConnections,
   });
 
+  // Remy Story Mode — pure composition of guided chapter journeys (no queries).
+  const remyStories = getRemyStories({
+    chapters: remyLifeChapters,
+    collections: remyCollections,
+    connections: remyConnections,
+  });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -767,6 +776,9 @@ export default async function DashboardPage() {
 
         {/* REMY TIMELINE — visual narrative above the drill-down layers */}
         <RemyTimeline events={remyTimeline} />
+
+        {/* REMY STORY MODE — guided journey built on the timeline backbone */}
+        <RemyStoryMode stories={remyStories} />
 
         {/* REMY COLLECTIONS — the organize layer */}
         <RemyCollections

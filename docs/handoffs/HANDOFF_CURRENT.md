@@ -12,6 +12,39 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Story Mode V1 — guided narrative journey** (read-only; no AI/migrations/
+  schema). NOT AI generation / biography writer / chat — a pure COMPOSITION over
+  existing intelligence, built on the Timeline V1 chapter backbone.
+  - **Investigation:** narrative primitives already exist — Life Chapters
+    (`title`, `summary`, `startYear/endYear`, **`themes[]`**), Collections
+    (`id`=category slug, `summary`, year range), Connections (`summary`,
+    `startYear/endYear`, `spansEras`, `diversityScore`). Story paths buildable
+    today: one story per chapter; sections = chapter `themes[]` (linked to matching
+    Collections by `slugify(theme)===collection.id`) + overlapping Connections;
+    narrative composed from themes + `chapter.summary`. Recompute nothing; fetch no
+    raw memories.
+  - **Architecture:** `lib/remy/story-mode.ts` — `getRemyStories(input)` PURE (0
+    queries). `RemyStory {id, title, summary, startYear, endYear, sections[],
+    href}`; `RemyStorySection {id, title, description?, href?, kind:"theme"|
+    "connection"}`. One story per chapter (chronological, cap 8); ≤3 theme + ≤2
+    connection sections; narrative "The 1980s was a period shaped by X and Y.".
+  - **UI:** `components/remy/RemyStoryMode.tsx` ("Story Mode") — card-based journey
+    (title · range · narrative · vertical section rail with Explore links · "Walk
+    through <chapter>"); mobile responsive; no nested scroll / fixed heights;
+    hidden when empty.
+  - **Dashboard placement:** Timeline → **Story Mode** → Collections/Connections/
+    Chapters. Sits directly after the Timeline backbone and above the drill-downs:
+    timeline plots chronology, Story Mode walks it, sections are deep exploration.
+  - **Validation (real data, top user):** 1 story — "The 1980s" → summary "The
+    1980s was a period shaped by Personal Memory and Social." → sections Personal
+    Memory → Social → nav /chapters/1980s; empty account → [] → hidden.
+  - **Scalability:** 0 queries (reuses chapters/collections/connections already
+    computed). Synthesis O(chapters × (themes + connections)), all bounded
+    (chapters ≤ #decades, cap 8; ≤3 themes; ≤ connections window) → constant;
+    render O(stories × sections) ≤ ~40. No memory-proportional work, no N², constant
+    at 10/100/1k/10k memories. **Future:** Story Mode V2 / Biography Generator
+    consume the same `RemyStory[]`; connection sections enrich as date adoption
+    creates cross-era overlaps.
 - **Remy Timeline V1 — visual narrative layer** (read-only; no AI/migrations/
   schema). NOT a calendar / list of memories / new engine — a pure SYNTHESIZER
   that turns existing intelligence into a chronological story.
@@ -778,7 +811,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)
+- `feat(remy)` Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
+- `63b7a4a` feat(remy): Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)
 - `b7e9a25` feat(remy): Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
 - `5e0fe01` feat(remy): Family Workspace Intelligence V1 — per-profile stats, family themes, observations
 - `6f67254` feat(remy): Life Chapters V2 — time-based life periods (decade chapters from memory dates)
