@@ -43,6 +43,7 @@ import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
 import RemyNotifications from "@/components/remy/RemyNotifications";
 import { getRemyNotifications } from "@/lib/remy/notifications";
+import { remyMoodForContext } from "@/components/remy/avatar/remy-moods";
 import RemyTimeline from "@/components/remy/RemyTimeline";
 import { getRemyTimeline } from "@/lib/remy/timeline";
 import RemyStoryMode from "@/components/remy/RemyStoryMode";
@@ -654,6 +655,15 @@ export default async function DashboardPage() {
     connections: remyConnections,
   });
 
+  // Remy header mood — celebrates a new chapter/family discovery, otherwise
+  // welcomes. Derived from the notifications already synthesized (no new query).
+  const remyHeaderMood = remyNotifications.some(
+    (n) =>
+      n.category === "chapter" || n.category === "family"
+  )
+    ? "celebrating"
+    : remyMoodForContext("dashboard");
+
   // Remy Story Mode — pure composition of guided chapter journeys (no queries).
   const remyStories = getRemyStories({
     chapters: remyLifeChapters,
@@ -757,6 +767,8 @@ export default async function DashboardPage() {
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
+          workspaceType={workspaceType}
+          remyMood={remyHeaderMood}
         />
 
         {/* REMY COMPANION — AI companion layer above the command center */}

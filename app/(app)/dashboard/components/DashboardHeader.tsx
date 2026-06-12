@@ -1,8 +1,12 @@
+import RemyAvatar from "@/components/remy/avatar/RemyAvatar";
+import type { RemyMood } from "@/components/remy/avatar/remy-moods";
+
 type DashboardHeaderProps = {
   greeting: string;
   displayName: string;
   workspaceType?: "care" | "my-nest";
   workspaceLabel?: string;
+  remyMood?: RemyMood;
 };
 
 export default function DashboardHeader({
@@ -10,6 +14,7 @@ export default function DashboardHeader({
   displayName,
   workspaceType = "care",
   workspaceLabel,
+  remyMood = "welcoming",
 }: DashboardHeaderProps) {
   return (
     <div className="space-y-4">
@@ -30,20 +35,31 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div>
+      <div className="flex items-start gap-4">
 
-        <h1 className="text-5xl font-semibold tracking-tight text-charcoal mb-3">
-          {greeting},{" "}
-          {displayName}
-        </h1>
+        {/* Remy — the AI Memory Companion, greeting from the header */}
+        <RemyAvatar
+          mood={remyMood}
+          size="lg"
+          className="mt-1 shrink-0"
+        />
 
-        <p className="text-lg text-charcoal-soft max-w-2xl leading-relaxed">
-          {workspaceLabel ?? "Welcome back to RemyNest."}
-          {" "}
-          Your memories, reminders,
-          and cognitive insights are
-          ready for today.
-        </p>
+        <div>
+
+          <h1 className="text-4xl font-semibold tracking-tight text-charcoal mb-3 sm:text-5xl">
+            {greeting},{" "}
+            {displayName}
+          </h1>
+
+          <p className="text-lg text-charcoal-soft max-w-2xl leading-relaxed">
+            {workspaceLabel ?? "Welcome back to RemyNest."}
+            {" "}
+            Your memories, reminders,
+            and cognitive insights are
+            ready for today.
+          </p>
+
+        </div>
 
       </div>
 

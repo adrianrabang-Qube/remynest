@@ -12,6 +12,35 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Avatar Evolution V1** (UI only; no DB/queries/AI; character NOT redesigned).
+  Maps the existing Remy intelligence onto the emotional/visual states in the
+  official **Remy Avatar Blueprint** (the canonical spec).
+  - **Architecture (`components/remy/avatar/`):** `remy-moods.ts` — canonical
+    `RemyMood` (welcoming/listening/thinking/analyzing/reflecting/sharing/
+    celebrating/resting/neutral) each grounded in a blueprint state
+    (`REMY_MOOD_SPECS`), + the **state mapping** `REMY_CONTEXT_MOOD` /
+    `remyMoodForContext(context)`. `remy-assets.ts` — mood → `RemyAvatarAsset`
+    (`src` = official `/public/remy/remy-<mood>.png`, **null until provided** →
+    brand-styled fallback: Remy's purple palette + the mood's expression glyph).
+    `RemyAvatar.tsx` — `<RemyAvatar mood size />` (xs–xl), renders official art
+    when present else the fallback; mobile responsive; a11y (role=img/alt or
+    decorative). Existing `components/remy/RemyAvatar.tsx` (companion ✦) left
+    untouched.
+  - **State mapping:** dashboard→welcoming · notifications→sharing · timeline→
+    analyzing · story-mode/biography/memory-book→reflecting (Thoughtful) · family→
+    sharing (caring) · milestone→celebrating. Each maps to a blueprint state; no
+    invented expressions.
+  - **Integration:** `DashboardHeader` now renders `<RemyAvatar size="lg">`; the
+    dashboard derives the header mood from existing notifications (a new chapter/
+    family discovery → **celebrating**, else welcoming) — **no new query**.
+  - **Validation:** real data → header shows celebrating Remy (chapter notification
+    present); mapping verified for all surfaces; lint clean; build passes (48
+    routes). **Scalability:** O(1) static render + constant-time mood lookups; 0
+    queries, 0 DB; header derivation O(notifications ≤ 10). Constant at any scale.
+  - **Future:** drop the official blueprint exports into `/public/remy/` and set
+    `src` in `remy-assets.ts` — every surface (web/iOS/Android/notifications/voice/
+    Story Mode/Biography/Memory Book) gains the real art with no other change; the
+    same `RemyMood` + mapping drive future animation/Voice Engine V2.
 - **Export Engine V1 — PDF-ready export layer** (read-only; no cloud/sharing/
   email/AI/migrations). Converts a MemoryBook/Biography into a printable document
   and generates a PDF via the browser print engine (zero new deps).
@@ -898,7 +927,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Export Engine V1 — PDF-ready ExportDocument + print page + download flow
+- `feat(remy)` Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
+- `779f045` feat(remy): Export Engine V1 — PDF-ready ExportDocument + print page + download flow
 - `aa652a4` feat(remy): Memory Books V1 — structured book model (cover/TOC/chapters from the biography)
 - `c7aa4cf` feat(remy): Biography V1 — structured life narrative (pure composition of existing summaries)
 - `b8dbb11` feat(remy): Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
