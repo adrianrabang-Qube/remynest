@@ -41,13 +41,17 @@ export const REMY_SPRITE_MAP: Record<RemyMood, SpriteRegion> = {
   analyzing: { x: 0.287, y: 0.79, w: 0.1, h: 0.1 },
   sharing: { x: 0.417, y: 0.79, w: 0.1, h: 0.1 },
   celebrating: { x: 0.553, y: 0.79, w: 0.1, h: 0.1 },
-  welcoming: { x: 0.846, y: 0.79, w: 0.1, h: 0.1 },
-  // Expressions grid (right column) — larger 0.17² because the faces are drawn
-  // bigger on the sheet (keeps the head the same size as the busts in-avatar).
-  neutral: { x: 0.817, y: 0.175, w: 0.17, h: 0.17 },
-  reflecting: { x: 0.821, y: 0.307, w: 0.17, h: 0.17 },
-  // Poses & Actions — head of the sitting pose, 0.12² (excludes the feet).
-  resting: { x: 0.792, y: 0.57, w: 0.12, h: 0.12 },
+  // Re-measured: the Chatting bird is x[0.871-0.962]; crop starts at 0.868 to
+  // drop the purple speech-bubble blob (x ≤ 0.868) and center on the bird.
+  welcoming: { x: 0.868, y: 0.796, w: 0.1, h: 0.1 },
+  // Expressions grid right column — re-measured face bands: neutral = row2
+  // y[0.207-0.335], reflecting = row3 y[0.346-0.475]. 0.145² fully contains each
+  // bust (head top → pendant) with no clipping or row-above bleed.
+  neutral: { x: 0.832, y: 0.199, w: 0.145, h: 0.145 },
+  reflecting: { x: 0.835, y: 0.338, w: 0.145, h: 0.145 },
+  // Poses & Actions — the resting (eyes-closed) sprite is row2-middle
+  // y[0.671-0.751], x≈[0.78-0.87]; 0.085² frames its head+scarf+pendant.
+  resting: { x: 0.783, y: 0.658, w: 0.085, h: 0.085 },
 };
 
 /** Inline style that crops a mood's region from the blueprint to fill a box. */

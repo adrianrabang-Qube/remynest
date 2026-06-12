@@ -21,6 +21,19 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   `/dev` entry in `middleware.ts`, and the temp link in `dashboard/page.tsx`. (Note:
   local `next start` 500s on SSR pages due to a pre-existing `@opentelemetry`
   instrumentation chunk issue — unrelated to this page.)
+- **Avatar crop calibration — 4 problem moods finalized** (`remy-sprite-map.ts` only).
+  After visual review on `/dev/remy-avatar-test`, re-measured welcoming/reflecting/
+  neutral/resting from the decoded 1254² PNG (row/column band profiling — no
+  guessing) and fixed: **welcoming** {0.846,0.79,0.1,0.1}→{0.868,0.796,0.1,0.1}
+  (drop the purple speech-bubble blob at x≤0.868, center the bird at x[0.871-0.962]);
+  **neutral** {0.817,0.175,0.17,0.17}→{0.832,0.199,0.145,0.145} (row2 bust
+  y[0.207-0.335]; old crop started at 0.175 → showed row1's pendant); **reflecting**
+  {0.821,0.307,0.17,0.17}→{0.835,0.338,0.145,0.145} (row3 bust y[0.346-0.475]);
+  **resting** {0.792,0.57,0.12,0.12}→{0.783,0.658,0.085,0.085} (the eyes-closed
+  sprite is Poses row2-middle y[0.671-0.751]; old crop at y0.57 was the wrong/row1
+  sprite). Validated: all 9 in-bounds+square, no clipping, no neighbor bleed; the 5
+  GOOD moods (listening/thinking/analyzing/sharing/celebrating) unchanged. lint
+  clean; build (49 routes).
 - **Avatar crop calibration (all 9 moods)** (`components/remy/avatar/remy-sprite-map.ts`
   only — architecture/middleware/mood-system/dashboard/animation untouched). The crop
   regions were too loose (included stars/wing-tips/surrounding art). Measured the real
