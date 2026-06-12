@@ -23,6 +23,8 @@ const PUBLIC_ROUTES = [
   "/cookies",
   "/account-deletion",
   "/contact",
+  // TEMP — development-only Remy avatar QA page (page itself 404s in prod).
+  "/dev",
 ];
 
 const PROTECTED_ROUTES = [

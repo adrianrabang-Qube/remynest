@@ -771,6 +771,16 @@ export default async function DashboardPage() {
           remyMood={remyHeaderMood}
         />
 
+        {/* TEMP — dev-only link to the Remy avatar mood test. Remove before launch. */}
+        {process.env.NODE_ENV !== "production" && (
+          <Link
+            href="/dev/remy-avatar-test"
+            className="inline-flex w-fit text-xs font-medium text-charcoal-muted underline underline-offset-2 hover:text-charcoal"
+          >
+            🛠 Remy avatar test
+          </Link>
+        )}
+
         {/* REMY COMPANION — AI companion layer above the command center */}
         <RemyCompanion
           observations={remyObservations}

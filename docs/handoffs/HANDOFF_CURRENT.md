@@ -12,6 +12,15 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **TEMP dev page — `/dev/remy-avatar-test`** (remove before launch): renders all 9
+  Remy moods in a 3×3 grid at 200px with labels, using the real `RemyAvatar`. No DB,
+  no auth (added `/dev` to middleware `PUBLIC_ROUTES`), **dev-only** (`notFound()` in
+  production). Temporary dev-only link from the dashboard header (hidden in prod).
+  Validated in `next dev`: 200, 9 `data-remy-mood` avatars, all labels, blueprint
+  sprite wired; lint clean; build (49 routes). To remove: delete `app/dev/`, the
+  `/dev` entry in `middleware.ts`, and the temp link in `dashboard/page.tsx`. (Note:
+  local `next start` 500s on SSR pages due to a pre-existing `@opentelemetry`
+  instrumentation chunk issue — unrelated to this page.)
 - **Avatar crop calibration (all 9 moods)** (`components/remy/avatar/remy-sprite-map.ts`
   only — architecture/middleware/mood-system/dashboard/animation untouched). The crop
   regions were too loose (included stars/wing-tips/surrounding art). Measured the real
