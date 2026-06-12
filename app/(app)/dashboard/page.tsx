@@ -49,6 +49,8 @@ import RemyStoryMode from "@/components/remy/RemyStoryMode";
 import { getRemyStories } from "@/lib/remy/story-mode";
 import RemyBiography from "@/components/remy/RemyBiography";
 import { getRemyBiography } from "@/lib/remy/biography";
+import RemyMemoryBook from "@/components/remy/RemyMemoryBook";
+import { getRemyMemoryBook } from "@/lib/remy/memory-book";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
 import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
@@ -669,6 +671,12 @@ export default async function DashboardPage() {
     coverage: remyDateCoverage,
   });
 
+  // Remy Memory Book — pure composition of the biography into a book preview.
+  const remyMemoryBook = getRemyMemoryBook({
+    biography: remyBiography,
+    stories: remyStories,
+  });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -794,6 +802,9 @@ export default async function DashboardPage() {
 
         {/* REMY BIOGRAPHY — long-form life document, the narrative culmination */}
         <RemyBiography biography={remyBiography} />
+
+        {/* REMY MEMORY BOOK — the bound, navigable book form of the biography */}
+        <RemyMemoryBook book={remyMemoryBook} />
 
         {/* REMY COLLECTIONS — the organize layer */}
         <RemyCollections

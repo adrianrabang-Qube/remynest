@@ -12,6 +12,36 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Memory Books V1 — structured book model** (read-only; no AI/queries/
+  migrations/schema). NOT PDF/print/share/AI — the deterministic book structure
+  future export/print/share will consume. Pure COMPOSITION of Biography V1 (+
+  Story Mode chapter titles) into a cover + table of contents + navigable book.
+  - **Investigation:** Biography V1 already contains every book section as prose
+    (Introduction/Life Chapters/Important Themes/Connected Stories/Family Impact/
+    Reflection); Story Mode supplies titled per-chapter entries. Reuse verbatim;
+    recompute nothing; empty biography → empty book.
+  - **Architecture:** `lib/remy/memory-book.ts` — `getRemyMemoryBook({biography,
+    stories})` PURE (0 queries) → `MemoryBook {title, subtitle, cover, tableOfContents[],
+    sections[]}`; `MemoryBookSection {id, title, paragraphs[], chapters?, href?}`;
+    `MemoryBookChapter {id, number, title, paragraphs[], href?}`. Each biography
+    section → a book section (in order); the "Life Chapters" section carries titled
+    `MemoryBookChapter` entries from Story Mode; TOC = numbered section list.
+    Returns null when biography is null.
+  - **UI:** `components/remy/RemyMemoryBook.tsx` — book preview: cover + contents
+    navigator (click a chapter to read it; client state, no nested scroll); mobile
+    responsive (TOC wraps above content); hidden when null. Preview only — no
+    export/PDF.
+  - **Placement:** Biography → **Memory Book** → Collections/Connections/Chapters —
+    the bound, navigable book form of the biography, above the drill-downs.
+    Progression: Timeline → Story Mode → Biography → Memory Book → drill-downs.
+    0 query delta.
+  - **Validation (real data):** "A Life in Memories" (1980) · 5 TOC entries
+    (Introduction, Life Chapters, Important Themes, Connected Stories, Reflection)
+    · Life Chapters → 1 chapter ("The 1980s"); empty account → null → hidden.
+  - **Scalability:** 0 queries; transform O(biography sections + stories) — both
+    bounded → constant; render shows one active section. No memory-proportional
+    work, no N², constant at 10/100/1k/10k memories. **Future:** PDF export /
+    printing / sharing consume the same `MemoryBook` model unchanged.
 - **Remy Biography V1 — structured life narrative** (read-only; no AI/migrations/
   schema/raw-memory queries). NOT AI writing / LLM / chatbot — a pure COMPOSITION
   that assembles a long-form life document from existing intelligence, reusing
@@ -844,7 +874,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Biography V1 — structured life narrative (pure composition of existing summaries)
+- `feat(remy)` Memory Books V1 — structured book model (cover/TOC/chapters from the biography)
+- `c7aa4cf` feat(remy): Biography V1 — structured life narrative (pure composition of existing summaries)
 - `b8dbb11` feat(remy): Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
 - `63b7a4a` feat(remy): Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)
 - `b7e9a25` feat(remy): Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
