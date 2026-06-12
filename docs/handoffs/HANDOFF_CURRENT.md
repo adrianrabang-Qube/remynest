@@ -12,6 +12,24 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile dashboard densification** (`< md` only; **desktop unchanged at `md+`**; no
+  content/feature/data removed). Fixes "dashboard is many screen-heights tall on mobile":
+  - **Width:** the dashboard had *double* horizontal padding (shell `<main>` + its own inner
+    `<main>` both `px-6` → ~80px lost, ~295px usable at 375px). Shell → `px-4 md:px-6`; inner
+    dashboard `<main>` → `px-0 md:px-6` (shell already gutters) → ~343px usable.
+  - **Vertical rhythm:** inner `<main>` `py-10 space-y-8` → `py-6 space-y-4 md:py-10 md:space-y-8`.
+  - **Card density:** the shared card root `bg-white p-6 shadow-soft` → `p-4 md:p-6` on 10 roots
+    (8 widget files; RemyBiography excluded to preserve its `sm:p-10` desktop).
+  - **Progressive disclosure:** new `app/(app)/dashboard/components/MobileExpandable.tsx` —
+    ResizeObserver-measured clamp (`max-h-[18rem]`) + "Show more/less"; **mobile only**
+    (`md:` = pure passthrough, no clamp/fade/button), and the toggle only renders when content
+    actually overflows (so the `return null` widgets are untouched). Wraps the 6 long white-card
+    widgets: Timeline, Biography, Memory Book, Collections, Connections, Life Chapters.
+  - **Preserved (Critical systems):** nav, profile/workspace switching, reminders, notifications,
+    memory creation, GDPR/account — all untouched (dashboard render is structurally identical;
+    only responsive classes + non-destructive wrappers added). Est. **~40–55% mobile scroll
+    reduction** on content-rich dashboards. Validated: lint (0 new), build ✓. **Live 375/390/430
+    visual pass pending on device** (auth-gated; can't render here).
 - **Hybrid mobile navigation — implemented** (fixes the `< md` navbar overflow audited
   earlier; **desktop unchanged at `md+`**). New `components/navigation/nav-config.ts` is the
   **single source of truth** for routes — desktop `NavLinks` and the mobile nav both derive

@@ -25,7 +25,7 @@ export default function RemyActivityFeed({
     : activities.slice(0, DEFAULT_VISIBLE);
 
   return (
-    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+    <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-semibold text-charcoal">Remy Activity</h2>
         <span className="text-xs text-charcoal-muted">

@@ -19,7 +19,7 @@ export default function RemyTimeline({
   const groups = groupTimelineByYear(events);
 
   return (
-    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+    <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
       <h2 className="text-lg font-semibold text-charcoal">Your Story</h2>
       <p className="mt-1 text-sm text-charcoal-soft">
         A look back through the moments that shaped your story.

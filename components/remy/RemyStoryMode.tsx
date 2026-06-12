@@ -27,7 +27,7 @@ export default function RemyStoryMode({
         {stories.map((story) => (
           <article
             key={story.id}
-            className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft"
+            className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft"
           >
             <div className="flex items-baseline justify-between gap-3">
               <h3 className="text-xl font-semibold text-charcoal break-words">

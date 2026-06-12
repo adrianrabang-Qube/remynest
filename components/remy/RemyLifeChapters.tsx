@@ -22,7 +22,7 @@ export default function RemyLifeChapters({
     : `I've started identifying important chapters in your story.`;
 
   return (
-    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+    <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-semibold text-charcoal">Life Chapters</h2>
         <Link

@@ -40,7 +40,7 @@ export default function DashboardFocus({
   // ---- My Nest: reminders are care-only, gentle redirect ----------------
   if (isMyNest) {
     return (
-      <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+      <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
         <h2 className="text-xl font-semibold text-charcoal">Today&apos;s Focus</h2>
         <p className="mt-2 text-sm text-charcoal-soft">
           Reminders live inside a care profile. Enter a care workspace to see
@@ -108,7 +108,7 @@ export default function DashboardFocus({
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* UPCOMING TODAY */}
-        <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
           <h2 className="text-lg font-semibold text-charcoal">Upcoming today</h2>
           {upcoming.length > 0 ? (
             <ul className="mt-3 space-y-2 text-sm">
@@ -132,7 +132,7 @@ export default function DashboardFocus({
         </div>
 
         {/* ROUTINE PROGRESS */}
-        <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
           <h2 className="text-lg font-semibold text-charcoal">Routine progress</h2>
           {routines.length > 0 ? (
             <>

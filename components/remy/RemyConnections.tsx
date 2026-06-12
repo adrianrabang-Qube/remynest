@@ -13,7 +13,7 @@ export default function RemyConnections({
   if (connections.length === 0) return null;
 
   return (
-    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
+    <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-lg font-semibold text-charcoal">
           Connections Remy Found

@@ -27,6 +27,7 @@ import {
 } from "./lib/dashboard-telemetry";
 
 import DashboardHeader from "./components/DashboardHeader";
+import MobileExpandable from "./components/MobileExpandable";
 import DashboardStats from "./components/DashboardStats";
 import DashboardProfilePanel from "./components/DashboardProfilePanel";
 import DashboardAccountStatus from "./components/DashboardAccountStatus";
@@ -759,7 +760,10 @@ export default async function DashboardPage() {
   return (
     <WorkspaceShell>
 
-      <main className="max-w-6xl mx-auto px-6 py-10 space-y-8">
+      {/* Mobile (< md): drop the inner horizontal padding (the app shell already
+          gutters px-4) to recover ~48px of width, and tighten the vertical rhythm
+          to cut scroll length. md+ keeps the original px-6 / py-10 / space-y-8. */}
+      <main className="max-w-6xl mx-auto px-0 py-6 space-y-4 md:px-6 md:py-10 md:space-y-8">
 
         
 
@@ -807,36 +811,48 @@ export default async function DashboardPage() {
         />
 
         {/* REMY TIMELINE — visual narrative above the drill-down layers */}
-        <RemyTimeline events={remyTimeline} />
+        <MobileExpandable>
+          <RemyTimeline events={remyTimeline} />
+        </MobileExpandable>
 
         {/* REMY STORY MODE — guided journey built on the timeline backbone */}
         <RemyStoryMode stories={remyStories} />
 
         {/* REMY BIOGRAPHY — long-form life document, the narrative culmination */}
-        <RemyBiography biography={remyBiography} />
+        <MobileExpandable>
+          <RemyBiography biography={remyBiography} />
+        </MobileExpandable>
 
         {/* REMY MEMORY BOOK — the bound, navigable book form of the biography */}
-        <RemyMemoryBook book={remyMemoryBook} />
+        <MobileExpandable>
+          <RemyMemoryBook book={remyMemoryBook} />
+        </MobileExpandable>
 
         {/* REMY COLLECTIONS — the organize layer */}
-        <RemyCollections
-          collections={remyCollections}
-        />
+        <MobileExpandable>
+          <RemyCollections
+            collections={remyCollections}
+          />
+        </MobileExpandable>
 
         {/* REMY CONNECTIONS — related-moments layer */}
-        <RemyConnections
-          connections={remyConnections}
-        />
+        <MobileExpandable>
+          <RemyConnections
+            connections={remyConnections}
+          />
+        </MobileExpandable>
 
         {/* LIFE CHAPTERS — narrative layer */}
-        <RemyLifeChapters
-          chapters={remyLifeChapters}
-          subjectName={
-            !isMyNestWorkspace
-              ? remySubjectName
-              : null
-          }
-        />
+        <MobileExpandable>
+          <RemyLifeChapters
+            chapters={remyLifeChapters}
+            subjectName={
+              !isMyNestWorkspace
+                ? remySubjectName
+                : null
+            }
+          />
+        </MobileExpandable>
 
         {/* FAMILY WORKSPACE INTELLIGENCE — family-level layer (>= 2 profiles) */}
         {familyIntelligence &&
