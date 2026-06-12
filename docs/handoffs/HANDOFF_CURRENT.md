@@ -13,6 +13,24 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
 ## Completed work
+- **Reminiscence Mode V1** (read-only; existing data only; no AI/embeddings/
+  clustering/migrations): the first dedicated caregiver/family memory experience.
+  New `lib/remy/reminiscence.ts` (`getReminiscence`) reuses historical (dated)
+  memories + the shared date helpers + `signMemories` (for images), grouping them
+  into **eras (decades)** by effective date, oldest-first (a life unfolding).
+  Workspace-scoped (care profile / My Nest), one fetch, best-effort.
+  - **/reminisce**: calm, large-type, large-tap-target experience. Per-era
+    sections ("1980s" + a warm Remy line "Let's revisit N memories from the
+    1980s.") of image-forward `ReminiscenceCard`s (title · 🕰 memory date · image
+    if available · short summary → /memories/[id]). Personal Remy intro using the
+    care-recipient's name when present. **Empty state** (0 dated) explains why
+    dates matter + links `/memory-dates`; **sparse note** (<3 dated) nudges the
+    same while still showing what exists.
+  - **Dashboard**: `ReminisceDashboardCard` ("Reminisce together → Start
+    reminiscing") shown when dated memories exist — reuses the existing
+    `intelligence.historicalTotal` count, **no extra scan**.
+  Directly actions the audit's "family-revisit / caregiver-reminiscence" gap.
+  Mobile responsive; graceful degradation.
 - **Memory Date Adoption V1** (read-only reads + a dedicated date-only write; no
   schema migrations): drives historical-date coverage up to improve every Remy
   narrative layer (only ~3% of memories are dated today). New
@@ -541,7 +559,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(memories)` Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
+- `feat(reminisce)` Reminiscence Mode V1 — caregiver/family era-based memory experience
+- `9c0cfd9` feat(memories): Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
 - `d1d2a3c` feat(remy): Life Chapters V1 — narrative layer (chapters page + detail + dashboard)
 - `0282b3e` feat(remy): Remy Connections V1 — relationship discovery (connections page + detail + dashboard)
 - `bce6d2b` feat(remy): Remy Collections V1 — Organize layer (collections page + detail + dashboard)

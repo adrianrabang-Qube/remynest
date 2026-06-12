@@ -55,6 +55,7 @@ import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
 import { computeCoverage } from "@/lib/remy/date-coverage";
 import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
+import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCard";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -699,6 +700,13 @@ export default async function DashboardPage() {
             <DateCompletionCard
               coverage={remyDateCoverage}
             />
+        )}
+
+        {/* REMINISCENCE — invite to revisit the past when dated memories exist */}
+        {remyDateCoverage.dated > 0 && (
+          <ReminisceDashboardCard
+            datedCount={remyDateCoverage.dated}
+          />
         )}
 
         {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
