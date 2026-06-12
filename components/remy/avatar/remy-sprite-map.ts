@@ -33,18 +33,21 @@ export interface SpriteRegion {
  * Tune these fractions if the official export's framing differs.
  */
 export const REMY_SPRITE_MAP: Record<RemyMood, SpriteRegion> = {
-  // In-App Usage row (named interaction busts)
-  listening: { x: 0.02, y: 0.79, w: 0.11, h: 0.105 },
-  thinking: { x: 0.15, y: 0.785, w: 0.11, h: 0.11 },
-  analyzing: { x: 0.28, y: 0.785, w: 0.11, h: 0.11 },
-  sharing: { x: 0.41, y: 0.79, w: 0.11, h: 0.105 },
-  celebrating: { x: 0.535, y: 0.78, w: 0.12, h: 0.12 },
-  welcoming: { x: 0.86, y: 0.785, w: 0.11, h: 0.11 },
-  // Expressions grid
-  neutral: { x: 0.835, y: 0.2, w: 0.15, h: 0.13 },
-  reflecting: { x: 0.835, y: 0.34, w: 0.15, h: 0.13 },
-  // Poses & Actions
-  resting: { x: 0.78, y: 0.63, w: 0.11, h: 0.11 },
+  // In-App Usage busts — tight 0.10² head crop centered on each measured head
+  // centroid; top y 0.79 sits below stars/accessories, bottom 0.89 above labels.
+  // Consistent framing: head ≈ 60% of the crop across all of these.
+  listening: { x: 0.025, y: 0.79, w: 0.1, h: 0.1 },
+  thinking: { x: 0.158, y: 0.79, w: 0.1, h: 0.1 },
+  analyzing: { x: 0.287, y: 0.79, w: 0.1, h: 0.1 },
+  sharing: { x: 0.417, y: 0.79, w: 0.1, h: 0.1 },
+  celebrating: { x: 0.553, y: 0.79, w: 0.1, h: 0.1 },
+  welcoming: { x: 0.846, y: 0.79, w: 0.1, h: 0.1 },
+  // Expressions grid (right column) — larger 0.17² because the faces are drawn
+  // bigger on the sheet (keeps the head the same size as the busts in-avatar).
+  neutral: { x: 0.817, y: 0.175, w: 0.17, h: 0.17 },
+  reflecting: { x: 0.821, y: 0.307, w: 0.17, h: 0.17 },
+  // Poses & Actions — head of the sitting pose, 0.12² (excludes the feet).
+  resting: { x: 0.792, y: 0.57, w: 0.12, h: 0.12 },
 };
 
 /** Inline style that crops a mood's region from the blueprint to fill a box. */

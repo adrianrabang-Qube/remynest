@@ -12,6 +12,17 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Avatar crop calibration (all 9 moods)** (`components/remy/avatar/remy-sprite-map.ts`
+  only — architecture/middleware/mood-system/dashboard/animation untouched). The crop
+  regions were too loose (included stars/wing-tips/surrounding art). Measured the real
+  sprite positions by decoding the 1254² blueprint PNG (pure Node zlib) and computing
+  the foreground bounding box / centroid per mood window, then set tight **square**,
+  head-centered crops (head + scarf + heart pendant, no labels/stars): In-App busts
+  0.10² at y0.79 (below stars, above the dark labels), Expressions faces 0.17² (drawn
+  larger on the sheet → same in-avatar head size), resting 0.12² on the head (excludes
+  feet). All 9 in-bounds + square; centers within ~0.01–0.02 of measured centroids.
+  Validated: lint clean, build (48), asset 200 image/png, dashboard 307 (auth intact).
+  Final framing should be eyeballed once in-browser; nudge values in the one file.
 - **Fix: static assets redirected by auth middleware** (`middleware.ts`). Root cause:
   the matcher excluded only `_next/*` + a named allowlist, so `/remy/remy-blueprint.png`
   entered the middleware; being neither protected, public, nor allow-listed, the
@@ -967,7 +978,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `fix(middleware)` bypass /public static assets (Remy blueprint sheet 307→/login→dashboard)
+- `fix(remy)` avatar crop calibration — tight square head crops for all 9 moods (measured)
+- `d9fcb32` fix(middleware): bypass /public static assets (Remy blueprint sheet 307→/login→dashboard)
 - `83a1c88` feat(remy): Avatar sprite sheet — single blueprint image + per-mood crop regions
 - `013b9c6` feat(remy): Avatar real artwork — image rendering + mood crossfade, emoji removed
 - `6e915de` feat(remy): Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
