@@ -3,7 +3,7 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-11
+**Last updated:** 2026-06-12
 
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
@@ -12,6 +12,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Resting avatar crop finalized** (`remy-sprite-map.ts` only — resting line + comment;
+  the other 8 moods byte-identical). Visual review on `/dev/remy-avatar-test` flagged
+  resting as the last bad mood (face too far left, too much body, head too small). Root
+  cause: `{0.783,0.658,0.085,0.085}` started above the sprite (top whitespace), ran right
+  into the empty gap so the bird sat left, clipped the pendant, and caught the neighbor's
+  gold pendant on the right edge. Re-measured by **decoding the 1254² PNG and visually
+  inspecting extracted crops** (not guessing): resting is a **curled sitting bird** (NOT a
+  bust) — bounds x[0.775-0.857] y[0.670-0.756], closed eyes ≈ (0.806,0.708), heart pendant
+  ≈ (0.798,0.742). New crop **{0.77,0.665,0.088,0.088}** centers the whole bird
+  head-forward: closed eyes + beak + scarf + pendant in, head ≈ 63% (matches the busts),
+  no neighbor bleed (singing bird ends 0.766 left, wing starts 0.871 right, strutter feet
+  end 0.649 top, UI panel starts 0.79 bottom). Validated by rendering the exact crop with
+  the same normalized→background-position math; `next dev` /dev page 200, blueprint asset
+  200 image/png; lint (no new errors — 6 pre-existing `no-assign-module-variable` in
+  generated workers), build (49 routes). **All 9 moods now calibrated.**
 - **TEMP dev page — `/dev/remy-avatar-test`** (remove before launch): renders all 9
   Remy moods in a 3×3 grid at 200px with labels, using the real `RemyAvatar`. No DB,
   no auth (added `/dev` to middleware `PUBLIC_ROUTES`), **dev-only** (`notFound()` in

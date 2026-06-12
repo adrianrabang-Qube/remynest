@@ -49,9 +49,13 @@ export const REMY_SPRITE_MAP: Record<RemyMood, SpriteRegion> = {
   // bust (head top → pendant) with no clipping or row-above bleed.
   neutral: { x: 0.832, y: 0.199, w: 0.145, h: 0.145 },
   reflecting: { x: 0.835, y: 0.338, w: 0.145, h: 0.145 },
-  // Poses & Actions — the resting (eyes-closed) sprite is row2-middle
-  // y[0.671-0.751], x≈[0.78-0.87]; 0.085² frames its head+scarf+pendant.
-  resting: { x: 0.783, y: 0.658, w: 0.085, h: 0.085 },
+  // Poses & Actions — resting (eyes-closed) is a curled sitting bird, NOT a bust.
+  // Measured bird bounds x[0.775-0.857] y[0.670-0.756]; face/eyes ≈ (0.806,0.708),
+  // heart pendant ≈ (0.798,0.742). 0.088² centered (0.814,0.709) frames the whole
+  // bird head-forward — closed eyes + beak + scarf + pendant in, head ≈ 63% (matches
+  // the busts). Neighbors excluded: singing bird ends 0.766 (left), wing starts 0.871
+  // (right), strutter feet end 0.649 (top), UI panel starts 0.79 (bottom).
+  resting: { x: 0.77, y: 0.665, w: 0.088, h: 0.088 },
 };
 
 /** Inline style that crops a mood's region from the blueprint to fill a box. */
