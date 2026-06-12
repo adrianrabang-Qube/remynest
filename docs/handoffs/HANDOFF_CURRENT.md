@@ -12,6 +12,41 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Collections V2 — deduplicated, thematic collections** (read-only; no
+  schema/migrations/AI; existing fields only). Rewrote `lib/remy/collections.ts`;
+  the components/pages are unchanged (no regressions).
+  - **Investigation (real production data):** `memory_clusters` (12 rows) has
+    `id,user_id,title,summary,category,emotional_theme,created_at`;
+    `memory_cluster_items` = `cluster_id,memory_id,similarity`. Duplicates appear
+    because groupings are created **one-per-created-memory**, so similar memories
+    spawn near-identical groupings. V1 `collectionTitle` preferred the grouping's
+    `title` (= anchor memory's ai_title) BEFORE `category`, and the only filter was
+    `memoryCount > 0` — hence three memory-titled "…Gym Workout" collections, all
+    `category="Fitness"`, drawn from the same pool. Confirmed: the 3 Fitness
+    clusters union to **15 distinct** members; every other category has 0 members.
+  - **Architecture decision — theme-first consolidation:** group underlying
+    groupings by their existing **`category`** and union members. Collapses
+    same-theme duplicates (Fitness 3→1), produces thematic titles, and is **linear
+    O(clusters + items)** — no pairwise O(clusters²) overlap scan. Subsumes
+    membership-overlap dedup for the production data (the duplicates share the
+    category).
+  - **Dedup strategy (exact):** two groupings belong to the same collection iff
+    `slugify(category)` is equal; membership = the UNION of their
+    `memory_cluster_items`. Collection `id` is now the **category slug** (e.g.
+    `fitness`); the detail page resolves by slug.
+  - **Title priority:** category → summary → title. Grouping is BY category, so a
+    shown collection's title is always its (Title-Cased) category — a memory title
+    can never become the title. Summary = representative grouping's `summary`;
+    themes = top member moods (fallback `emotional_theme`).
+  - **Threshold rules:** category non-empty, non-generic
+    (`general/uncategorized/memory/other/""`), non-technical; AND **≥3 distinct
+    members**. Otherwise omitted → graceful empty (no fabrication).
+  - **Dashboard impact (real data):** V1 showed 3 near-identical Fitness
+    collections; **V2 shows exactly one — "Fitness" (15 memories)**.
+  - **Scalability:** bounded reads — `fetchClusters` orders by `created_at` desc,
+    `limit 500` (recent window); items only for those clusters; member fetch capped
+    at 1000. Complexity O(clusters + items); no per-collection queries, no repeated
+    full memory scans, no N². Output bounded by distinct categories at 100/1k/10k.
 - **Dashboard Remy Activity — concise summary card** (presentation-only): the
   dashboard "Remy Activity" section behaves like a concise summary, not an
   ever-growing feed. Shows the **3 most recent** items by default; a footer CTA
@@ -586,7 +621,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(dashboard)` Remy Activity — concise summary card ("Show more →") + investigation findings
+- `feat(remy)` Collections V2 — theme-consolidated, deduplicated collections (category grouping)
+- `6bbfd50` feat(dashboard): Remy Activity concise summary card + investigation findings
 - `1938ae4` feat(dashboard): Remy Activity — collapse to 3 with in-place show more/less (presentation only)
 - `c99a9a0` feat(reminisce): Reminiscence Mode V1 — caregiver/family era-based memory experience
 - `9c0cfd9` feat(memories): Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
