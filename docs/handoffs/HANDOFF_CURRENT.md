@@ -48,9 +48,17 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     (c) native OneSignal push for the **remote-URL** WebView
     is non-trivial — the cordova plugin JS isn't injected into the remote page, so it needs
     a dedicated native-init task (track separately); (d) set the 5 **Sentry env vars in
-    Vercel** (`vercel env add …`); (e) run the **physical-iPhone QA** workflow
-    (login/session-persistence across restart, camera+library upload, push delivery,
-    cancel→"scheduled to cancel", in-app account deletion).
+    Vercel** (`vercel env add …`); (e) run the **physical-iPhone QA** workflow — full
+    checklist in `docs/QA_TESTFLIGHT_DEVICE.md`; (f) **replace the placeholder app icon** —
+    the current `AppIcon-512@2x.png` is the **default Capacitor placeholder** (blue
+    cross-hatch), an App Store 2.3.7 reject risk; regenerate the iOS icon from the RemyNest
+    brand (`/public/logo.png` / Remy mark). The icon set is structurally complete (modern
+    single-size 1024) — only the artwork must change.
+  - **Re-validated 2026-06-12 (build-readiness):** `npm run lint` (6 pre-existing errors,
+    0 new), `npm run build` ✓, `npx cap sync ios` clean, **unsigned iOS simulator build
+    `BUILD SUCCEEDED`**. Version 1.0 (build 1) — bump `CURRENT_PROJECT_VERSION` per upload.
+    Entitlements linked in Debug+Release. **The only gate to archive is the signing Team
+    (operator selects it in Xcode).**
 - **Resting avatar crop finalized** (`remy-sprite-map.ts` only — resting line + comment;
   the other 8 moods byte-identical). Visual review on `/dev/remy-avatar-test` flagged
   resting as the last bad mood (face too far left, too much body, head too small). Root
