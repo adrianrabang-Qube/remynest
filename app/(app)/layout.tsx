@@ -69,7 +69,8 @@ export default async function AppLayout({
         <WorkspaceBanner activeProfileName={activeProfileName} />
       )}
 
-      <main className="mx-auto w-full max-w-[1600px] px-6 py-6">
+      {/* pb-24 on mobile clears the fixed bottom nav; md+ keeps the original py-6. */}
+      <main className="mx-auto w-full max-w-[1600px] px-6 pt-6 pb-24 md:pb-6">
         {children}
       </main>
     </div>

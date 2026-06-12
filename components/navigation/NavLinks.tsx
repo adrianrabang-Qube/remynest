@@ -2,15 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-const LINKS: { href: string; label: string }[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/memories", label: "Memories" },
-  { href: "/memory-chat", label: "Memory Chat" },
-  { href: "/memories/new", label: "New" },
-  { href: "/timeline", label: "Timeline" },
-  { href: "/reminders", label: "Reminders" },
-  { href: "/insights", label: "Insights" },
-];
+import { NAV_ITEMS, isNavItemActive } from "./nav-config";
 
 function NavLinksContent() {
   const searchParams = useSearchParams();
@@ -23,9 +15,8 @@ function NavLinksContent() {
 
   return (
     <nav className="flex gap-1 text-sm font-medium">
-      {LINKS.map(({ href, label }) => {
-        const active =
-          pathname === href || pathname.startsWith(`${href}/`);
+      {NAV_ITEMS.map(({ href, label }) => {
+        const active = isNavItemActive(pathname, href);
         return (
           <Link
             key={href}

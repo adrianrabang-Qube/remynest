@@ -1,6 +1,6 @@
 import "./globals.css";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 
 import QueryProvider from "@/components/QueryProvider";
@@ -46,6 +46,15 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
     apple: "/icon-192.png",
   },
+};
+
+// `viewport-fit=cover` lets the app draw into the iOS safe-area insets so the
+// mobile bottom nav can pad itself clear of the home indicator via
+// env(safe-area-inset-bottom).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 // Body: Inter (clear, calm, Apple-like rhythm).

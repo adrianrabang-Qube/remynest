@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import NavLinks from "./NavLinks";
 import UserProfileDropdown from "./UserProfileDropdown";
 import WorkspaceIndicator from "./WorkspaceIndicator";
+import MobileTopBar from "./MobileTopBar";
+import MobileBottomNav from "./MobileBottomNav";
+import MobileNavDrawer from "./MobileNavDrawer";
 import type { WorkspaceNavState } from "./workspace-nav";
 import type { ProfileSummary } from "@/components/profile/types";
 
@@ -15,6 +18,9 @@ interface AppNavbarProps {
 
 export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
   const [open, setOpen] = useState(false);
+  // Mobile (< md) nav/profile drawer — opened by the top-bar avatar and the
+  // bottom-nav "More" entry. Separate from the desktop profile dropdown above.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Wraps the toggle button + dropdown so a pointer event INSIDE (button or
   // drawer) never counts as "outside".
@@ -44,49 +50,61 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-40 flex justify-between items-center px-6 py-3.5 border-b border-sand-deep/60 bg-sand/80 backdrop-blur-md">
-      <NavLinks />
+    <>
+      {/* Desktop top navigation — unchanged, shown at md and up. */}
+      <header className="hidden md:flex sticky top-0 z-40 justify-between items-center px-6 py-3.5 border-b border-sand-deep/60 bg-sand/80 backdrop-blur-md">
+        <NavLinks />
 
-      <div className="flex items-center gap-4">
-        <WorkspaceIndicator
-          isMyNest={workspace.isMyNest}
-          activeProfileName={workspace.activeProfileName}
-        />
+        <div className="flex items-center gap-4">
+          <WorkspaceIndicator
+            isMyNest={workspace.isMyNest}
+            activeProfileName={workspace.activeProfileName}
+          />
 
-        <div className="relative" ref={menuRef}>
-          <button
-          onClick={() => setOpen(!open)}
-          className="
-            flex
-            items-center
-            gap-3
-            rounded-full
-            border
-            border-sand-deep/70
-            bg-white/70
-            px-3
-            py-1.5
-            transition
-            hover:bg-white
-          "
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white">
-            {initial}
+          <div className="relative" ref={menuRef}>
+            <button
+            onClick={() => setOpen(!open)}
+            className="
+              flex
+              items-center
+              gap-3
+              rounded-full
+              border
+              border-sand-deep/70
+              bg-white/70
+              px-3
+              py-1.5
+              transition
+              hover:bg-white
+            "
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white">
+              {initial}
+            </div>
+
+            <span className="text-sm font-medium text-charcoal">{displayName}</span>
+
+            <span className="text-xs text-charcoal-muted">▾</span>
+          </button>
+
+            {open && profile && (
+              <UserProfileDropdown
+                profile={profile}
+                onClose={() => setOpen(false)}
+              />
+            )}
           </div>
-
-          <span className="text-sm font-medium text-charcoal">{displayName}</span>
-
-          <span className="text-xs text-charcoal-muted">▾</span>
-        </button>
-
-          {open && profile && (
-            <UserProfileDropdown
-              profile={profile}
-              onClose={() => setOpen(false)}
-            />
-          )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Mobile navigation (< md): slim top bar + bottom nav + "More" drawer. */}
+      <MobileTopBar profile={profile} onOpenMenu={() => setMobileNavOpen(true)} />
+      <MobileBottomNav onOpenMore={() => setMobileNavOpen(true)} />
+      <MobileNavDrawer
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+        profile={profile}
+      />
+    </>
   );
 }

@@ -12,6 +12,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Hybrid mobile navigation — implemented** (fixes the `< md` navbar overflow audited
+  earlier; **desktop unchanged at `md+`**). New `components/navigation/nav-config.ts` is the
+  **single source of truth** for routes — desktop `NavLinks` and the mobile nav both derive
+  from it. Mobile (`< md`): `MobileTopBar` (brand + avatar) · `MobileBottomNav` (Dashboard,
+  Memories, center **New**, Timeline, **More**) · `MobileNavDrawer` ("More" → Memory
+  Chat/Reminders/Insights + reused `ProfileHub` for Settings/Billing/Support/Profile/
+  **workspace switching**/sign-out). `AppNavbar` desktop bar gated `hidden md:flex`; mobile
+  pieces `md:hidden`. **Preserved:** active highlighting (`isNavItemActive`), `?context=`
+  query handling (Suspense-wrapped `useSearchParams`), workspace switching + profile + route
+  permissions (via `ProfileHub`). **iOS safe areas:** `viewport-fit=cover` (root `viewport`
+  export) + `env(safe-area-inset-bottom)` on the bottom nav/drawer. Shell `<main>` →
+  `pt-6 pb-24 md:pb-6` so content clears the fixed bottom nav. Validated: lint **4 errors/160
+  warnings (0 new)**, build ✓, no fixed-width overflow at 375px (bottom nav `flex-1`, drawer
+  `w-[88%]` overlay), all 7 routes + account reachable. (Left `body{overflow-x:hidden}` as a
+  safety net — the mobile overflow source is gone regardless; revisit later.) **Live 375px
+  visual check pending on device/browser.**
 - **Native push — double-init conflict fixed** (follow-up to the `5c74190` audit). The
   `onesignal-cordova-plugin` auto-swizzled `didFinishLaunchingWithOptions` and called
   `OneSignal.initialize(nil)` at launch, conflicting with AppDelegate's native
