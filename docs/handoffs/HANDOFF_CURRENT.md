@@ -12,6 +12,40 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Timeline V1 — visual narrative layer** (read-only; no AI/migrations/
+  schema). NOT a calendar / list of memories / new engine — a pure SYNTHESIZER
+  that turns existing intelligence into a chronological story.
+  - **Investigation:** timeline is fully buildable from already-computed dashboard
+    intelligence. Year availability: Life Chapters V2 (`startYear` always) ✅,
+    Connections V2 (`startYear` always; use `spansEras` only) ✅, Collections V2
+    (`startYear` only with `includeDetails`) ⚠️, date-coverage = counts only.
+    Reuse `RemyLifeChapter`/`RemyConnection`/`RemyCollection`; do NOT re-derive or
+    fetch raw dated memories.
+  - **Architecture:** `lib/remy/timeline.ts` — `getRemyTimeline(input)` PURE (0
+    queries) → `RemyTimelineEvent {id,title,description,year,category,href,
+    priority}`; categories `chapter|collection|connection|memory|family`. Events:
+    each chapter ("The 1980s became a chapter" @ decade), each cross-era
+    connection ("A connected story spans these years" @ startYear), each detailed
+    collection ("<Theme> memories begin appearing" @ startYear). Sort **year asc**
+    (ties: priority chapter 90 > connection 75 > collection 70), cap 24.
+    `groupTimelineByYear` for rendering.
+  - **UI:** `components/remy/RemyTimeline.tsx` ("Your Story") — vertical timeline
+    with a left rail + year dots → year → event title → description; mobile
+    responsive; no nested scroll / fixed heights; hidden when empty.
+  - **Dashboard placement:** rendered immediately **above the Collections/
+    Connections/Chapters drill-down trio** (it's their narrative parent — story
+    first, then explore). The only query delta: the existing dashboard collections
+    call now uses `includeDetails:true` (one bounded member fetch) so collections
+    carry a year; Timeline itself adds **0 queries**.
+  - **Validation (real data, top user):** 1980 "The 1980s became a chapter" →
+    2026 "Health & Fitness / Fitness memories begin appearing"; chronological;
+    no cross-era connections (all ~2026); empty account → hidden.
+  - **Scalability:** Timeline = O(chapters + collections + connections), all
+    already bounded (≤4 each on dashboard; intrinsically #decades / #categories /
+    window), event cap 24, render O(≤24). **0 timeline queries** (net dashboard
+    delta +1 bounded collections detail fetch). Constant cost at 10/100/1k/10k
+    memories; no N². **Future:** Story Mode, Biography Generator consume the same
+    events; family milestones plug into the reserved `family` category.
 - **Remy Notifications V1 — intelligence-driven updates layer** (read-only; no
   push/email/persistence/cron/AI/migrations). The synthesis engine that turns
   existing Remy intelligence into ranked notification candidates; future Digest
@@ -744,7 +778,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
+- `feat(remy)` Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)
+- `b7e9a25` feat(remy): Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
 - `5e0fe01` feat(remy): Family Workspace Intelligence V1 — per-profile stats, family themes, observations
 - `6f67254` feat(remy): Life Chapters V2 — time-based life periods (decade chapters from memory dates)
 - `46c13e7` feat(remy): Connections V2 — diversity-ranked, narrative relationship discovery

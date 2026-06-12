@@ -43,6 +43,8 @@ import RemyCompanion from "@/components/remy/RemyCompanion";
 import RemyActivityFeed from "@/components/remy/RemyActivityFeed";
 import RemyNotifications from "@/components/remy/RemyNotifications";
 import { getRemyNotifications } from "@/lib/remy/notifications";
+import RemyTimeline from "@/components/remy/RemyTimeline";
+import { getRemyTimeline } from "@/lib/remy/timeline";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
 import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
@@ -577,12 +579,13 @@ export default async function DashboardPage() {
         remyActivitySources.clusters,
     });
 
-  // Remy Collections (top, lightweight — title + count only).
+  // Remy Collections (top themes; includeDetails gives date ranges, reused by
+  // the Timeline to anchor "theme begins appearing" events to a year).
   const remyCollections =
     await getRemyCollections(
       supabase,
       user.id,
-      { limit: 4 }
+      { limit: 4, includeDetails: true }
     );
 
   // Remy Connections (top stories — anchor title + connected count).
@@ -636,6 +639,14 @@ export default async function DashboardPage() {
       chapters: remyLifeChapters,
       family: familyIntelligence,
     });
+
+  // Remy Timeline — pure synthesis of the same intelligence into a chronological
+  // narrative (no extra queries).
+  const remyTimeline = getRemyTimeline({
+    chapters: remyLifeChapters,
+    collections: remyCollections,
+    connections: remyConnections,
+  });
 
   const dashboardDurationMs = 0;
 
@@ -753,6 +764,9 @@ export default async function DashboardPage() {
         <RemyNotifications
           notifications={remyNotifications}
         />
+
+        {/* REMY TIMELINE — visual narrative above the drill-down layers */}
+        <RemyTimeline events={remyTimeline} />
 
         {/* REMY COLLECTIONS — the organize layer */}
         <RemyCollections
