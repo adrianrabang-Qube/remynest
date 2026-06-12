@@ -1,29 +1,33 @@
-# Remy avatar artwork
+# Remy avatar artwork — Blueprint Sprite Sheet
 
-`RemyAvatar` renders Remy's real artwork from this folder. Add the official
-exports from the **Remy Avatar Blueprint** here — no code change is required.
+`RemyAvatar` renders Remy by cropping regions from **one** image:
 
-## Files (one PNG per mood)
+```
+public/remy/remy-blueprint.png
+```
 
-| File                    | Blueprint state          |
-| ----------------------- | ------------------------ |
-| `remy-welcoming.png`    | Chatting (greeting)      |
-| `remy-listening.png`    | Listening                |
-| `remy-thinking.png`     | Thinking                 |
-| `remy-analyzing.png`    | Analyzing                |
-| `remy-reflecting.png`   | Thoughtful (wing to chin)|
-| `remy-sharing.png`      | Sharing                  |
-| `remy-celebrating.png`  | Celebrating              |
-| `remy-resting.png`      | Resting (eyes closed)    |
-| `remy-neutral.png`      | Neutral                  |
+Drop the official **Remy Avatar Blueprint** here as `remy-blueprint.png`. No code
+change is required — every mood is a crop region of this single sheet, defined in
+`components/remy/avatar/remy-sprite-map.ts`.
 
-## Spec
+## Mood → blueprint region
 
-- Square **bust crop** of Remy (head + scarf + heart pendant), centered.
-- **Transparent** background.
-- ~512×512 px (any square size works; rendered with `object-cover`).
-- Cropped from the corresponding blueprint sprite — do **not** redesign Remy.
+| Mood          | Blueprint sprite                       |
+| ------------- | -------------------------------------- |
+| `welcoming`   | In-App Usage → Chatting bust           |
+| `listening`   | In-App Usage → Listening               |
+| `thinking`    | In-App Usage → Thinking                |
+| `analyzing`   | In-App Usage → Analyzing               |
+| `sharing`     | In-App Usage → Sharing                 |
+| `celebrating` | In-App Usage → Celebrating             |
+| `reflecting`  | Expressions → Thoughtful (wing to chin)|
+| `resting`     | Poses & Actions → Resting (eyes closed)|
+| `neutral`     | Expressions → Neutral                  |
 
-Until a file is present, that mood renders a brand fallback (Remy's purple with
-the gold heart pendant). Drop the PNGs in and the real art appears everywhere
-`RemyAvatar` is mounted, with a smooth crossfade between moods.
+## Notes
+
+- Crop regions are **normalized fractions** (0–1) of the image, so any resolution
+  works. Recalibrate in `remy-sprite-map.ts` if the export's framing differs.
+- Until `remy-blueprint.png` is present, avatars show a brand fallback (Remy's
+  purple with the gold heart pendant) — never an emoji.
+- Adding/updating Remy = replace this one file (or tweak the sprite map).

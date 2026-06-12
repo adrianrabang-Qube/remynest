@@ -41,7 +41,23 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     `src` in `remy-assets.ts` — every surface (web/iOS/Android/notifications/voice/
     Story Mode/Biography/Memory Book) gains the real art with no other change; the
     same `RemyMood` + mapping drive future animation/Voice Engine V2.
-  - **Real-artwork pass:** emoji rendering **removed**. `RemyAvatar` now renders
+  - **Sprite-sheet pass (current):** replaced the 9 per-mood PNGs with ONE
+    blueprint sprite sheet `/remy/remy-blueprint.png`. New
+    `components/remy/avatar/remy-sprite-map.ts` (`BLUEPRINT_SRC`, `REMY_SPRITE_MAP`
+    of normalized `{x,y,w,h}` crop regions per mood, `remySpriteStyle()` →
+    background-size/position math) + `RemyAvatarSprite.tsx` (pure-CSS crop).
+    `RemyAvatar` now renders `RemyAvatarSprite` layers (crossfade preserved) and
+    falls back to the gold-heart brand mark if the sheet is absent (a hidden
+    `<img>` onError detects it). `remy-assets.ts` dropped the per-mood `src` (keeps
+    alt/ring/gradient). Mood map: In-App-Usage busts → listening/thinking/
+    analyzing/sharing/celebrating + Chatting→welcoming; Expressions → neutral/
+    reflecting; Poses → resting. Regions are calibrated to the blueprint layout and
+    tunable in one file. Validated: all 9 regions in-bounds, valid crop math; lint
+    clean; build (48). **Scalability:** one image (one fetch, browser-cached) shared
+    by every avatar; crop is pure CSS, O(1) per avatar; no DB/queries. **Asset
+    step:** drop `remy-blueprint.png` in `/public/remy/` (cannot be generated
+    in-repo) — recalibrate `remy-sprite-map.ts` if the export framing differs.
+  - **(superseded) Real-artwork pass:** emoji rendering **removed**. `RemyAvatar` rendered
     Remy's real art via `next/image` from `/remy/remy-<mood>.png` (set in
     `remy-assets.ts`; `remy-moods.ts` `cue` replaced the emoji), with a **smooth
     crossfade** between moods (`.remy-fade-in` keyframe in `globals.css` + a
@@ -938,7 +954,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Avatar real artwork — image rendering + mood crossfade, emoji removed, asset contract
+- `feat(remy)` Avatar sprite sheet — single blueprint image + per-mood crop regions
+- `013b9c6` feat(remy): Avatar real artwork — image rendering + mood crossfade, emoji removed
 - `6e915de` feat(remy): Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
 - `779f045` feat(remy): Export Engine V1 — PDF-ready ExportDocument + print page + download flow
 - `aa652a4` feat(remy): Memory Books V1 — structured book model (cover/TOC/chapters from the biography)

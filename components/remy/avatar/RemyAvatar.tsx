@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { remyAsset, type RemyAvatarAsset } from "./remy-assets";
+import RemyAvatarSprite from "./RemyAvatarSprite";
+import { BLUEPRINT_SRC } from "./remy-sprite-map";
+import { remyAsset } from "./remy-assets";
 import type { RemyMood } from "./remy-moods";
 
 /**
@@ -10,11 +11,11 @@ import type { RemyMood } from "./remy-moods";
  *
  *   <RemyAvatar mood="thinking" size="md" />
  *
- * Renders Remy's REAL artwork (/public/remy/remy-<mood>.png) and crossfades
- * smoothly between moods. When an export is not yet present it shows a brand
- * mark (Remy's purple + the gold heart pendant) — never an emoji. The single
- * component every surface mounts; the official art activates with no code change.
- * Mobile responsive via `size`.
+ * Renders Remy's real artwork by cropping the correct region from the ONE
+ * blueprint sprite sheet (/public/remy/remy-blueprint.png) and crossfades
+ * smoothly between moods. If the sheet isn't present it shows a brand mark
+ * (Remy's purple + the gold heart pendant) — never an emoji. Mobile responsive
+ * via `size`. Drop the blueprint in and the real art appears everywhere.
  */
 const SIZES = {
   xs: "h-6 w-6",
@@ -37,12 +38,13 @@ export default function RemyAvatar({
   className?: string;
   decorative?: boolean;
 }) {
-  // Crossfade stack: at rest a single layer; on a mood change the new layer
-  // fades in over the previous one, which is dropped when the animation ends.
+  // Crossfade stack: at rest one layer; a mood change fades a new layer in over
+  // the previous one, which is dropped when the animation ends.
   const [stack, setStack] = useState<{ mood: RemyMood; key: number }[]>([
     { mood, key: 0 },
   ]);
   const keyRef = useRef(0);
+  const [blueprintMissing, setBlueprintMissing] = useState(false);
 
   useEffect(() => {
     setStack((prev) => {
@@ -70,6 +72,16 @@ export default function RemyAvatar({
       aria-hidden={decorative ? true : undefined}
       className={`relative inline-flex shrink-0 overflow-hidden rounded-full bg-[#ECE6F7] ring-2 ${active.ring} ${SIZES[size]} ${className}`}
     >
+      {/* Hidden loader — detects whether the blueprint sheet is available. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={BLUEPRINT_SRC}
+        alt=""
+        aria-hidden="true"
+        className="hidden"
+        onError={() => setBlueprintMissing(true)}
+      />
+
       {stack.map((layer, index) => {
         const isTop = index === stack.length - 1;
         const animating = isTop && stack.length > 1;
@@ -79,7 +91,11 @@ export default function RemyAvatar({
             onAnimationEnd={() => settle(layer.key)}
             className={`absolute inset-0 ${animating ? "remy-fade-in" : ""}`}
           >
-            <RemyArt asset={remyAsset(layer.mood)} decorative={decorative} />
+            {blueprintMissing ? (
+              <BrandFallback gradient={active.gradient} />
+            ) : (
+              <RemyAvatarSprite mood={layer.mood} />
+            )}
           </span>
         );
       })}
@@ -87,33 +103,10 @@ export default function RemyAvatar({
   );
 }
 
-function RemyArt({
-  asset,
-  decorative,
-}: {
-  asset: RemyAvatarAsset;
-  decorative: boolean;
-}) {
-  const [errored, setErrored] = useState(false);
-
-  if (!errored) {
-    return (
-      <Image
-        src={asset.src}
-        alt={decorative ? "" : asset.alt}
-        fill
-        sizes="96px"
-        unoptimized
-        className="object-cover"
-        onError={() => setErrored(true)}
-      />
-    );
-  }
-
-  // Brand fallback — Remy's purple with the gold heart pendant (no emoji).
+function BrandFallback({ gradient }: { gradient: string }) {
   return (
     <span
-      className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${asset.gradient}`}
+      className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient}`}
     >
       <svg
         viewBox="0 0 24 24"

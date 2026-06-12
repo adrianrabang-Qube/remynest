@@ -5,19 +5,15 @@ import {
 } from "./remy-moods";
 
 /**
- * Remy avatar assets — the binding between a mood and its real artwork.
+ * Remy avatar presentation metadata (a11y + ring/fallback styling).
  *
- * `src` points at the OFFICIAL blueprint export for the mood:
- *   /public/remy/remy-<mood>.png  (square bust, transparent background)
- *
- * RemyAvatar renders this artwork. If an export is not yet present it falls back
- * to a brand mark (Remy's purple + the gold heart pendant) — never an emoji. To
- * add or update Remy's art, drop the PNGs in /public/remy; no code change needed.
+ * The artwork itself comes from the single blueprint sprite sheet via
+ * `remy-sprite-map.ts` (cropped per mood). This module no longer references
+ * per-mood PNGs — it only carries the alt text, ring accent, and the gradient
+ * used by the brand fallback when the sheet is absent.
  */
 export interface RemyAvatarAsset {
   mood: RemyMood;
-  /** Official artwork path (square bust PNG, transparent background). */
-  src: string;
   alt: string;
   /** Tailwind gradient (Remy's purple palette) — used by the brand fallback. */
   gradient: string;
@@ -36,11 +32,9 @@ const RING_BY_MOOD: Partial<Record<RemyMood, string>> = {
 function buildAssets(): Record<RemyMood, RemyAvatarAsset> {
   const assets = {} as Record<RemyMood, RemyAvatarAsset>;
   for (const mood of REMY_MOODS) {
-    const spec = REMY_MOOD_SPECS[mood];
     assets[mood] = {
       mood,
-      src: `/remy/remy-${mood}.png`,
-      alt: `Remy — ${spec.label}`,
+      alt: `Remy — ${REMY_MOOD_SPECS[mood].label}`,
       gradient: BASE_GRADIENT,
       ring: RING_BY_MOOD[mood] ?? "ring-[#7C5CBF]/40",
     };
