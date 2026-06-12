@@ -12,6 +12,30 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Export Engine V1 — PDF-ready export layer** (read-only; no cloud/sharing/
+  email/AI/migrations). Converts a MemoryBook/Biography into a printable document
+  and generates a PDF via the browser print engine (zero new deps).
+  - **Architecture (3 parts):** (1) `lib/remy/export-document.ts` — pure flattening
+    of `MemoryBook`/`Biography` into an `ExportDocument {title, subtitle, blocks[],
+    meta}` of `ExportBlock {type: title|subtitle|heading|subheading|paragraph|
+    divider|pagebreak, text?}` (`buildExportDocumentFromMemoryBook` /
+    `…FromBiography` / `buildExportDocument`); reuses prose verbatim, generates
+    nothing, returns null when empty. (2) **PDF generation:** print page
+    `app/(app)/memory-book/print/page.tsx` assembles the same book the dashboard
+    builds (chapters/collections-details/connections/coverage/family → story →
+    biography → book), renders `ExportDocumentView` (serif, page-break blocks),
+    print-isolated via `#remy-export` CSS in `app/globals.css`. (3) **Download
+    flow:** `PrintButton` (`window.print()` → Save as PDF) + an "Export as PDF →"
+    link on the dashboard Memory Book.
+  - **Validation (real data):** book → ExportDocument of 26 bounded blocks (title,
+    subtitle, divider, Contents + 5 TOC, 5 sections each pagebreak+heading+content,
+    5 page breaks). Empty account → book null → print page shows "Nothing to export
+    yet" + /memory-dates link. lint clean; build passes (48 routes; /memory-book/print).
+  - **Scalability:** export model = 0 queries, O(sections + chapters + paragraphs)
+    (~≤50 blocks) → constant. Print page = ~6 bounded model reads, **on-demand only**
+    (off the dashboard hot path). PDF = browser print over a bounded doc; no server
+    PDF lib, no deps, no N²; constant at 10/100/1k/10k memories. **Future:** a PDF
+    library or print/share/cloud consume the same `ExportDocument` unchanged.
 - **Remy Memory Books V1 — structured book model** (read-only; no AI/queries/
   migrations/schema). NOT PDF/print/share/AI — the deterministic book structure
   future export/print/share will consume. Pure COMPOSITION of Biography V1 (+
@@ -874,7 +898,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Memory Books V1 — structured book model (cover/TOC/chapters from the biography)
+- `feat(remy)` Export Engine V1 — PDF-ready ExportDocument + print page + download flow
+- `aa652a4` feat(remy): Memory Books V1 — structured book model (cover/TOC/chapters from the biography)
 - `c7aa4cf` feat(remy): Biography V1 — structured life narrative (pure composition of existing summaries)
 - `b8dbb11` feat(remy): Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
 - `63b7a4a` feat(remy): Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)

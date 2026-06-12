@@ -318,6 +318,31 @@ p {
   animation: slideIn 0.25s ease-out forwards;
 }
 
+/* ── Export Engine V1 — print isolation (PDF via the browser print engine) ── */
+.break-page {
+  break-before: page;
+}
+
+@media print {
+  /* Isolate the export document; hide all app chrome when printing. */
+  body * {
+    visibility: hidden;
+  }
+  #remy-export,
+  #remy-export * {
+    visibility: visible;
+  }
+  #remy-export {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  @page {
+    margin: 1in;
+  }
+}
+
 .animate-slideOut {
   animation: slideOut 0.25s ease-in forwards;
 }

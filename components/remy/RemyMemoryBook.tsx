@@ -38,6 +38,12 @@ export default function RemyMemoryBook({
             {book.cover.subtitle}
           </p>
         )}
+        <Link
+          href="/memory-book/print"
+          className="mt-4 inline-flex items-center rounded-full border border-sage/40 bg-white px-4 py-2 text-sm font-semibold text-sage-deep transition hover:bg-sage/10"
+        >
+          Export as PDF →
+        </Link>
       </header>
 
       <div className="grid gap-0 md:grid-cols-[14rem_1fr]">
