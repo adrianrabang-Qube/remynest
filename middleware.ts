@@ -101,7 +101,11 @@ function isBypassRequest(
     method === "HEAD" ||
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/images/") ||
-    pathname.startsWith("/fonts/")
+    pathname.startsWith("/fonts/") ||
+    pathname.startsWith("/remy/") ||
+    // Any static file in /public (png, svg, jpg, css, …). App routes and
+    // /api/* have no trailing file extension, so they are unaffected.
+    /\.[a-zA-Z0-9]+$/.test(pathname)
   );
 }
 
@@ -412,6 +416,6 @@ export async function middleware(
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|icon-192.png|icon-512.png|sw.js|robots.txt|sitemap.xml).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|manifest.json|icon-192.png|icon-512.png|sw.js|robots.txt|sitemap.xml|remy/).*)",
   ],
 };

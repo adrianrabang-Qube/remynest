@@ -12,6 +12,19 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Fix: static assets redirected by auth middleware** (`middleware.ts`). Root cause:
+  the matcher excluded only `_next/*` + a named allowlist, so `/remy/remy-blueprint.png`
+  entered the middleware; being neither protected, public, nor allow-listed, the
+  catch-all `!user && !publicRoute` branch 307-redirected it to `/login`, which (for an
+  authenticated session) bounced to `/dashboard` — so the avatar's `<img>`/CSS
+  background received HTML, errored, and showed the gold-heart fallback. Fix:
+  `isBypassRequest()` now bypasses `/remy/` **and any path with a file extension**
+  (`/\.[a-zA-Z0-9]+$/`) so all `/public` static files serve directly; the matcher also
+  excludes `remy/` (middleware never runs for the sheet). Validated against the running
+  prod server: `/remy/remy-blueprint.png` → **200 image/png (2.12 MB)**, `/logo.png` →
+  200, `/dashboard` (unauth) → **307 /login** (auth unchanged). The Remy avatar sprite
+  sheet now serves real artwork instead of the fallback. No auth weakening; app
+  routes/`/api/*` (no file extension) are unaffected.
 - **Remy Avatar Evolution V1** (UI only; no DB/queries/AI; character NOT redesigned).
   Maps the existing Remy intelligence onto the emotional/visual states in the
   official **Remy Avatar Blueprint** (the canonical spec).
@@ -954,7 +967,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Avatar sprite sheet — single blueprint image + per-mood crop regions
+- `fix(middleware)` bypass /public static assets (Remy blueprint sheet 307→/login→dashboard)
+- `83a1c88` feat(remy): Avatar sprite sheet — single blueprint image + per-mood crop regions
 - `013b9c6` feat(remy): Avatar real artwork — image rendering + mood crossfade, emoji removed
 - `6e915de` feat(remy): Avatar Evolution V1 — blueprint-grounded mood system + dashboard header avatar
 - `779f045` feat(remy): Export Engine V1 — PDF-ready ExportDocument + print page + download flow
