@@ -12,6 +12,39 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Biography V1 — structured life narrative** (read-only; no AI/migrations/
+  schema/raw-memory queries). NOT AI writing / LLM / chatbot — a pure COMPOSITION
+  that assembles a long-form life document from existing intelligence, reusing
+  existing summaries verbatim and only templating plain facts (counts, spans).
+  - **Investigation:** all narrative info already exists — Story Mode `summary`
+    (ready chapter narratives), Chapters/Collections/Connections summaries, Family
+    observations/members, `coverage.total/dated`. No per-user memory total beyond
+    `coverage` (used for intro/reflection). Sparse → fewer sections; empty → null.
+  - **Architecture:** `lib/remy/biography.ts` — `getRemyBiography(input)` PURE (0
+    queries) → `RemyBiography {title, subtitle, sections[]}` /
+    `RemyBiographySection {id, title, paragraphs[], href?}`. Sections (omitted when
+    empty): **Introduction** (facts), **Life Chapters** (reuses Story Mode
+    narratives, else chapter summaries), **Important Themes** (collection summaries),
+    **Connected Stories** (deduped connection summaries, diverse only), **Family
+    Impact** (family members + shared-theme observation), **Reflection** (facts).
+    `null` when no chapters/collections/connections/family.
+  - **UI:** `components/remy/RemyBiography.tsx` — readable document style (serif-ish
+    title, span subtitle, prose sections in a `max-w-2xl` column, Explore links);
+    mobile responsive; no nested scroll / fixed heights; hidden when null.
+  - **Placement:** Timeline → Story Mode → **Biography** → Collections/Connections/
+    Chapters. The long-form culmination of the narrative layers (chronology →
+    guided journeys → full document), above the analytical drill-downs. 0 query
+    delta (reuses already-computed intelligence).
+  - **Validation (real data, top user):** "A Life in Memories" (1980) — Introduction
+    (45 memories · 1 chapter) · Life Chapters ("The 1980s was a period shaped by
+    Personal Memory and Social.") · Important Themes (Health & Fitness / Fitness
+    summaries) · Connected Stories (deduped) · Reflection (2 of 45 placed in time);
+    Family omitted single-profile; empty account → null → hidden.
+  - **Scalability:** 0 queries; synthesis O(stories + chapters + collections +
+    connections + family) all bounded → constant; render O(sections × paragraphs)
+    ≤ ~25. No memory-proportional work, no N², constant at 10/100/1k/10k memories.
+    **Future:** PDF/voice/sharing consume the same `RemyBiography`; richer prose as
+    date adoption adds chapters and cross-era connections.
 - **Remy Story Mode V1 — guided narrative journey** (read-only; no AI/migrations/
   schema). NOT AI generation / biography writer / chat — a pure COMPOSITION over
   existing intelligence, built on the Timeline V1 chapter backbone.
@@ -811,7 +844,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
+- `feat(remy)` Biography V1 — structured life narrative (pure composition of existing summaries)
+- `b8dbb11` feat(remy): Story Mode V1 — guided narrative journey (pure composition on timeline backbone)
 - `63b7a4a` feat(remy): Timeline V1 — visual narrative layer (pure synthesis of chapters/collections/connections)
 - `b7e9a25` feat(remy): Notifications V1 — intelligence-driven updates layer (pure synthesis, dashboard card)
 - `5e0fe01` feat(remy): Family Workspace Intelligence V1 — per-profile stats, family themes, observations

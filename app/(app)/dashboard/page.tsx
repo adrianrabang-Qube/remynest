@@ -47,6 +47,8 @@ import RemyTimeline from "@/components/remy/RemyTimeline";
 import { getRemyTimeline } from "@/lib/remy/timeline";
 import RemyStoryMode from "@/components/remy/RemyStoryMode";
 import { getRemyStories } from "@/lib/remy/story-mode";
+import RemyBiography from "@/components/remy/RemyBiography";
+import { getRemyBiography } from "@/lib/remy/biography";
 import RemyCollections from "@/components/remy/RemyCollections";
 import RemyConnections from "@/components/remy/RemyConnections";
 import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
@@ -657,6 +659,16 @@ export default async function DashboardPage() {
     connections: remyConnections,
   });
 
+  // Remy Biography — pure composition of a readable life document (no queries).
+  const remyBiography = getRemyBiography({
+    stories: remyStories,
+    chapters: remyLifeChapters,
+    collections: remyCollections,
+    connections: remyConnections,
+    family: familyIntelligence,
+    coverage: remyDateCoverage,
+  });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -779,6 +791,9 @@ export default async function DashboardPage() {
 
         {/* REMY STORY MODE — guided journey built on the timeline backbone */}
         <RemyStoryMode stories={remyStories} />
+
+        {/* REMY BIOGRAPHY — long-form life document, the narrative culmination */}
+        <RemyBiography biography={remyBiography} />
 
         {/* REMY COLLECTIONS — the organize layer */}
         <RemyCollections
