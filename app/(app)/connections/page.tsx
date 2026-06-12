@@ -43,13 +43,12 @@ export default async function ConnectionsPage() {
               <h2 className="text-lg font-semibold text-charcoal break-words">
                 {c.title}
               </h2>
-              <p className="mt-1 text-sm text-charcoal-soft">
-                {c.connectedCount} connected{" "}
-                {c.connectedCount === 1 ? "moment" : "moments"}
+              <p className="mt-1 text-sm text-charcoal-soft break-words">
+                {c.summary}
               </p>
-              {c.theme && (
+              {c.themes.length > 0 && (
                 <p className="mt-3 text-xs text-charcoal-muted">
-                  Connected to {c.theme}
+                  {c.themes.join(" • ")}
                 </p>
               )}
             </Link>

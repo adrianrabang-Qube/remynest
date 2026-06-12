@@ -12,6 +12,40 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Connections V2 — meaningful relationship discovery** (read-only; no
+  schema/migrations/AI; existing stored relationships only). Rewrote
+  `lib/remy/connections.ts`; pages/components updated to narrative (no regressions).
+  - **Investigation:** V1 ranked by raw graph **degree** and led with "{N}
+    connected moments"; the production graph is a near-single-theme clique
+    (degrees ≤17) → true but redundant. Relationships mostly link same-`ai_category`
+    memories. Reuses memory `ai_category` (theme) + effective dates (era) already
+    fetched — no extra query. No similarity/score surfaced.
+  - **Architecture decision — diversity ranking, not degree:** for each anchor +
+    its connected memories, compute distinct **themes** (categories, each needing
+    **≥2 members** to count — robust to category noise) and **eras** (decades).
+    `diversityScore = (spansEras?2:0) + (spansThemes?1:0)`. Sort by score → degree →
+    recency. **Reduce redundancy:** single-theme (score 0) hubs are collapsed to one
+    strongest representative per theme (titled by the theme); diverse connections
+    are kept individually (titled by the anchor memory).
+  - **Human-language strategy:** lead with a narrative **summary** (no count
+    headline): cross-era+theme → "This story reaches across different periods and
+    themes of life."; cross-era → "This story spans multiple periods."; cross-theme
+    → "These memories may be part of the same story."; single-theme → "These
+    memories share a common theme." Never exposes similarity/vector/score/
+    relationship_type.
+  - **Detail page:** title, narrative summary, connection count, **date span**
+    (`formatConnectionSpan`), **theme hints** (`themes` joined • ), connected
+    memories. Dashboard + /connections lead with the summary instead of a count.
+  - **Real-data result:** V1 = 18 degree-ranked "{N} connected moments"; V2 = **16**
+    (14 cross-theme + 2 collapsed single-theme reps "Health Fitness"/"Fitness"),
+    each with narrative copy. (Era spanning is ~0 today because <3% of memories are
+    dated; era ranking strengthens as Memory Date Adoption fills in. The residual
+    cross-theme inflation is the audit's known category-fragmentation issue —
+    category canonicalization is a separate future task, not Connections.)
+  - **Scalability:** unchanged read shape — ≤400-memory window + 2 bounded
+    relationship `.in(...)` queries; adjacency + per-anchor diversity are **O(memories
+    + edges)**, no per-connection queries, no N² traversal, no relationship
+    recompute. Dashboard stays lightweight (top-N); graceful empty preserved.
 - **Collections V2 — deduplicated, thematic collections** (read-only; no
   schema/migrations/AI; existing fields only). Rewrote `lib/remy/collections.ts`;
   the components/pages are unchanged (no regressions).
@@ -621,7 +655,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Collections V2 — theme-consolidated, deduplicated collections (category grouping)
+- `feat(remy)` Connections V2 — diversity-ranked, narrative relationship discovery
+- `ebe2f98` feat(remy): Collections V2 — theme-consolidated, deduplicated collections (category grouping)
 - `6bbfd50` feat(dashboard): Remy Activity concise summary card + investigation findings
 - `1938ae4` feat(dashboard): Remy Activity — collapse to 3 with in-place show more/less (presentation only)
 - `c99a9a0` feat(reminisce): Reminiscence Mode V1 — caregiver/family era-based memory experience

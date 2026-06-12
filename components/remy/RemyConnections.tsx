@@ -40,9 +40,8 @@ export default function RemyConnections({
               <p className="font-medium text-charcoal break-words">
                 {c.title}
               </p>
-              <p className="text-sm text-charcoal-muted">
-                {c.connectedCount} connected{" "}
-                {c.connectedCount === 1 ? "moment" : "moments"}
+              <p className="text-sm text-charcoal-soft break-words">
+                {c.summary}
               </p>
             </Link>
           </li>

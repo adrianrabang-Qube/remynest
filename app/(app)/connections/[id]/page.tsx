@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { getRemyConnectionById } from "@/lib/remy/connections";
+import {
+  getRemyConnectionById,
+  formatConnectionSpan,
+} from "@/lib/remy/connections";
 import { formatMemoryDateLabel } from "@/lib/memories/memory-date";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +35,7 @@ export default async function ConnectionDetailPage({
   }
 
   const { connection, memories } = result;
+  const span = formatConnectionSpan(connection);
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
@@ -47,10 +51,8 @@ export default async function ConnectionDetailPage({
           {connection.title}
         </h1>
 
-        <p className="mt-3 text-charcoal-soft">
-          {connection.theme
-            ? `These memories appear connected to ${connection.theme}.`
-            : "These moments may be part of the same story."}
+        <p className="mt-3 text-lg text-charcoal-soft break-words">
+          {connection.summary}
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
@@ -58,6 +60,14 @@ export default async function ConnectionDetailPage({
             {connection.connectedCount} connected{" "}
             {connection.connectedCount === 1 ? "moment" : "moments"}
           </span>
+          {span && (
+            <span className="font-medium text-sage-deep">{span}</span>
+          )}
+          {connection.themes.length > 0 && (
+            <span className="text-charcoal-muted">
+              {connection.themes.join(" • ")}
+            </span>
+          )}
           <Link
             href={`/memories/${connection.id}`}
             className="font-medium text-sage-deep underline-offset-2 hover:underline"
