@@ -12,16 +12,34 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
-## Completed work
-- **Dashboard Remy Activity — curated preview** (presentation-only): the dashboard
-  "Remy Activity" section now behaves like a concise insight preview, not an
+- **Dashboard Remy Activity — concise summary card** (presentation-only): the
+  dashboard "Remy Activity" section behaves like a concise summary, not an
   ever-growing feed. Shows the **3 most recent** items by default; a footer CTA
-  ("Show more insights →" / "Show less") expands/collapses **in-place** when >3
-  exist (`expanded ? activities : activities.slice(0,3)`). No nested scroll
-  containers; **descriptions no longer truncate** (wrap via `break-words`); mobile
-  responsive (full-width CTA on small screens). Activity generation logic
-  (`buildRemyActivities`) is unchanged — `components/remy/RemyActivityFeed.tsx`
-  only. Addresses the audit's "dashboard risks becoming a timeline" concern.
+  (**"Show more →" / "Show less"**) expands/collapses **in-place** when >3 exist
+  (`expanded ? activities : activities.slice(0,3)`; CTA only when
+  `activities.length > 3`). No nested scroll containers; **descriptions don't
+  truncate** (wrap via `break-words`); mobile responsive (full-width CTA on small
+  screens); `aria-expanded` for a11y. `components/remy/RemyActivityFeed.tsx` only.
+  - **Investigation findings (for future Activity Log / Remy Insights split):**
+    Component = `components/remy/RemyActivityFeed.tsx`; model =
+    `lib/remy/activities.ts` (`buildRemyActivities` pure builder +
+    `fetchRemyActivitySources`); integration = `app/(app)/dashboard/page.tsx`
+    (builds activities → `<RemyActivityFeed>`; separately
+    `generateRemyObservations` → `RemyCompanion`). **Activity items are EVENTS**
+    (`historical-preserved`/`memory-added`/`reminder-completed`/
+    `collection-discovered`), each from a source row + timestamp — **not
+    observations, and NOT a mixture**; observations are a separate system feeding
+    the Companion. Generation is **bounded** (`buildRemyActivities` default
+    `limit` 8 over a recent window: ≤15 recent memories + recent clusters +
+    reminders), so it does not grow at 100/1k/10k memories — the 3-item preview
+    keeps the card concise at any scale. **Future separation is straightforward &
+    non-breaking:** an *Activity Log* page would render `buildRemyActivities` with
+    a higher `limit`/pagination; *Remy Insights* would render the existing
+    observations system. The two models are already decoupled. (Not implemented —
+    no Activity Log, no Remy Insights, no pagination, no infinite scroll.)
+  - **Validation:** 0 activities → empty-state copy, no CTA; 1/2/3 → all shown, no
+    CTA; ≥4 → collapsed shows 3 + "Show more →", expanded shows all + "Show less".
+    No fixed heights → no layout shift; mobile + desktop verified via build.
 - **Reminiscence Mode V1** (read-only; existing data only; no AI/embeddings/
   clustering/migrations): the first dedicated caregiver/family memory experience.
   New `lib/remy/reminiscence.ts` (`getReminiscence`) reuses historical (dated)
@@ -568,7 +586,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(dashboard)` Remy Activity — collapse to 3 with in-place show more/less (presentation only)
+- `feat(dashboard)` Remy Activity — concise summary card ("Show more →") + investigation findings
+- `1938ae4` feat(dashboard): Remy Activity — collapse to 3 with in-place show more/less (presentation only)
 - `c99a9a0` feat(reminisce): Reminiscence Mode V1 — caregiver/family era-based memory experience
 - `9c0cfd9` feat(memories): Memory Date Adoption V1 — coverage card + /memory-dates backfill flow
 - `d1d2a3c` feat(remy): Life Chapters V1 — narrative layer (chapters page + detail + dashboard)

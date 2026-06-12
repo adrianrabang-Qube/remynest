@@ -53,7 +53,7 @@ export default function RemyActivityFeed({
               aria-expanded={expanded}
               className="mt-3 w-full rounded-2xl px-3 py-2 text-left text-sm font-semibold text-sage-deep transition hover:bg-sand/40 sm:w-auto"
             >
-              {expanded ? "Show less" : "Show more insights →"}
+              {expanded ? "Show less" : "Show more →"}
             </button>
           )}
         </>
