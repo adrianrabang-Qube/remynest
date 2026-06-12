@@ -53,6 +53,9 @@ import {
 import { getRemyCollections } from "@/lib/remy/collections";
 import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
+import { getFamilyIntelligence } from "@/lib/remy/family";
+import FamilyOverview from "@/components/family/FamilyOverview";
+import FamilyThemes from "@/components/family/FamilyThemes";
 import { computeCoverage } from "@/lib/remy/date-coverage";
 import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
 import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCard";
@@ -602,6 +605,25 @@ export default async function DashboardPage() {
     remySignals.intelligence?.historicalTotal ?? 0
   );
 
+  // Family Workspace Intelligence — only for a family (>= 2 accessible profiles).
+  const familyProfiles = (
+    accessibleProfiles || []
+  ).map((p) => ({
+    id: p.id,
+    name:
+      p.preferred_name ||
+      p.profile_name ||
+      "Family member",
+  }));
+
+  const familyIntelligence =
+    familyProfiles.length >= 2
+      ? await getFamilyIntelligence(
+          supabase,
+          familyProfiles
+        )
+      : null;
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -733,6 +755,27 @@ export default async function DashboardPage() {
               : null
           }
         />
+
+        {/* FAMILY WORKSPACE INTELLIGENCE — family-level layer (>= 2 profiles) */}
+        {familyIntelligence &&
+          familyIntelligence.profiles.length >= 2 &&
+          familyIntelligence.totalMemories > 0 && (
+            <>
+              <FamilyOverview
+                profiles={
+                  familyIntelligence.profiles
+                }
+                observations={
+                  familyIntelligence.observations
+                }
+              />
+              <FamilyThemes
+                themes={
+                  familyIntelligence.themes
+                }
+              />
+            </>
+        )}
 
         {/* PRIMARY COMMAND CENTER — reminder-driven focus */}
         <DashboardFocus

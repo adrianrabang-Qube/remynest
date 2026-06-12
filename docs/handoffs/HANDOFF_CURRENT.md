@@ -12,6 +12,40 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Family Workspace Intelligence V1** (read-only; no schema/migrations/AI;
+  intelligence only — no notifications/alerts/predictions). First family-level
+  layer above Memory Dates / Collections V2 / Connections V2 / Life Chapters V2.
+  - **Investigation:** `memory_profiles` = `id, created_at, profile_name,
+    preferred_name, date_of_birth, profile_photo, created_by_account_id,
+    subscription_status` (6 rows; **max 2 profiles per owner** — families are
+    small). `getAccessibleProfiles()` (owned ∪ caregiver, deduped) is **already
+    fetched on the dashboard** → reused, no new profile query. Memories carry
+    `memory_profile_id`; clusters do NOT, so per-profile **collection count** =
+    Collections-V2 category model per profile (categories with ≥3 memories) and
+    **chapter count** = Life-Chapters-V2 decades among that profile's dated
+    memories — all from ONE scoped `memories` read.
+  - **Model** `lib/remy/family.ts` (`getFamilyIntelligence(profiles)`): single
+    `memories.in("memory_profile_id", ids)` query → per-profile {memoryCount,
+    datedCount, chapterCount, collectionCount, lastActivityAt}, aggregated family
+    **themes** (top categories + how many members share each), and **observations**
+    (RemyObservation, surface "caregiver"): "Most recent activity is centered
+    around <name>." / "Several family members share <Theme> memories." (≥2 members)
+    / "Most family memories still need dates." (<50% dated → /memory-dates).
+  - **Dashboard:** `FamilyOverview` (members + observations, relative "last memory"
+    time) + `FamilyThemes` (theme chips), shown only when **≥2 accessible profiles
+    AND the family has memories**. Mobile responsive; graceful (hidden otherwise).
+  - **Real-data result:** family "Mary, test" → Mary (60 memories · 2 dated · 1
+    chapter · 3 collections · last 2 days ago), test (No memories yet); themes
+    Health & Fitness / Fitness / Technology…; observations "centered around Mary"
+    + dates nudge (3% dated).
+  - **Scalability:** one query + JS aggregation, **O(profiles + rows)**; bounded —
+    `MAX_PROFILES=50` (IN clause) + `ROW_CAP=8000` (rows). 10/100 profiles fast +
+    accurate; **1000** profiles → only first 50 processed + 8000-row cap
+    (approximate) — real families are tiny, so a materialized per-profile rollup /
+    aggregate RPC is the future path for org-scale. **Limitations:** clusters have
+    no profile link (collection count is the per-profile category proxy); user/
+    profile counts are recent-window-approximate past the row cap. **Future:**
+    dedicated /family page, per-profile drill-down, cross-member Connections.
 - **Life Chapters V2 — time-based life periods** (read-only; no
   schema/migrations/AI; existing fields only). Rewrote `lib/remy/life-chapters.ts`;
   pages/components updated (no route changes).
@@ -680,7 +714,8 @@ None blocking web production. Mobile store submission blocked on Apple Developer
 Play Console accounts + native push + Android SDK.
 
 ## Recent commits
-- `feat(remy)` Life Chapters V2 — time-based life periods (decade chapters from memory dates)
+- `feat(remy)` Family Workspace Intelligence V1 — per-profile stats, family themes, observations
+- `6f67254` feat(remy): Life Chapters V2 — time-based life periods (decade chapters from memory dates)
 - `46c13e7` feat(remy): Connections V2 — diversity-ranked, narrative relationship discovery
 - `ebe2f98` feat(remy): Collections V2 — theme-consolidated, deduplicated collections (category grouping)
 - `6bbfd50` feat(dashboard): Remy Activity concise summary card + investigation findings
