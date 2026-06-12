@@ -11,6 +11,7 @@
     "test:e2e:ui": "playwright test --ui",
     "provision:tombstone": "node scripts/provision-tombstone.mjs",
     "verify:delete-account": "node scripts/verify-delete-account.mjs",
+    "validate:sentry-env": "node scripts/validate-sentry-env.mjs",
     "cap:add:ios": "cap add ios",
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync",

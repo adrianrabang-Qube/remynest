@@ -12,6 +12,34 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **TestFlight Readiness — Phase A+B (code portion)** (no new features; no schema change).
+  Cleared the code-ownable launch-gap items from the TestFlight Readiness Report:
+  - **iOS permission strings** — added `NSCameraUsageDescription`,
+    `NSPhotoLibraryUsageDescription`, `NSPhotoLibraryAddUsageDescription` to
+    `ios/App/App/Info.plist` (fixes on-device camera/library crash; copy from
+    `compliance/07`). **No microphone string** (voice not shipped — per `09`/`12`).
+  - **Push scaffolding** — `ios/App/App/App.entitlements` (`aps-environment=development`)
+    + `UIBackgroundModes=[remote-notification]` in Info.plist. Both `plutil -lint` OK.
+  - **Stripe cancel** — new `app/api/stripe/cancel/route.ts`: cancels at period end
+    (`cancel_at_period_end`), resolves customer by email like checkout, structured
+    non-throwing results; webhook syncs the profile. Fixes the BillingSection cancel
+    button (was a 404). Pairs with the existing `/api/stripe/portal`.
+  - **OneSignal cleanup** — removed dead `/api/save-onesignal` + `/api/save-subscription`
+    (wrote to the non-existent `users` table via anon client; no references). Real push
+    registry remains `/api/register-device` (called by `OneSignalInit.tsx`, Web SDK).
+  - **Sentry validation** — `scripts/validate-sentry-env.mjs` + `npm run validate:sentry-env`
+    (read-only preflight; locally reports all 5 vars MISSING — confirms the prod gap).
+  - Validated: lint (no new errors — 6 pre-existing generated-worker errors only),
+    build ✓ (cancel route present, dead routes absent), plists `plutil`-OK.
+  - **Operator / Xcode-required (cannot be performed or validated from the CLI env):**
+    (a) create APNs auth key in Apple Developer portal → upload to OneSignal; (b) in Xcode
+    add the **Push Notifications** capability to the App target (links `App.entitlements` /
+    sets `CODE_SIGN_ENTITLEMENTS`); (c) native OneSignal push for the **remote-URL** WebView
+    is non-trivial — the cordova plugin JS isn't injected into the remote page, so it needs
+    a dedicated native-init task (track separately); (d) set the 5 **Sentry env vars in
+    Vercel** (`vercel env add …`); (e) run the **physical-iPhone QA** workflow
+    (login/session-persistence across restart, camera+library upload, push delivery,
+    cancel→"scheduled to cancel", in-app account deletion).
 - **Resting avatar crop finalized** (`remy-sprite-map.ts` only — resting line + comment;
   the other 8 moods byte-identical). Visual review on `/dev/remy-avatar-test` flagged
   resting as the last bad mood (face too far left, too much body, head too small). Root
@@ -989,9 +1017,11 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
 ## Open issues
 - **Operator migration pending — Reminder Lifecycle**: apply
   `20260609120000_reminder_lifecycle_foundation.sql` (see Completed work).
-- `users` table missing → `save-onesignal` / `save-subscription` broken.
-- `/api/stripe/cancel` missing → BillingSection cancel broken.
-- Sentry env vars not set in Vercel (no prod error visibility).
+- `users` table missing (legacy): dead `save-onesignal` / `save-subscription` endpoints
+  **removed** (2026-06-12); push uses `device_registrations` via `/api/register-device`.
+- ~~`/api/stripe/cancel` missing~~ **fixed** (2026-06-12) — cancels at period end.
+- Sentry env vars not set in Vercel (no prod error visibility) — check with
+  `npm run validate:sentry-env`; set via `vercel env add` (operator).
 - Data drift: the webhook now writes a correct, price-derived `subscription_plan`
   (future drift prevented). **Pre-existing** drifted rows (e.g. `admin@remynest.com`:
   is_premium=true, plan=FREE) are not auto-corrected until their next
