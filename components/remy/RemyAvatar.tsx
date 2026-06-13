@@ -24,15 +24,18 @@ const SIZES = {
 export default function RemyAvatar({
   mood = "calm",
   size = "md",
+  className = "",
 }: {
   mood?: RemyMood;
   size?: keyof typeof SIZES;
+  /** Optional extra classes (e.g. responsive size overrides). */
+  className?: string;
 }) {
   return (
     <div
       aria-hidden="true"
       data-remy-mood={mood}
-      className={`relative inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ring-1 ring-sage/20 ${MOOD_RING[mood]} ${SIZES[size]}`}
+      className={`relative inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ring-1 ring-sage/20 ${MOOD_RING[mood]} ${SIZES[size]} ${className}`}
     >
       <span className="font-semibold text-sage-deep">✦</span>
     </div>

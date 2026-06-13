@@ -12,24 +12,29 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
-- **Mobile dashboard densification** (`< md` only; **desktop unchanged at `md+`**; no
-  content/feature/data removed). Fixes "dashboard is many screen-heights tall on mobile":
-  - **Width:** the dashboard had *double* horizontal padding (shell `<main>` + its own inner
-    `<main>` both `px-6` → ~80px lost, ~295px usable at 375px). Shell → `px-4 md:px-6`; inner
-    dashboard `<main>` → `px-0 md:px-6` (shell already gutters) → ~343px usable.
-  - **Vertical rhythm:** inner `<main>` `py-10 space-y-8` → `py-6 space-y-4 md:py-10 md:space-y-8`.
-  - **Card density:** the shared card root `bg-white p-6 shadow-soft` → `p-4 md:p-6` on 10 roots
-    (8 widget files; RemyBiography excluded to preserve its `sm:p-10` desktop).
-  - **Progressive disclosure:** new `app/(app)/dashboard/components/MobileExpandable.tsx` —
-    ResizeObserver-measured clamp (`max-h-[18rem]`) + "Show more/less"; **mobile only**
-    (`md:` = pure passthrough, no clamp/fade/button), and the toggle only renders when content
-    actually overflows (so the `return null` widgets are untouched). Wraps the 6 long white-card
-    widgets: Timeline, Biography, Memory Book, Collections, Connections, Life Chapters.
-  - **Preserved (Critical systems):** nav, profile/workspace switching, reminders, notifications,
-    memory creation, GDPR/account — all untouched (dashboard render is structurally identical;
-    only responsive classes + non-destructive wrappers added). Est. **~40–55% mobile scroll
-    reduction** on content-rich dashboards. Validated: lint (0 new), build ✓. **Live 375/390/430
-    visual pass pending on device** (auth-gated; can't render here).
+- **Mobile dashboard redesign — layout-first** (`< md` only; **desktop unchanged at `md+`**;
+  no content/feature/data removed). Replaces the earlier clamp-heavy attempt — height is now cut
+  by real re-layout, with Show-more reserved for the two true long-form documents. All mobile
+  overrides use Tailwind `max-md:` so **desktop classes stay byte-identical**.
+  - **Width:** removed the *double* horizontal padding (shell `<main>` + dashboard inner `<main>`
+    both `px-6`). Shell → `px-4 md:px-6`; inner → `px-0 md:px-6` (~295px → ~343px usable @375).
+  - **Rhythm:** inner `<main>` → `py-6 space-y-4 md:py-10 md:space-y-8`; card roots `p-4 md:p-6`.
+  - **Header:** avatar inline + smaller, greeting `max-md:text-2xl`, smaller badges, one-line
+    mobile summary (full sentence kept at `md:`).
+  - **Companion:** `max-md:p-4`, smaller avatar, tighter separator/secondary list.
+    `components/remy/RemyAvatar.tsx` gained an optional `className` prop (backward-compatible).
+  - **Stats:** `md:grid-cols-2`→`grid-cols-2` (2-up on phones, was stacked), `max-md:p-4`, smaller numbers.
+  - **Collections / Connections / Chapters:** `sm:grid-cols-2`→`grid-cols-2` (2-up on phones;
+    desktop already 2-col ≥640 so unchanged); sub-cards `p-4 md:p-6`; tighter gaps.
+  - **Timeline / Activity / Notifications / Story Mode:** denser rows + `max-md:` spacing/heading.
+  - **Biography (expandable kept):** `max-md:p-5`, `h2 max-md:text-2xl`, `mt-8→mt-4`, `space-y-10→space-y-5`.
+  - **Memory Book (expandable kept):** TOC → **horizontal chip scroll** on mobile
+    (`max-md:flex-nowrap overflow-x-auto`, chips `shrink-0`); smaller headings/padding.
+  - **Expandables reduced 6→2:** unwrapped Timeline/Collections/Connections/Chapters (now
+    re-laid-out); `MobileExpandable` kept only on Biography + Memory Book.
+  - Critical systems (nav, profile/workspace switching, reminders, notifications, memory creation,
+    GDPR/account) untouched. Est. **~45–50% mobile scroll reduction** on content-rich dashboards.
+    Validated: lint (0 new), build ✓. **Live 375/390/430 visual pass pending on device** (auth-gated).
 - **Hybrid mobile navigation — implemented** (fixes the `< md` navbar overflow audited
   earlier; **desktop unchanged at `md+`**). New `components/navigation/nav-config.ts` is the
   **single source of truth** for routes — desktop `NavLinks` and the mobile nav both derive

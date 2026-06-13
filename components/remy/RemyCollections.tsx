@@ -32,7 +32,7 @@ export default function RemyCollections({
         I&apos;ve started organizing memories into collections.
       </p>
 
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      <ul className="mt-4 max-md:mt-3 grid grid-cols-2 gap-3 max-md:gap-2">
         {collections.map((c) => (
           <li key={c.id}>
             <Link

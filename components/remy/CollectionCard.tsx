@@ -19,7 +19,7 @@ export default function CollectionCard({
   return (
     <Link
       href={`/collections/${collection.id}`}
-      className="block rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft-lg"
+      className="block rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-soft-lg"
     >
       <h3 className="text-lg font-semibold text-charcoal break-words">
         {collection.title}

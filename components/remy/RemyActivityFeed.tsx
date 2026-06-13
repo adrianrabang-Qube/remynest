@@ -40,7 +40,7 @@ export default function RemyActivityFeed({
         </p>
       ) : (
         <>
-          <ul className="mt-4 space-y-1">
+          <ul className="mt-4 max-md:mt-3 space-y-1">
             {visibleActivities.map((item) => (
               <ActivityRow key={item.id} item={item} />
             ))}
@@ -64,7 +64,7 @@ export default function RemyActivityFeed({
 
 function ActivityRow({ item }: { item: RemyActivity }) {
   const body = (
-    <div className="flex items-start gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-sand/40">
+    <div className="flex items-start gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-sand/40 max-md:gap-2 max-md:py-2">
       <span
         aria-hidden="true"
         className="mt-0.5 text-lg leading-none"

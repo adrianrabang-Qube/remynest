@@ -35,7 +35,7 @@ export default function RemyLifeChapters({
 
       <p className="mt-1 text-sm text-charcoal-soft">{intro}</p>
 
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      <ul className="mt-4 max-md:mt-3 grid grid-cols-2 gap-3 max-md:gap-2">
         {chapters.map((c) => {
           const range = formatChapterRange(c);
           return (

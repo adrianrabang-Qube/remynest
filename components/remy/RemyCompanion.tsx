@@ -29,9 +29,9 @@ export default function RemyCompanion({
   const mood = primary?.mood ?? REMY.defaultMood;
 
   return (
-    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-6 shadow-soft">
-      <div className="flex items-start gap-4">
-        <RemyAvatar mood={mood} size="lg" />
+    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-6 shadow-soft max-md:p-4">
+      <div className="flex items-start gap-4 max-md:gap-3">
+        <RemyAvatar mood={mood} size="lg" className="max-md:!h-12 max-md:!w-12 max-md:!text-xl" />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
@@ -63,11 +63,11 @@ export default function RemyCompanion({
           )}
 
           {rest.length > 0 && (
-            <ul className="mt-4 space-y-2 border-t border-sage/15 pt-3">
+            <ul className="mt-4 space-y-2 border-t border-sage/15 pt-3 max-md:mt-2 max-md:space-y-1 max-md:pt-2">
               {rest.map((o) => (
                 <li
                   key={o.id}
-                  className="flex items-start justify-between gap-3 text-sm"
+                  className="flex items-start justify-between gap-3 text-sm max-md:gap-2 max-md:text-[13px]"
                 >
                   <span className="text-charcoal-soft">{o.text}</span>
                   {o.cta && (

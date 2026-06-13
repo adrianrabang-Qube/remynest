@@ -17,20 +17,20 @@ export default function RemyStoryMode({
   if (stories.length === 0) return null;
 
   return (
-    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.06] to-sand/40 p-6 shadow-soft">
+    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.06] to-sand/40 p-6 shadow-soft max-md:p-4">
       <h2 className="text-lg font-semibold text-charcoal">Story Mode</h2>
       <p className="mt-1 text-sm text-charcoal-soft">
         Take a guided walk through the chapters of your story.
       </p>
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-5 max-md:mt-4 space-y-5 max-md:space-y-3">
         {stories.map((story) => (
           <article
             key={story.id}
             className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft"
           >
             <div className="flex items-baseline justify-between gap-3">
-              <h3 className="text-xl font-semibold text-charcoal break-words">
+              <h3 className="text-xl font-semibold text-charcoal break-words max-md:text-base">
                 {story.title}
               </h3>
               {formatChapterRange(story) && (
@@ -45,7 +45,7 @@ export default function RemyStoryMode({
             </p>
 
             {story.sections.length > 0 && (
-              <ol className="mt-4 space-y-3 border-l border-sand-deep/70 pl-5">
+              <ol className="mt-4 max-md:mt-3 space-y-3 max-md:space-y-2 border-l border-sand-deep/70 pl-5">
                 {story.sections.map((section) => (
                   <li key={section.id} className="relative">
                     <span

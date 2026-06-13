@@ -41,12 +41,12 @@ export default function RemyNotifications({
     <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
       <h2 className="text-lg font-semibold text-charcoal">Remy Updates</h2>
 
-      <ul className="mt-4 space-y-1">
+      <ul className="mt-4 max-md:mt-3 space-y-1">
         {visible.map((n) => (
           <li key={n.id}>
             <Link
               href={n.href}
-              className="flex items-start gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-sand/40"
+              className="flex items-start gap-3 rounded-2xl px-3 py-2.5 transition hover:bg-sand/40 max-md:gap-2 max-md:py-2"
             >
               <span aria-hidden="true" className="mt-0.5 text-lg leading-none">
                 {CATEGORY_ICON[n.category]}

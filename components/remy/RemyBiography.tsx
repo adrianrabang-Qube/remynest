@@ -14,9 +14,9 @@ export default function RemyBiography({
   if (!biography) return null;
 
   return (
-    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft sm:p-10">
-      <header className="border-b border-sand-deep/60 pb-6">
-        <h2 className="text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl">
+    <section className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft sm:p-10 max-md:p-5">
+      <header className="border-b border-sand-deep/60 pb-6 max-md:pb-4">
+        <h2 className="text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl max-md:text-2xl">
           {biography.title}
         </h2>
         {biography.subtitle && (
@@ -26,7 +26,7 @@ export default function RemyBiography({
         )}
       </header>
 
-      <div className="mx-auto mt-8 max-w-2xl space-y-10">
+      <div className="mx-auto mt-8 max-md:mt-4 max-w-2xl space-y-10 max-md:space-y-5">
         {biography.sections.map((section) => (
           <article key={section.id}>
             <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-sage-deep">
@@ -36,7 +36,7 @@ export default function RemyBiography({
               {section.paragraphs.map((paragraph, index) => (
                 <p
                   key={index}
-                  className="text-[17px] leading-relaxed text-charcoal-soft break-words"
+                  className="text-[17px] leading-relaxed text-charcoal-soft break-words max-md:text-[15px]"
                 >
                   {paragraph}
                 </p>

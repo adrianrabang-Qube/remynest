@@ -30,7 +30,7 @@ export default function RemyConnections({
         Memories that may be part of the same story.
       </p>
 
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      <ul className="mt-4 max-md:mt-3 grid grid-cols-2 gap-3 max-md:gap-2">
         {connections.map((c) => (
           <li key={c.id}>
             <Link

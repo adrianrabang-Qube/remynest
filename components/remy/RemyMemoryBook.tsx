@@ -26,11 +26,11 @@ export default function RemyMemoryBook({
   return (
     <section className="overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft">
       {/* Cover */}
-      <header className="border-b border-sand-deep/60 bg-gradient-to-br from-sage/[0.10] to-sand/50 p-6 sm:p-8">
+      <header className="border-b border-sand-deep/60 bg-gradient-to-br from-sage/[0.10] to-sand/50 p-6 sm:p-8 max-md:p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sage-deep">
           Memory Book
         </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl">
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl max-md:text-2xl">
           {book.cover.title}
         </h2>
         {book.cover.subtitle && (
@@ -48,11 +48,12 @@ export default function RemyMemoryBook({
 
       <div className="grid gap-0 md:grid-cols-[14rem_1fr]">
         {/* Table of Contents — chapter navigation */}
-        <nav className="border-b border-sand-deep/60 p-4 md:border-b-0 md:border-r">
+        <nav className="border-b border-sand-deep/60 p-4 max-md:p-3 md:border-b-0 md:border-r">
           <p className="px-2 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
             Contents
           </p>
-          <ul className="mt-2 flex flex-wrap gap-1 md:flex-col">
+          {/* Mobile: a single horizontal-scroll chip row. Desktop: vertical sidebar. */}
+          <ul className="mt-2 flex gap-1 md:flex-col max-md:flex-nowrap max-md:overflow-x-auto max-md:pb-1">
             {book.tableOfContents.map((entry) => {
               const isActive = entry.anchor === active.id;
               return (
@@ -61,7 +62,7 @@ export default function RemyMemoryBook({
                     type="button"
                     onClick={() => setActiveId(entry.anchor)}
                     aria-current={isActive ? "true" : undefined}
-                    className={`rounded-xl px-3 py-2 text-left text-sm transition ${
+                    className={`rounded-xl px-3 py-2 text-left text-sm transition max-md:shrink-0 max-md:whitespace-nowrap ${
                       isActive
                         ? "bg-sage/15 font-semibold text-sage-deep"
                         : "text-charcoal-soft hover:bg-sand/40"
@@ -77,8 +78,8 @@ export default function RemyMemoryBook({
         </nav>
 
         {/* Active chapter */}
-        <article className="p-6 sm:p-8">
-          <h3 className="text-2xl font-semibold text-charcoal">
+        <article className="p-6 sm:p-8 max-md:p-4">
+          <h3 className="text-2xl font-semibold text-charcoal max-md:text-lg">
             {active.title}
           </h3>
 
