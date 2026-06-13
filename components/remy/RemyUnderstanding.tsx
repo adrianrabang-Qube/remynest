@@ -4,9 +4,11 @@ import {
   CalendarRange,
   ChevronRight,
   Clock,
+  Feather,
   FolderHeart,
   History,
   Link2,
+  ScrollText,
   Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -21,6 +23,8 @@ const KIND_ICON: Record<UnderstandingFacetKind, LucideIcon> = {
   "life-areas": FolderHeart,
   "strongest-period": Clock,
   "chapter-span": CalendarRange,
+  "story-ready": ScrollText,
+  "narrative-growth": Feather,
   coverage: BookOpen,
   recency: History,
   "missing-knowledge": Sparkles,

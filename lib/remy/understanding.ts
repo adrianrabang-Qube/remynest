@@ -50,6 +50,8 @@ export interface UnderstandingInput {
   subject: { id: string; name: string };
   memoryCount: number;
   datedCount: number;
+  /** Life chapters (decades with enough dated memories); drives narrative readiness. */
+  chapterCount?: number;
   /** Top themes (from getFamilyIntelligence), most-documented first. */
   themes: { label: string; memoryCount: number }[];
   coveragePercentage: number;
@@ -110,6 +112,7 @@ export function buildPersonUnderstanding(
     subject,
     memoryCount,
     datedCount: input.datedCount,
+    chapterCount: input.chapterCount ?? 0,
     themes: input.themes,
     coveragePercentage: input.coveragePercentage,
     decades: input.decades,

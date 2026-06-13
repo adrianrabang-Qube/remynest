@@ -1,5 +1,6 @@
 import { cap, coverageLevel } from "./lenses/shared";
 import { deriveLifeJourneySignals } from "./life-journey-signals";
+import type { StorySignals } from "./story-signals";
 import type { DecadeBucket, UnderstandingFacet } from "./lenses/types";
 import type { RemyUnderstanding } from "./understanding";
 
@@ -26,6 +27,8 @@ export interface WorkspaceUnderstandingInput {
   themes: { label: string; memoryCount: number }[];
   /** Family-wide dated-memory counts per decade (the time shape); optional. */
   decades?: DecadeBucket[];
+  /** Narrative readiness across the workspace (from deriveStorySignals); optional. */
+  story?: StorySignals;
   /** Injectable for deterministic output. */
   now?: Date;
 }
@@ -136,6 +139,41 @@ export function buildWorkspaceUnderstanding(
     }
   }
 
+  // Story — narrative readiness across the workspace.
+  if (input.story) {
+    const s = input.story;
+    if (s.narrativeCoverage === "developed") {
+      facets.push({
+        lensId: "story",
+        kind: "story-ready",
+        priority: 55,
+        tone: "celebratory",
+        role: "storyteller",
+        label: `Stories span ${s.chapterCount} life ${
+          s.chapterCount === 1 ? "chapter" : "chapters"
+        }`,
+        detail: s.hasMemoryBook
+          ? "A memory book can be assembled"
+          : "A biography can be generated",
+        lens: { label: "Story", href: "/library/story" },
+      });
+    } else if (s.narrativeCoverage === "growing") {
+      const who = workspaceLabel === "your family" ? "family " : "";
+      facets.push({
+        lensId: "story",
+        kind: "narrative-growth",
+        priority: 44,
+        tone: "encouraging",
+        role: "storyteller",
+        label: `The ${who}story is still growing`,
+        detail: `${s.chapterCount} ${
+          s.chapterCount === 1 ? "chapter" : "chapters"
+        } so far`,
+        lens: { label: "Story", href: "/library/story" },
+      });
+    }
+  }
+
   // Preservation — total preserved + coverage level.
   facets.push({
     lensId: "preservation",
@@ -147,7 +185,7 @@ export function buildWorkspaceUnderstanding(
       totalMemories === 1 ? "memory" : "memories"
     } preserved`,
     detail: `Coverage: ${cap(level)} · ${totalDated} dated`,
-    lens: { label: "Story", href: "/library/story" },
+    lens: { label: "Memories", href: "/memories" },
   });
 
   const ranked = facets.sort((a, b) => b.priority - a.priority).slice(0, 6);

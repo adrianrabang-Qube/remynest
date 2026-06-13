@@ -116,6 +116,7 @@ export default async function PersonProfilePage({
     subject: { id, name },
     memoryCount,
     datedCount,
+    chapterCount,
     themes: family.themes,
     coveragePercentage: coverage.percentage,
     decades: bucketDecades(

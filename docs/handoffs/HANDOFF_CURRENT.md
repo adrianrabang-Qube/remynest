@@ -12,6 +12,31 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Story Lens V1 — narrative readiness engine** (the Story lens becomes canonical owner of narrative readiness; deterministic, no AI).
+  - **`lib/remy/story-signals.ts`** (new) — `deriveStorySignals(input) → StorySignals` (chapterCount,
+    storyCount, hasStory/hasBiography/hasMemoryBook, narrativeReady, strongestChapterTitle,
+    earliest/latestYear, `narrativeCoverage: nascent|growing|developed`). Pure; thresholds nascent=0 /
+    growing=1–2 / developed≥3, memory-book≥2. **Canonical narrative-signal source.**
+  - **Story lens implemented** (was a `[]` stub) — emits one readiness facet sized to coverage:
+    **story-ready** ("Enough chapters exist to tell {name}'s story", new kind + `ScrollText`) when
+    developed, **narrative-growth** ("{name}'s story is taking shape", new kind + `Feather`) when
+    growing. Derives readiness from `ctx.chapterCount` + life-journey signals — added **`chapterCount`**
+    to `LensContext`/`UnderstandingInput`; Profile Detail + People pass it.
+  - **Workspace** gains Story (family path only): "Stories span N life chapters / A memory book can be
+    assembled" (developed) or "The family story is still growing" (growing), from `deriveStorySignals`
+    over the **full family decade count** + real `getRemyStories/Biography/MemoryBook` booleans (already
+    loaded — no new query). **Single-workspace story is deferred** (same as single-workspace Life
+    Journey — no reliable per-workspace decade count loaded).
+  - **Auto-wired** through the existing pipeline: facets bridge to observations via `observation-bridge`
+    (default voicing), and render in Profile/People/Search/Dashboard via `RemyUnderstanding` /
+    `RemyLensSummary` / `RemyHomeSummary` — **no renderer-specific Story code** (only two icon entries).
+  - **Seam (documented):** `deriveStorySignals` is the reusable input for Story Mode (ordering),
+    Biography (availability/span), Memory Book (assembly), Voice (narration). Story/Biography/Memory
+    Book code **unchanged**.
+  - Adversarially reviewed (6-agent workflow): fixed the single-workspace `chapterCount` undercount
+    (now family-path only) and repointed the Preservation coverage facet `/library/story → /memories`
+    (lens semantics; Story owns `/library/story`). No AI/LLM/embeddings. Validated: lint 0 new (4/160),
+    build ✓.
 - **Life Journey Lens V1** (strengthens Remy's time dimension; deterministic, no AI).
   - **`lib/remy/life-journey-signals.ts`** (new) — `deriveLifeJourneySignals(decades, birthYear, now)` →
     `LifeJourneySignals` (strongest/earliest/latest decade, documented + span decade counts, missing

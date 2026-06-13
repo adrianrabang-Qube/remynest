@@ -38,7 +38,7 @@ export const preservationLens: Lens = {
       role: "guide",
       label: `Life story coverage: ${cap(level)}`,
       detail: `${datedCount} of ${memoryCount} memories dated`,
-      lens: { label: "Story", href: "/library/story" },
+      lens: { label: "Memories", href: "/memories" },
     });
 
     // Recency — how actively the story is growing.

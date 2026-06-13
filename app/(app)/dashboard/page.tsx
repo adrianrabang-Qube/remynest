@@ -62,6 +62,7 @@ import { computeCoverage } from "@/lib/remy/date-coverage";
 import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
 import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCard";
 import { buildWorkspaceUnderstanding } from "@/lib/remy/workspace-understanding";
+import { deriveStorySignals } from "@/lib/remy/story-signals";
 import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
 import Link from "next/link";
 
@@ -679,6 +680,23 @@ export default async function DashboardPage() {
     stories: remyStories,
   });
 
+  // Story signals — narrative readiness from intelligence already composed above
+  // (no extra queries, no AI). Family path only: chapterCount uses the FULL,
+  // family-scoped decade distribution. Single-workspace story readiness is
+  // deferred alongside single-workspace Life Journey — remyLifeChapters is
+  // account-wide and capped (limit 4), so it can't give a reliable per-workspace
+  // chapter count without a new query.
+  const workspaceStorySignals = familyIntelligence
+    ? deriveStorySignals({
+        chapterCount: familyIntelligence.decades.length,
+        storyCount: remyStories.length,
+        strongestChapterTitle: remyLifeChapters[0]?.title ?? null,
+        hasStory: remyStories.length > 0,
+        hasBiography: Boolean(remyBiography),
+        hasMemoryBook: Boolean(remyMemoryBook),
+      })
+    : undefined;
+
   // Remy Home Summary — workspace/family understanding. Deterministic synthesis
   // of intelligence ALREADY loaded above (family totals/themes, coverage,
   // collections, accessible profiles) — no extra queries, no AI.
@@ -700,6 +718,7 @@ export default async function DashboardPage() {
     // Full family decade distribution (family path); single-workspace Life
     // Journey is a follow-up (needs a per-workspace decade source).
     decades: familyIntelligence?.decades,
+    story: workspaceStorySignals,
   });
 
   const dashboardDurationMs = 0;

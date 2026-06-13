@@ -29,6 +29,8 @@ export type UnderstandingFacetKind =
   | "life-areas"
   | "strongest-period"
   | "chapter-span"
+  | "story-ready"
+  | "narrative-growth"
   | "coverage"
   | "recency"
   | "missing-knowledge"
@@ -73,6 +75,8 @@ export interface LensContext {
   subject: { id: string; name: string };
   memoryCount: number;
   datedCount: number;
+  /** Life chapters (decades with enough dated memories) — drives narrative readiness. */
+  chapterCount: number;
   /** Top themes (most documented first). */
   themes: { label: string; memoryCount: number }[];
   coveragePercentage: number;

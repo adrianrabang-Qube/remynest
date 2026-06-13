@@ -67,6 +67,7 @@ export default async function ProfilesPage() {
       subject: { id: p.id, name: p.name },
       memoryCount,
       datedCount,
+      chapterCount: stat?.chapterCount ?? 0,
       themes: stat?.themes ?? [],
       coveragePercentage: computeCoverage(memoryCount, datedCount).percentage,
       // Decade buckets aren't loaded in the directory (the person page derives
