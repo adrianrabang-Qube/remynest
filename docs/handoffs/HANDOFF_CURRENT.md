@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Memory Book V2 — presentation/assembly consumer** (Memory Book stops being an intelligence source; deterministic, no AI).
+  - `lib/remy/memory-book.ts`: `MemoryBookInput` gains **optional** `lifeJourney?: LifeJourneySignals`
+    + `story?: StorySignals` (public API preserved; backward compatible). Memory Book now **consumes**
+    canonical signals instead of deriving readiness/span: (a) **availability gate** uses
+    `story.hasMemoryBook` when provided (else the legacy biography-only gate); (b) a deterministic,
+    documentation-grounded **"Life Overview"** opening section assembled from signals — documented span
+    ("This story spans the 1960s–2020s, across N decades"), **richest era** (strongest decade), and
+    **story readiness** (`narrativeCoverage`). No prose generation, no inference, no queries.
+  - **Architecture:** `Signals → Biography → Memory Book → Voice`. Memory Book is a consumer of
+    intelligence; `deriveLifeJourneySignals` / `deriveStorySignals` remain the canonical sources.
+  - **Render pages** (`/library/memory-book`, `/memory-book/print`) compute both signals from the
+    `chapters`/`stories` **already loaded** (decade buckets via `parseInt(chapter.id)`; `chapterCount`/
+    `storyCount`/`hasBiography`) — **no new query** — and pass them in. Export
+    (`buildExportDocumentFromMemoryBook`) maps the new paragraphs-only section generically.
+  - **Intentional UX change (reviewed):** the Life Overview is prepended, so the renderer's default
+    section shifts Introduction → Life Overview (overview-first book opening); all sections stay
+    reachable via the TOC, no content lost. Dashboard unchanged (uses `Boolean(remyMemoryBook)`, passes
+    no signals → identical). Adversarially reviewed (4-agent workflow): only this intentional change
+    surfaced. Validated: lint 0 new (4/160), build ✓ (`/library/memory-book` 2.22 kB, `/memory-book/print` 576 B).
 - **Story Lens V1 — narrative readiness engine** (the Story lens becomes canonical owner of narrative readiness; deterministic, no AI).
   - **`lib/remy/story-signals.ts`** (new) — `deriveStorySignals(input) → StorySignals` (chapterCount,
     storyCount, hasStory/hasBiography/hasMemoryBook, narrativeReady, strongestChapterTitle,

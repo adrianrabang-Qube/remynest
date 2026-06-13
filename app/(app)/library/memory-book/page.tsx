@@ -9,6 +9,8 @@ import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyStories } from "@/lib/remy/story-mode";
 import { getRemyBiography } from "@/lib/remy/biography";
 import { getRemyMemoryBook } from "@/lib/remy/memory-book";
+import { deriveLifeJourneySignals } from "@/lib/remy/life-journey-signals";
+import { deriveStorySignals } from "@/lib/remy/story-signals";
 import RemyMemoryBook from "@/components/remy/RemyMemoryBook";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +36,25 @@ export default async function LibraryMemoryBookPage() {
     connections,
     family: null,
   });
-  const book = getRemyMemoryBook({ biography, stories });
+
+  // Canonical signals (no new query — derived from the chapters already loaded).
+  const lifeJourney = deriveLifeJourneySignals(
+    chapters
+      .map((c) => ({ decade: parseInt(c.id, 10), count: c.memoryCount }))
+      .filter((d) => !Number.isNaN(d.decade)),
+    null,
+  );
+  const story = deriveStorySignals({
+    chapterCount: chapters.length,
+    storyCount: stories.length,
+    strongestChapterTitle: chapters[0]?.title ?? null,
+    earliestYear: lifeJourney.earliestDecade,
+    latestYear: lifeJourney.latestDecade,
+    hasStory: stories.length > 0,
+    hasBiography: Boolean(biography),
+  });
+
+  const book = getRemyMemoryBook({ biography, stories, lifeJourney, story });
 
   return (
     <div className="space-y-4 p-4 md:p-6">
