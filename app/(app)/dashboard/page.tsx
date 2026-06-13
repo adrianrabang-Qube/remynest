@@ -1,6 +1,4 @@
 import PendingInvites from "@/components/PendingInvites";
-import ProfileSwitcher from "@/components/ProfileSwitcher";
-import EnterCareProfileList from "@/components/EnterCareProfileList";
 
 import { createClient } from "@/utils/supabase/server";
 
@@ -29,9 +27,7 @@ import {
 import DashboardHeader from "./components/DashboardHeader";
 import MobileExpandable from "./components/MobileExpandable";
 import DashboardStats from "./components/DashboardStats";
-import DashboardProfilePanel from "./components/DashboardProfilePanel";
 import DashboardAccountStatus from "./components/DashboardAccountStatus";
-import DashboardCreateProfile from "./components/DashboardCreateProfile";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
@@ -74,7 +70,6 @@ import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCar
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
-import { WorkspaceContextPanel } from "./components/workspace/WorkspaceContextPanel";
 
 type Profile = {
   id: string;
@@ -901,70 +896,27 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* MY NEST → CARE ENTRY (writes remynest-active-context) */}
-        {isMyNestContext && (
-          <EnterCareProfileList profiles={switcherProfiles} />
+        {!isMyNestContext && !activeProfile && (
+          <DashboardActiveProfileWarning />
         )}
 
-        {/* PROFILE CONTEXT FIRST */}
-        {!isMyNestContext && (
-          <ProfileSwitcher
-            profiles={switcherProfiles}
-            activeProfileId={activeProfileId}
-          />
-        )}
-
-        {!isMyNestContext &&
-          !activeProfile && (
-            <DashboardActiveProfileWarning />
-        )}
-
-        {/* EXISTING PROFILE PANEL PRESERVED */}
-        {!isMyNestContext && activeProfile && (
-          <DashboardProfilePanel
-            activeProfile={activeProfile}
-          />
-        )}
-
-        {/* WORKSPACE CONTEXT — MOVED CLOSER TO PROFILE DETAILS */}
-        {!isMyNestContext &&
-          activeProfile && (
-            <WorkspaceContextPanel
-              activeProfile={activeProfile}
-              workspaceType={workspaceType}
-            />
-        )}
-
-        {/* =====================================================
-            ACCOUNT & WORKSPACE
-            Administrative context (workspace state, invites,
-            account status) — separated from the focus surface.
-        ===================================================== */}
-        <div className="pt-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-charcoal-muted">
-            Account &amp; Workspace
-          </h2>
-          <div className="mt-1 h-px w-full bg-sand-deep/60" />
+        {/* WORKSPACE SUMMARY — compact row only. Workspace switching AND
+            care-profile management (switch, invite caregiver, add a person) now
+            live in the global top-bar Workspace Selector, available on every
+            authenticated screen — no longer scattered across the dashboard. */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-sand-deep/70 bg-white px-4 py-3 text-sm shadow-soft">
+          <span className="font-semibold text-charcoal">
+            Workspace:{" "}
+            {isMyNestContext
+              ? "My Nest"
+              : activeProfile?.profile_name ?? "Care"}
+          </span>
+          <span className="text-charcoal-muted">{memoryCount} memories</span>
+          <span className="text-charcoal-muted">
+            {accessibleProfiles.length}{" "}
+            {accessibleProfiles.length === 1 ? "profile" : "profiles"}
+          </span>
         </div>
-
-        <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
-            <h3 className="text-lg font-semibold text-charcoal">Care Snapshot</h3>
-            <div className="mt-3 space-y-2 text-sm text-charcoal-soft">
-              <p>Workspace: {workspaceType}</p>
-              <p>Accessible profiles: {accessibleProfiles.length}</p>
-              <p>Total memories: {memoryCount}</p>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
-            <h3 className="text-lg font-semibold text-charcoal">Memory Insights</h3>
-            <p className="mt-3 text-sm text-charcoal-soft">
-              Memory activity and cognitive insight summaries will appear here,
-              giving caregivers and users a quick overview before opening Insights.
-            </p>
-          </div>
-        </section>
 
         <DashboardStats
           memoryCount={memoryCount}
@@ -994,9 +946,6 @@ export default async function DashboardPage() {
 
         {/* CREATE MEMORY */}
         <DashboardCreateMemory />
-
-        {/* CREATE PROFILE */}
-        <DashboardCreateProfile />
       </main>
     </WorkspaceShell>
   );

@@ -12,6 +12,27 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Global Workspace Selector — IA migration** (workspace switching is now a first-class,
+  always-visible top-bar control on **every** authenticated screen; mobile + desktop).
+  - New `components/navigation/WorkspaceSelector.tsx`: a chip `[ {workspace} ▾ ]` → responsive
+    sheet (bottom-sheet on mobile, top-right dropdown on desktop) listing **My Nest** + every
+    accessible care profile (✓ on active). **Reuses the existing permission-guarded server
+    actions** `setActiveProfile(id)` (runs `validateProfileId`) / `setPersonalWorkspace()` +
+    `router.refresh()` → global context update + full data refresh + cookie persistence
+    (`remynest-active-context`). **No switching/permission logic changed.**
+  - Care-profile **management relocated into the sheet** — "Manage care profiles" reveals
+    `InviteCaregiverForm` (active profile) + `CreateProfileForm` (add a person).
+  - `(app)/layout.tsx` loads `getAccessibleProfiles()` (RLS-scoped) → nav; wired into desktop
+    `AppNavbar` (replaces display-only `WorkspaceIndicator`) and `MobileTopBar`
+    (now `[Workspace ▾] … [avatar]`).
+  - **Dashboard cleanup:** removed `ProfileSwitcher`, `EnterCareProfileList`,
+    `DashboardProfilePanel`, `WorkspaceContextPanel`, the "Account & Workspace" 2-card grid, and
+    `DashboardCreateProfile`; replaced with a single compact **Workspace Summary Row**
+    (Workspace: {name} · N memories · N profiles). Dashboard bundle 12.9→10.2 kB.
+  - Critical systems intact (auth, workspace permissions, caregiver/ownership via the reused
+    `validateProfileId` + RLS loader, GDPR). Validated: lint (0 new), build ✓. **Runtime checks
+    (switch from every screen, invite, persistence after refresh) pending on-device** (auth-gated).
+  - Deferred: a full edit/remove-profile CRUD screen (sheet currently does switch + invite + add).
 - **Mobile dashboard redesign — layout-first** (`< md` only; **desktop unchanged at `md+`**;
   no content/feature/data removed). Replaces the earlier clamp-heavy attempt — height is now cut
   by real re-layout, with Show-more reserved for the two true long-form documents. All mobile

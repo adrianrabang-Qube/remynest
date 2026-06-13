@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
 import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { getAccessibleProfiles } from "@/lib/profile-access";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
 // serve this segment (or its identity read) from cache.
@@ -54,6 +55,25 @@ export default async function AppLayout({
     activeProfileName,
   };
 
+  // RLS-scoped accessible care profiles for the global Workspace Selector (top
+  // bar, every screen). Reuses the same loader the dashboard uses; failures
+  // degrade to an empty list (selector still offers "My Nest").
+  type AccessibleProfile = {
+    id: string;
+    profile_name?: string | null;
+    preferred_name?: string | null;
+  };
+  let workspaceProfiles: { id: string; name: string }[] = [];
+  try {
+    const accessible = (await getAccessibleProfiles()) as AccessibleProfile[];
+    workspaceProfiles = (accessible ?? []).map((profile) => ({
+      id: profile.id,
+      name: profile.preferred_name || profile.profile_name || "Care profile",
+    }));
+  } catch {
+    workspaceProfiles = [];
+  }
+
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Loads the OneSignal Web SDK + registers the device for push. Self-guards
@@ -63,6 +83,8 @@ export default async function AppLayout({
       <AppNavbar
         profile={identity?.summary ?? null}
         workspace={workspace}
+        workspaceProfiles={workspaceProfiles}
+        activeProfileId={activeProfileId}
       />
 
       {!workspace.isMyNest && activeProfileName && (

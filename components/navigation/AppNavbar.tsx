@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import NavLinks from "./NavLinks";
 import UserProfileDropdown from "./UserProfileDropdown";
-import WorkspaceIndicator from "./WorkspaceIndicator";
+import WorkspaceSelector, { type WorkspaceOption } from "./WorkspaceSelector";
 import MobileTopBar from "./MobileTopBar";
 import MobileBottomNav from "./MobileBottomNav";
 import MobileNavDrawer from "./MobileNavDrawer";
@@ -14,9 +14,16 @@ import type { ProfileSummary } from "@/components/profile/types";
 interface AppNavbarProps {
   profile: ProfileSummary | null;
   workspace: WorkspaceNavState;
+  workspaceProfiles: WorkspaceOption[];
+  activeProfileId: string | null;
 }
 
-export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
+export default function AppNavbar({
+  profile,
+  workspace,
+  workspaceProfiles,
+  activeProfileId,
+}: AppNavbarProps) {
   const [open, setOpen] = useState(false);
   // Mobile (< md) nav/profile drawer — opened by the top-bar avatar and the
   // bottom-nav "More" entry. Separate from the desktop profile dropdown above.
@@ -56,7 +63,9 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
         <NavLinks />
 
         <div className="flex items-center gap-4">
-          <WorkspaceIndicator
+          <WorkspaceSelector
+            profiles={workspaceProfiles}
+            activeProfileId={activeProfileId}
             isMyNest={workspace.isMyNest}
             activeProfileName={workspace.activeProfileName}
           />
@@ -98,7 +107,14 @@ export default function AppNavbar({ profile, workspace }: AppNavbarProps) {
       </header>
 
       {/* Mobile navigation (< md): slim top bar + bottom nav + "More" drawer. */}
-      <MobileTopBar profile={profile} onOpenMenu={() => setMobileNavOpen(true)} />
+      <MobileTopBar
+        profile={profile}
+        onOpenMenu={() => setMobileNavOpen(true)}
+        workspaceProfiles={workspaceProfiles}
+        activeProfileId={activeProfileId}
+        isMyNest={workspace.isMyNest}
+        activeProfileName={workspace.activeProfileName}
+      />
       <MobileBottomNav onOpenMore={() => setMobileNavOpen(true)} />
       <MobileNavDrawer
         open={mobileNavOpen}
