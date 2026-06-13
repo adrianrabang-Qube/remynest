@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { Search } from "lucide-react";
+
 import type { ProfileSummary } from "@/components/profile/types";
 import WorkspaceSelector, { type WorkspaceOption } from "./WorkspaceSelector";
 
@@ -39,15 +42,25 @@ export default function MobileTopBar({
         activeProfileName={activeProfileName}
       />
 
-      <button
-        type="button"
-        onClick={onOpenMenu}
-        aria-label="Open menu and profile"
-        aria-haspopup="dialog"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white transition hover:bg-sage-deep"
-      >
-        {initial}
-      </button>
+      <div className="flex items-center gap-1.5">
+        <Link
+          href="/search"
+          aria-label="Search"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-charcoal-soft transition hover:bg-sand-deep/40"
+        >
+          <Search className="h-5 w-5" aria-hidden />
+        </Link>
+
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label="Open menu and profile"
+          aria-haspopup="dialog"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white transition hover:bg-sage-deep"
+        >
+          {initial}
+        </button>
+      </div>
     </header>
   );
 }

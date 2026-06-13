@@ -3,7 +3,7 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-12
+**Last updated:** 2026-06-13
 
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
@@ -12,6 +12,30 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Search V2 — global memory intelligence search** (new `/search` route; the single retrieval layer).
+  Before: the only `/search` was an **orphaned, unlinked** client page **outside** `(app)` (no nav)
+  doing premium **vector** search; Timeline/Library "search" were just local filters of their own page
+  data. There was **no global search and no mobile search affordance**.
+  - New `/search` (`app/(app)/search/page.tsx`, force-dynamic, inside `(app)` → auth + nav + chrome)
+    renders `components/search/SearchView.tsx` (client): `role="search"` input, **debounced** live
+    search, sticky filter chips (**All / Memories / Library / People**), recent searches (localStorage),
+    suggestions, and **collapsible grouped result sections** of ~72px `SearchResultRow`s
+    (icon + title + preview + type badge + chevron).
+  - **One request, server fan-out:** `POST /api/search/global` (new) does `Promise.all` over memories
+    (`title/content/ai_title/ai_summary` **ILIKE**, workspace-scoped `memory_profile_id = active | IS NULL`),
+    collections, connections, chapters (Remy loaders, name match) and people (`getAccessibleProfiles`),
+    returning render-ready grouped hits with deep links (`/memories/[id]`, `/collections/[id]`,
+    `/connections/[id]`, `/chapters/[id]`). **No N+1** (icon rows, no per-result media join). User input
+    is sanitized before the PostgREST `.or()`.
+  - **Keyword only — no embeddings / vector / AI / semantic.** The premium vector endpoints
+    (`/api/search`, `/api/memories/search`) are **untouched** and remain available as a future "smart"
+    mode — **no duplicate search systems**; Search V2 is the canonical global layer.
+  - Reachable from a new **search icon in the mobile top bar** (one tap) + a **Search** entry in
+    `NAV_ITEMS` (mobile drawer + desktop nav). The orphaned `app/search/page.tsx` was **removed**
+    (replaced, not duplicated).
+  - No auth/RLS/GDPR/billing/caregiver/workspace/notification/reminder/ownership/sharing/profile/library
+    regression. Validated: lint (0 new — 4/160 baseline), build ✓ (`/search` 4.49 kB, `/api/search/global`),
+    no eslint-disable.
 - **Profile V2 — digital identity layer** (new `/profile` route; Settings becomes secondary).
   Before: no profile page — "profile" was the `ProfileHub` account/settings menu (avatar dropdown +
   drawer); memory intelligence was invisible outside the dashboard.
