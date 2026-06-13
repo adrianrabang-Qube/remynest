@@ -23,11 +23,11 @@ export default function TimelineSearch({
     Boolean(searchQuery);
 
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm">
+    <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm max-md:rounded-2xl max-md:p-2">
       <form
         action="/timeline"
         method="GET"
-        className="flex items-center gap-3"
+        className="flex items-center gap-3 max-md:gap-2"
       >
         <input
           type="text"
@@ -36,7 +36,7 @@ export default function TimelineSearch({
           defaultValue={searchQuery}
           autoComplete="off"
           spellCheck={false}
-          className="flex-1 text-lg outline-none bg-transparent"
+          className="flex-1 text-lg outline-none bg-transparent max-md:px-2 max-md:text-base"
         />
 
         {selectedCategory && (

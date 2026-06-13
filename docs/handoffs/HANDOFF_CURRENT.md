@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Timeline V2 — mobile-first feed** (`< md` only; **desktop unchanged**; nothing deleted —
+  intelligence/related relocated to detail). Timeline was a desktop card experience:
+  `TimelineCard` `<details>` (`p-7`, `text-4xl` title, `text-2xl` preview, per-card
+  `IntelligenceStrip` + expanded `RelatedMemories`) ≈ 450–600px each; `text-5xl` header;
+  `flex-wrap` chip-wall filters; `p-5` search card; `LifeChapterCard` `p-7`/`text-3xl` ≈ 450px.
+  - New `TimelineRow.tsx` (~76px): thumbnail/icon · title · 1-line preview · date · category ·
+    chevron → links to `/memories/[id]` (full content + AI intelligence + related live there).
+  - New `CompactChapterRow.tsx` (~72px): title · date range · memory count · chevron → chapter view.
+  - `TimelineDayGroup` / `ChaptersView`: render rows on mobile (`md:hidden`) + the **unchanged**
+    `TimelineCard` / `LifeChapterCard` on desktop (`hidden md:block`). `IntelligenceStrip` +
+    `RelatedMemories` are omitted from the row → auto-relocated to detail.
+  - Chrome: header `max-md:text-2xl`; categories → **horizontal chip scroll**; search compact
+    (`max-md:p-2`); toggle compact; toggle+search+filters sit in a **sticky control bar** on
+    mobile (`top-14`); day headers compact + sticky below (`max-md:top-[12.5rem]`). Container
+    `p-6 → p-4 md:p-6`.
+  - Desktop untouched (all `max-md:`/`md:hidden`; control-bar wrapper keeps `space-y-6` on desktop).
+    Est. **~80% mobile feed scroll reduction**; chapters ~84%; chrome ~60%. Validated: lint (0 new),
+    build ✓, no eslint-disable. **Caveat: sticky offset `top-[12.5rem]` is an estimate needing
+    one-line device tuning; a single-row control bar is a recommended follow-up.**
 - **Mobile Memory feed — CompactMemoryRow** (Phase 2; `< md` only; **desktop keeps MemoryCard**;
   no information removed — moved deeper). Memories were a single-column stack of full-content
   `MemoryCard`s (~300px each: untruncated content + 3 thumbs + summary + tags + inline

@@ -77,7 +77,7 @@ export default function TimelineViewToggle({
               searchQuery,
               selectedCategory,
             })}
-            className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 max-md:px-3 max-md:py-1.5 ${
               isActive
                 ? "bg-black text-white shadow-sm"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"

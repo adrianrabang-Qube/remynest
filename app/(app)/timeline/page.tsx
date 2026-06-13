@@ -347,38 +347,35 @@ export default async function TimelinePage({
   // =====================================
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 max-md:space-y-4 max-md:p-4">
       <TimelineHeader />
 
-      <TimelineViewToggle
-        currentView={currentView}
-        searchQuery={searchQuery}
-        selectedCategory={
-          selectedCategory
-        }
-      />
+      {/* Compact control bar — sticky on mobile so the toggle, search and
+          filters stay reachable while scrolling the feed. The wrapper keeps the
+          original `space-y-6` on desktop, so desktop layout is unchanged. */}
+      <div className="space-y-6 max-md:space-y-2 max-md:sticky max-md:top-14 max-md:z-20 max-md:-mx-4 max-md:border-b max-md:border-sand-deep/40 max-md:bg-[#f5f1e8]/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+        <TimelineViewToggle
+          currentView={currentView}
+          searchQuery={searchQuery}
+          selectedCategory={selectedCategory}
+        />
 
-      <TimelineSearch
-        searchQuery={searchQuery}
-        selectedCategory={
-          selectedCategory
-        }
-      />
+        <TimelineSearch
+          searchQuery={searchQuery}
+          selectedCategory={selectedCategory}
+        />
 
-      <TimelineCategories
-        categories={categories}
-        selectedCategory={
-          selectedCategory
-        }
-        searchQuery={searchQuery}
-        formatCategoryLabel={
-          formatCategoryLabel
-        }
-      />
+        <TimelineCategories
+          categories={categories}
+          selectedCategory={selectedCategory}
+          searchQuery={searchQuery}
+          formatCategoryLabel={formatCategoryLabel}
+        />
+      </div>
 
       {/* Empty State */}
       {!hasResults && (
-        <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm">
+        <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6">
           <p className="text-gray-500">
             No memories matched your current AI timeline filters.
           </p>

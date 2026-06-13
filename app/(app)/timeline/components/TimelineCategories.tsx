@@ -55,12 +55,12 @@ export default function TimelineCategories({
     ).sort();
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3 max-md:flex-nowrap max-md:gap-2 max-md:overflow-x-auto max-md:pb-1">
       <Link
         href={buildTimelineHref({
           search: searchQuery,
         })}
-        className={`px-5 py-2 rounded-full text-sm transition-colors ${
+        className={`px-5 py-2 rounded-full text-sm max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 transition-colors ${
           !selectedCategory
             ? "bg-black text-white"
             : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
@@ -82,7 +82,7 @@ export default function TimelineCategories({
                 category,
                 search: searchQuery,
               })}
-              className={`px-5 py-2 rounded-full text-sm transition-all ${
+              className={`px-5 py-2 rounded-full text-sm max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 transition-all ${
                 isActive
                   ? "bg-black text-white shadow-sm"
                   : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"

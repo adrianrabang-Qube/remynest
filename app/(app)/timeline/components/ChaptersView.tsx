@@ -1,4 +1,5 @@
 import LifeChapterCard from "./LifeChapterCard";
+import CompactChapterRow from "./CompactChapterRow";
 
 type Memory = {
   id: string;
@@ -117,7 +118,7 @@ export default function ChaptersView({ memories }: ChaptersViewProps) {
 
   if (chapters.length === 0) {
     return (
-      <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm">
+      <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6">
         <p className="text-gray-500">
           No life chapters available yet.
         </p>
@@ -126,13 +127,20 @@ export default function ChaptersView({ memories }: ChaptersViewProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {chapters.map((chapter) => (
-        <LifeChapterCard
-          key={chapter.id}
-          chapter={chapter}
-        />
-      ))}
-    </div>
+    <>
+      {/* Mobile: compact chapter rows */}
+      <ul className="md:hidden overflow-hidden rounded-2xl border border-sand-deep/60 bg-white divide-y divide-sand-deep/40">
+        {chapters.map((chapter) => (
+          <CompactChapterRow key={chapter.id} chapter={chapter} />
+        ))}
+      </ul>
+
+      {/* Desktop: existing cards — unchanged */}
+      <div className="hidden space-y-6 md:block">
+        {chapters.map((chapter) => (
+          <LifeChapterCard key={chapter.id} chapter={chapter} />
+        ))}
+      </div>
+    </>
   );
 }
