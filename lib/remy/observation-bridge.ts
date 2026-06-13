@@ -81,3 +81,29 @@ export function understandingToObservations(
     .map((facet) => facetToObservation(facet, voice, surface))
     .sort((a, b) => b.priority - a.priority);
 }
+
+/**
+ * Observation fusion — merge understanding-derived observations (from the
+ * lenses, via this bridge) with signal-derived observations (from
+ * generateRemyObservations) into one ranked stream. Deterministic, dedup by id.
+ * This is the seam Remy Home (and later Voice) consumes so a surface can speak
+ * from both intelligence sources at once — without changing how RemyCompanion
+ * renders signal observations today.
+ */
+export function fuseObservations(
+  understanding: RemyUnderstanding,
+  voice: RemyVoice,
+  signalObservations: RemyObservation[] = [],
+  surface: RemySurface = "dashboard",
+): RemyObservation[] {
+  const fromUnderstanding = understandingToObservations(
+    understanding,
+    voice,
+    surface,
+  );
+  const seen = new Set(fromUnderstanding.map((o) => o.id));
+  return [
+    ...fromUnderstanding,
+    ...signalObservations.filter((o) => !seen.has(o.id)),
+  ].sort((a, b) => b.priority - a.priority);
+}

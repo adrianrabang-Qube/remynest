@@ -12,6 +12,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Home Foundation V1** (proves Remy can understand the workspace/family as a whole; additive — no Dashboard migration).
+  - **`lib/remy/workspace-understanding.ts`** (new) — `buildWorkspaceUnderstanding()`: deterministic
+    workspace/family synthesizer returning the **same `RemyUnderstanding` shape** (so `RemyLensSummary`
+    + the observation bridge work unchanged). Workspace-scoped facets owned by lenses: **relationships**
+    (family network size), **themes** (most documented theme across the whole), **preservation** (total
+    preserved + coverage). **No AI/LLM/embeddings.**
+  - **`components/remy/RemyHomeSummary.tsx`** (new) — "What Remy understands" (workspace), rendered via
+    the shared `RemyLensSummary` (grouped); optional fused-observation list (the Remy Home / Voice seam).
+  - **Observation fusion** (`observation-bridge.ts`): new `fuseObservations()` merges
+    understanding-derived (bridge) + signal-derived (`generateRemyObservations`) observations into one
+    ranked, dedup'd stream — the architecture for Remy Home/Voice; **RemyCompanion behavior unchanged**.
+  - **Dashboard integration (additive only):** `RemyHomeSummary` added near the top (after the header,
+    above RemyCompanion). Built from intelligence the dashboard **already loads** (`familyIntelligence`
+    totals/themes, `remyDateCoverage`, `remyCollections`, `accessibleProfiles`, `memoryCount`) — **no
+    new queries**. **Nothing renamed/removed/moved** (billing, invites, account status, warnings,
+    widgets, nav all intact). Validated: lint 0 new (4/160), build ✓ (`/dashboard` 9.95 kB).
 - **Understanding Engine Expansion — People + Search** (proves the engine is reusable across surfaces).
   - **Shared renderer** `components/remy/RemyLensSummary.tsx` (new) — consumes a `RemyUnderstanding`
     directly; **`variant="inline"`** (one-line lens summary for rows/cards) and **`variant="grouped"`**

@@ -61,6 +61,8 @@ import FamilyThemes from "@/components/family/FamilyThemes";
 import { computeCoverage } from "@/lib/remy/date-coverage";
 import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
 import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCard";
+import { buildWorkspaceUnderstanding } from "@/lib/remy/workspace-understanding";
+import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -677,6 +679,26 @@ export default async function DashboardPage() {
     stories: remyStories,
   });
 
+  // Remy Home Summary — workspace/family understanding. Deterministic synthesis
+  // of intelligence ALREADY loaded above (family totals/themes, coverage,
+  // collections, accessible profiles) — no extra queries, no AI.
+  const workspaceUnderstanding = buildWorkspaceUnderstanding({
+    workspaceLabel: familyIntelligence
+      ? "your family"
+      : isMyNestWorkspace
+        ? "My Nest"
+        : remySubjectName ?? "this workspace",
+    peopleCount: accessibleProfiles.length,
+    totalMemories: familyIntelligence?.totalMemories ?? memoryCount,
+    totalDated: familyIntelligence?.totalDated ?? remyDateCoverage.dated,
+    themes:
+      familyIntelligence?.themes ??
+      remyCollections.map((c) => ({
+        label: c.title,
+        memoryCount: c.memoryCount,
+      })),
+  });
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -763,6 +785,10 @@ export default async function DashboardPage() {
           workspaceType={workspaceType}
           remyMood={remyHeaderMood}
         />
+
+        {/* REMY HOME SUMMARY — workspace/family "what Remy understands" (the Remy
+            Home foundation). Additive: everything below continues unchanged. */}
+        <RemyHomeSummary understanding={workspaceUnderstanding} />
 
         {/* REMY COMPANION — AI companion layer above the command center */}
         <RemyCompanion
