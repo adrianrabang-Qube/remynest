@@ -50,7 +50,7 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
   const withContext = (path: string) =>
     context ? `${path}?context=${context}` : path;
 
-  const [dashboard, memories, timeline] = MOBILE_PRIMARY_NAV;
+  const [home, dashboard, memories] = MOBILE_PRIMARY_NAV;
   const NewIcon = MOBILE_NEW_ACTION.icon;
 
   // "More" reflects the active state of any drawer-hosted route.
@@ -62,22 +62,18 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
     <ul className="flex items-stretch">
       <li className="flex flex-1">
         <Tab
-          href={withContext(dashboard.href)}
-          label={dashboard.label}
-          Icon={dashboard.icon}
-          active={isNavItemActive(pathname, dashboard.href)}
+          href={withContext(home.href)}
+          label={home.label}
+          Icon={home.icon}
+          active={isNavItemActive(pathname, home.href)}
         />
       </li>
       <li className="flex flex-1">
         <Tab
-          href={withContext(memories.href)}
-          label={memories.label}
-          Icon={memories.icon}
-          // Don't light up Memories while on the dedicated "New" screen.
-          active={
-            isNavItemActive(pathname, memories.href) &&
-            !isNavItemActive(pathname, MOBILE_NEW_ACTION.href)
-          }
+          href={withContext(dashboard.href)}
+          label={dashboard.label}
+          Icon={dashboard.icon}
+          active={isNavItemActive(pathname, dashboard.href)}
         />
       </li>
 
@@ -97,10 +93,14 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
 
       <li className="flex flex-1">
         <Tab
-          href={withContext(timeline.href)}
-          label={timeline.label}
-          Icon={timeline.icon}
-          active={isNavItemActive(pathname, timeline.href)}
+          href={withContext(memories.href)}
+          label={memories.label}
+          Icon={memories.icon}
+          // Don't light up Memories while on the dedicated "New" screen.
+          active={
+            isNavItemActive(pathname, memories.href) &&
+            !isNavItemActive(pathname, MOBILE_NEW_ACTION.href)
+          }
         />
       </li>
 
@@ -123,9 +123,9 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
 }
 
 /**
- * Fixed bottom navigation for mobile (< md). Hosts the four primary
- * destinations + the center "New" action + a "More" entry that opens the
- * drawer. iOS safe-area inset keeps it clear of the home indicator.
+ * Fixed bottom navigation for mobile (< md). Hosts the primary destinations
+ * (Home, Dashboard, Memories) + the center "New" action + a "More" entry that
+ * opens the drawer. iOS safe-area inset keeps it clear of the home indicator.
  */
 export default function MobileBottomNav({ onOpenMore }: MobileBottomNavProps) {
   return (

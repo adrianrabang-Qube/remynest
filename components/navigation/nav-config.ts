@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Home,
   LayoutDashboard,
   BookHeart,
   MessageCircle,
@@ -32,18 +33,19 @@ export interface NavItem {
  *   • drawer  → the "More" drawer
  */
 export const NAV_ITEMS: NavItem[] = [
+  { href: "/home", label: "Home", icon: Home, mobile: "primary" },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, mobile: "primary" },
   { href: "/memories", label: "Memories", icon: BookHeart, mobile: "primary" },
   { href: "/search", label: "Search", icon: Search, mobile: "drawer" },
   { href: "/memory-chat", label: "Memory Chat", icon: MessageCircle, mobile: "drawer" },
   { href: "/memories/new", label: "New", icon: Plus, mobile: "new" },
-  { href: "/timeline", label: "Timeline", icon: Clock, mobile: "primary" },
+  { href: "/timeline", label: "Timeline", icon: Clock, mobile: "drawer" },
   { href: "/library", label: "Library", icon: Library, mobile: "drawer" },
   { href: "/reminders", label: "Reminders", icon: Bell, mobile: "drawer" },
   { href: "/insights", label: "Insights", icon: Sparkles, mobile: "drawer" },
 ];
 
-/** Bottom-nav tabs (Dashboard, Memories, Timeline) — derived, never duplicated. */
+/** Bottom-nav tabs (Home, Dashboard, Memories) — derived, never duplicated. */
 export const MOBILE_PRIMARY_NAV: NavItem[] = NAV_ITEMS.filter(
   (i) => i.mobile === "primary",
 );

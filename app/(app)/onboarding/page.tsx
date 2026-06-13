@@ -41,7 +41,7 @@ export default async function OnboardingPage() {
     existingProfile?.onboarding_completed ===
     true
   ) {
-    redirect("/dashboard");
+    redirect("/home");
   }
 
   // =====================================
@@ -157,7 +157,7 @@ export default async function OnboardingPage() {
     // REDIRECT
     // =====================================
 
-    redirect("/dashboard");
+    redirect("/home");
   }
 
   return (
@@ -289,7 +289,7 @@ export default async function OnboardingPage() {
             type="submit"
             className="w-full rounded-2xl bg-black text-white py-4 text-lg font-medium hover:opacity-90 transition"
           >
-            Continue to Dashboard
+            Continue to Home
           </button>
         </form>
       </div>

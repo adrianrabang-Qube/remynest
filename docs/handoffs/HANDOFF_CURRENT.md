@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Home V2 — Home becomes the primary experience** (nav + post-login routing; Dashboard stays the operational page, untouched).
+  - **Navigation:** `nav-config.ts` adds **Home** (first, `mobile: primary`) and demotes **Timeline**
+    primary→drawer (keeps the 3-slot mobile bar). `MobileBottomNav` rewired → Home · Dashboard · **New**
+    (center) · Memories · More. Desktop (`NavLinks`) and the drawer (`MobileNavDrawer`) map their lists,
+    so Home leads desktop and Timeline moves into "More" automatically. Active states via `isNavItemActive`.
+  - **Routing:** post-login now lands on **/home** — `LoginClient` push `/memories`→`/home`; middleware
+    authenticated-redirect `/dashboard`→`/home`. `/home` gains an **onboarding gate**
+    (`profiles.onboarding_completed`→`/onboarding`). Onboarding completion + already-onboarded guard now
+    redirect to **/home** (was `/dashboard`); button label "Continue to Home". New-user flow:
+    login→/home→/onboarding→complete→/home (no loop). Dashboard remains directly accessible.
+  - **Middleware protection fix (found by review):** the middleware only runs the auth lookup for routes
+    in `PROTECTED_ROUTES`; any non-public route missing from it is bounced to `/login` even when
+    authenticated. Added **`/home`, `/onboarding`, `/profiles`, `/search`** — the last two were **latent
+    runtime gaps from earlier this session** (Search V2 / Profile Detail V1 routes were never added to
+    `PROTECTED_ROUTES`), now closed.
+  - **Polish/positioning:** `/home` header → "Home" / "Your memory companion — what Remy understands,
+    and what to do next." Sections unchanged (understanding → voice → family story → progress → next
+    action). **No new intelligence/lens/signal/observation/AI/query** (the onboarding gate is an auth check).
+  - Adversarially reviewed (10-agent workflow): 6 findings → 2 distinct, **both fixed** (onboarding→/home
+    routing; middleware protected-routes). Validated: lint 0 new (4/160), build ✓ (`/home` 1.14 kB,
+    `/dashboard` 9.95 kB, `/onboarding` 0.34 kB). Risks/follow-ups: target nav ordering (Profiles/Settings
+    in top nav) deferred; onboarding button styling unchanged.
 - **Remy Home Migration V1** (first dedicated Remy experience; additive — Dashboard untouched).
   New **`/home`** (`app/(app)/home/page.tsx`) — pure **composition** of existing intelligence (no new
   engine/lens/signal/observation, no AI, no new query types). Flow:

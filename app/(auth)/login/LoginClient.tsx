@@ -29,7 +29,7 @@ export default function LoginClient() {
       return;
     }
 
-    router.push("/memories");
+    router.push("/home");
     router.refresh();
   };
 

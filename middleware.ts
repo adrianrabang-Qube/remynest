@@ -26,12 +26,16 @@ const PUBLIC_ROUTES = [
 ];
 
 const PROTECTED_ROUTES = [
+  "/home",
   "/dashboard",
   "/memories",
   "/timeline",
   "/reminders",
   "/insights",
   "/memory-chat",
+  "/onboarding",
+  "/profiles",
+  "/search",
   "/settings",
   "/api",
 ];
@@ -372,7 +376,7 @@ export async function middleware(
 
       return createRedirectResponse(
         req,
-        "/dashboard"
+        "/home"
       );
     }
 

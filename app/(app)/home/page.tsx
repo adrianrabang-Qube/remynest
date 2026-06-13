@@ -49,6 +49,16 @@ export default async function RemyHomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Onboarding gate — Home is now the post-login default, so it must preserve
+  // onboarding exactly as the Dashboard does: a not-yet-onboarded user goes to
+  // onboarding rather than landing here.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!profile?.onboarding_completed) redirect("/onboarding");
+
   const activeContext = await getActiveContext();
   const memoryProfileId =
     activeContext?.type === "CARE" ? activeContext.profileId : null;
@@ -141,11 +151,9 @@ export default async function RemyHomePage() {
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
       <header>
-        <h1 className="text-xl font-semibold text-charcoal md:text-2xl">
-          Home with Remy
-        </h1>
+        <h1 className="text-xl font-semibold text-charcoal md:text-2xl">Home</h1>
         <p className="mt-0.5 text-sm text-charcoal-muted">
-          What Remy understands, and where to go next.
+          Your memory companion — what Remy understands, and what to do next.
         </p>
       </header>
 
