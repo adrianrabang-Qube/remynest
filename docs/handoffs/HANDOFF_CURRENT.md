@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Profile V2 — digital identity layer** (new `/profile` route; Settings becomes secondary).
+  Before: no profile page — "profile" was the `ProfileHub` account/settings menu (avatar dropdown +
+  drawer); memory intelligence was invisible outside the dashboard.
+  - New `/profile` (`app/(app)/profile/page.tsx`) — mobile-first identity surface composing 4 new
+    presentational cards (`components/profile/identity/`): **ProfileOverviewCard** (photo/name/age —
+    care subject's dob/photo in a care workspace, account name/avatar in My Nest),
+    **ProfileLifeSnapshot** (Memories/Collections/Connections/Chapters counts, 2-up cards),
+    **ProfileCoverageCard** (first/latest memory date + `computeCoverage` %), **Relationships**
+    (people-in-care count), **ProfileHighlightsCard** (top chapter / top collection / strongest
+    connection from existing Remy intelligence), and an **Account → /settings** link.
+  - **Reuses existing intelligence** (`getRemyCollections/Connections/LifeChapters`,
+    `computeCoverage`, `getAccessibleProfiles`, `resolveAccountIdentity` / `resolveActiveProfileId`)
+    — **no new data system, no AI generation, no social features.** Memory counts replicate the
+    dashboard's **workspace-scoped** pattern (`memory_profile_id = active | IS NULL`) so RLS/workspace
+    scoping is unchanged. `bio`/`location` shown only if available (not in schema → omitted).
+  - Reachable via a "View profile" link in `ProfileHub` (avatar menu). Settings page + ProfileHub
+    sections untouched.
+  - No auth/RLS/GDPR/billing/caregiver/workspace/notification/reminder/ownership/sharing/settings
+    regression. Validated: lint (0 new), build ✓ (`/profile`), no eslint-disable.
 - **Dashboard V4 — Home cleanup (post-Library)** (removes the duplicate intelligence wall now
   that Library is canonical). Removed the 6 Library widget **renders** from `dashboard/page.tsx`
   (`RemyCollections/Connections/LifeChapters/StoryMode/Biography/MemoryBook` + the two
