@@ -12,6 +12,27 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Lens Architecture V1 — foundation refactor** (internal; no UX/route/nav changes).
+  Established the single understanding pipeline **Signals → Lenses → Facets → (future) Observations →
+  (future) Voice**, eliminating divergence between the two intelligence systems.
+  - New **`lib/remy/lenses/`**: `types.ts` (the `Lens`/`LensContext`/`UnderstandingFacet` contract —
+    facets now carry **`lensId`** ownership), `shared.ts` (pure helpers), and five lens modules —
+    **life-journey** (strongest period), **themes** (documented themes), **relationships** (relationship +
+    family context), **preservation** (coverage + missing-knowledge + recency), **story** (canonical
+    owner; emits nothing yet — extension point for narrative-readiness signals), plus `index.ts`
+    (`LENSES` registry).
+  - **`lib/remy/understanding.ts` refactored** from a monolithic rule container into an **orchestrator**
+    (builds `LensContext` → runs `LENSES` → merges/ranks/summarizes → `RemyUnderstanding`). Public API
+    (`buildPersonUnderstanding`, `bucketDecades`, all types) is **stable** via re-exports; the only two
+    consumers (Profile Detail page + `RemyUnderstanding` renderer) are **unchanged**.
+  - **Personality inference removed** (trust/GDPR): deleted `TRAIT_LEXICON` ("Family-oriented",
+    "Career-focused", "Creative spirit", "Loves travel", "Animal lover"). The Themes lens now emits
+    **documentation-grounded** copy only ("**Family** is the most documented theme"). Remy describes
+    preserved evidence; it never infers personality.
+  - Deterministic, **no AI/LLM/embeddings**. Facet shape/ranking/gating preserved → Profile Detail V1
+    (`/profiles`, `/profiles/[id]`, coverage, snapshot, quick actions, Search People routing) works
+    exactly as before, only the theme copy is now evidence-grounded. Dashboard/nav/Search/billing/auth/
+    RLS untouched. Validated: lint 0 new (4/160), build ✓ (`/profiles/[id]` 2.7 kB), no eslint-disable.
 - **Remy's Understanding Engine V1 + Profile Detail reframe** (Remy-as-the-ecosystem alignment).
   New canonical **`lib/remy/understanding.ts`** — a deterministic, renderer-agnostic engine that turns
   existing Remy intelligence into a structured point of view (`RemyUnderstanding` = `{subject, level,
