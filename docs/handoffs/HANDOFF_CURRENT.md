@@ -12,6 +12,24 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile Memory feed — CompactMemoryRow** (Phase 2; `< md` only; **desktop keeps MemoryCard**;
+  no information removed — moved deeper). Memories were a single-column stack of full-content
+  `MemoryCard`s (~300px each: untruncated content + 3 thumbs + summary + tags + inline
+  Edit/Delete → ~6,000px for 20 memories).
+  - New `components/memories/CompactMemoryRow.tsx`: ~76px row — leading thumbnail (`next/image`)
+    or fallback icon · title + 1-line preview · `date · ai_category · attachment count` · chevron.
+    The whole row links to the existing `/memories/[id]` detail (full content lives there).
+    Edit/Delete moved into an overflow "…" menu (no inline button clusters). 44px touch targets +
+    aria labels.
+  - New `components/memories/MemorySection.tsx` (generic over the caller's memory type): a
+    **sticky** group header + responsive split — mobile = divided CompactMemoryRow list; desktop =
+    the **unchanged** MemoryCard stack.
+  - `app/(app)/memories/page.tsx`: the 3 date groups (Today/This Week/Earlier) + search results
+    now render via `MemorySection`; the search bar is **compact + sticky on mobile**; container
+    padding `p-6 → p-4 md:p-6` (drops the double-padding). **No filter system exists** (semantic
+    search only) — none invented.
+  - Desktop untouched (all changes `max-md:`/`md:hidden`). Est. **~70–75% mobile memories scroll
+    reduction**. Validated: lint (0 new), build ✓. **Live 375/390/430 pass pending on-device**.
 - **Global Workspace Selector — IA migration** (workspace switching is now a first-class,
   always-visible top-bar control on **every** authenticated screen; mobile + desktop).
   - New `components/navigation/WorkspaceSelector.tsx`: a chip `[ {workspace} ▾ ]` → responsive

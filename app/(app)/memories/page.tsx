@@ -15,7 +15,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import MemoryCard from "@/components/MemoryCard";
+import MemorySection from "@/components/memories/MemorySection";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
 import {
@@ -674,7 +674,7 @@ const sortedMemories = [
   );
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-5 md:space-y-6">
       <h1 className="text-2xl font-semibold">
         Your Memories
       </h1>
@@ -712,8 +712,9 @@ const sortedMemories = [
         + New Memory
       </button>
 
-      {/* Semantic Search */}
-      <div className="flex gap-2">
+      {/* Semantic Search — compact, and sticky on mobile so it stays reachable
+          while scrolling the feed. Desktop layout unchanged. */}
+      <div className="flex gap-2 max-md:sticky max-md:top-14 max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
         <input
           type="text"
           placeholder="Search memories..."
@@ -749,31 +750,12 @@ const sortedMemories = [
       {/* Search Results */}
       {isSearchActive &&
         searchResults.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold text-gray-500">
-              Semantic Search Results •{" "}
-              {searchResults.length} found
-            </h2>
-
-            {searchResults.map(
-              (memory) => (
-                <MemoryCard
-                  key={memory.id}
-                  memory={memory}
-                  onEdit={() =>
-                    setEditingMemory(
-                      memory
-                    )
-                  }
-                  onDelete={() =>
-                    deleteMutation.mutate(
-                      memory.id
-                    )
-                  }
-                />
-              )
-            )}
-          </div>
+          <MemorySection
+            label={`Search results · ${searchResults.length} found`}
+            memories={searchResults}
+            onEdit={(m) => setEditingMemory(m)}
+            onDelete={(id) => deleteMutation.mutate(id)}
+          />
         )}
 
       {/* No Search Results */}
@@ -801,91 +783,34 @@ const sortedMemories = [
         )}
 
       {/* TODAY */}
-      {!isSearchActive &&
-        today.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-500 mb-2">
-              Today
-            </h2>
-
-            <div className="space-y-4">
-              {today.map((memory) => (
-                <MemoryCard
-                  key={memory.id}
-                  memory={memory}
-                  onEdit={() =>
-                    setEditingMemory(
-                      memory
-                    )
-                  }
-                  onDelete={() =>
-                    deleteMutation.mutate(
-                      memory.id
-                    )
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
+      {!isSearchActive && today.length > 0 && (
+        <MemorySection
+          label="Today"
+          memories={today}
+          onEdit={(m) => setEditingMemory(m)}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
+      )}
 
       {/* THIS WEEK */}
-      {!isSearchActive &&
-        thisWeek.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-500 mb-2">
-              This Week
-            </h2>
-
-            <div className="space-y-4">
-              {thisWeek.map((memory) => (
-                <MemoryCard
-                  key={memory.id}
-                  memory={memory}
-                  onEdit={() =>
-                    setEditingMemory(
-                      memory
-                    )
-                  }
-                  onDelete={() =>
-                    deleteMutation.mutate(
-                      memory.id
-                    )
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
+      {!isSearchActive && thisWeek.length > 0 && (
+        <MemorySection
+          label="This Week"
+          memories={thisWeek}
+          onEdit={(m) => setEditingMemory(m)}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
+      )}
 
       {/* EARLIER */}
-      {!isSearchActive &&
-        earlier.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-500 mb-2">
-              Earlier
-            </h2>
-
-            <div className="space-y-4">
-              {earlier.map((memory) => (
-                <MemoryCard
-                  key={memory.id}
-                  memory={memory}
-                  onEdit={() =>
-                    setEditingMemory(
-                      memory
-                    )
-                  }
-                  onDelete={() =>
-                    deleteMutation.mutate(
-                      memory.id
-                    )
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
+      {!isSearchActive && earlier.length > 0 && (
+        <MemorySection
+          label="Earlier"
+          memories={earlier}
+          onEdit={(m) => setEditingMemory(m)}
+          onDelete={(id) => deleteMutation.mutate(id)}
+        />
+      )}
 
       {/* Create Modal */}
       {showCreate && (
