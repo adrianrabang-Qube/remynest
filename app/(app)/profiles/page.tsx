@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getFamilyIntelligence } from "@/lib/remy/family";
+import { computeCoverage } from "@/lib/remy/date-coverage";
+import { buildPersonUnderstanding } from "@/lib/remy/understanding";
 import PersonRow from "@/components/profile/people/PersonRow";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +13,25 @@ function str(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
 }
 
+function titleCase(value: string): string {
+  return value
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function parseBirthYear(dob: string | null): number | null {
+  if (!dob) return null;
+  const year = new Date(dob).getFullYear();
+  return Number.isNaN(year) ? null : year;
+}
+
 /**
- * People directory (/profiles) — everyone in the care network. Each row links to
- * that person's canonical profile. Memory counts come from a single
+ * People directory (/profiles) — everyone in the care network. Each row leads
+ * with what Remy understands about that person (one-line lens summary), reusing
+ * buildPersonUnderstanding. All per-person stats + themes come from a single
  * getFamilyIntelligence call over all profiles (no N+1).
  */
 export default async function ProfilesPage() {
@@ -25,22 +43,49 @@ export default async function ProfilesPage() {
 
   const profiles = await getAccessibleProfiles();
 
-  const people = profiles.map((p) => ({
+  const named = profiles.map((p) => ({
     id: p.id,
     name: str(p.preferred_name) ?? str(p.profile_name) ?? "Care profile",
     photo: str(p.profile_photo),
     relationship: str(p.relationship_type),
+    birthYear: parseBirthYear(str(p.date_of_birth)),
   }));
 
-  const family = people.length
+  const family = named.length
     ? await getFamilyIntelligence(
         supabase,
-        people.map((p) => ({ id: p.id, name: p.name })),
+        named.map((p) => ({ id: p.id, name: p.name })),
       )
     : null;
-  const countById = new Map(
-    (family?.profiles ?? []).map((s) => [s.id, s.memoryCount]),
-  );
+  const statById = new Map((family?.profiles ?? []).map((s) => [s.id, s]));
+
+  const rows = named.map((p) => {
+    const stat = statById.get(p.id);
+    const memoryCount = stat?.memoryCount ?? 0;
+    const datedCount = stat?.datedCount ?? 0;
+    const understanding = buildPersonUnderstanding({
+      subject: { id: p.id, name: p.name },
+      memoryCount,
+      datedCount,
+      themes: stat?.themes ?? [],
+      coveragePercentage: computeCoverage(memoryCount, datedCount).percentage,
+      // Decade buckets aren't loaded in the directory (the person page derives
+      // the strongest-period facet); the summary uses themes/coverage/relationship.
+      decades: [],
+      birthYear: p.birthYear,
+      relationshipLabel: p.relationship ? titleCase(p.relationship) : null,
+      lastActivityAt: stat?.lastActivityAt ?? null,
+    });
+    return {
+      person: {
+        id: p.id,
+        name: p.name,
+        photo: p.photo,
+        relationship: p.relationship,
+      },
+      understanding,
+    };
+  });
 
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
@@ -51,18 +96,18 @@ export default async function ProfilesPage() {
         </p>
       </header>
 
-      {people.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center text-sm text-charcoal-muted">
           No care profiles yet. People you add or who are shared with you appear
           here.
         </p>
       ) : (
         <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white shadow-soft">
-          {people.map((person) => (
+          {rows.map(({ person, understanding }) => (
             <PersonRow
               key={person.id}
               person={person}
-              memoryCount={countById.get(person.id) ?? 0}
+              understanding={understanding}
             />
           ))}
         </ul>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Loader2, Search, X } from "lucide-react";
 
+import AskRemy from "./AskRemy";
 import SearchResultRow from "./SearchResultRow";
 import {
   EMPTY_RESULTS,
@@ -277,11 +278,18 @@ export default function SearchView() {
       {/* Results */}
       {hasQuery && (
         <div className="mt-3" aria-live="polite">
-          {!loading && total === 0 && (
-            <p className="px-1 py-10 text-center text-sm text-charcoal-muted">
-              No results for &ldquo;{query.trim()}&rdquo;.
-            </p>
-          )}
+          <AskRemy
+            query={query.trim()}
+            loading={loading}
+            memories={results.memories.length}
+            library={
+              results.collections.length +
+              results.connections.length +
+              results.chapters.length
+            }
+            people={results.people.length}
+            total={total}
+          />
 
           {visibleGroups.map((group) => {
             const isCollapsed = collapsed[group.key];

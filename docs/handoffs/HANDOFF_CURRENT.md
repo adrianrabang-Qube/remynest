@@ -12,6 +12,23 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Understanding Engine Expansion — People + Search** (proves the engine is reusable across surfaces).
+  - **Shared renderer** `components/remy/RemyLensSummary.tsx` (new) — consumes a `RemyUnderstanding`
+    directly; **`variant="inline"`** (one-line lens summary for rows/cards) and **`variant="grouped"`**
+    (facets grouped by lens, for richer surfaces). Reusable by Profile/People/Search/Remy Home/Voice.
+  - **People directory** (`/profiles`): each `PersonRow` now leads with **what Remy understands** about
+    that person (inline `RemyLensSummary`) via `buildPersonUnderstanding` — no duplicated logic. Enabled
+    by exposing **per-profile `themes`** on `FamilyProfileStats` (already-computed `categoryCounts`;
+    additive, **no N+1** — still one `getFamilyIntelligence` call). Decade buckets aren't loaded in the
+    directory, so the summary uses themes/coverage/relationship (e.g. "Family is the most documented
+    theme · Your mother", or "Just getting to know Mary").
+  - **Search** (`/search`): new **`AskRemy`** layer above results — Remy frames the result set in its
+    voice ("Remy found 4 memories, 2 in your library and 1 person for …"), template-only, **no AI/LLM/
+    embeddings**. Search stays fully functional below; replaces the old plain "No results" line.
+  - Reuse points: `buildPersonUnderstanding` (People), `RemyLensSummary` (People now; Profile/Search/
+    Remy Home/Voice later), `RemyAvatar` (AskRemy). **No Dashboard/nav/Remy-Home changes; no new AI.**
+    `FamilyProfileStats.themes` is additive (only constructed in family.ts) so the dashboard family view
+    is unaffected. Validated: lint 0 new (4/160), build ✓ (`/search` 5.04 kB, `/profiles` 1.15 kB).
 - **Remy Intelligence Unification — Lenses → Observations** (internal; no UX/renderer changes).
   Completed the single pipeline **Signals → Lenses → Facets → Observations → Remy**, converging the two
   intelligence systems (`signals.ts → observations.ts → RemyCompanion` and `understanding.ts → lenses →

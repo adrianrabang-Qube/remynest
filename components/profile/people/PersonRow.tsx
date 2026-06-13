@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
+import RemyLensSummary from "@/components/remy/RemyLensSummary";
+import type { RemyUnderstanding } from "@/lib/remy/understanding";
+
 export interface PersonRowData {
   id: string;
   name: string;
@@ -10,21 +13,19 @@ export interface PersonRowData {
 }
 
 /**
- * PersonRow — a ~64px directory row for the people network (CompactRow pattern):
- * leading photo (or initial) · name + relationship · memory count · chevron. The
- * whole row links to that person's canonical profile (/profiles/[id]).
+ * PersonRow — a directory row for the people network (CompactRow pattern):
+ * leading photo (or initial) · name · what Remy understands about this person
+ * (one-line lens summary, reused from buildPersonUnderstanding) · chevron. The
+ * whole row links to that person's canonical profile.
  */
 export default function PersonRow({
   person,
-  memoryCount,
+  understanding,
 }: {
   person: PersonRowData;
-  memoryCount: number;
+  understanding: RemyUnderstanding;
 }) {
   const initial = (person.name || "?").charAt(0).toUpperCase();
-  const sub = [person.relationship, `${memoryCount} ${memoryCount === 1 ? "memory" : "memories"}`]
-    .filter(Boolean)
-    .join(" · ");
 
   return (
     <li>
@@ -48,8 +49,14 @@ export default function PersonRow({
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-charcoal">{person.name}</p>
-          <p className="truncate text-xs text-charcoal-muted">{sub}</p>
+          <p className="truncate text-sm font-medium text-charcoal">
+            {person.name}
+          </p>
+          <RemyLensSummary
+            understanding={understanding}
+            variant="inline"
+            className="mt-0.5 text-xs text-charcoal-muted"
+          />
         </div>
 
         <ChevronRight className="h-4 w-4 shrink-0 text-charcoal-muted" aria-hidden />

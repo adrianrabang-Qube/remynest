@@ -27,6 +27,8 @@ export interface FamilyProfileStats {
   chapterCount: number;
   collectionCount: number;
   lastActivityAt: string | null;
+  /** This person's top documented themes (most-documented first). */
+  themes: { label: string; memoryCount: number }[];
 }
 
 export interface FamilyTheme {
@@ -176,6 +178,7 @@ export async function getFamilyIntelligence(
           chapterCount: 0,
           collectionCount: 0,
           lastActivityAt: null,
+          themes: [],
         };
       }
       const collectionCount = [...agg.categoryCounts.values()].filter(
@@ -183,6 +186,11 @@ export async function getFamilyIntelligence(
       ).length;
       const chapterCount =
         agg.datedCount >= MIN_CHAPTER_DATED ? agg.datedDecades.size : 0;
+      // Per-person themes from the already-computed category counts (slug → count).
+      const themes = [...agg.categoryCounts.entries()]
+        .map(([slug, count]) => ({ label: titleCase(slug), memoryCount: count }))
+        .sort((a, b) => b.memoryCount - a.memoryCount)
+        .slice(0, 5);
       return {
         id: p.id,
         name: p.name,
@@ -191,6 +199,7 @@ export async function getFamilyIntelligence(
         chapterCount,
         collectionCount,
         lastActivityAt: agg.lastActivityAt,
+        themes,
       };
     })
     // Show every family member (incl. those with no memories yet); active
