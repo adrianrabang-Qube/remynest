@@ -25,7 +25,6 @@ import {
 } from "./lib/dashboard-telemetry";
 
 import DashboardHeader from "./components/DashboardHeader";
-import MobileExpandable from "./components/MobileExpandable";
 import DashboardStats from "./components/DashboardStats";
 import DashboardAccountStatus from "./components/DashboardAccountStatus";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
@@ -43,15 +42,10 @@ import { getRemyNotifications } from "@/lib/remy/notifications";
 import { remyMoodForContext } from "@/components/remy/avatar/remy-moods";
 import RemyTimeline from "@/components/remy/RemyTimeline";
 import { getRemyTimeline } from "@/lib/remy/timeline";
-import RemyStoryMode from "@/components/remy/RemyStoryMode";
 import { getRemyStories } from "@/lib/remy/story-mode";
-import RemyBiography from "@/components/remy/RemyBiography";
 import { getRemyBiography } from "@/lib/remy/biography";
-import RemyMemoryBook from "@/components/remy/RemyMemoryBook";
 import { getRemyMemoryBook } from "@/lib/remy/memory-book";
-import RemyCollections from "@/components/remy/RemyCollections";
-import RemyConnections from "@/components/remy/RemyConnections";
-import RemyLifeChapters from "@/components/remy/RemyLifeChapters";
+import DashboardStoryPreview from "./components/DashboardStoryPreview";
 import { buildRemySignals } from "@/lib/remy/signals";
 import { generateRemyObservations } from "@/lib/remy/observations";
 import {
@@ -806,48 +800,31 @@ export default async function DashboardPage() {
         />
 
         {/* REMY TIMELINE — visual narrative above the drill-down layers */}
-        <MobileExpandable>
-          <RemyTimeline events={remyTimeline} />
-        </MobileExpandable>
+        <RemyTimeline events={remyTimeline} />
 
-        {/* REMY STORY MODE — guided journey built on the timeline backbone */}
-        <RemyStoryMode stories={remyStories} />
-
-        {/* REMY BIOGRAPHY — long-form life document, the narrative culmination */}
-        <MobileExpandable>
-          <RemyBiography biography={remyBiography} />
-        </MobileExpandable>
-
-        {/* REMY MEMORY BOOK — the bound, navigable book form of the biography */}
-        <MobileExpandable>
-          <RemyMemoryBook book={remyMemoryBook} />
-        </MobileExpandable>
-
-        {/* REMY COLLECTIONS — the organize layer */}
-        <MobileExpandable>
-          <RemyCollections
-            collections={remyCollections}
-          />
-        </MobileExpandable>
-
-        {/* REMY CONNECTIONS — related-moments layer */}
-        <MobileExpandable>
-          <RemyConnections
-            connections={remyConnections}
-          />
-        </MobileExpandable>
-
-        {/* LIFE CHAPTERS — narrative layer */}
-        <MobileExpandable>
-          <RemyLifeChapters
-            chapters={remyLifeChapters}
-            subjectName={
-              !isMyNestWorkspace
-                ? remySubjectName
-                : null
-            }
-          />
-        </MobileExpandable>
+        {/* EXPLORE YOUR STORY — one compact preview of the Library (Collections,
+            Connections, Chapters, Story, Biography, Memory Book). The full
+            destinations now live in /library; the dashboard only previews them.
+            All underlying data is still generated above — only the six full
+            widget renders were removed. */}
+        <DashboardStoryPreview
+          collectionCount={remyCollections.length}
+          connectionCount={remyConnections.length}
+          chapterCount={remyLifeChapters.length}
+          continueReading={
+            remyStories[0]
+              ? {
+                  label: remyStories[0].title,
+                  href: remyStories[0].href ?? "/library/story",
+                }
+              : null
+          }
+          narratives={{
+            story: remyStories.length > 0,
+            biography: Boolean(remyBiography),
+            memoryBook: Boolean(remyMemoryBook),
+          }}
+        />
 
         {/* FAMILY WORKSPACE INTELLIGENCE — family-level layer (>= 2 profiles) */}
         {familyIntelligence &&

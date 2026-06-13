@@ -12,6 +12,23 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Dashboard V4 — Home cleanup (post-Library)** (removes the duplicate intelligence wall now
+  that Library is canonical). Removed the 6 Library widget **renders** from `dashboard/page.tsx`
+  (`RemyCollections/Connections/LifeChapters/StoryMode/Biography/MemoryBook` + the two
+  `MobileExpandable` wrappers + their imports) — ~1,440px of duplicate mobile cards. Replaced with
+  one compact **`DashboardStoryPreview`** (~160px): Collections/Connections/Chapters counts +
+  narrative chips (Story/Biography/Memory Book) + "Continue reading →" (latest story) +
+  **Open Library →**.
+  - **Data generation preserved** (per the brief): all 6 synthesizers still run in the dashboard
+    (`getRemyCollections/Connections/LifeChapters/Stories/Biography/MemoryBook`) — they feed
+    `RemyNotifications`/`RemyTimeline` (unchanged) **and** the new preview's counts/chips, so
+    nothing is orphaned. **Only the renders were removed. No change to synthesizers, routes
+    (`/library`, `/collections`, …), or data models.** `MobileExpandable.tsx` is now unused (kept;
+    deletable in a follow-up).
+  - `RemyTimeline` / `RemyNotifications` / Stats / etc. kept (not Library duplicates).
+  - No auth/RLS/GDPR/billing/workspace/caregiver/reminder/ownership change. Dashboard bundle
+    10.2→9.95 kB. Est. **−1,280px (~−25–30% whole-dashboard)** mobile scroll. Validated: lint
+    (0 new), build ✓, no eslint-disable.
 - **Library V2 — unified discovery hub** (consolidates Collections/Connections/Chapters/Story/
   Biography/Memory Book). Before: Collections/Connections/Chapters were standalone routes;
   **Story/Biography had no route** (dashboard-widget-only); Memory Book had only `/print`; **none
