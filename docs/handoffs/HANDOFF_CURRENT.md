@@ -12,6 +12,32 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Profile Detail V1 — per-person identity pages** (new `/profiles` directory + `/profiles/[id]`).
+  Before: Search V2 People results and the `/profile` Relationships count had **no per-person
+  destination** — they pointed at the generic `/profile`. Care profiles had no canonical page.
+  - New `/profiles` (`app/(app)/profiles/page.tsx`) — people directory: `getAccessibleProfiles()` rows
+    (`PersonRow`, ~64px CompactRow) enriched with memory counts from **one** `getFamilyIntelligence`
+    call over all profiles (no N+1). New `/profiles/[id]` (`app/(app)/profiles/[id]/page.tsx`) — the
+    canonical person page: Identity (`ProfileOverviewCard`, reused — name/photo/age/relationship),
+    Life Snapshot (`ProfilePersonSnapshot` — Memories/Collections/Chapters/Dated), Memory Coverage
+    (`ProfileCoverageCard`, reused), Family Intelligence (`ProfilePersonIntelligence` — notable life
+    areas + Remy observations), Quick Actions (`ProfileQuickActions` — Memories/Timeline/Collections/
+    Story; switches the active workspace via `setActiveProfile` then navigates).
+  - **All per-person data is profile-scoped via `getFamilyIntelligence(supabase, [{id,name}])`** (it
+    filters `memory_profile_id` internally) + two scoped first/latest-date queries + `computeCoverage`.
+    The Remy collection/connection/chapter loaders are **`user_id`-scoped only**, so they were
+    deliberately **not** used per-person (would show identical account-wide data on every person).
+  - **Access guard:** `/profiles/[id]` resolves only ids in `getAccessibleProfiles()` → else `notFound()`
+    (RLS also blocks foreign memory reads). Viewing a person does **not** change the active workspace;
+    only Quick Actions do (intentional, reuses the existing action).
+  - **Search V2 integration:** People hits now route `href: /profiles/${id}` (was `/profile`).
+    `/profiles` is reachable from the `/profile` **Relationships** card (now a link).
+  - **Deferred (documented):** connections aren't profile-scoped anywhere → omitted from the snapshot;
+    per-person top-chapter/connection ranking would need profile-scoped loader variants (themes serve
+    as life highlights for now).
+  - No auth/RLS/workspace/GDPR/billing/caregiver/ownership/sharing/reminder/notification/profile-access
+    regression. **No new AI generation.** Validated: lint (0 new — 4/160), build ✓
+    (`/profiles` 1.15 kB, `/profiles/[id]` 2.68 kB), no eslint-disable.
 - **Search V2 — global memory intelligence search** (new `/search` route; the single retrieval layer).
   Before: the only `/search` was an **orphaned, unlinked** client page **outside** `(app)` (no nav)
   doing premium **vector** search; Timeline/Library "search" were just local filters of their own page

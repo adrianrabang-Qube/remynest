@@ -156,7 +156,7 @@ export async function POST(request: Request) {
           type: "person",
           title: p.label || "Care profile",
           meta: "Care profile",
-          href: "/profile",
+          href: `/profiles/${p.id}`,
         }),
       );
 

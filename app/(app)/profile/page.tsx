@@ -168,16 +168,22 @@ export default async function ProfilePage() {
       />
 
       {peopleCount > 0 && (
-        <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft md:p-6">
-          <h2 className="text-lg font-semibold text-charcoal">Relationships</h2>
-          <div className="mt-2 flex items-center gap-3 text-sm text-charcoal-soft">
-            <Users className="h-5 w-5 shrink-0 text-sage" aria-hidden />
-            <span>
-              <span className="font-semibold text-charcoal">{peopleCount}</span>{" "}
-              {peopleCount === 1 ? "person" : "people"} in your care
-            </span>
+        <Link
+          href="/profiles"
+          className="flex items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:shadow-soft-lg md:p-6"
+        >
+          <div>
+            <h2 className="text-lg font-semibold text-charcoal">Relationships</h2>
+            <div className="mt-2 flex items-center gap-3 text-sm text-charcoal-soft">
+              <Users className="h-5 w-5 shrink-0 text-sage" aria-hidden />
+              <span>
+                <span className="font-semibold text-charcoal">{peopleCount}</span>{" "}
+                {peopleCount === 1 ? "person" : "people"} in your care
+              </span>
+            </div>
           </div>
-        </section>
+          <ChevronRight className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
+        </Link>
       )}
 
       <ProfileHighlightsCard
