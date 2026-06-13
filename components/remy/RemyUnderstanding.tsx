@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen,
+  CalendarRange,
   ChevronRight,
   Clock,
   FolderHeart,
@@ -19,6 +20,7 @@ import type {
 const KIND_ICON: Record<UnderstandingFacetKind, LucideIcon> = {
   "life-areas": FolderHeart,
   "strongest-period": Clock,
+  "chapter-span": CalendarRange,
   coverage: BookOpen,
   recency: History,
   "missing-knowledge": Sparkles,

@@ -1,11 +1,12 @@
 import type { Lens, LensContext, UnderstandingFacet } from "./types";
-import { cap, coverageLevel, findGapDecade, monthsSince } from "./shared";
+import { cap, coverageLevel, monthsSince } from "./shared";
 
 /**
  * Preservation Lens — Remy as guide and memory-keeper. Understands how complete
- * the record is and what's missing: coverage level, the earliest gap (or undated
- * memories), and how recently the story has grown. Missing-knowledge copy is
- * invitational, never judgmental.
+ * the record is: coverage level, undated memories, and how recently the story
+ * has grown. The era-gap facet ("the 1990s remain lightly documented") is owned
+ * by the Life Journey lens — Preservation keeps only the dating-completeness
+ * nudge. Copy is invitational, never judgmental.
  */
 export const preservationLens: Lens = {
   id: "preservation",
@@ -13,27 +14,8 @@ export const preservationLens: Lens = {
     const out: UnderstandingFacet[] = [];
     const { memoryCount, datedCount } = ctx;
 
-    // Missing knowledge — a real gap decade, or "not placed in time yet".
-    if (datedCount >= 2) {
-      const gap = findGapDecade(ctx.decades, ctx.birthYear, ctx.now);
-      if (gap != null) {
-        const birthDecade =
-          ctx.birthYear != null ? Math.floor(ctx.birthYear / 10) * 10 : null;
-        const isEarlyYears = birthDecade != null && gap <= birthDecade + 10;
-        out.push({
-          lensId: "preservation",
-          kind: "missing-knowledge",
-          priority: 55,
-          tone: "gentle",
-          role: "guide",
-          label: isEarlyYears
-            ? `Remy knows little about ${ctx.subject.name}'s early years`
-            : `Little preserved from the ${gap}s`,
-          detail: "Add a memory to fill this in",
-          lens: { label: "Add a memory", href: "/memories/new" },
-        });
-      }
-    } else if (memoryCount >= 3 && datedCount < Math.ceil(memoryCount / 2)) {
+    // Memories not yet placed in time — Life Journey can't see them until dated.
+    if (datedCount < 2 && memoryCount >= 3) {
       out.push({
         lensId: "preservation",
         kind: "missing-knowledge",

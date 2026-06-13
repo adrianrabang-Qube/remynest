@@ -1,5 +1,6 @@
 import { cap, coverageLevel } from "./lenses/shared";
-import type { UnderstandingFacet } from "./lenses/types";
+import { deriveLifeJourneySignals } from "./life-journey-signals";
+import type { DecadeBucket, UnderstandingFacet } from "./lenses/types";
 import type { RemyUnderstanding } from "./understanding";
 
 /**
@@ -23,7 +24,9 @@ export interface WorkspaceUnderstandingInput {
   totalDated: number;
   /** Top documented themes across the workspace, most-documented first. */
   themes: { label: string; memoryCount: number }[];
-  /** Injectable for deterministic output (reserved for future recency facet). */
+  /** Family-wide dated-memory counts per decade (the time shape); optional. */
+  decades?: DecadeBucket[];
+  /** Injectable for deterministic output. */
   now?: Date;
 }
 
@@ -78,6 +81,59 @@ export function buildWorkspaceUnderstanding(
         : `${top.memoryCount} ${top.memoryCount === 1 ? "memory" : "memories"}`,
       lens: { label: "Themes", href: "/collections" },
     });
+  }
+
+  // Life Journey — the time shape of the workspace (from family decade buckets).
+  const journey = deriveLifeJourneySignals(
+    input.decades ?? [],
+    null,
+    input.now ?? new Date(),
+  );
+  if (journey.hasTimeline) {
+    if (
+      journey.earliestDecade != null &&
+      journey.latestDecade != null &&
+      journey.documentedDecadeCount >= 2
+    ) {
+      facets.push({
+        lensId: "life-journey",
+        kind: "chapter-span",
+        priority: 60,
+        tone: "informative",
+        role: "storyteller",
+        label: `Most preserved memories span the ${journey.earliestDecade}s–${journey.latestDecade}s`,
+        detail: `${journey.documentedDecadeCount} decades documented`,
+        lens: { label: "Life Journey", href: "/timeline" },
+      });
+    }
+    if (journey.strongestDecade && journey.strongestDecade.count >= 2) {
+      facets.push({
+        lensId: "life-journey",
+        kind: "strongest-period",
+        priority: 58,
+        tone: "celebratory",
+        role: "storyteller",
+        label: `The ${journey.strongestDecade.decade}s are the best documented decade`,
+        detail: `${journey.strongestDecade.count} memories`,
+        lens: { label: "Life Journey", href: "/timeline" },
+      });
+    }
+    if (
+      totalDated >= 2 &&
+      journey.documentedDecadeCount >= 2 &&
+      journey.missingDecade != null
+    ) {
+      facets.push({
+        lensId: "life-journey",
+        kind: "missing-knowledge",
+        priority: 45,
+        tone: "gentle",
+        role: "guide",
+        label: `The ${journey.missingDecade}s remain lightly documented`,
+        detail: "A few memories from then would help",
+        lens: { label: "Add a memory", href: "/memories/new" },
+      });
+    }
   }
 
   // Preservation — total preserved + coverage level.

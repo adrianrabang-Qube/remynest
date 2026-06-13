@@ -2,6 +2,7 @@ import type { createClient } from "@/utils/supabase/server";
 import { resolveEffectiveDate } from "@/lib/memories/memory-date";
 import { TONE_MOOD } from "./persona";
 import type { RemyObservation } from "./types";
+import type { DecadeBucket } from "./lenses/types";
 
 type DashboardSupabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -45,6 +46,8 @@ export interface FamilyIntelligence {
   totalMemories: number;
   totalDated: number;
   profileCount: number;
+  /** Family-wide dated-memory counts per decade (ascending) — the time shape. */
+  decades: DecadeBucket[];
 }
 
 interface MemoryRow {
@@ -116,6 +119,7 @@ export async function getFamilyIntelligence(
   >();
   let totalMemories = 0;
   let totalDated = 0;
+  const familyDecadeCounts = new Map<number, number>();
 
   for (const r of rows) {
     const pid = r.memory_profile_id;
@@ -140,7 +144,14 @@ export async function getFamilyIntelligence(
       agg.datedCount += 1;
       totalDated += 1;
       const year = resolveEffectiveDate(r).getFullYear();
-      if (!Number.isNaN(year)) agg.datedDecades.add(Math.floor(year / 10) * 10);
+      if (!Number.isNaN(year)) {
+        const decade = Math.floor(year / 10) * 10;
+        agg.datedDecades.add(decade);
+        familyDecadeCounts.set(
+          decade,
+          (familyDecadeCounts.get(decade) ?? 0) + 1
+        );
+      }
     }
 
     const createdMs = new Date(r.created_at).getTime();
@@ -227,6 +238,10 @@ export async function getFamilyIntelligence(
     totalDated,
   });
 
+  const decades: DecadeBucket[] = [...familyDecadeCounts.entries()]
+    .map(([decade, count]) => ({ decade, count }))
+    .sort((a, b) => a.decade - b.decade);
+
   return {
     profiles: profileStats,
     themes,
@@ -234,6 +249,7 @@ export async function getFamilyIntelligence(
     totalMemories,
     totalDated,
     profileCount: profileStats.length,
+    decades,
   };
 }
 
@@ -308,6 +324,7 @@ function emptyFamily(profileCount: number): FamilyIntelligence {
     totalMemories: 0,
     totalDated: 0,
     profileCount,
+    decades: [],
   };
 }
 

@@ -28,6 +28,7 @@ export type RemyRole =
 export type UnderstandingFacetKind =
   | "life-areas"
   | "strongest-period"
+  | "chapter-span"
   | "coverage"
   | "recency"
   | "missing-knowledge"

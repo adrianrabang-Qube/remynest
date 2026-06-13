@@ -697,6 +697,9 @@ export default async function DashboardPage() {
         label: c.title,
         memoryCount: c.memoryCount,
       })),
+    // Full family decade distribution (family path); single-workspace Life
+    // Journey is a follow-up (needs a per-workspace decade source).
+    decades: familyIntelligence?.decades,
   });
 
   const dashboardDurationMs = 0;

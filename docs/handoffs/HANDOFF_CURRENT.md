@@ -12,6 +12,26 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Life Journey Lens V1** (strengthens Remy's time dimension; deterministic, no AI).
+  - **`lib/remy/life-journey-signals.ts`** (new) — `deriveLifeJourneySignals(decades, birthYear, now)` →
+    `LifeJourneySignals` (strongest/earliest/latest decade, documented + span decade counts, missing
+    decade, early-years flag). Pure reduction over decade buckets; the **canonical time-signal source**.
+  - **Life Journey lens expanded** — now emits **chapter-span** ("Memories span the 1960s–2020s",
+    new facet kind + `CalendarRange` icon), **strongest-period**, and **missing-era** (the era-gap,
+    **moved here from Preservation** so the time lens owns time; Preservation keeps only the
+    "memories aren't dated yet" nudge). Profile Detail gains these **automatically** (it already passes
+    per-person `decades` + `birthYear`) — no page/redesign change.
+  - **Workspace understanding** gains Life Journey: family decade distribution now exposed as
+    **`FamilyIntelligence.decades`** (additive; aggregated in the existing dated-row loop — no new
+    query), passed from the dashboard → workspace facets "The 1980s are the best documented decade",
+    "Most preserved memories span the 1970s–2020s", "The 1990s remain lightly documented". Single-
+    workspace (no `familyIntelligence`) Life Journey is a follow-up (needs a per-workspace decade source).
+  - **Phase 6 seams (documented, not built):** `deriveLifeJourneySignals` is the reusable input for
+    **Story** (chapter ordering by strongest/span), **Biography** (replace ad-hoc spanStart/spanEnd),
+    **Memory Book** (gap prompts), **Voice** (narrate span/strongest/missing) — see the file header.
+    Story/Biography/Memory Book code **unchanged**.
+  - No AI/LLM/embeddings; reuses `bucketDecades` + `findGapDecade`. Validated: lint 0 new (4/160),
+    build ✓ (`/profiles/[id]` 2.7 kB, `/dashboard` 9.95 kB).
 - **Remy Home Foundation V1** (proves Remy can understand the workspace/family as a whole; additive — no Dashboard migration).
   - **`lib/remy/workspace-understanding.ts`** (new) — `buildWorkspaceUnderstanding()`: deterministic
     workspace/family synthesizer returning the **same `RemyUnderstanding` shape** (so `RemyLensSummary`
