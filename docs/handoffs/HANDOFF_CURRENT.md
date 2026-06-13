@@ -12,6 +12,31 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Home Migration V1** (first dedicated Remy experience; additive — Dashboard untouched).
+  New **`/home`** (`app/(app)/home/page.tsx`) — pure **composition** of existing intelligence (no new
+  engine/lens/signal/observation, no AI, no new query types). Flow:
+  **understanding → Remy speaking → family story → progress → next action**:
+  1. **What Remy understands** — reuses `RemyHomeSummary` (`buildWorkspaceUnderstanding`).
+  2. **Remy voice** — reuses `RemyVoicePreview`, fed by `observationsToVoiceLines(fuseObservations(
+     understanding, remyVoice(...), []))` (understanding-derived stream; no signals/reminders query).
+  3. **Family story** — new `components/remy/RemyStorySnapshot.tsx`: deterministic facts from
+     `StorySignals` + `LifeJourneySignals` ("Stories span N chapters", "The 1980s are the richest
+     documented decade", "A memory book can be assembled"). No prose.
+  4. **Memory progress** — reuses `ProfileCoverageCard` over `getDateCoverage` (dates omitted).
+  5. **Suggested next step** — highest-ranked voice line with a CTA (`voiceLines.find(l => l.cta)`); no
+     new scoring.
+  - **Reused loaders** (no novel query types): `getActiveContext`, `getAccessibleProfiles`,
+    `getDateCoverage`, `getRemyLifeChapters/Collections/Connections` (limit 12 — the "understanding
+    tier", same as `/library/memory-book`; vs the dashboard's limit‑4 preview tier), conditional
+    `getFamilyIntelligence`; pure `getRemyStories/Biography/MemoryBook`.
+  - **Scoping:** decades + story derived for **My Nest** (account‑wide ≈ My Nest) and **family**
+    (family‑wide); **deferred for a single care workspace** (account‑wide chapters aren't scoped to one
+    subject) — Story Snapshot hidden there. Adversarially reviewed (7‑agent workflow): fixed the
+    single‑care story incoherence (story now follows the decades deferral); kept limit 12 (conflicts
+    with the same review's accuracy point; negligible over‑fetch). **Dashboard fully intact** (billing,
+    invites, account status, telemetry, warnings, create‑memory, widgets, RemyCompanion all unchanged);
+    `/home` not yet in nav (reachable by URL; nav/discoverability is a follow‑up). Validated: lint 0 new
+    (4/160), build ✓ (`/home` 1.14 kB, `/dashboard` 9.95 kB).
 - **Voice Engine V1 — presentation layer over observations** (the end of the pipeline; deterministic, no AI).
   Completes **Signals → Lenses → Facets → Observations → Voice → UI**.
   - **`lib/remy/voice-engine.ts`** (new) — `RemyVoiceLine {id, text, mood, lensId?, priority, cta?}` +
