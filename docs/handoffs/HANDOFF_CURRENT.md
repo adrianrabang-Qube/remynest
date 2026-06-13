@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Library V2 — unified discovery hub** (consolidates Collections/Connections/Chapters/Story/
+  Biography/Memory Book). Before: Collections/Connections/Chapters were standalone routes;
+  **Story/Biography had no route** (dashboard-widget-only); Memory Book had only `/print`; **none
+  were in the nav** — discovery meant scrolling the dashboard widget stack.
+  - New `/library` landing (`app/(app)/library/page.tsx` + `components/library/LibraryView.tsx`):
+    a single mobile-first hub — one search box + a sticky **horizontal filter-chip** row + **6
+    compact destination rows** (≤80px, CompactRow pattern).
+  - New routes **`/library/story`, `/library/biography`, `/library/memory-book`** — thin server
+    pages that **reuse the existing widgets** (`RemyStoryMode`/`RemyBiography`/`RemyMemoryBook`)
+    and synthesizers (`getRemyLifeChapters/Collections/Connections` → `getRemyStories` →
+    `getRemyBiography` → `getRemyMemoryBook`). Promotes the 3 dashboard-trapped narratives to
+    real destinations. **No new data system.**
+  - Collections/Connections/Chapters **keep their routes** (Library links to them — folding them
+    into subsections was churn with no UX gain).
+  - **Nav:** added "Library" to `nav-config.ts` (drawer item → mobile drawer + desktop top nav).
+  - No permission/RLS/GDPR/auth/workspace/caregiver/ownership change (new routes reuse the auth
+    guard + the same read-only synthesizers). Validated: lint (0 new), build ✓ (4 routes), no
+    eslint-disable. **Live device pass pending. Follow-up: trim dashboard widgets to previews;
+    aggregate cross-surface content search.**
 - **Timeline V2 — mobile-first feed** (`< md` only; **desktop unchanged**; nothing deleted —
   intelligence/related relocated to detail). Timeline was a desktop card experience:
   `TimelineCard` `<details>` (`p-7`, `text-4xl` title, `text-2xl` preview, per-card

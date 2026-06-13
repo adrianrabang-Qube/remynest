@@ -7,6 +7,7 @@ import {
   Clock,
   Bell,
   Sparkles,
+  Library,
 } from "lucide-react";
 
 /** Where an item sits in the mobile hybrid nav. */
@@ -35,6 +36,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/memory-chat", label: "Memory Chat", icon: MessageCircle, mobile: "drawer" },
   { href: "/memories/new", label: "New", icon: Plus, mobile: "new" },
   { href: "/timeline", label: "Timeline", icon: Clock, mobile: "primary" },
+  { href: "/library", label: "Library", icon: Library, mobile: "drawer" },
   { href: "/reminders", label: "Reminders", icon: Bell, mobile: "drawer" },
   { href: "/insights", label: "Insights", icon: Sparkles, mobile: "drawer" },
 ];
