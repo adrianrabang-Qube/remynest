@@ -18,8 +18,10 @@ import { deriveStorySignals } from "@/lib/remy/story-signals";
 import { buildWorkspaceUnderstanding } from "@/lib/remy/workspace-understanding";
 import { fuseObservations } from "@/lib/remy/observation-bridge";
 import { observationsToVoiceLines } from "@/lib/remy/voice-engine";
+import { buildRemyBriefing } from "@/lib/remy/briefing";
 import { remyVoice } from "@/lib/remy/persona";
 
+import RemyBriefing from "@/components/remy/RemyBriefing";
 import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
 import RemyVoicePreview from "@/components/remy/RemyVoicePreview";
 import RemyStorySnapshot from "@/components/remy/RemyStorySnapshot";
@@ -148,6 +150,14 @@ export default async function RemyHomePage() {
   );
   const nextAction = voiceLines.find((line) => line.cta) ?? null;
 
+  // Daily briefing — pure selection over the outputs above (no new intelligence).
+  const briefing = buildRemyBriefing({
+    understanding,
+    voiceLines,
+    story,
+    lifeJourney,
+  });
+
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
       <header>
@@ -157,17 +167,20 @@ export default async function RemyHomePage() {
         </p>
       </header>
 
-      {/* 1 — What Remy understands */}
+      {/* 1 — Remy briefing (daily composition of the outputs below) */}
+      <RemyBriefing briefing={briefing} />
+
+      {/* 2 — What Remy understands */}
       <RemyHomeSummary understanding={understanding} />
 
-      {/* 2 — Remy speaking */}
+      {/* 3 — Remy speaking */}
       <RemyVoicePreview lines={voiceLines} />
 
-      {/* 3 — Family story snapshot (deterministic, from signals; shown only when
+      {/* 4 — Family story snapshot (deterministic, from signals; shown only when
           chapter data is reliably scoped — see story derivation above) */}
       {story && <RemyStorySnapshot story={story} lifeJourney={lifeJourney} />}
 
-      {/* 4 — Memory progress (reused coverage card; dates omitted) */}
+      {/* 5 — Memory progress (reused coverage card; dates omitted) */}
       <ProfileCoverageCard
         firstDate={null}
         latestDate={null}
@@ -176,7 +189,7 @@ export default async function RemyHomePage() {
         dated={coverage.dated}
       />
 
-      {/* 5 — Suggested next action (highest-ranked observation CTA) */}
+      {/* 6 — Suggested next action (highest-ranked observation CTA) */}
       {nextAction?.cta && (
         <section
           aria-label="Suggested next step"

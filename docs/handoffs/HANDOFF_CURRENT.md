@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Briefing V1 — daily intelligence composition** (presentation-only; pure selection over existing outputs).
+  Extends the pipeline to **Signals → Lenses → Facets → Observations → Voice → Briefing → Home**. The
+  briefing creates nothing — it selects.
+  - **`lib/remy/briefing.ts`** (new) — `buildRemyBriefing({understanding, voiceLines, story?, lifeJourney?})`
+    → `RemyBriefing {headline, highlights[], nextAction, mood}`. Pure deterministic **selection**:
+    headline = top voice line text (`understanding.summary` empty-state fallback); highlights = next
+    ranked voice lines (max 3); nextAction = highest-ranked line with a CTA; mood = lead voice mood.
+    No generation/rewriting/summarization/inference/AI; **no `.sort()`** so the voice ranking is
+    preserved. `story`/`lifeJourney` are accepted but **reserved** (voiceLines already encode those
+    facets via the bridge).
+  - **`components/remy/RemyBriefing.tsx`** (new) — renders mood-aware `RemyAvatar` + headline +
+    highlights + next-action CTA; consumes the briefing directly (no logic); returns null when there's
+    no headline (graceful, no fake content).
+  - **Home integration:** mounted **first** on `/home` (order: Briefing → What Remy understands →
+    Remy speaking → Family story → Progress → Suggested next action), built from the already-computed
+    `understanding` + `voiceLines` (+ `story`/`lifeJourney`) — **no new query**. Dashboard untouched.
+  - Adversarially reviewed (4-dimension workflow; 2 agents returned `findings:[]` before the run
+    stalled on 2 hung agents → self-verified the remaining dimensions inline: dashboard-untouched,
+    empty-states, ranking/CTA preservation — all clean, **0 confirmed findings**). Validated: lint 0 new
+    (4/160), build ✓ (`/home` 1.14 kB, `/dashboard` 9.95 kB). Follow-up: briefing headline/next-action
+    intentionally overlap the Voice/Next-action sections below (digest-at-top per the spec ordering);
+    consolidating is a future UX call.
 - **Remy Home V2 — Home becomes the primary experience** (nav + post-login routing; Dashboard stays the operational page, untouched).
   - **Navigation:** `nav-config.ts` adds **Home** (first, `mobile: primary`) and demotes **Timeline**
     primary→drawer (keeps the 3-slot mobile bar). `MobileBottomNav` rewired → Home · Dashboard · **New**
