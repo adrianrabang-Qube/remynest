@@ -63,7 +63,11 @@ import DateCompletionCard from "@/components/memory-dates/DateCompletionCard";
 import ReminisceDashboardCard from "@/components/reminisce/ReminisceDashboardCard";
 import { buildWorkspaceUnderstanding } from "@/lib/remy/workspace-understanding";
 import { deriveStorySignals } from "@/lib/remy/story-signals";
+import { fuseObservations } from "@/lib/remy/observation-bridge";
+import { observationsToVoiceLines } from "@/lib/remy/voice-engine";
+import { remyVoice } from "@/lib/remy/persona";
 import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
+import RemyVoicePreview from "@/components/remy/RemyVoicePreview";
 import Link from "next/link";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
@@ -721,6 +725,17 @@ export default async function DashboardPage() {
     story: workspaceStorySignals,
   });
 
+  // Voice Engine V1 — present the unified observation stream (understanding-derived
+  // via the bridge + signal-derived) as speakable voice lines. Pure transform —
+  // no new intelligence, no AI. The end of the pipeline: Observations → Voice → UI.
+  const remyVoiceLines = observationsToVoiceLines(
+    fuseObservations(
+      workspaceUnderstanding,
+      remyVoice(remySubjectName, !isMyNestWorkspace),
+      remyObservations,
+    ),
+  );
+
   const dashboardDurationMs = 0;
 
   const recentMemories = [
@@ -811,6 +826,10 @@ export default async function DashboardPage() {
         {/* REMY HOME SUMMARY — workspace/family "what Remy understands" (the Remy
             Home foundation). Additive: everything below continues unchanged. */}
         <RemyHomeSummary understanding={workspaceUnderstanding} />
+
+        {/* REMY VOICE — the presentation end of the pipeline (Observations →
+            Voice → UI). Additive validation; RemyCompanion stays below. */}
+        <RemyVoicePreview lines={remyVoiceLines} />
 
         {/* REMY COMPANION — AI companion layer above the command center */}
         <RemyCompanion

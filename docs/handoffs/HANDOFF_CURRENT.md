@@ -12,6 +12,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Voice Engine V1 — presentation layer over observations** (the end of the pipeline; deterministic, no AI).
+  Completes **Signals → Lenses → Facets → Observations → Voice → UI**.
+  - **`lib/remy/voice-engine.ts`** (new) — `RemyVoiceLine {id, text, mood, lensId?, priority, cta?}` +
+    `observationToVoiceLine` / `observationsToVoiceLines`: a **pure deterministic transform** of
+    `RemyObservation[]` (copies text/mood/lensId/priority/cta verbatim, preserves priority ranking).
+    No new intelligence, scoring, prose, or AI.
+  - **`components/remy/RemyVoicePreview.tsx`** (new) — renders the top voice line as Remy "speaking"
+    (mood-aware `RemyAvatar` + line + optional CTA); consumes `RemyVoiceLine[]` directly, no
+    intelligence/signal-derivation/lens logic; the seam where future animated/spoken Remy plugs in.
+  - **Dashboard (additive):** mounted beneath `RemyHomeSummary`, fed by
+    `observationsToVoiceLines(fuseObservations(workspaceUnderstanding, remyVoice(...), remyObservations))`
+    — so Voice speaks over the **full unified stream** (understanding-derived facets + signal-derived
+    observations). **Nothing removed** (RemyCompanion, widgets, nav, understanding surfaces intact); no
+    new query, no new pipeline.
+  - Adversarially reviewed (3-agent workflow): **0 findings**. Validated: lint 0 new (4/160), build ✓
+    (`/dashboard` 9.95 kB).
 - **Memory Book V2 — presentation/assembly consumer** (Memory Book stops being an intelligence source; deterministic, no AI).
   - `lib/remy/memory-book.ts`: `MemoryBookInput` gains **optional** `lifeJourney?: LifeJourneySignals`
     + `story?: StorySignals` (public API preserved; backward compatible). Memory Book now **consumes**
