@@ -42,7 +42,7 @@ export default function ProfileQuickActions({
 
   return (
     <section aria-label="Quick actions">
-      <h2 className="mb-2 text-lg font-semibold text-charcoal">Quick actions</h2>
+      <h2 className="mb-2 text-lg font-semibold text-charcoal">Explore with Remy</h2>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {ACTIONS.map(({ key, label, href, icon: Icon }) => (
           <button

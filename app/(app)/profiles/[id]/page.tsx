@@ -7,11 +7,12 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getFamilyIntelligence } from "@/lib/remy/family";
 import { computeCoverage } from "@/lib/remy/date-coverage";
+import { buildPersonUnderstanding, bucketDecades } from "@/lib/remy/understanding";
 
+import RemyUnderstanding from "@/components/remy/RemyUnderstanding";
 import ProfileOverviewCard from "@/components/profile/identity/ProfileOverviewCard";
 import ProfileCoverageCard from "@/components/profile/identity/ProfileCoverageCard";
 import ProfilePersonSnapshot from "@/components/profile/people/ProfilePersonSnapshot";
-import ProfilePersonIntelligence from "@/components/profile/people/ProfilePersonIntelligence";
 import ProfileQuickActions from "@/components/profile/people/ProfileQuickActions";
 
 export const dynamic = "force-dynamic";
@@ -68,25 +69,37 @@ export default async function PersonProfilePage({
     str(profile.preferred_name) ?? str(profile.profile_name) ?? "Care profile";
   const photo = str(profile.profile_photo);
   const relationship = str(profile.relationship_type);
-  const age = ageFromDob(str(profile.date_of_birth));
+  const dob = str(profile.date_of_birth);
+  const age = ageFromDob(dob);
+  const birthYearRaw = dob ? new Date(dob).getFullYear() : null;
+  const birthYear =
+    birthYearRaw != null && !Number.isNaN(birthYearRaw) ? birthYearRaw : null;
 
-  // Profile-scoped intelligence (filters memory_profile_id internally).
-  const [family, firstResult, latestResult, activeProfileId] = await Promise.all([
-    getFamilyIntelligence(supabase, [{ id, name }]),
-    supabase
-      .from("memories")
-      .select("created_at")
-      .eq("memory_profile_id", id)
-      .order("created_at", { ascending: true })
-      .limit(1),
-    supabase
-      .from("memories")
-      .select("created_at")
-      .eq("memory_profile_id", id)
-      .order("created_at", { ascending: false })
-      .limit(1),
-    resolveActiveProfileId(),
-  ]);
+  // Profile-scoped intelligence (every query filters memory_profile_id; RLS
+  // still scopes by account). The decade query feeds the Understanding engine.
+  const [family, firstResult, latestResult, decadeResult, activeProfileId] =
+    await Promise.all([
+      getFamilyIntelligence(supabase, [{ id, name }]),
+      supabase
+        .from("memories")
+        .select("created_at")
+        .eq("memory_profile_id", id)
+        .order("created_at", { ascending: true })
+        .limit(1),
+      supabase
+        .from("memories")
+        .select("created_at")
+        .eq("memory_profile_id", id)
+        .order("created_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("memories")
+        .select("memory_date")
+        .eq("memory_profile_id", id)
+        .not("memory_date", "is", null)
+        .limit(3000),
+      resolveActiveProfileId(),
+    ]);
 
   const stat = family.profiles.find((s) => s.id === id);
   const memoryCount = stat?.memoryCount ?? 0;
@@ -98,6 +111,21 @@ export default async function PersonProfilePage({
   const latestDate = latestResult.data?.[0]?.created_at ?? null;
   const coverage = computeCoverage(memoryCount, datedCount);
 
+  // Remy's understanding — deterministic synthesis of the evidence above.
+  const understanding = buildPersonUnderstanding({
+    subject: { id, name },
+    memoryCount,
+    datedCount,
+    themes: family.themes,
+    coveragePercentage: coverage.percentage,
+    decades: bucketDecades(
+      (decadeResult.data ?? []).map((r) => r.memory_date),
+    ),
+    birthYear,
+    relationshipLabel: relationship ? titleCase(relationship) : null,
+    lastActivityAt: stat?.lastActivityAt ?? null,
+  });
+
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
       <Link
@@ -108,6 +136,7 @@ export default async function PersonProfilePage({
         People
       </Link>
 
+      {/* Who Remy is learning about. */}
       <ProfileOverviewCard
         name={name}
         photoUrl={photo}
@@ -115,27 +144,31 @@ export default async function PersonProfilePage({
         contextLabel={relationship ? titleCase(relationship) : "Care profile"}
       />
 
-      <ProfilePersonSnapshot
-        memories={memoryCount}
-        collections={collectionCount}
-        chapters={chapterCount}
-        dated={datedCount}
-      />
+      {/* Remy's point of view — the lead of the page. */}
+      <RemyUnderstanding understanding={understanding} />
 
-      <ProfileCoverageCard
-        firstDate={firstDate}
-        latestDate={latestDate}
-        percentage={coverage.percentage}
-        total={coverage.total}
-        dated={coverage.dated}
-      />
-
-      <ProfilePersonIntelligence
-        themes={family.themes}
-        observations={family.observations}
-      />
-
+      {/* How the user explores Remy's understanding. */}
       <ProfileQuickActions profileId={id} isActive={activeProfileId === id} />
+
+      {/* The evidence behind Remy's understanding (supporting, secondary). */}
+      <section aria-label="The detail behind Remy's understanding" className="space-y-4">
+        <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
+          The detail
+        </h2>
+        <ProfilePersonSnapshot
+          memories={memoryCount}
+          collections={collectionCount}
+          chapters={chapterCount}
+          dated={datedCount}
+        />
+        <ProfileCoverageCard
+          firstDate={firstDate}
+          latestDate={latestDate}
+          percentage={coverage.percentage}
+          total={coverage.total}
+          dated={coverage.dated}
+        />
+      </section>
     </div>
   );
 }

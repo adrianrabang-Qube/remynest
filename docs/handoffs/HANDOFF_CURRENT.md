@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy's Understanding Engine V1 + Profile Detail reframe** (Remy-as-the-ecosystem alignment).
+  New canonical **`lib/remy/understanding.ts`** — a deterministic, renderer-agnostic engine that turns
+  existing Remy intelligence into a structured point of view (`RemyUnderstanding` = `{subject, level,
+  isNascent, summary, facets[]}`). Facets are typed (`life-areas | strongest-period | coverage |
+  recency | missing-knowledge | relationship`), each carrying a **Remy role** (curator/storyteller/
+  guide/connector/memory-keeper) + a lens deep-link; gated by minimum evidence so Remy never
+  overclaims. **No AI/LLM/embeddings** — bands + a theme→trait lexicon + decade-gap math over
+  `getFamilyIntelligence` + `computeCoverage` + a scoped decade query (`bucketDecades`). The union is
+  additive so Phase 2/3 lenses attach without touching renderers.
+  - New shared renderer **`components/remy/RemyUnderstanding.tsx`** (lives in `components/remy`, reusable
+    by Search/Remy-home/People later — *not* coupled to Profile): "Remy understands {Name} as…" +
+    facet rows bridging into Themes/Life Journey/Story/Connections, with a nascent empty state.
+  - **`/profiles/[id]` reframed** so the page *is* Remy's perspective: identity (who Remy is learning
+    about) → **RemyUnderstanding (lead)** → **Explore with Remy** (Quick Actions, renamed) → **The
+    detail** (snapshot + coverage demoted to evidence). `ProfilePersonIntelligence` folded into the
+    engine and **deleted** (its family observations under-fired for a single person).
+  - Added **one** profile-scoped decade query to the existing `Promise.all` (no extra latency). Reuses
+    `RemyAvatar`. Access guard, RLS, workspace behavior unchanged. **No new AI calls.**
+  - Validated: lint (0 new — 4/160), build ✓ (`/profiles/[id]` 2.7 kB), no eslint-disable.
 - **Profile Detail V1 — per-person identity pages** (new `/profiles` directory + `/profiles/[id]`).
   Before: Search V2 People results and the `/profile` Relationships count had **no per-person
   destination** — they pointed at the generic `/profile`. Care profiles had no canonical page.
