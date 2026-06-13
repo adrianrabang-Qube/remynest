@@ -11,6 +11,8 @@
  * to the observation engine.
  */
 
+import type { LensId } from "./lens-id";
+
 /** The surface a companion is rendered on (lets one engine serve many places). */
 export type RemySurface =
   | "dashboard"
@@ -34,6 +36,12 @@ export interface RemyObservation {
   /** Stable id so observations can be diffed/animated/dismissed later. */
   id: string;
   surface: RemySurface;
+  /**
+   * Which lens this observation belongs to (the unified Lenses → Observations
+   * pipeline). Optional: operational signals (reminders, invites, presence)
+   * have no life-understanding lens owner.
+   */
+  lensId?: LensId;
   tone: RemyTone;
   mood: RemyMood;
   /** Higher = more prominent. The companion shows the top-ranked first. */

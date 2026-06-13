@@ -12,6 +12,27 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Intelligence Unification — Lenses → Observations** (internal; no UX/renderer changes).
+  Completed the single pipeline **Signals → Lenses → Facets → Observations → Remy**, converging the two
+  intelligence systems (`signals.ts → observations.ts → RemyCompanion` and `understanding.ts → lenses →
+  RemyUnderstanding`).
+  - **Lens ownership on observations:** `RemyObservation` gains optional **`lensId`**; every
+    life-understanding rule in `observations.ts` is tagged (timeline/historical → `life-journey`;
+    theme/collection → `themes`; caregiver invites → `relationships`; coverage/recency/growth/capture →
+    `preservation`). Operational signals (reminders, presence) intentionally stay **unowned** (no
+    life-lens). The `add()` helper carries `lensId`; output text/priority/sort unchanged → RemyCompanion
+    is byte-identical.
+  - **Facet → Observation bridge** (new `lib/remy/observation-bridge.ts`): deterministic, template-only
+    (`facetToObservation` / `understandingToObservations`). A facet maps losslessly to an observation
+    (lensId→ownership, tone→mood, priority→rank, lens→cta), voiced in Remy's first person
+    ("Looking across Mary's memories, family is the most documented theme"). **No AI/LLM/embeddings.**
+    Lenses produce understanding; observations become Remy's voice describing it.
+  - **Cycle-safe:** new leaf `lib/remy/lens-id.ts` holds `LensId` so base types (`RemyObservation`) and
+    the lens layer share it without an import cycle; `lenses/types.ts` re-exports it.
+  - **Phase 5 seam (documented, not wired):** Voice Engine V1 consumes `RemyObservation[]` directly —
+    `mood` (avatar), `text` (speech), `lensId` (context), `cta` (action). The bridge is the seam; it is
+    intentionally **not** wired into any renderer (architecture only). Dashboard/Profile Detail/Search/
+    nav/Voice/billing/auth/RLS untouched. Validated: lint 0 new (4/160), build ✓, no eslint-disable.
 - **Remy Lens Architecture V1 — foundation refactor** (internal; no UX/route/nav changes).
   Established the single understanding pipeline **Signals → Lenses → Facets → (future) Observations →
   (future) Voice**, eliminating divergence between the two intelligence systems.

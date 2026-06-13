@@ -1,4 +1,5 @@
 import type { RemyObservation, RemySignals, RemySurface } from "./types";
+import type { LensId } from "./lens-id";
 import { TONE_MOOD, remyVoice } from "./persona";
 
 const DAY_MS = 86_400_000;
@@ -33,11 +34,13 @@ export function generateRemyObservations(
     priority: number,
     tone: RemyObservation["tone"],
     text: string,
-    cta?: RemyObservation["cta"]
+    cta?: RemyObservation["cta"],
+    lensId?: LensId
   ) => {
     out.push({
       id,
       surface,
+      lensId,
       tone,
       mood: TONE_MOOD[tone],
       priority,
@@ -53,7 +56,8 @@ export function generateRemyObservations(
       90,
       "encouraging",
       `${v.subject} ${v.hasHave} no memories yet — let's capture the first one together.`,
-      { label: "Add a memory", href: "/memories/new" }
+      { label: "Add a memory", href: "/memories/new" },
+      "preservation"
     );
   }
 
@@ -109,7 +113,8 @@ export function generateRemyObservations(
       75,
       "celebratory",
       `${Poss} memory archive grew this week — ${preserved}.`,
-      { label: "Open timeline", href: "/timeline" }
+      { label: "Open timeline", href: "/timeline" },
+      "preservation"
     );
   } else if (m.addedThisWeek > 0) {
     add(
@@ -117,7 +122,8 @@ export function generateRemyObservations(
       55,
       "encouraging",
       `${Poss} archive grew by ${m.addedThisWeek} ${m.addedThisWeek === 1 ? "memory" : "memories"} this week.`,
-      { label: "Open memories", href: "/memories" }
+      { label: "Open memories", href: "/memories" },
+      "preservation"
     );
   }
 
@@ -128,7 +134,8 @@ export function generateRemyObservations(
       52,
       "informative",
       `I've found ${i.topCategory.count} memories connected to ${i.topCategory.label}.`,
-      { label: "Explore timeline", href: "/timeline" }
+      { label: "Explore timeline", href: "/timeline" },
+      "themes"
     );
   }
 
@@ -138,7 +145,9 @@ export function generateRemyObservations(
       "memory-trend",
       50,
       "celebratory",
-      `Memory activity is up this month — ${m.addedThisMonth} so far, compared with ${m.addedLastMonth} last month.`
+      `Memory activity is up this month — ${m.addedThisMonth} so far, compared with ${m.addedLastMonth} last month.`,
+      undefined,
+      "preservation"
     );
   }
 
@@ -148,7 +157,9 @@ export function generateRemyObservations(
       "recent-theme",
       47,
       "reassuring",
-      `Most recently preserved memories relate to ${i.recentTheme}.`
+      `Most recently preserved memories relate to ${i.recentTheme}.`,
+      undefined,
+      "themes"
     );
   }
 
@@ -159,7 +170,8 @@ export function generateRemyObservations(
       46,
       "informative",
       `I've organized ${v.possessive} memories into ${i.clustersDiscovered} ${i.clustersDiscovered === 1 ? "collection" : "collections"}.`,
-      { label: "View collections", href: "/collections" }
+      { label: "View collections", href: "/collections" },
+      "themes"
     );
   }
 
@@ -170,7 +182,8 @@ export function generateRemyObservations(
       43,
       "encouraging",
       `${Poss} timeline now reaches back to ${i.earliestYear}.`,
-      { label: "Open timeline", href: "/timeline" }
+      { label: "Open timeline", href: "/timeline" },
+      "life-journey"
     );
   }
 
@@ -181,7 +194,8 @@ export function generateRemyObservations(
       41,
       "reassuring",
       `${i.historicalTotal} historical ${i.historicalTotal === 1 ? "memory has" : "memories have"} been preserved so far.`,
-      { label: "Open timeline", href: "/timeline" }
+      { label: "Open timeline", href: "/timeline" },
+      "life-journey"
     );
   }
 
@@ -194,7 +208,8 @@ export function generateRemyObservations(
         44,
         "gentle",
         `Most memories still need dates — adding them helps me understand ${v.possessive} story.`,
-        { label: "Add memory dates", href: "/memory-dates" }
+        { label: "Add memory dates", href: "/memory-dates" },
+        "preservation"
       );
     } else if (datedPct < 100) {
       add(
@@ -202,7 +217,8 @@ export function generateRemyObservations(
         30,
         "reassuring",
         `${v.isCare ? `${v.subject} has` : "You've"} dated ${datedPct}% of memories.`,
-        { label: "Add memory dates", href: "/memory-dates" }
+        { label: "Add memory dates", href: "/memory-dates" },
+        "preservation"
       );
     }
   }
@@ -218,7 +234,8 @@ export function generateRemyObservations(
         45,
         "gentle",
         `No new memories have been added recently. A small moment is always worth keeping.`,
-        { label: "Capture a moment", href: "/memories/new" }
+        { label: "Capture a moment", href: "/memories/new" },
+        "preservation"
       );
     }
   }
@@ -230,7 +247,8 @@ export function generateRemyObservations(
       40,
       "informative",
       `${w.pendingInvites} caregiver invite${w.pendingInvites === 1 ? " is" : "s are"} waiting for a response.`,
-      { label: "Review invites", href: "/dashboard" }
+      { label: "Review invites", href: "/dashboard" },
+      "relationships"
     );
   }
 

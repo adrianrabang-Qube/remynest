@@ -1,4 +1,5 @@
 import type { RemyTone } from "../types";
+import type { LensId } from "../lens-id";
 
 /**
  * Lens foundation types. A Lens is a deterministic *perspective* that reasons
@@ -7,16 +8,11 @@ import type { RemyTone } from "../types";
  * the lens registry, merges, ranks and summarizes. No AI — pure rules.
  *
  * This file is the single source of truth for the lens/facet contract so both
- * the lenses and the orchestrator import from here (no cycles).
+ * the lenses and the orchestrator import from here (no cycles). LensId lives in
+ * ../lens-id so the base Remy types can share it without a cycle.
  */
 
-/** The five perspectives Remy understands a life through. Additive. */
-export type LensId =
-  | "life-journey"
-  | "themes"
-  | "relationships"
-  | "story"
-  | "preservation";
+export type { LensId };
 
 /** What role Remy is playing in a facet — the "what is Remy doing here?" answer. */
 export type RemyRole =
