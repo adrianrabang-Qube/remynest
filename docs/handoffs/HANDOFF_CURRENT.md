@@ -12,6 +12,25 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Ask V1 — deterministic intent router** (`/remy`; Remy's first interactive entry point).
+  Completes the pipeline at **… → Coach → Ask**. NOT AI/chat/semantic search/RAG/embeddings/retrieval.
+  - **`lib/remy/ask.ts`** (new) — a fixed **registry** of 14 `RemyIntent {id,label,href,keywords}` (real
+    destinations only — all 18 audited routes verified to exist) + `buildRemyAsk()` + `resolveRemyIntent
+    (query)`. The resolver lowercases, flattens punctuation, and matches each keyword as a **whole
+    word/phrase** (token-bounded); first match in registry order (specific → generic) wins; empty/unknown
+    → null. Deterministic — no substring/fuzzy/semantic matching, no scoring/ranking, no AI/queries.
+  - **`components/remy/RemyAsk.tsx`** (new, client-only) — input + submit → `resolveRemyIntent` →
+    `router.push(href)` on a hit, or the fixed message "Remy doesn't know how to help with that yet." on
+    miss; suggestion chips route directly. No backend, no generated text, no chat/history/streaming/
+    retrieval.
+  - **Mounted in `/remy` below Coach** (Home, Conversation, Actions, Journeys, Coach, Dashboard
+    untouched).
+  - Adversarially reviewed (6-agent ultracode workflow): 2 confirmed — over-broad keywords `"book"`
+    (matched "facebook") and `"dating"` (matched "dating app") substring-misrouted. **Fixed** by
+    switching the resolver to whole-word/phrase matching + dropping the ambiguous standalone keywords
+    (`book`, `dating`, `bio`; tightened `capture`→`capture a memory`) — also resolving latent collisions
+    ("history"⊃"story", "candidates"⊃"dates"). Validated: lint 0 new (4/160), build ✓ (`/home` 1.14 kB,
+    `/remy` 2.8 kB, `/dashboard` 9.95 kB).
 - **Remy Memory Coach V1 — deterministic guidance layer** (`/remy`; selection over coverage/maturity facts).
   Completes the pipeline at **… → Journeys → Coach**. Creates nothing — selection only.
   - **`lib/remy/coach.ts`** (new) — `buildRemyCoach({coverage, lifeJourney, story?})` → `RemyCoach

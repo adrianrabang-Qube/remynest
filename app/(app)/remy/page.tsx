@@ -8,12 +8,14 @@ import { buildRemyConversation } from "@/lib/remy/conversation";
 import { buildRemyActions } from "@/lib/remy/actions";
 import { buildRemyJourneys } from "@/lib/remy/journeys";
 import { buildRemyCoach } from "@/lib/remy/coach";
+import { buildRemyAsk } from "@/lib/remy/ask";
 import { REMY } from "@/lib/remy/persona";
 
 import RemyConversation from "@/components/remy/RemyConversation";
 import RemyActions from "@/components/remy/RemyActions";
 import RemyJourneys from "@/components/remy/RemyJourneys";
 import RemyCoach from "@/components/remy/RemyCoach";
+import RemyAsk from "@/components/remy/RemyAsk";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,7 @@ export default async function RemyConversationPage() {
     lifeJourney: model.lifeJourney,
     story: model.story,
   });
+  const ask = buildRemyAsk();
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:space-y-5 md:p-6">
@@ -90,6 +93,9 @@ export default async function RemyConversationPage() {
 
       {/* Coach — deterministic coverage/maturity health from existing facts */}
       <RemyCoach coach={coach} />
+
+      {/* Ask — deterministic intent router to existing destinations */}
+      <RemyAsk ask={ask} />
     </div>
   );
 }
