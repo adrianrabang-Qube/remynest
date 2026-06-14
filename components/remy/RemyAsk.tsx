@@ -2,34 +2,71 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Search } from "lucide-react";
 
 import { resolveRemyIntent, type RemyAsk as RemyAskModel } from "@/lib/remy/ask";
+import {
+  parseRetrievalQuery,
+  type AskRetrievalResult,
+} from "@/lib/remy/ask-retrieval";
+import { askRemyRetrieval } from "@/app/(app)/remy/ask-action";
+
+type AskStatus = "idle" | "loading" | "results" | "unknown";
+
+const MAX_SHOWN = 10;
+
+function yearLabel(memoryDate?: string | null): string {
+  if (!memoryDate) return "";
+  const year = new Date(memoryDate).getFullYear();
+  return Number.isNaN(year) ? "" : ` (${year})`;
+}
 
 /**
- * RemyAsk — Remy's first interactive entry point. A simple client-side Ask
- * surface: type a request, Remy routes it to an existing destination via the
- * deterministic keyword resolver (lib/remy/ask.ts). No AI, no generated text, no
- * conversation history, no memory retrieval, no chat, no streaming, no backend.
- * Unknown requests show a fixed message. Suggestion chips route directly.
+ * RemyAsk — Remy's interactive entry point. Deterministic only.
+ *   1. Retrieval query (parseRetrievalQuery) → retrieve & list factual memory
+ *      candidates via the server action (Retrieval Engine V1).
+ *   2. Otherwise a navigation intent (resolveRemyIntent) → navigate.
+ *   3. Otherwise the fixed "doesn't know" message.
+ * No AI, generation, summaries, chat history, streaming or client-side retrieval.
  */
 export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [notFound, setNotFound] = useState(false);
+  const [status, setStatus] = useState<AskStatus>("idle");
+  const [results, setResults] = useState<AskRetrievalResult[]>([]);
 
-  function onSubmit(event: React.FormEvent) {
+  async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const intent = resolveRemyIntent(query);
+    const text = query.trim();
+    if (!text) return;
+
+    // 1. Retrieval (checked first so "travel memories" isn't caught by the
+    // "memories" navigation keyword).
+    const retrievalQuery = parseRetrievalQuery(text);
+    if (retrievalQuery) {
+      setStatus("loading");
+      setResults([]);
+      const res = await askRemyRetrieval(retrievalQuery);
+      setResults(res.results);
+      setStatus("results");
+      return;
+    }
+
+    // 2. Navigation intent.
+    const intent = resolveRemyIntent(text);
     if (intent) {
-      setNotFound(false);
       router.push(intent.href);
       return;
     }
-    setNotFound(true);
+
+    // 3. Unknown.
+    setResults([]);
+    setStatus("unknown");
   }
 
-  const suggestions = ask.intents.slice(0, 5);
+  const shown = results.slice(0, MAX_SHOWN);
+  const overflow = results.length - shown.length;
 
   return (
     <section
@@ -42,7 +79,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
 
       <form onSubmit={onSubmit} className="mt-2">
         <label htmlFor="remy-ask" className="sr-only">
-          Ask Remy to take you somewhere
+          Ask Remy to find memories or take you somewhere
         </label>
         <div className="flex items-center gap-2 rounded-2xl border border-sand-deep/70 bg-white px-3 focus-within:border-sage">
           <Search className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
@@ -53,9 +90,9 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              if (notFound) setNotFound(false);
+              if (status !== "idle") setStatus("idle");
             }}
-            placeholder="e.g. show my story"
+            placeholder="e.g. show travel memories"
             className="h-11 w-full bg-transparent text-base text-charcoal outline-none placeholder:text-charcoal-muted"
           />
           <button
@@ -67,14 +104,53 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
         </div>
       </form>
 
-      {notFound && (
+      {status === "loading" && (
+        <p className="mt-2 text-sm text-charcoal-soft" role="status">
+          Searching your memories…
+        </p>
+      )}
+
+      {status === "unknown" && (
         <p className="mt-2 text-sm text-charcoal-soft" role="status">
           Remy doesn&rsquo;t know how to help with that yet.
         </p>
       )}
 
+      {status === "results" && results.length === 0 && (
+        <p className="mt-2 text-sm text-charcoal-soft" role="status">
+          No matching memories found.
+        </p>
+      )}
+
+      {status === "results" && results.length > 0 && (
+        <div className="mt-3" role="status">
+          <p className="text-sm font-medium text-charcoal">
+            I found {results.length}{" "}
+            {results.length === 1 ? "memory" : "memories"}
+          </p>
+          <ul className="mt-1 divide-y divide-sand-deep/30">
+            {shown.map((memory) => (
+              <li key={memory.memoryId}>
+                <Link
+                  href={`/memories/${memory.memoryId}`}
+                  className="block py-2 text-sm text-sage-deep transition hover:text-sage"
+                >
+                  {memory.title}
+                  {yearLabel(memory.memoryDate)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {overflow > 0 && (
+            <p className="mt-1 text-xs text-charcoal-muted">
+              and {overflow} more
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 flex flex-wrap gap-2">
-        {suggestions.map((intent) => (
+        {ask.intents.slice(0, 5).map((intent) => (
           <button
             key={intent.id}
             type="button"

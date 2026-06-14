@@ -12,6 +12,27 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Retrieval Integration V1 — Ask now retrieves real memories** (deterministic; wires Ask → Retrieval Engine).
+  Completes the pipeline at **… → Ask → Retrieval**. NOT AI/semantic/embeddings/vector/RAG/summaries/
+  answer-generation — only factual memory candidates.
+  - **`lib/remy/ask-retrieval.ts`** (new) — `parseRetrievalQuery(text): RetrievalQuery | null` (pure,
+    deterministic regex+stopwords; precedence decade → year → "about X"=text → "tagged X"=tag →
+    "{X} memories"=category; else null) + `retrieveAskResults(supabase, query, memoryProfileId)` which
+    runs `retrieveMemories` and **broadens a bare category term** deterministically (category → tag →
+    text, first non-empty tier — since a free word can't be known to be a category vs tag).
+  - **`app/(app)/remy/ask-action.ts`** (new, `"use server"`) — `askRemyRetrieval(query)`: `getUser` +
+    `resolveActiveProfileId` (workspace scoping) → `retrieveAskResults`. Query fields are used only by
+    `filterMemories` (pure JS), never interpolated into SQL.
+  - **`components/remy/RemyAsk.tsx`** (updated) — on submit: **parse retrieval FIRST** (so "travel
+    memories" isn't caught by the "memories" nav keyword) → server action → list candidates
+    (title + (year), linking to `/memories/[id]`) or "No matching memories found."; else
+    `resolveRemyIntent` → navigate (unchanged); else "Remy doesn't know how to help with that yet." No
+    generated text/summaries/chat/streaming; client/server boundary clean (pure parser + server action,
+    no server runtime in the client bundle).
+  - **Verified:** parser passes 9 runtime assertions (incl. all 5 spec examples); the Retrieval Engine
+    passed its 8 tests. Adversarially reviewed (4-agent ultracode workflow): **0 findings**. Validated:
+    lint 0 new (4/160), build ✓ (`/home`, `/dashboard`, `/remy` 3.67 kB, `/search`, `/memories`).
+    Risk: single-filter parse (a year wins over a co-mentioned category); multi-filter parse is a follow-up.
 - **Remy Memory Retrieval Engine V1 — deterministic retrieval** (foundation for Ask Remy V2).
   Returns memory CANDIDATES from existing metadata/dates; does not generate answers. NOT AI/embeddings/
   semantic/vector/RAG/LLM.
