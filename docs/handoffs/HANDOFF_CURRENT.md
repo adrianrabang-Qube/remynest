@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Conversation V1 — dedicated companion experience** (`/remy`; presentation/composition only).
+  Extends the pipeline to **… → Voice → Briefing → Home → Conversation**. Creates nothing — selection only.
+  - **`lib/remy/home-model.ts`** (new) — `buildRemyHomeModel(supabase, userId)` centralizes Home's
+    existing composition (workspace understanding · story/life-journey signals · observation bridge ·
+    voice · briefing) into one shared, canonical place. **Home was refactored to consume it** (UI/sections
+    byte-identical — not a redesign), so `/home` and `/remy` share one composition with **no duplication**
+    and **no new query types** (same loaders/limits).
+  - **`lib/remy/conversation.ts`** (new) — `buildRemyConversation({understanding, voiceLines, briefing})`
+    → `RemyConversation {openingMessage, featuredObservation, featuredCTA, suggestedTopics[],
+    quickActions[]}`. Pure deterministic **selection**: openingMessage = briefing.headline;
+    featuredObservation = voiceLines[0]; featuredCTA = briefing.nextAction.cta; suggestedTopics = the
+    distinct understanding-facet lenses (existing topics only); quickActions = a static set of existing
+    app routes. No generation/summarization/inference/ranking change/AI.
+  - **`components/remy/RemyConversation.tsx`** (new) + **`app/(app)/remy/page.tsx`** (new) — the companion
+    page: greeting + opening message + featured CTA + suggested topics + quick actions. Auth + onboarding
+    gate; reuses `buildRemyHomeModel`.
+  - **Routing:** `/remy` added to middleware `PROTECTED_ROUTES` (else authed users are bounced to
+    `/login` — the gate-class fix from Home V2). **Home entry point** added: a single "Open conversation
+    with Remy" link → `/remy` (additive; no sections removed).
+  - Adversarially reviewed (4-agent workflow): **0 findings**. Validated: lint 0 new (4/160), build ✓
+    (`/home` 1.15 kB, `/remy` 1.15 kB, `/dashboard` 9.95 kB). Future: conversational input/threading
+    (would need a real chat layer — out of scope for this composition-only V1).
 - **Remy Briefing V1 — daily intelligence composition** (presentation-only; pure selection over existing outputs).
   Extends the pipeline to **Signals → Lenses → Facets → Observations → Voice → Briefing → Home**. The
   briefing creates nothing — it selects.

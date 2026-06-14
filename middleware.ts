@@ -27,6 +27,7 @@ const PUBLIC_ROUTES = [
 
 const PROTECTED_ROUTES = [
   "/home",
+  "/remy",
   "/dashboard",
   "/memories",
   "/timeline",

@@ -1,25 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 
 import { createClient } from "@/utils/supabase/server";
-import { getActiveContext } from "@/lib/active-profile";
-import { getAccessibleProfiles } from "@/lib/profile-access";
-import { getDateCoverage } from "@/lib/remy/date-coverage";
-import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
-import { getRemyCollections } from "@/lib/remy/collections";
-import { getRemyConnections } from "@/lib/remy/connections";
-import { getRemyStories } from "@/lib/remy/story-mode";
-import { getRemyBiography } from "@/lib/remy/biography";
-import { getRemyMemoryBook } from "@/lib/remy/memory-book";
-import { getFamilyIntelligence } from "@/lib/remy/family";
-import { deriveLifeJourneySignals } from "@/lib/remy/life-journey-signals";
-import { deriveStorySignals } from "@/lib/remy/story-signals";
-import { buildWorkspaceUnderstanding } from "@/lib/remy/workspace-understanding";
-import { fuseObservations } from "@/lib/remy/observation-bridge";
-import { observationsToVoiceLines } from "@/lib/remy/voice-engine";
-import { buildRemyBriefing } from "@/lib/remy/briefing";
-import { remyVoice } from "@/lib/remy/persona";
+import { buildRemyHomeModel } from "@/lib/remy/home-model";
 
 import RemyBriefing from "@/components/remy/RemyBriefing";
 import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
@@ -29,20 +13,11 @@ import ProfileCoverageCard from "@/components/profile/identity/ProfileCoverageCa
 
 export const dynamic = "force-dynamic";
 
-function str(value: unknown): string | null {
-  return typeof value === "string" && value.trim() ? value : null;
-}
-
 /**
- * Remy Home (/home) — the first dedicated Remy experience. Pure COMPOSITION of
- * intelligence that already exists (workspace-understanding · story/life-journey
- * signals · observation-bridge · voice-engine) into:
- *
- *   Remy understanding → Remy speaking → Family story → Progress → Next action
- *
- * No new intelligence, no new lenses/signals/observations, no AI, no new
- * pipeline. The Dashboard remains the operational workspace page; Home is
- * additive. Reuses the same loaders so it introduces no novel query types.
+ * Remy Home (/home) — the primary Remy experience. A pure COMPOSITION of existing
+ * intelligence, now sourced from the shared buildRemyHomeModel (used by /remy
+ * too). No new intelligence/lenses/signals/observations/AI/queries. The Dashboard
+ * remains the operational workspace page; Home is additive.
  */
 export default async function RemyHomePage() {
   const supabase = await createClient();
@@ -51,9 +26,8 @@ export default async function RemyHomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Onboarding gate — Home is now the post-login default, so it must preserve
-  // onboarding exactly as the Dashboard does: a not-yet-onboarded user goes to
-  // onboarding rather than landing here.
+  // Onboarding gate — Home is the post-login default, so it preserves onboarding
+  // exactly as the Dashboard does.
   const { data: profile } = await supabase
     .from("profiles")
     .select("onboarding_completed")
@@ -61,102 +35,8 @@ export default async function RemyHomePage() {
     .maybeSingle();
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
-  const activeContext = await getActiveContext();
-  const memoryProfileId =
-    activeContext?.type === "CARE" ? activeContext.profileId : null;
-  const isMyNest = !memoryProfileId;
-
-  const [coverage, chapters, collections, connections, accessibleProfiles] =
-    await Promise.all([
-      getDateCoverage(supabase, memoryProfileId),
-      getRemyLifeChapters(supabase, user.id, { sort: "count", limit: 12 }),
-      getRemyCollections(supabase, user.id, { limit: 12, includeDetails: true }),
-      getRemyConnections(supabase, user.id, { limit: 12 }),
-      getAccessibleProfiles(),
-    ]);
-
-  const familyProfiles = (accessibleProfiles ?? []).map((p) => ({
-    id: p.id,
-    name: str(p.preferred_name) ?? str(p.profile_name) ?? "Family member",
-  }));
-  const family =
-    familyProfiles.length >= 2
-      ? await getFamilyIntelligence(supabase, familyProfiles)
-      : null;
-
-  const subjectName = memoryProfileId
-    ? familyProfiles.find((p) => p.id === memoryProfileId)?.name ?? null
-    : null;
-
-  // Pure synthesizers (no queries) — reused verbatim.
-  const stories = getRemyStories({ chapters, collections, connections });
-  const biography = getRemyBiography({
-    stories,
-    chapters,
-    collections,
-    connections,
-    family,
-    coverage,
-  });
-  const memoryBook = getRemyMemoryBook({ biography, stories });
-
-  // Canonical signals (reused; no new query). Decades: family-wide when a family
-  // exists, else account-wide chapters for My Nest; deferred for a single care
-  // workspace (can't account-scope to one subject) — consistent with Dashboard.
-  const chapterDecades = chapters
-    .map((c) => ({ decade: parseInt(c.id, 10), count: c.memoryCount }))
-    .filter((d) => !Number.isNaN(d.decade));
-  const decades = family?.decades ?? (isMyNest ? chapterDecades : undefined);
-
-  const lifeJourney = deriveLifeJourneySignals(decades ?? [], null);
-  // Story readiness only where chapter data is reliably scoped: My Nest
-  // (account-wide ≈ My Nest) or a family (family-wide). Deferred for a single
-  // care workspace — account-wide chapters aren't scoped to one subject — so it
-  // stays coherent with the decades deferral above (no account-wide leakage).
-  const story =
-    family || isMyNest
-      ? deriveStorySignals({
-          chapterCount: family ? family.decades.length : chapters.length,
-          storyCount: stories.length,
-          strongestChapterTitle: chapters[0]?.title ?? null,
-          earliestYear: lifeJourney.earliestDecade,
-          latestYear: lifeJourney.latestDecade,
-          hasStory: stories.length > 0,
-          hasBiography: Boolean(biography),
-          hasMemoryBook: Boolean(memoryBook),
-        })
-      : undefined;
-
-  const understanding = buildWorkspaceUnderstanding({
-    workspaceLabel: family
-      ? "your family"
-      : isMyNest
-        ? "My Nest"
-        : subjectName ?? "this workspace",
-    peopleCount: familyProfiles.length,
-    totalMemories: family?.totalMemories ?? coverage.total,
-    totalDated: family?.totalDated ?? coverage.dated,
-    themes:
-      family?.themes ??
-      collections.map((c) => ({ label: c.title, memoryCount: c.memoryCount })),
-    decades,
-    story,
-  });
-
-  // Voice over the understanding-derived observation stream (the bridge) — no
-  // new scoring; ranking preserved. Next action = highest-ranked line with a CTA.
-  const voiceLines = observationsToVoiceLines(
-    fuseObservations(understanding, remyVoice(subjectName, !isMyNest), []),
-  );
-  const nextAction = voiceLines.find((line) => line.cta) ?? null;
-
-  // Daily briefing — pure selection over the outputs above (no new intelligence).
-  const briefing = buildRemyBriefing({
-    understanding,
-    voiceLines,
-    story,
-    lifeJourney,
-  });
+  const { understanding, voiceLines, briefing, story, lifeJourney, coverage, nextAction } =
+    await buildRemyHomeModel(supabase, user.id);
 
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
@@ -166,6 +46,18 @@ export default async function RemyHomePage() {
           Your memory companion — what Remy understands, and what to do next.
         </p>
       </header>
+
+      {/* Entry point into the dedicated companion experience */}
+      <Link
+        href="/remy"
+        className="flex items-center justify-between gap-3 rounded-2xl border border-sage/30 bg-sage/[0.06] px-4 py-3 text-sm font-semibold text-sage-deep transition hover:bg-sage/10"
+      >
+        <span className="inline-flex items-center gap-2">
+          <MessageCircle className="h-4 w-4" aria-hidden />
+          Open conversation with Remy
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+      </Link>
 
       {/* 1 — Remy briefing (daily composition of the outputs below) */}
       <RemyBriefing briefing={briefing} />
@@ -177,7 +69,7 @@ export default async function RemyHomePage() {
       <RemyVoicePreview lines={voiceLines} />
 
       {/* 4 — Family story snapshot (deterministic, from signals; shown only when
-          chapter data is reliably scoped — see story derivation above) */}
+          chapter data is reliably scoped) */}
       {story && <RemyStorySnapshot story={story} lifeJourney={lifeJourney} />}
 
       {/* 5 — Memory progress (reused coverage card; dates omitted) */}
