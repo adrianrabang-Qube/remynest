@@ -12,6 +12,23 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Memory Coach V1 — deterministic guidance layer** (`/remy`; selection over coverage/maturity facts).
+  Completes the pipeline at **… → Journeys → Coach**. Creates nothing — selection only.
+  - **`lib/remy/coach.ts`** (new) — `buildRemyCoach({coverage, lifeJourney, story?})` → `RemyCoach
+    {items[]}`, each `{title, detail, status: "healthy"|"growing"|"attention", href}`. Pure deterministic
+    selection of existing facts via documented thresholds: **Memory dating** (`coverage.total>0`;
+    %≥80 healthy · 50–79 growing · <50 attention → `/memory-dates`); **Life timeline**
+    (`lifeJourney.hasTimeline`; ≥3 decades healthy else growing → `/timeline`); **Life story**
+    (`story.hasStory`; `narrativeCoverage==="developed"` healthy else growing → `/library/story`). No
+    AI/LLM/embeddings/inference/new signals/observations/lenses/queries/ranking. Each item appears only
+    when its supporting data exists (timeline gated on `hasTimeline` so single-care workspaces don't get
+    a misleading "attention").
+  - **`components/remy/RemyCoach.tsx`** (new) — coach cards (title · detail · status badge · link);
+    consumes the model directly; returns null when empty (no placeholders/fabricated advice).
+  - **Mounted in `/remy` below Journeys** (Home, Conversation, Actions, Journeys, Dashboard untouched).
+    No new query (built from the already-loaded home model).
+  - Adversarially reviewed (4-agent ultracode workflow): **0 findings**. Validated: lint 0 new (4/160),
+    build ✓ (`/home` 1.15 kB, `/remy` 1.15 kB, `/dashboard` 9.95 kB).
 - **Remy Journeys V1 — narrative destinations layer** (`/remy`; selection over story/life-journey outputs).
   Extends the pipeline to **… → Actions → Journeys**. Creates nothing — selection only.
   - **`lib/remy/journeys.ts`** (new) — `buildRemyJourneys({story?, lifeJourney, understanding})` →
