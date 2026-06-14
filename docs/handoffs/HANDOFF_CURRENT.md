@@ -12,6 +12,26 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Memory Retrieval Engine V1 — deterministic retrieval** (foundation for Ask Remy V2).
+  Returns memory CANDIDATES from existing metadata/dates; does not generate answers. NOT AI/embeddings/
+  semantic/vector/RAG/LLM.
+  - **Audit:** real retrievable columns confirmed — title, content, ai_title, ai_summary, ai_category,
+    `ai_tags` (string[]), memory_date. No people/location fields (not fabricated).
+  - **`lib/remy/retrieval.ts`** (new) — `RetrievalQuery {text?, category?, tag?, year?, decade?}` →
+    `RetrievalResult {memoryId, title, memoryDate?, category?}`. **`filterMemories(rows, query)`** is a
+    pure deterministic AND-filter: text (case-insensitive substring over title/content/ai_title/
+    ai_summary/ai_category), category (`ai_category` case-insensitive exact), tag (`ai_tags`
+    case-insensitive membership), year (`memory_date` year ===), decade (`floor(year/10)*10` ===); no
+    filter → []; unmatched → [] (no fabrication). `retrieveMemories` / `getRetrievalHealth` are
+    workspace-scoped loaders (most-recent N by `created_at`, cap 2000, deterministic order).
+    `buildRetrievalHealth` reuses `buildSearchHealth` counts (no duplication).
+  - **Not mounted** — a standalone engine (the retrieval foundation for Ask Remy V2); all surfaces
+    untouched.
+  - **Phase 5 tests:** 8 runtime assertions PASS against the real `filterMemories` (category/tag/year/
+    decade/text/AND/empty/unknown). Adversarially reviewed (6-agent ultracode workflow): 2 confirmed
+    (major) — `.limit()` without `.order()` was non-deterministic beyond the cap. **Fixed** by adding
+    `.order("created_at", desc)` to both loaders + documenting the sampling cap. Validated: lint 0 new
+    (4/160), build ✓ (`/home`, `/dashboard`, `/remy`, `/search`, `/memories`).
 - **Remy Memory Search V1 — deterministic discoverability + search-health** (foundation for future retrieval).
   Makes stored memories reliably findable and reports factual corpus health. NOT AI/semantic/embeddings/
   vector/RAG.
