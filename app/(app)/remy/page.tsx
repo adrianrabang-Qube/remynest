@@ -6,10 +6,12 @@ import { createClient } from "@/utils/supabase/server";
 import { buildRemyHomeModel } from "@/lib/remy/home-model";
 import { buildRemyConversation } from "@/lib/remy/conversation";
 import { buildRemyActions } from "@/lib/remy/actions";
+import { buildRemyJourneys } from "@/lib/remy/journeys";
 import { REMY } from "@/lib/remy/persona";
 
 import RemyConversation from "@/components/remy/RemyConversation";
 import RemyActions from "@/components/remy/RemyActions";
+import RemyJourneys from "@/components/remy/RemyJourneys";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,11 @@ export default async function RemyConversationPage() {
     // The conversation already renders its featured CTA — don't duplicate it.
     excludeHref: conversation.featuredCTA?.href,
   });
+  const journeys = buildRemyJourneys({
+    story: model.story,
+    lifeJourney: model.lifeJourney,
+    understanding: model.understanding,
+  });
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:space-y-5 md:p-6">
@@ -70,6 +77,9 @@ export default async function RemyConversationPage() {
 
       {/* Structured action layer — selection of existing ranked CTAs */}
       <RemyActions actions={actions} />
+
+      {/* Journeys — selection of existing story / life-journey destinations */}
+      <RemyJourneys journeys={journeys} />
     </div>
   );
 }

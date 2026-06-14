@@ -12,6 +12,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Journeys V1 — narrative destinations layer** (`/remy`; selection over story/life-journey outputs).
+  Extends the pipeline to **… → Actions → Journeys**. Creates nothing — selection only.
+  - **`lib/remy/journeys.ts`** (new) — `buildRemyJourneys({story?, lifeJourney, understanding})` →
+    `RemyJourneys {journeys[]}`, each `{title, description, href, status}`. Pure deterministic selection:
+    one journey per **available** narrative output — **Life Journey** (`hasTimeline` → `/timeline`),
+    **Your story** (`hasStory` → `/library/story`), **Biography** (`hasBiography` → `/library/biography`),
+    **Memory book** (`hasMemoryBook` → `/library/memory-book`). `status` (ready/growing) derived from
+    existing signals (`documentedDecadeCount`, `narrativeCoverage`). No generation/inference/new scoring.
+    `understanding` accepted but reserved (future theme/relationship journeys).
+  - **`components/remy/RemyJourneys.tsx`** (new) — journey cards (title · description · status badge ·
+    link to the existing destination); consumes the model directly; returns null when empty (no
+    placeholders/fabricated content).
+  - **Mounted in `/remy` below Actions** (Home, Conversation, Actions, Dashboard untouched). No new query
+    (built from the already-loaded home model).
+  - Adversarially reviewed (4-agent workflow): **0 findings**. Validated: lint 0 new (4/160), build ✓
+    (`/home` 1.15 kB, `/remy` 1.15 kB, `/dashboard` 9.95 kB).
 - **Remy Actions V1 — structured action layer** (`/remy`; selection over existing CTAs).
   Extends the pipeline to **… → Conversation → Actions**. Creates nothing — selection only.
   - **`lib/remy/actions.ts`** (new) — `buildRemyActions({voiceLines, briefing, excludeHref?})` →
