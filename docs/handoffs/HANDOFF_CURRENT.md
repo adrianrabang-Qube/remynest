@@ -12,6 +12,22 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Actions V1 — structured action layer** (`/remy`; selection over existing CTAs).
+  Extends the pipeline to **… → Conversation → Actions**. Creates nothing — selection only.
+  - **`lib/remy/actions.ts`** (new) — `buildRemyActions({voiceLines, briefing, excludeHref?})` →
+    `RemyActions {primaryAction, secondaryActions[], actionCount}`. Pure deterministic selection of the
+    CTAs that already exist on the (already ranked) voice lines: primary = `briefing.nextAction`
+    (highest-ranked CTA); secondaries = remaining CTAs in their existing order, deduped by href. No new
+    ranking/scoring/inference/AI.
+  - **`components/remy/RemyActions.tsx`** (new) — renders the primary action (+ its context) and the
+    secondary actions; consumes the model directly; returns null when there are no actions (no
+    placeholders/fabricated actions).
+  - **Mounted in `/remy` below the conversation** (Home + Conversation untouched).
+  - Adversarially reviewed (5-agent workflow): 1 confirmed (minor) — Actions' primary duplicated the
+    Conversation's `featuredCTA`. **Fixed**: added `excludeHref` and pass `conversation.featuredCTA.href`
+    so Actions complements (promotes the next-ranked CTA) instead of repeating it. Validated: lint 0 new
+    (4/160), build ✓ (`/home` 1.15 kB, `/remy` 1.15 kB, `/dashboard` 9.95 kB). Follow-up: consolidating
+    the featured CTA across Briefing/Conversation/Actions is a later UX call.
 - **Remy Conversation V1 — dedicated companion experience** (`/remy`; presentation/composition only).
   Extends the pipeline to **… → Voice → Briefing → Home → Conversation**. Creates nothing — selection only.
   - **`lib/remy/home-model.ts`** (new) — `buildRemyHomeModel(supabase, userId)` centralizes Home's

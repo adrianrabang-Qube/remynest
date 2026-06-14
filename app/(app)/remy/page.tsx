@@ -5,9 +5,11 @@ import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { buildRemyHomeModel } from "@/lib/remy/home-model";
 import { buildRemyConversation } from "@/lib/remy/conversation";
+import { buildRemyActions } from "@/lib/remy/actions";
 import { REMY } from "@/lib/remy/persona";
 
 import RemyConversation from "@/components/remy/RemyConversation";
+import RemyActions from "@/components/remy/RemyActions";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,12 @@ export default async function RemyConversationPage() {
     voiceLines: model.voiceLines,
     briefing: model.briefing,
   });
+  const actions = buildRemyActions({
+    voiceLines: model.voiceLines,
+    briefing: model.briefing,
+    // The conversation already renders its featured CTA — don't duplicate it.
+    excludeHref: conversation.featuredCTA?.href,
+  });
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:space-y-5 md:p-6">
@@ -59,6 +67,9 @@ export default async function RemyConversationPage() {
       </header>
 
       <RemyConversation conversation={conversation} />
+
+      {/* Structured action layer — selection of existing ranked CTAs */}
+      <RemyActions actions={actions} />
     </div>
   );
 }
