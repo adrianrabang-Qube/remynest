@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Memory Search V1 — deterministic discoverability + search-health** (foundation for future retrieval).
+  Makes stored memories reliably findable and reports factual corpus health. NOT AI/semantic/embeddings/
+  vector/RAG.
+  - **Audit:** the global keyword search (`/api/search/global`) matched memories on
+    `title/content/ai_title/ai_summary` (ILIKE, workspace-scoped) — it **selected but didn't search
+    `ai_category`** (gap). No dedicated people/location memory fields exist (so those metrics are not
+    fabricated). Real searchable columns confirmed: title, content, ai_title, ai_summary, ai_category,
+    ai_tags, memory_date.
+  - **Search improvement (Phase 4):** added **`ai_category` ILIKE** to the global search `.or()` — users
+    can now find memories by category. Input is still sanitized before the `.or()`; scoping unchanged.
+    (Partial `ai_tags` array matching deferred — documented gap.)
+  - **`lib/remy/search-health.ts`** (new) — `buildSearchHealth(rows)` (pure deterministic counts:
+    searchable/dated/categorized/tagged + missing + percentages) and `getSearchHealth(supabase,
+    memoryProfileId)` (workspace-scoped loader, cap 5000). Counts only; no AI/scoring/inference.
+  - **`components/remy/RemySearchInsights.tsx`** (new) — a small factual readout ("N memories · X%
+    searchable by date · N categorized · N tagged · N missing dates/categories"). Facts only, no
+    coaching/recommendations; renders nothing when empty. Mounted **above SearchView on `/search`**
+    (SearchView untouched).
+  - Adversarially reviewed (4-agent ultracode workflow): **0 findings**. Validated: lint 0 new (4/160),
+    build ✓ (`/home` 1.14 kB, `/dashboard` 9.95 kB, `/remy` 2.8 kB, `/search` 5.04 kB, `/memories` 12.3 kB).
+    Risk: health counts sample up to 5000 memories (documented); `ai_tags` partial search + date-range
+    search in the global endpoint are follow-ups.
 - **Remy Ask V1 — deterministic intent router** (`/remy`; Remy's first interactive entry point).
   Completes the pipeline at **… → Coach → Ask**. NOT AI/chat/semantic search/RAG/embeddings/retrieval.
   - **`lib/remy/ask.ts`** (new) — a fixed **registry** of 14 `RemyIntent {id,label,href,keywords}` (real

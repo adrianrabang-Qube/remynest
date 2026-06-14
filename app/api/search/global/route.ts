@@ -70,6 +70,7 @@ export async function POST(request: Request) {
           `content.ilike.%${query}%`,
           `ai_title.ilike.%${query}%`,
           `ai_summary.ilike.%${query}%`,
+          `ai_category.ilike.%${query}%`,
         ].join(","),
       )
       .order("created_at", { ascending: false })
