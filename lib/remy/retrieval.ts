@@ -266,6 +266,117 @@ export function mergeAndRankCandidates(
   return rankRecords(union, query, now);
 }
 
+// ---------------------------------------------------------------------------
+// Person-aware retrieval helpers (Phase C3, pure — no AI, no IO). Detect person
+// references in a free-text query, match them against fetched person rows, and
+// re-rank a candidate set so person-linked memories are BOOSTED (not hard-filtered).
+// ---------------------------------------------------------------------------
+
+/** Subset of a `people` row used by the pure token matcher. */
+export interface PersonRow {
+  id: string;
+  display_name: string;
+  normalized_name: string;
+  aliases?: string[] | null;
+}
+
+/** A person resolved from a query. `matchedBy` records why (name beats alias). */
+export interface ResolvedPerson {
+  id: string;
+  displayName: string;
+  matchedBy: "name" | "alias";
+}
+
+/** Query words that are never names — excluded as unigram candidates to keep the
+ *  token set small (bigrams are kept regardless; they rarely match a person). */
+const NAME_STOPWORDS = new Set([
+  "the", "a", "an", "and", "or", "but", "with", "without", "to", "of", "in", "on", "at",
+  "for", "from", "by", "i", "me", "my", "mine", "we", "us", "our", "you", "your", "he",
+  "him", "his", "she", "her", "they", "them", "their", "what", "when", "where", "who",
+  "whom", "whose", "why", "how", "which", "did", "do", "does", "was", "were", "is", "are",
+  "am", "be", "been", "being", "have", "has", "had", "last", "time", "thing", "things",
+  "about", "that", "this", "these", "those", "it", "go", "went", "see", "saw", "tell",
+  "show", "find", "memory", "memories", "day", "days",
+]);
+
+const MAX_NAME_TOKENS = 40;
+
+/** Candidate name tokens from a query: non-stopword unigrams + adjacent bigrams
+ *  (so multi-word names like "John Smith" can match). Pure + deterministic. */
+export function extractNameTokens(query: string): string[] {
+  const words = norm(query).replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
+  const tokens: string[] = [];
+  const seen = new Set<string>();
+  const add = (t: string) => {
+    if (t && !seen.has(t)) {
+      seen.add(t);
+      tokens.push(t);
+    }
+  };
+  for (let i = 0; i < words.length; i++) {
+    if (!NAME_STOPWORDS.has(words[i])) add(words[i]);
+    if (i + 1 < words.length) add(`${words[i]} ${words[i + 1]}`);
+  }
+  return tokens.slice(0, MAX_NAME_TOKENS);
+}
+
+/** Match fetched person rows against query tokens. Exact normalized_name first,
+ *  then alias overlap; deduped by id; name matches ordered before alias matches.
+ *  Pure — the caller is responsible for fetching rows scoped to the owner+workspace. */
+export function matchPeopleByTokens(
+  people: PersonRow[],
+  tokens: string[],
+): ResolvedPerson[] {
+  const tokenSet = new Set(tokens.map((t) => t.toLowerCase().trim()).filter(Boolean));
+  if (tokenSet.size === 0) return [];
+
+  const nameMatches: ResolvedPerson[] = [];
+  const aliasMatches: ResolvedPerson[] = [];
+  const taken = new Set<string>();
+  for (const person of people) {
+    if (taken.has(person.id)) continue;
+    if (tokenSet.has(norm(person.normalized_name))) {
+      nameMatches.push({ id: person.id, displayName: person.display_name, matchedBy: "name" });
+      taken.add(person.id);
+      continue;
+    }
+    const aliases = Array.isArray(person.aliases) ? person.aliases : [];
+    if (aliases.some((alias) => tokenSet.has(norm(alias)))) {
+      aliasMatches.push({ id: person.id, displayName: person.display_name, matchedBy: "alias" });
+      taken.add(person.id);
+    }
+  }
+  return [...nameMatches, ...aliasMatches];
+}
+
+/**
+ * Person boost added to a memory's blended score when it is linked to a matched
+ * person. STRICTLY GREATER than the max base score (semantic+recency+metadata sum
+ * to <= 1.0), so a person-linked memory always ranks ABOVE every non-linked one
+ * (even a perfectly-scored non-linked record can't tie), while BOTH still appear
+ * (a boost, never a hard filter).
+ */
+export const PERSON_RANK_BOOST = 2;
+
+/** Rank a candidate set with the person boost. Pure. Linked rank higher; ties by
+ *  blended score then stable index. With an empty linkedIds set this reduces to
+ *  the standard rankRecords order (so person-less queries are unchanged). */
+export function rankWithPersonBoost(
+  rows: MemoryRecord[],
+  query: RetrievalQuery,
+  linkedIds: Set<string>,
+  now: number = Date.now(),
+): MemoryRecord[] {
+  return rows
+    .map((row, index) => ({
+      row,
+      index,
+      score: blendedScore(row, query, now) + (linkedIds.has(row.id) ? PERSON_RANK_BOOST : 0),
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((entry) => entry.row);
+}
+
 /**
  * Retrieve matched memory RECORDS (full existing columns, incl. content/summary)
  * for the active workspace via deterministic filtering. RLS scopes by account;

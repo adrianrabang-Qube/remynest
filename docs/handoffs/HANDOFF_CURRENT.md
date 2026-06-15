@@ -12,6 +12,42 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Phase C3 — Person Retrieval Foundation** (retrieval **only**; read-only, additive). A standalone, composable
+  person-aware retriever — **not** wired into Ask Remy (foundation for a future phase). No schema/extraction/UI/
+  relationship-intelligence changes; the existing hybrid + `ask-action`/`ask-intelligence` are untouched.
+  - **Files:** **`lib/remy/person-retrieval.ts`** (new, server-only) — `resolvePeopleInQuery`,
+    `retrievePersonLinkedRecords`, `retrievePersonAware`. **`lib/remy/retrieval.ts`** — new **pure** helpers
+    `extractNameTokens`, `matchPeopleByTokens`, `rankWithPersonBoost`, `PERSON_RANK_BOOST`, types `PersonRow`/`ResolvedPerson`.
+  - **Architecture / flow:** `retrievePersonAware(supabase, question, query, owner, profile)` runs, in parallel,
+    the existing `retrieveAskRecordsHybrid` (base set, **unchanged**) and person resolution; then unions the
+    person-linked memories in and re-ranks with a person boost, returning `{records, matchedPersonIds,
+    matchedPersonNames}` (explainability metadata for future Ask explanations). **Resolution:** `extractNameTokens`
+    (non-stopword unigrams + adjacent bigrams) → **two parameterized, indexed** lookups (exact `normalized_name`;
+    `aliases` overlap), owner + workspace scoped → `matchPeopleByTokens` (exact name beats alias; deduped). **Linked
+    retrieval:** links → memory ids (`order created_at desc`, capped, deterministic) → memories re-fetched
+    `eq(user_id=owner)` + `eq/is(memory_profile_id)`.
+  - **Ranking rule:** person-linked memories get `PERSON_RANK_BOOST = 2` added to their blended score (which is
+    `<= 1.0`), so a linked memory **always ranks above** every non-linked one while **both still appear** — a boost,
+    **never a hard filter**. With no resolved people the boost set is empty → identical to the standard order
+    (existing retrieval unchanged).
+  - **Safety:** read-only (no create/update of people/links/extraction); **authenticated owner client** (RLS), never
+    service role; **no AI/embeddings/OpenAI**; person resolution + memory retrieval are owner + workspace scoped, so
+    personal "Dad" and care "Dad" stay distinct and people never resolve across users/workspaces. **GDPR unchanged**
+    (no schema/state; `delete_user_account` already purges people/links). No duplicate memories (union deduped by id).
+  - **Validation:** 14 pure unit tests pass — token extraction (incl. stopword filtering, bigrams), A (Dad by name),
+    B (Father by alias → same person), name-beats-alias dedupe, no-substring match, boost (linked > perfect non-linked,
+    both appear), E (person-less == `rankRecords`). **Adversarial review (2-agent): both PASS** — every break attempt
+    (cross-workspace/cross-user resolution, link leakage, duplicates, ranking corruption, N+1, token-injection)
+    **blocked-safe**; only **minor** findings, fixed (strict boost; deterministic link order) or documented. Lint
+    0 new (4/160), build ✓, server-only (no client-bundle leak). *Live DB scoping tests (C/D isolation) are operator-run
+    — no DB here; scoping verified statically + by the owner+workspace `.eq` on every query.*
+  - **Known limitations (C-phase candidates):** (a) name detection is unigram+bigram — 3+ word names ("Mary Jane
+    Smith") aren't matched as one token; (b) relationship-word resolution ("who is my father") works only if that word
+    was a stored alias/name (role-based resolution is a future phase); (c) the active workspace comes from a
+    client-set cookie — safe here because **every** query pins `owner = auth.uid()` (the load-bearing discriminator).
+  - **Future C4 dependencies:** `matchedPersonIds`/`matchedPersonNames` (explanations), `mention_count`/co-occurrence
+    over `memory_person_links` (relationship metrics); wiring `retrievePersonAware` into Ask is a deliberate later step
+    (keep the owner `.eq` on every query when doing so).
 - **Phase C2 — Person Extraction Foundation** (extraction **only**; no retrieval/Ask/relationship/UI). Grounded person
   mentions are persisted into `people` + `memory_person_links` as a **best-effort cognition task** that never blocks or
   fails memory creation.
