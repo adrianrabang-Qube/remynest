@@ -8,6 +8,12 @@ import {
 } from "@/lib/remy/ask-retrieval";
 import { retrievePersonAware } from "@/lib/remy/person-retrieval";
 import {
+  detectRelationshipIntent,
+  answerAggregateRelationship,
+  buildPersonRelationshipContext,
+  formatPersonRelationshipFacts,
+} from "@/lib/remy/relationship-intelligence";
+import {
   answerAskQuestion,
   buildAskContext,
   contextSize,
@@ -86,6 +92,27 @@ export async function answerAskRemy(
   const retrievalText =
     (options?.retrievalText ?? question).trim().slice(0, MAX_QUESTION_LENGTH) || trimmed;
 
+  // RELATIONSHIP INTELLIGENCE (Phase C5). Aggregate questions ("who do I mention
+  // most?", "who do I spend the most time with?") get a DETERMINISTIC answer built
+  // from real mention/co-occurrence counts + cited memory titles — no LLM, no
+  // inference, no profiling. Owner+workspace scoped; read-only.
+  const relIntent = detectRelationshipIntent(retrievalText);
+  if (relIntent?.kind === "aggregate") {
+    const agg = await answerAggregateRelationship(
+      supabase,
+      { type: relIntent.type },
+      user.id,
+      memoryProfileId,
+    );
+    return {
+      answer: agg.text,
+      count: agg.count,
+      failed: false,
+      matchedPersonIds: agg.personIds,
+      matchedPersonNames: agg.personNames,
+    };
+  }
+
   // PERSON-AWARE retrieval (Phase C4): hybrid (semantic + deterministic) UNION
   // person-linked memories, person-boosted. Additive — a query naming no known
   // person returns exactly the hybrid result. Workspace/owner scoped; no new AI call.
@@ -102,8 +129,26 @@ export async function answerAskRemy(
     return { ...EMPTY_ANSWER, matchedPersonIds, matchedPersonNames };
   }
 
-  const context = buildAskContext(records);
+  let context = buildAskContext(records);
   const count = contextSize(records);
+
+  // C5: a single-person relationship question ("tell me about my relationship with
+  // Dad") gets its grounded context enriched with FACTUAL metrics (counts/dates/
+  // co-occurrence only). Best-effort — never blocks the answer.
+  if (relIntent?.kind === "person" && matchedPersonIds.length >= 1) {
+    try {
+      const relCtx = await buildPersonRelationshipContext(
+        supabase,
+        matchedPersonIds[0],
+        user.id,
+        memoryProfileId,
+      );
+      const facts = formatPersonRelationshipFacts(relCtx);
+      if (facts) context = `${context}\n\n${facts}`;
+    } catch {
+      // relationship enrichment is best-effort; the grounded answer proceeds without it.
+    }
+  }
 
   // Explainability/observability (no UI). Log COUNTS only — never the person names
   // (PII) — to keep memory-derived identities out of server logs.

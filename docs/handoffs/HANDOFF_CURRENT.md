@@ -12,6 +12,42 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Phase C5 — Relationship Intelligence Foundation** (derived-on-read metrics over **existing** data; additive).
+  Derives relationship signals from `people` + `memory_person_links` + `memories` — **no** new extraction/embeddings/
+  schema/AI/graph/persistence/UI. Read-only, owner+workspace scoped, authenticated client (never service role).
+  - **Files:** **`lib/remy/relationship-intelligence.ts`** (new, server-only). **`app/(app)/remy/ask-action.ts`** —
+    a thin C5 branch in `answerAskRemy`.
+  - **Architecture:** one scoped IO fetch (`getRelationshipDataset`: people `.eq(created_by_account_id)`+`status=active`+
+    workspace; links `.in(workspace personIds)`; memories `.eq(user_id)`+workspace; **links then filtered to memories
+    that passed the scoped fetch**), then everything is **pure derivations** (unit-testable). Public API:
+    `getRelationshipMetrics`, `getTopPeople` (by mention|strength), `getRecentPeople`, `getPersonTimeline`,
+    `getPersonCoOccurrences`, `buildPersonRelationshipContext`.
+  - **Formulas:** `mentionCount` = **distinct memories** per person (defensive). Co-occurrence = per memory, distinct
+    persons → canonical `a|b` (a<b) pairs (**self-pairs excluded, dup pairs removed**), counted across memories;
+    `coOccurrenceTotal` sums a person's pairs once each. **Relationship strength** (deterministic, explainable, no AI):
+    `0.5·saturate(mentions) + 0.2·recency(latest) + 0.3·saturate(coOccur)`, where `saturate(n)=n/(n+5)` ∈ [0,1) and
+    `recency=0.5^(ageDays/1825)` (5-yr half-life). All ranking sorts tie-break on `personId.localeCompare` → stable.
+  - **Ask integration (Step 6, limited):** `detectRelationshipIntent` (pure) routes — **aggregate** ("who do I mention
+    most / spend the most time with / appears together most / mentioned recently") → a **deterministic, no-LLM** answer
+    built from real counts/co-occurrence + **cited memory titles** (`NO_DATA` when empty); **single-person**
+    ("tell me about my relationship with Dad") → the C4 grounded answer with a **factual facts block** appended to
+    context (counts/dates/co-occurrence only, labelled "do NOT infer feelings, health, or psychology"; best-effort).
+    Non-relationship queries are the **unchanged** C4 path. No psychological profiling, no sentiment inference.
+  - **Validation (Step 7):** ~28 pure unit tests (co-occurrence self/dup exclusion + canonical keys + counts; totals;
+    strength deterministic+monotonic+bounded; distinct mentionCount ignoring a dup link; metrics dates; stable ranking;
+    intent detection 7/7). **A/B isolation** (cross-user, cross-workspace) by construction — every query pins owner +
+    `memory_profile_id`; **C** no duplicate pairs; **D/E** deterministic/stable ranking; **F** no new OpenAI calls
+    (grep-verified — DB-only; aggregate is no-LLM; single-person reuses the same `answerAskQuestion`); **G** no new
+    schema; **H** `delete_user_account` unchanged (read-only). Lint 0 new (4/160), build ✓. *Live-DB metric checks are
+    operator-run (no DB here); scoping verified statically.*
+  - **Adversarial review (2-agent): both PASS** — all 21 break attempts (cross-user/workspace leakage, ranking
+    manipulation, duplicate counting, pair inflation, retrieval poisoning, GDPR, service-role, new-AI-call, integration
+    regression) **blocked-safe**. Findings: one **minor fixed** (mentionCount now counts distinct memories, not raw
+    links); one **minor pre-existing** (active-workspace cookie unvalidated — C5 safe because owner `.eq` is load-bearing).
+  - **Future graph dependencies (C6+):** the co-occurrence pair map is the raw **edge list** for a future relationship
+    graph; `relationshipStrength` is the candidate **edge weight**; `merged_into_person_id` (C1) is the hook for entity
+    de-dup/merge UX. A graph/family-tree/visualization, caregiver-relationship modelling, and any relationship UI are
+    **out of scope** and not started.
 - **Phase C4 — Ask Remy Person-Aware Retrieval Integration** (wires C3 into the **live** Ask answer path; additive).
   When a user asks about people ("Dad", "what did Dad and I do in Galway?", "John Smith"), Ask Remy now auto-retrieves
   person-linked memories and uses them in the grounded answer. No schema/migration/extraction/UI/embeddings/relationship-
