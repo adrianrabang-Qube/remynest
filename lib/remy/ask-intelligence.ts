@@ -29,6 +29,7 @@ Answer using ONLY the memories provided in the user message. Do not use outside 
 Never invent, assume, or add memories, names, dates, places, people, or events that are not present in the provided memories.
 If the provided memories do not contain enough to answer, say so plainly (for example: "The memories I found don't cover that.").
 Refer to memories by their titles where it helps. Keep replies warm, concise, and non-clinical.
+When a memory records an emotional tone (its mood or sentiment), you may gently reflect that recorded tone using the memory's own framing. Never infer, assess, score, or diagnose a person's mood, mental health, or cognitive state — describe only the emotion already recorded with the memory.
 
 ${PROMPT_SAFETY_PREAMBLE}`;
 
@@ -48,13 +49,20 @@ export function buildAskContext(records: MemoryRecord[]): string {
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, MAX_DETAIL_CHARS);
-      return [
+      // Recorded emotional tone (existing enrichment), if any — used non-clinically.
+      const tone = [record.ai_mood, record.ai_sentiment]
+        .map((v) => (v == null ? "" : String(v).trim()))
+        .filter(Boolean)
+        .join(", ");
+      const lines = [
         `Memory ${index + 1}`,
         `Title: ${title}`,
         `Date: ${date}`,
         `Category: ${category}`,
         `Details: ${detail || "(no details recorded)"}`,
-      ].join("\n");
+      ];
+      if (tone) lines.push(`Recorded tone: ${tone}`);
+      return lines.join("\n");
     })
     .join("\n\n");
 }

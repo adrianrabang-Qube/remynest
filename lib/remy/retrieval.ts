@@ -20,7 +20,7 @@ type RemySupabase = Awaited<ReturnType<typeof createClient>>;
 const RETRIEVAL_CAP = 2000;
 
 const SELECT_FIELDS =
-  "id, title, content, ai_title, ai_summary, ai_category, ai_tags, memory_date";
+  "id, title, content, ai_title, ai_summary, ai_category, ai_tags, memory_date, ai_mood, ai_sentiment, ai_emotional_weight";
 
 export interface RetrievalQuery {
   text?: string;
@@ -59,6 +59,10 @@ export interface MemoryRecord {
   ai_category?: string | null;
   ai_tags?: string[] | null;
   memory_date?: string | null;
+  // Emotional enrichment (existing columns; surfaced for mood-aware answers).
+  ai_mood?: string | null;
+  ai_sentiment?: string | null;
+  ai_emotional_weight?: number | string | null;
 }
 
 function norm(value: string | null | undefined): string {
@@ -110,7 +114,7 @@ export function matchesQuery(row: MemoryRecord, query: RetrievalQuery): boolean 
 
   if (text) {
     const haystack = norm(
-      [row.title, row.content, row.ai_title, row.ai_summary, row.ai_category]
+      [row.title, row.content, row.ai_title, row.ai_summary, row.ai_category, row.ai_mood]
         .filter(Boolean)
         .join(" "),
     );

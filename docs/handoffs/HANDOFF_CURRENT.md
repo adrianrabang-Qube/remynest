@@ -12,6 +12,23 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Intelligence V1.2 — mood/sentiment-aware context** (Phase B of the Companion roadmap; additive, no schema).
+  Surfaces the **existing** emotional enrichment to grounded answers. Preserves all guarantees
+  (grounded-only, retrieval-before-generation, no-AI-on-empty, workspace scoping, non-clinical).
+  - **`lib/remy/retrieval.ts`** — `SELECT_FIELDS` + `MemoryRecord` now include `ai_mood`/`ai_sentiment`/
+    `ai_emotional_weight` (existing columns, written at create-time); `matchesQuery` adds **`ai_mood`** to
+    the free-text haystack so emotion words match a memory's recorded mood (verified: text "joyful" →
+    memory with `ai_mood:"joyful"`). Sentiment/weight (likely scores) are intentionally **not** searchable.
+  - **`lib/remy/ask-intelligence.ts`** — `buildAskContext` appends a `Recorded tone: <mood, sentiment>`
+    line **only when present**; `GROUNDING_SYSTEM` gains a **non-clinical** instruction: reflect a memory's
+    recorded tone using its own framing, **never infer/score/diagnose** mood/mental-health/cognition.
+    `PROMPT_SAFETY_PREAMBLE` unchanged.
+  - **Scope note:** mood-aware *answering* ships now; mood/sentiment-based *retrieval ranking* (e.g.
+    "happiest memories") is deferred — it needs the `ai_sentiment`/`ai_emotional_weight` value vocabulary
+    confirmed in the SQL editor (operator). Validated: lint 0 new (4/160), build ✓ (`/remy` 5.02 kB).
+  - **Companion roadmap (designed, not yet implemented):** A) hybrid semantic retrieval, C) people/
+    relationship intelligence (needs schema migration — operator), D) conversational memory — see the
+    Companion Readiness Review in the session report.
 - **Ask Remy Intelligence V1.1 — hardening pass** (smallest-possible pre-ship pass over V1; no redesign).
   Fixes the production-readiness audit's verified failures and adds the required AI disclaimer. All changes localized;
   grounding invariants untouched (retrieval-before-generation, no-AI-on-empty, workspace scoping, safety preamble).
