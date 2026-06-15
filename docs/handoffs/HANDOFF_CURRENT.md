@@ -12,6 +12,40 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Phase C1 — People Intelligence Schema Foundation** (DB foundation **only**; migration committed, **NOT applied — operator step**).
+  Net-new schema for future People Intelligence. **No extraction, no retrieval, no Ask Remy/UI changes** (those are C2–C5).
+  Conforms to verified conventions; preserves every Ask Remy invariant (nothing in the runtime was touched).
+  - **Migration:** `supabase/migrations/20260615120000_people_intelligence_foundation.sql` (additive, idempotent
+    `if not exists`). **Apply in the Supabase SQL editor after review** — the app does not run migrations.
+  - **`people`** (one individual **per workspace**): `id, created_at, updated_at, created_by_account_id`
+    (→auth.users, cascade), `memory_profile_id` (→memory_profiles, cascade; **NULL = My Nest / personal**),
+    `display_name, normalized_name, aliases text[], role, mention_count, max_mention_confidence, status,
+    merged_into_person_id` (→people, set null). **Profile-scoped only — no global/hybrid identities.**
+  - **Dedupe (the NULL fix):** **two partial unique indexes** — `people_uq_personal (created_by_account_id,
+    normalized_name) WHERE memory_profile_id IS NULL` + `people_uq_care (created_by_account_id, memory_profile_id,
+    normalized_name) WHERE memory_profile_id IS NOT NULL` (a single composite would let NULL personal rows duplicate).
+  - **`memory_person_links`** (the grounding bridge): `id, created_at, memory_id` (→memories, **cascade**),
+    `person_id` (→people, **cascade**), `matched_text, source`; `unique(memory_id, person_id)`. FK cascades ⇒ no orphans.
+  - **RLS (mirrors `20260608180000_caregiver_authz_rls.sql`):** owner write (`created_by_account_id = auth.uid()`);
+    read = owner **or** accepted caregiver (`profile_relationships.invite_status='accepted'` + `caregiver_account_id`).
+    Personal rows (NULL profile) are owner-only. Links scope through their parent person (same predicate). Extraction
+    (C2) **must** run as the authenticated owner (`createClient`), never the service role (which bypasses RLS).
+  - **GDPR (`delete_user_account` re-created, 3 `[C1]` blocks, all prior logic preserved):** (2b) **re-own** the
+    departing user's people in profiles owned by others (incl. just-transferred) to that profile's owner — so person
+    data on transferred/tombstoned memories isn't cascade-deleted with the auth.users row (mirrors memory tombstoning);
+    (step 3) delete the user's own links + people (personal + sole-owned); (step 7) clear sole-owned-profile links +
+    people before profile delete. No orphans; transfer/tombstone/contributed paths respected.
+  - **Validation:** SQL tooling (supabase/psql) is **absent in this environment**, so the migration was **not applied
+    and runtime RLS/GDPR tests were not executed here** — that is an operator step. Statically verified: structure
+    (2 tables, 2 partial unique idx, 7 policies, 2 RLS enables, RPC re-create), FK cascades, the accepted-caregiver
+    predicate matches the GDPR RPC, and the RPC re-create preserves all original logic. App unaffected: lint 0 new
+    (4/160), build ✓. **Operator validation suite** (run post-apply): (a) personal dup `Dad` rejected by
+    `people_uq_personal`; (b) care dup rejected by `people_uq_care`; (c) same `Dad` allowed across personal vs care
+    (isolation); (d) caregiver can SELECT but not INSERT a care person; cross-account read returns 0; (e) `delete_user_account`
+    on a multi-workspace fixture leaves 0 orphan people/links and preserves a transferred profile's people; (f) deleting a
+    memory cascades its links.
+  - **Remaining Phase C roadmap:** C2 Person Extraction (verbatim-mention cognition task + backfill), C3 Person Retrieval
+    (`extractPeopleQuery` → hard pre-ranking scope), C4 Relationship Intelligence (derived metrics), C5 Companion Features.
 - **Ask Remy Intelligence V1.4 — Conversational Memory M1** (Phase D of the Companion roadmap; **client-side only, no schema/persistence/server session**).
   Enables grounded follow-ups ("tell me more", "what happened after that?", "what else?") while preserving
   every invariant: **retrieval runs every turn** (history never becomes a fact source), no-AI-on-empty,
