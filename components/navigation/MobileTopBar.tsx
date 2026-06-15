@@ -34,15 +34,20 @@ export default function MobileTopBar({
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-sand-deep/60 bg-sand/80 px-4 py-3 backdrop-blur-md">
-      <WorkspaceSelector
-        profiles={workspaceProfiles}
-        activeProfileId={activeProfileId}
-        isMyNest={isMyNest}
-        activeProfileName={activeProfileName}
-      />
+    <header className="md:hidden sticky top-0 z-40 flex w-full items-center gap-2 border-b border-sand-deep/60 bg-sand/80 px-4 py-3 backdrop-blur-md">
+      {/* Flexible, shrinkable left side: the selector truncates (its chip is
+          max-w-capped) before it can push the right controls off-screen. */}
+      <div className="flex min-w-0 flex-1 items-center">
+        <WorkspaceSelector
+          profiles={workspaceProfiles}
+          activeProfileId={activeProfileId}
+          isMyNest={isMyNest}
+          activeProfileName={activeProfileName}
+        />
+      </div>
 
-      <div className="flex items-center gap-1.5">
+      {/* Fixed, never-shrunk right cluster — search + avatar stay fully visible. */}
+      <div className="flex shrink-0 items-center gap-1.5">
         <Link
           href="/search"
           aria-label="Search"
