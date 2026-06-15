@@ -44,8 +44,25 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
     (isolation); (d) caregiver can SELECT but not INSERT a care person; cross-account read returns 0; (e) `delete_user_account`
     on a multi-workspace fixture leaves 0 orphan people/links and preserves a transferred profile's people; (f) deleting a
     memory cascades its links.
-  - **Remaining Phase C roadmap:** C2 Person Extraction (verbatim-mention cognition task + backfill), C3 Person Retrieval
-    (`extractPeopleQuery` → hard pre-ranking scope), C4 Relationship Intelligence (derived metrics), C5 Companion Features.
+  - **Pre-C2 remediation (adversarial audit + independent re-verify; folded into the still-unapplied migration):**
+    **#1 (HIGH, GDPR)** the `[C1]` re-own is now **collision-safe** — re-point colliding links → delete duplicate →
+    re-own the rest, so it can never raise a `people_uq_care` violation that rolls back `delete_user_account` (a
+    shared-workspace deletion-failure bug); the transfer path can legitimately create duplicates, so this is
+    load-bearing. **#2 (HIGH, RLS)** `people` INSERT/UPDATE now require the writer **own** the target workspace
+    (personal Nest or an owned care profile) — no cross-profile row planting. **#3 (MED, RLS)** `memory_person_links`
+    INSERT now requires the caller **own the person AND author the memory AND** they share a workspace — blocks
+    fabricated cross-workspace/cross-account grounding edges (incl. the personal-Nest hole the re-verify caught).
+    **#4 (LOW)** `normalized_name` is now **auto-derived by a trigger** (`people_set_normalized_name`) so the dedupe
+    key can't desync. Re-verified: GDPR re-own is collision-free / loses no surviving links / no survivor deletion /
+    idempotent; planting + cross-workspace links blocked; owner writes + caregiver reads intact; **0 new issues**.
+    Validated statically (no `supabase`/`psql` here — apply + RLS/GDPR runtime tests remain operator steps): lint
+    0 new (4/160), build ✓. **Operator validation suite (run post-apply):** the original suite PLUS — (g) deletion of
+    an owner whose successor caregiver also recorded the same person succeeds with links folded onto the survivor;
+    (h) a non-owner INSERT into another profile is rejected; (i) a cross-workspace `memory_person_links` INSERT is rejected.
+  - **Remaining Phase C roadmap:** C2 Person Extraction (verbatim-mention cognition task + backfill; note people-write
+    is owner-only, so extraction links the owner's own-authored memories — relax the write policy if caregiver-authored
+    extraction is later required), C3 Person Retrieval (`extractPeopleQuery` → hard pre-ranking scope), C4 Relationship
+    Intelligence (derived metrics), C5 Companion Features.
 - **Ask Remy Intelligence V1.4 — Conversational Memory M1** (Phase D of the Companion roadmap; **client-side only, no schema/persistence/server session**).
   Enables grounded follow-ups ("tell me more", "what happened after that?", "what else?") while preserving
   every invariant: **retrieval runs every turn** (history never becomes a fact source), no-AI-on-empty,

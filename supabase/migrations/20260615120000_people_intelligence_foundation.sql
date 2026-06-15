@@ -11,9 +11,18 @@
 --   * people <-> memories grounding bridge via memory_person_links (verbatim-mention
 --     grounded later in C2; this phase only defines the table).
 --   * RLS mirrors the verified caregiver model (20260608180000_caregiver_authz_rls.sql):
---     owner full access; caregiver read-only via profile_relationships.invite_status='accepted'.
+--     reads = owner OR accepted caregiver; WRITES = owner only AND workspace-authorized
+--     (personal Nest, or a care profile the writer owns) — no cross-profile row planting.
 --   * GDPR: delete_user_account (20260605120000) extended so no orphaned people/links,
---     respecting transfer / tombstone / contributed-memory paths.
+--     respecting transfer / tombstone / contributed-memory paths; the re-own step is
+--     COLLISION-SAFE (cannot raise a unique violation that rolls back the deletion).
+--
+-- Pre-C2 remediation applied (adversarial audit + re-verify): [#1] collision-safe GDPR
+-- re-own (load-bearing: the transfer path can legitimately create duplicates), [#2]
+-- people write workspace-authorization, [#3] memory_person_links same-workspace AND
+-- caller-authored-memory integrity, [#4] normalized_name auto-derive trigger. This
+-- migration is NOT YET APPLIED, so the fixes are folded in-place (operator applies one
+-- correct version).
 --
 -- OPERATOR STEP: apply in the Supabase SQL editor / migration runner after review.
 -- The application does not apply migrations.
@@ -40,6 +49,26 @@ create table if not exists public.people (
   status                 text not null default 'active',  -- 'active' | 'merged' | 'archived'
   merged_into_person_id  uuid references public.people(id) on delete set null
 );
+
+-- [C1-fix #4] normalized_name is the dedupe key (used by both partial unique indexes).
+-- DERIVE it server-side from display_name via a trigger so neither the app nor C2 can
+-- desync it (more robust than a CHECK, which would reject legitimate app-side
+-- normalization that differs on exotic whitespace/locale). Writers may omit
+-- normalized_name; the trigger fills it before the NOT NULL / uniqueness checks.
+create or replace function public.people_set_normalized_name()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.normalized_name := lower(btrim(coalesce(new.display_name, '')));
+  return new;
+end;
+$$;
+
+drop trigger if exists people_normalize_name on public.people;
+create trigger people_normalize_name
+  before insert or update on public.people
+  for each row execute function public.people_set_normalized_name();
 
 -- Dedupe: Postgres treats NULL as DISTINCT in a UNIQUE, so a single composite
 -- index would NOT dedupe personal (NULL) rows. Use TWO partial unique indexes.
@@ -96,17 +125,51 @@ using (
   )
 );
 
--- people: WRITE = owner only.
+-- people: WRITE = owner only, AND workspace-authorized. [C1-fix #2] The author must
+-- be writing into their OWN personal Nest (memory_profile_id IS NULL) or a care
+-- profile they OWN (memory_profiles.created_by_account_id = auth.uid()). Without the
+-- workspace branch, any authenticated user could plant self-owned rows into an
+-- arbitrary profile — the entry primitive for the GDPR re-own collision.
 drop policy if exists "people_insert_authz" on public.people;
 create policy "people_insert_authz" on public.people
 for insert to authenticated
-with check (created_by_account_id = auth.uid());
+with check (
+  created_by_account_id = auth.uid()
+  and (
+    memory_profile_id is null
+    or exists (
+      select 1 from public.memory_profiles mp
+      where mp.id = people.memory_profile_id
+        and mp.created_by_account_id = auth.uid()
+    )
+  )
+);
 
 drop policy if exists "people_update_authz" on public.people;
 create policy "people_update_authz" on public.people
 for update to authenticated
-using (created_by_account_id = auth.uid())
-with check (created_by_account_id = auth.uid());
+using (
+  created_by_account_id = auth.uid()
+  and (
+    memory_profile_id is null
+    or exists (
+      select 1 from public.memory_profiles mp
+      where mp.id = people.memory_profile_id
+        and mp.created_by_account_id = auth.uid()
+    )
+  )
+)
+with check (
+  created_by_account_id = auth.uid()
+  and (
+    memory_profile_id is null
+    or exists (
+      select 1 from public.memory_profiles mp
+      where mp.id = people.memory_profile_id
+        and mp.created_by_account_id = auth.uid()
+    )
+  )
+);
 
 drop policy if exists "people_delete_authz" on public.people;
 create policy "people_delete_authz" on public.people
@@ -136,14 +199,25 @@ using (
 );
 
 -- memory_person_links: WRITE = owner of the parent person only.
+-- [C1-fix #3] A link is valid only when the caller owns the person AND the linked
+-- memory is in the SAME workspace as the person. This blocks fabricated grounding
+-- edges that cross workspaces (a self-owned person pointed at a memory elsewhere).
 drop policy if exists "mpl_insert_authz" on public.memory_person_links;
 create policy "mpl_insert_authz" on public.memory_person_links
 for insert to authenticated
 with check (
   exists (
-    select 1 from public.people p
+    select 1
+    from public.people p
+    join public.memories m on m.id = memory_person_links.memory_id
     where p.id = memory_person_links.person_id
-      and p.created_by_account_id = auth.uid()
+      and p.created_by_account_id = auth.uid()   -- caller owns the person
+      and m.user_id = auth.uid()                 -- caller authored the memory (closes the
+                                                 -- personal-Nest cross-account-link hole)
+      and (
+        (p.memory_profile_id is null and m.memory_profile_id is null)
+        or p.memory_profile_id = m.memory_profile_id  -- same workspace
+      )
   )
 );
 
@@ -265,10 +339,47 @@ begin
     select count(*) into v_tombstoned from tomb;
   end if;
 
-  -- [C1] 2b) Re-own people the departing user created in profiles owned by
-  --      someone else (including profiles just transferred in step 1) to that
-  --      profile's owner, so person links on surviving/tombstoned memories are
-  --      preserved and are NOT cascade-deleted with the auth.users row later.
+  -- [C1] 2b) Re-own people the departing user created in profiles owned by someone
+  --      else (incl. profiles just transferred in step 1) to that profile's owner,
+  --      so person links on surviving/tombstoned memories are preserved and are NOT
+  --      cascade-deleted with the auth.users row later.
+  --      [C1-fix #1] COLLISION-SAFE: if the target owner ALREADY has a person with
+  --      the same (memory_profile_id, normalized_name), a bare re-own UPDATE would
+  --      violate people_uq_care and roll back the ENTIRE deletion. So first merge the
+  --      duplicate into the surviving person, then re-own the rest. Idempotent.
+
+  -- (i) Re-point the departing duplicate's links onto the surviving (owner's) person,
+  --     skipping any (memory_id, person_id) that would duplicate an existing link.
+  update memory_person_links mpl
+     set person_id = keep.id
+    from people dup
+    join memory_profiles mp on mp.id = dup.memory_profile_id
+    join people keep
+      on keep.memory_profile_id = dup.memory_profile_id
+     and keep.normalized_name   = dup.normalized_name
+     and keep.created_by_account_id = mp.created_by_account_id
+   where mpl.person_id = dup.id
+     and dup.created_by_account_id = p_user_id
+     and mp.created_by_account_id <> p_user_id
+     and keep.id <> dup.id
+     and not exists (
+       select 1 from memory_person_links x
+       where x.memory_id = mpl.memory_id and x.person_id = keep.id
+     );
+
+  -- (ii) Drop the now-redundant duplicate people (any links that collided in (i)
+  --      cascade away via memory_person_links.person_id ON DELETE CASCADE).
+  delete from people dup
+   using memory_profiles mp, people keep
+   where dup.memory_profile_id = mp.id
+     and dup.created_by_account_id = p_user_id
+     and mp.created_by_account_id <> p_user_id
+     and keep.memory_profile_id = dup.memory_profile_id
+     and keep.normalized_name   = dup.normalized_name
+     and keep.created_by_account_id = mp.created_by_account_id
+     and keep.id <> dup.id;
+
+  -- (iii) Re-own the remaining (non-colliding) people to the profile's owner.
   update people p
      set created_by_account_id = mp.created_by_account_id,
          updated_at = now()
