@@ -1,6 +1,8 @@
 import type { createClient } from "@/utils/supabase/server";
 import {
-  retrieveMemories,
+  retrieveMemoryRecords,
+  toRetrievalResult,
+  type MemoryRecord,
   type RetrievalQuery,
   type RetrievalResult,
 } from "@/lib/remy/retrieval";
@@ -77,7 +79,9 @@ export function parseRetrievalQuery(input: string): RetrievalQuery | null {
   const year = q.match(/\b((?:19|20)\d{2})\b/);
   if (year) return { year: parseInt(year[1], 10) };
 
-  const about = q.match(/\b(?:about|mentioning|containing|regarding)\s+(.+)$/);
+  const about = q.match(
+    /\b(?:about|mentioning|mention|mentions|containing|regarding)\s+(.+)$/,
+  );
   if (about) {
     const term = cleanTerm(about[1]);
     return term ? { text: term } : null;
@@ -99,17 +103,18 @@ export function parseRetrievalQuery(input: string): RetrievalQuery | null {
 }
 
 /**
- * Run a parsed query through the Retrieval Engine. A bare category term (from
- * "{X} memories") is broadened deterministically — tried as category, then tag,
- * then free text, first non-empty tier wins — since a free-text word can't be
- * known to be a category vs a tag without inspecting data. Explicit
- * year/decade/about/tagged queries run once. No ranking, no AI.
+ * Run a parsed query through the Retrieval Engine, returning matched RECORDS. A
+ * bare category term (from "{X} memories") is broadened deterministically — tried
+ * as category, then tag, then free text, first non-empty tier wins — since a
+ * free-text word can't be known to be a category vs a tag without inspecting
+ * data. Explicit year/decade/about/tagged queries run once. No ranking, no AI.
+ * Shared by the candidate list (Retrieval) and the grounded answer (Intelligence).
  */
-export async function retrieveAskResults(
+export async function retrieveAskRecords(
   supabase: RemySupabase,
   query: RetrievalQuery,
   memoryProfileId: string | null,
-): Promise<AskRetrievalResults> {
+): Promise<MemoryRecord[]> {
   const isBareCategory =
     Boolean(query.category) &&
     !query.text &&
@@ -126,8 +131,18 @@ export async function retrieveAskResults(
     : [query];
 
   for (const attempt of attempts) {
-    const { results } = await retrieveMemories(supabase, attempt, memoryProfileId);
-    if (results.length > 0) return { results };
+    const records = await retrieveMemoryRecords(supabase, attempt, memoryProfileId);
+    if (records.length > 0) return records;
   }
-  return { results: [] };
+  return [];
+}
+
+/** Bridge for the candidate list: matched records mapped to lightweight results. */
+export async function retrieveAskResults(
+  supabase: RemySupabase,
+  query: RetrievalQuery,
+  memoryProfileId: string | null,
+): Promise<AskRetrievalResults> {
+  const records = await retrieveAskRecords(supabase, query, memoryProfileId);
+  return { results: records.map(toRetrievalResult) };
 }

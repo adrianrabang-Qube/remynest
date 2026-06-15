@@ -3,7 +3,7 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-13
+**Last updated:** 2026-06-15
 
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
@@ -12,6 +12,24 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Intelligence V1 — first grounded LLM answer layer** (`/remy`; completes the pipeline at **… → Retrieval → Intelligence**).
+  Reuses the **existing** Remy AI infra (the `openai` client, `gpt-4o-mini`, shared `PROMPT_SAFETY_PREAMBLE`) fed by the
+  **deterministic** Retrieval Engine — no new provider/stack, no embeddings. Committed as a **V1 checkpoint**; a **V1.1
+  hardening pass** (disclaimer + extraction fixes + word-boundary match + submit guard) lands before ship.
+  - **`lib/remy/ask-intent.ts`** (new, pure/client-safe) — `classifyAskIntent` (RETRIEVE/QUESTION/SUMMARY) + `extractAskQuery`
+    (scopes which memories feed the answer; returns null for navigation phrasings so they fall through to `resolveRemyIntent`).
+  - **`lib/remy/ask-intelligence.ts`** (new, server) — `buildAskContext` (pure; ≤8 memories × 600 chars) + `answerAskQuestion`
+    (grounded gpt-4o-mini, temp 0.3, 30s timeout; `GROUNDING_SYSTEM` + safety preamble; answer **only** from supplied memories).
+  - **`lib/remy/retrieval.ts`** (refactor) — extracted `matchesQuery`/`hasAnyFilter`/`toRetrievalResult`; added
+    `retrieveMemoryRecords` (rich records w/ content+summary for the LLM); `retrieveMemories` delegates (behavior preserved,
+    parity runtime-tested). **`ask-retrieval.ts`** gained `retrieveAskRecords` (cascade on records) + `mention(s)` parsing.
+  - **`app/(app)/remy/ask-action.ts`** (`"use server"`) — `answerAskRemy`: getUser + `resolveActiveProfileId` (workspace
+    scoping) → retrieve first → **no AI call when retrieval is empty** → buildAskContext → answerAskQuestion; safe fallback.
+  - **`components/remy/RemyAsk.tsx`** — extract → classify → RETRIEVE lists candidates / QUESTION+SUMMARY grounded answer;
+    navigation preserved. Grounded, workspace-scoped, no fabrication, no retrieval bypass.
+  - **Reviewed:** 8-dimension adversarial workflow → **0 confirmed findings** (2 dims self-verified). Validated: lint 0 new
+    (4/160), build ✓ (`/remy` 4.31 kB). **Known V1 limits (V1.1/V2):** keyword-only retrieval (~30% NL coverage), no AI
+    disclaimer in UI, substring matching false positives — addressed in V1.1.
 - **Ask Remy Retrieval Integration V1 — Ask now retrieves real memories** (deterministic; wires Ask → Retrieval Engine).
   Completes the pipeline at **… → Ask → Retrieval**. NOT AI/semantic/embeddings/vector/RAG/summaries/
   answer-generation — only factual memory candidates.

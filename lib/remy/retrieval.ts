@@ -71,59 +71,91 @@ function yearOf(memoryDate: string | null | undefined): number | null {
   return Number.isNaN(year) ? null : year;
 }
 
-/**
- * Pure deterministic filter. Applies every provided filter with AND semantics
- * over existing memory fields (case-insensitive). No AI, scoring or ranking. A
- * query with no recognized filter returns nothing (never the whole corpus), and
- * unmatched filters return an empty list (no fabricated results).
- */
-export function filterMemories(
-  rows: MemoryRecord[],
-  query: RetrievalQuery,
-): RetrievalResult[] {
+/** True when the query carries at least one filter. */
+export function hasAnyFilter(query: RetrievalQuery): boolean {
+  return (
+    Boolean(norm(query.text)) ||
+    Boolean(norm(query.category)) ||
+    Boolean(norm(query.tag)) ||
+    query.year != null ||
+    query.decade != null
+  );
+}
+
+/** Pure AND-match of one memory row against a query (case-insensitive). */
+export function matchesQuery(row: MemoryRecord, query: RetrievalQuery): boolean {
   const text = norm(query.text);
   const category = norm(query.category);
   const tag = norm(query.tag);
   const { year, decade } = query;
 
-  const hasFilter =
-    Boolean(text) ||
-    Boolean(category) ||
-    Boolean(tag) ||
-    year != null ||
-    decade != null;
-  if (!hasFilter) return [];
+  if (text) {
+    const haystack = norm(
+      [row.title, row.content, row.ai_title, row.ai_summary, row.ai_category]
+        .filter(Boolean)
+        .join(" "),
+    );
+    if (!haystack.includes(text)) return false;
+  }
+  if (category && norm(row.ai_category) !== category) return false;
+  if (tag) {
+    const tags = Array.isArray(row.ai_tags) ? row.ai_tags.map((t) => norm(t)) : [];
+    if (!tags.includes(tag)) return false;
+  }
+  if (year != null && yearOf(row.memory_date) !== year) return false;
+  if (decade != null) {
+    const y = yearOf(row.memory_date);
+    if (y == null || Math.floor(y / 10) * 10 !== decade) return false;
+  }
+  return true;
+}
 
-  return rows
-    .filter((row) => {
-      if (text) {
-        const haystack = norm(
-          [row.title, row.content, row.ai_title, row.ai_summary, row.ai_category]
-            .filter(Boolean)
-            .join(" "),
-        );
-        if (!haystack.includes(text)) return false;
-      }
-      if (category && norm(row.ai_category) !== category) return false;
-      if (tag) {
-        const tags = Array.isArray(row.ai_tags)
-          ? row.ai_tags.map((t) => norm(t))
-          : [];
-        if (!tags.includes(tag)) return false;
-      }
-      if (year != null && yearOf(row.memory_date) !== year) return false;
-      if (decade != null) {
-        const y = yearOf(row.memory_date);
-        if (y == null || Math.floor(y / 10) * 10 !== decade) return false;
-      }
-      return true;
-    })
-    .map((row) => ({
-      memoryId: row.id,
-      title: row.ai_title || row.title || "Untitled memory",
-      memoryDate: row.memory_date ?? null,
-      category: row.ai_category ?? null,
-    }));
+/** Map a matched memory row to a lightweight retrieval result. */
+export function toRetrievalResult(row: MemoryRecord): RetrievalResult {
+  return {
+    memoryId: row.id,
+    title: row.ai_title || row.title || "Untitled memory",
+    memoryDate: row.memory_date ?? null,
+    category: row.ai_category ?? null,
+  };
+}
+
+/**
+ * Pure deterministic filter. Applies every provided filter with AND semantics.
+ * A query with no recognized filter returns nothing (never the whole corpus).
+ */
+export function filterMemories(
+  rows: MemoryRecord[],
+  query: RetrievalQuery,
+): RetrievalResult[] {
+  if (!hasAnyFilter(query)) return [];
+  return rows.filter((row) => matchesQuery(row, query)).map(toRetrievalResult);
+}
+
+/**
+ * Retrieve matched memory RECORDS (full existing columns, incl. content/summary)
+ * for the active workspace via deterministic filtering. RLS scopes by account;
+ * this narrows to the active workspace. Returns nothing for a filterless query —
+ * never the whole corpus — so callers cannot accidentally dump every memory.
+ */
+export async function retrieveMemoryRecords(
+  supabase: RemySupabase,
+  query: RetrievalQuery,
+  memoryProfileId: string | null,
+): Promise<MemoryRecord[]> {
+  if (!hasAnyFilter(query)) return [];
+
+  let dbQuery = supabase
+    .from("memories")
+    .select(SELECT_FIELDS)
+    .order("created_at", { ascending: false })
+    .limit(RETRIEVAL_CAP);
+  dbQuery = memoryProfileId
+    ? dbQuery.eq("memory_profile_id", memoryProfileId)
+    : dbQuery.is("memory_profile_id", null);
+
+  const { data } = await dbQuery;
+  return ((data ?? []) as MemoryRecord[]).filter((row) => matchesQuery(row, query));
 }
 
 /**
@@ -135,17 +167,8 @@ export async function retrieveMemories(
   query: RetrievalQuery,
   memoryProfileId: string | null,
 ): Promise<RetrievalResults> {
-  let dbQuery = supabase
-    .from("memories")
-    .select(SELECT_FIELDS)
-    .order("created_at", { ascending: false })
-    .limit(RETRIEVAL_CAP);
-  dbQuery = memoryProfileId
-    ? dbQuery.eq("memory_profile_id", memoryProfileId)
-    : dbQuery.is("memory_profile_id", null);
-
-  const { data } = await dbQuery;
-  return { results: filterMemories((data ?? []) as MemoryRecord[], query) };
+  const records = await retrieveMemoryRecords(supabase, query, memoryProfileId);
+  return { results: records.map(toRetrievalResult) };
 }
 
 /** Factual retrieval-health (reuses the search-health counts; no duplication). */
