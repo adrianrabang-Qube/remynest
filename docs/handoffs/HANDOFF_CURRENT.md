@@ -35,6 +35,20 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile header sticky-position fix** (real root cause of the "My Nest" selector clipping; mobile-only, no desktop change).
+  The sticky mobile header (`MobileTopBar`) rendered horizontally shifted off-screen (left edge / Workspace Selector
+  clipped). **Root cause:** `body { overflow-x: hidden }` (`app/globals.css:43`) makes `<body>` a horizontal scroll
+  container, which breaks `position: sticky` on WebKit/iOS — the sticky header positions against the body's scroll extent
+  instead of the viewport. The earlier `MobileTopBar` flex fix (`w-full`/`flex-1`/`shrink-0`, commit `5c46a73`) only fixed
+  intra-header distribution, not the mis-positioned header *box*, so it couldn't help. **Fix:** `body { overflow-x: clip }`
+  (was `hidden`) — `clip` still prevents horizontal overflow but does NOT create a scroll container, so sticky positions
+  correctly. `clip` clips identically to `hidden` on desktop → no desktop regression. **Overflow-source diagnostic:** the
+  shared mobile shell has **no in-flow element exceeding the viewport** — `WorkspaceSelector` is `max-w-[11rem]`,
+  `MobileBottomNav` items are all `flex-1` in a `fixed inset-x-0` bar, drawers/dialogs are `fixed` (only when open), `<main>`
+  is `w-full max-w-[1600px] px-4`, `UserProfileDropdown` (`w-[360px]`) is desktop-only, `FamilyOverview`/`WorkspaceBanner`
+  don't render in My Nest — so the defect is the `overflow-x: hidden`↔`sticky` interaction itself, which `clip` resolves.
+  1 file (`app/globals.css`), lint 0 new (4/160), build ✓. *Note: live 390px visual confirmation needs an authenticated
+  WebView session (the `(app)` pages are auth-gated) — verified here by lint/build + the shared-shell code audit.*
 - **Remy Identity Consolidation V1 + "Who is X?" routing fix** (branding + one-line client fix; no functionality removed).
   Establishes the **Remy AI Architecture Rule** (see top of this doc): Remy is the sole AI identity; all capabilities
   are internal layers behind Remy.
