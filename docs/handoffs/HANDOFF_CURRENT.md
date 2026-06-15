@@ -20,10 +20,13 @@ childhood", "What memories mention Galway?" — is answered *as Remy*.
 - **User-facing naming:** "Remy" (the identity / chat header) and "Ask Remy" (the entry point /
   nav). Internal module/route/function names (e.g. `/memory-chat`, `answerAskRemy`, `build-people`)
   are implementation details, not brands.
-- **Known consolidation debt (do not delete without approval):** two "Ask Remy" surfaces still
-  coexist — `/remy` (RemyAsk, the C1–C5 person/relationship-aware pipeline, Home-linked) and
-  `/memory-chat` (the older semantic chat, in nav). Both are now branded "Remy"/"Ask Remy"
-  (branding consolidated); unifying them onto the C1–C5 pipeline is a recommended follow-up.
+- **Consolidation — RESOLVED:** `/remy` is the **single** Ask Remy surface. Nav "Ask Remy" + the
+  dashboard CTA point at `/remy`, and **`/memory-chat` now redirects to `/remy`** (server
+  `redirect()`). The route + the `/api/memory-chat` API + `retrieve-memory-context` are kept as
+  **internal implementation** (no capability removed; semantic retrieval lives on inside `/remy`'s
+  hybrid). One AI surface; all intelligence (memory/people/relationship/timeline/reminder) are
+  internal layers behind Remy. *(`/memory-chat`'s old retriever was account-scoped, not
+  workspace-isolated — consolidating onto `/remy` also closed that isolation gap.)*
 
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
