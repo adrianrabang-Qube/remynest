@@ -12,6 +12,28 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Intelligence V1.1 — hardening pass** (smallest-possible pre-ship pass over V1; no redesign).
+  Fixes the production-readiness audit's verified failures and adds the required AI disclaimer. All changes localized;
+  grounding invariants untouched (retrieval-before-generation, no-AI-on-empty, workspace scoping, safety preamble).
+  - **AI disclaimer (compliance):** `RemyAsk.tsx` now renders `<AIDisclaimer kind="memoryChat" variant="footnote" />`
+    under every grounded answer (parity with `/memory-chat`; closes the missing-disclaimer gap on a healthcare AI surface).
+  - **Double-submit guard:** the Ask button is `disabled` while loading and `onSubmit` early-returns during "loading"
+    (each answer is a paid LLM call).
+  - **Extraction fixes** (verified via the 7-query probe): the fallback now takes the **last** content word, not the first
+    (`ask-intent.ts` — the subject trails the cue): "When did I visit **Dublin**?" → `{category:"dublin"}` (was `"i"`);
+    "Summarize my relationship with **Mary**" → `{category:"mary"}` (was `"relationship"`); "before I **moved house**" →
+    `{category:"house"}`; "after **retirement**" → `{category:"retirement"}`. `ask-retrieval.ts` adds **involve(s)/involving**
+    as a text cue ("What memories involve **hospitals**?" → `{text:"hospitals"}`, was `{category:"what"}`) and adds the
+    question-words (what/when/where/why/how/who/whose/which) to `TERM_STOPWORDS` so `"{word} memories"` can't yield a
+    question word.
+  - **Word-boundary matching** (`retrieval.ts` `containsWord`): the free-text tier is now token-aware — `"son"` no longer
+    matches "person"/"reason", `"mary"` no longer matches "rosemary". Category/tag/year/decade matching and all other
+    retrieval semantics (AND, fields, case-insensitivity, cascade, empty handling) are **unchanged**; only the text tier
+    moved from raw substring to bounded-token.
+  - **Validated:** 7-query probe all corrected (before: 6/7 broken → after: 4 verified-fixed, "happiest"/"son" improved at
+    the noun/match layer), no regression on the original success criteria, lint 0 new (4/160), build ✓ (`/remy` 5.02 kB).
+    **Still V2 (not in scope):** semantic/embedding retrieval, `ai_mood`/`ai_sentiment` in context, conversation memory,
+    entity model, markdown rendering.
 - **Ask Remy Intelligence V1 — first grounded LLM answer layer** (`/remy`; completes the pipeline at **… → Retrieval → Intelligence**).
   Reuses the **existing** Remy AI infra (the `openai` client, `gpt-4o-mini`, shared `PROMPT_SAFETY_PREAMBLE`) fed by the
   **deterministic** Retrieval Engine — no new provider/stack, no embeddings. Committed as a **V1 checkpoint**; a **V1.1

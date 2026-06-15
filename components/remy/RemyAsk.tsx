@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search } from "lucide-react";
 
+import AIDisclaimer from "@/components/ai/AIDisclaimer";
 import { resolveRemyIntent, type RemyAsk as RemyAskModel } from "@/lib/remy/ask";
 import { classifyAskIntent, extractAskQuery } from "@/lib/remy/ask-intent";
 import type { AskRetrievalResult } from "@/lib/remy/ask-retrieval";
@@ -43,6 +44,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (status === "loading") return; // guard double-submit (each answer is a paid LLM call)
     const text = query.trim();
     if (!text) return;
 
@@ -112,7 +114,8 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
           />
           <button
             type="submit"
-            className="shrink-0 rounded-full bg-sage px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-sage-deep"
+            disabled={status === "loading"}
+            className="shrink-0 rounded-full bg-sage px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-sage-deep disabled:cursor-not-allowed disabled:opacity-50"
           >
             Ask
           </button>
@@ -142,6 +145,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
               {answer.count === 1 ? "memory" : "memories"} Remy found.
             </p>
           )}
+          <AIDisclaimer kind="memoryChat" variant="footnote" />
         </div>
       )}
 

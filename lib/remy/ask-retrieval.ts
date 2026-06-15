@@ -46,6 +46,15 @@ const TERM_STOPWORDS = new Set([
   "see",
   "list",
   "get",
+  // Question words — "what memories involve X" must not parse to category "what".
+  "what",
+  "when",
+  "where",
+  "why",
+  "how",
+  "who",
+  "whose",
+  "which",
 ]);
 
 function cleanTerm(raw: string): string {
@@ -80,7 +89,7 @@ export function parseRetrievalQuery(input: string): RetrievalQuery | null {
   if (year) return { year: parseInt(year[1], 10) };
 
   const about = q.match(
-    /\b(?:about|mentioning|mention|mentions|containing|regarding)\s+(.+)$/,
+    /\b(?:about|mentioning|mention|mentions|containing|regarding|involve|involves|involving)\s+(.+)$/,
   );
   if (about) {
     const term = cleanTerm(about[1]);

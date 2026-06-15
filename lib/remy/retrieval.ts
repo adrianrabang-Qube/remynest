@@ -71,6 +71,25 @@ function yearOf(memoryDate: string | null | undefined): number | null {
   return Number.isNaN(year) ? null : year;
 }
 
+/** Escape a string for safe literal use inside a RegExp. */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Token-aware containment: the term must appear bounded by non-alphanumeric
+ * characters (or the string edges), so a query for "son" does NOT match
+ * "person"/"reason" and "mary" does NOT match "rosemary". Multi-word terms are
+ * matched as a bounded phrase. A term with no alphanumeric character falls back
+ * to plain containment. Replaces raw substring matching; all other retrieval
+ * semantics (AND, fields searched, case-insensitivity) are unchanged.
+ */
+function containsWord(haystack: string, term: string): boolean {
+  if (!/[a-z0-9]/i.test(term)) return haystack.includes(term);
+  const re = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(term)}(?:[^a-z0-9]|$)`, "i");
+  return re.test(haystack);
+}
+
 /** True when the query carries at least one filter. */
 export function hasAnyFilter(query: RetrievalQuery): boolean {
   return (
@@ -95,7 +114,7 @@ export function matchesQuery(row: MemoryRecord, query: RetrievalQuery): boolean 
         .filter(Boolean)
         .join(" "),
     );
-    if (!haystack.includes(text)) return false;
+    if (!containsWord(haystack, text)) return false;
   }
   if (category && norm(row.ai_category) !== category) return false;
   if (tag) {

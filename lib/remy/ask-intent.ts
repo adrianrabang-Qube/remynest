@@ -64,9 +64,12 @@ export function classifyAskIntent(input: string): AskIntent {
 /**
  * Derive the deterministic RetrievalQuery that scopes an Ask request. Reuses the
  * structured parser (year/decade/about/mention/tagged/"{X} memories") first; for
- * question/summary phrasings it strips the leading cue and uses the first subject
- * word as a (cascade-broadened) category term. Returns null when the text carries
- * no memory-query signal, so navigation phrasings fall through untouched.
+ * question/summary phrasings it strips the leading cue and uses the LAST subject
+ * word as a (cascade-broadened) category term — in natural questions the subject
+ * trails the cue ("visit Dublin", "with Mary", "after retirement", "moved house"),
+ * so the last content word is the subject far more often than the first. Returns
+ * null when the text carries no memory-query signal, so navigation phrasings fall
+ * through untouched.
  */
 export function extractAskQuery(input: string): RetrievalQuery | null {
   const direct = parseRetrievalQuery(input);
@@ -85,5 +88,5 @@ export function extractAskQuery(input: string): RetrievalQuery | null {
     .trim()
     .split(" ")
     .filter((w) => w && !FALLBACK_FILLER.has(w));
-  return words.length ? { category: words[0] } : null;
+  return words.length ? { category: words[words.length - 1] } : null;
 }
