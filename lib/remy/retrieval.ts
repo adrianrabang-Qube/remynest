@@ -19,8 +19,8 @@ type RemySupabase = Awaited<ReturnType<typeof createClient>>;
  */
 const RETRIEVAL_CAP = 2000;
 
-const SELECT_FIELDS =
-  "id, title, content, ai_title, ai_summary, ai_category, ai_tags, memory_date, ai_mood, ai_sentiment, ai_emotional_weight";
+export const MEMORY_SELECT_FIELDS =
+  "id, title, content, ai_title, ai_summary, ai_category, ai_tags, memory_date, ai_mood, ai_sentiment, ai_emotional_weight, created_at";
 
 export interface RetrievalQuery {
   text?: string;
@@ -63,6 +63,9 @@ export interface MemoryRecord {
   ai_mood?: string | null;
   ai_sentiment?: string | null;
   ai_emotional_weight?: number | string | null;
+  created_at?: string | null;
+  /** Attached by the hybrid retriever (semantic cosine ~[0,1]); 0 for deterministic-only rows. */
+  similarity?: number;
 }
 
 function norm(value: string | null | undefined): string {
@@ -155,6 +158,114 @@ export function filterMemories(
   return rows.filter((row) => matchesQuery(row, query)).map(toRetrievalResult);
 }
 
+// ---------------------------------------------------------------------------
+// Hybrid ranking (pure). Used by the hybrid semantic retriever to order a merged
+// set of semantic + deterministic candidates. No AI, no IO. Semantic-primary so
+// recall leads; recency + metadata break ties and respect explicit intent.
+// ---------------------------------------------------------------------------
+
+export const RANK_W_SEMANTIC = 0.65;
+export const RANK_W_RECENCY = 0.2;
+export const RANK_W_METADATA = 0.15;
+/** Recency half-life of 5 years — long, so decades-old life memories aren't buried. */
+export const RECENCY_HALF_LIFE_DAYS = 1825;
+
+function clamp01(n: number): number {
+  if (Number.isNaN(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+/** Exponential recency decay from memory_date (fallback created_at); 0 when undated. */
+export function recencyScore(row: MemoryRecord, now: number = Date.now()): number {
+  const iso = row.memory_date || row.created_at;
+  if (!iso) return 0;
+  const ts = new Date(iso).getTime();
+  if (Number.isNaN(ts)) return 0;
+  const ageDays = (now - ts) / 86_400_000;
+  if (ageDays <= 0) return 1; // today/future-dated → most recent
+  return Math.pow(0.5, ageDays / RECENCY_HALF_LIFE_DAYS);
+}
+
+/** Fraction of the query's structured constraints this row satisfies (0 when none). */
+export function metadataScore(row: MemoryRecord, query: RetrievalQuery): number {
+  let total = 0;
+  let parts = 0;
+  if (norm(query.category)) {
+    total++;
+    if (norm(row.ai_category) === norm(query.category)) parts++;
+  }
+  if (norm(query.tag)) {
+    total++;
+    const tags = Array.isArray(row.ai_tags) ? row.ai_tags.map((t) => norm(t)) : [];
+    if (tags.includes(norm(query.tag))) parts++;
+  }
+  if (query.year != null || query.decade != null) {
+    total++;
+    if (matchesQuery(row, { year: query.year, decade: query.decade })) parts++;
+  }
+  return total === 0 ? 0 : parts / total;
+}
+
+/** Blended 0..1 relevance: semantic similarity + recency + metadata. Pure. */
+export function blendedScore(
+  row: MemoryRecord,
+  query: RetrievalQuery,
+  now: number = Date.now(),
+): number {
+  return (
+    RANK_W_SEMANTIC * clamp01(row.similarity ?? 0) +
+    RANK_W_RECENCY * recencyScore(row, now) +
+    RANK_W_METADATA * metadataScore(row, query)
+  );
+}
+
+/** Order rows by blended score, descending; stable on ties. Pure. */
+export function rankRecords(
+  rows: MemoryRecord[],
+  query: RetrievalQuery,
+  now: number = Date.now(),
+): MemoryRecord[] {
+  return rows
+    .map((row, index) => ({ row, index, score: blendedScore(row, query, now) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((entry) => entry.row);
+}
+
+/** Only absolute time (year/decade) is a HARD constraint that filters semantic hits. */
+export function hasHardTimeConstraint(query: RetrievalQuery): boolean {
+  return query.year != null || query.decade != null;
+}
+
+/**
+ * Pure hybrid merge: hard-time-filter the semantic set (a year/decade query must
+ * not surface other years), union with the deterministic set (semantic wins;
+ * deterministic-only rows get similarity 0), then blended-rank. Returns [] when
+ * both inputs are empty — preserving the no-AI-on-empty guarantee downstream.
+ * Category/tag stay SOFT (they shape ranking via metadataScore, never exclude).
+ */
+export function mergeAndRankCandidates(
+  semantic: MemoryRecord[],
+  deterministic: MemoryRecord[],
+  query: RetrievalQuery,
+  now: number = Date.now(),
+): MemoryRecord[] {
+  const scopedSemantic = hasHardTimeConstraint(query)
+    ? semantic.filter((row) =>
+        matchesQuery(row, { year: query.year, decade: query.decade }),
+      )
+    : semantic;
+
+  const byId = new Map<string, MemoryRecord>();
+  for (const row of scopedSemantic) byId.set(row.id, row);
+  for (const row of deterministic) {
+    if (!byId.has(row.id)) byId.set(row.id, { ...row, similarity: 0 });
+  }
+
+  const union = [...byId.values()];
+  if (union.length === 0) return [];
+  return rankRecords(union, query, now);
+}
+
 /**
  * Retrieve matched memory RECORDS (full existing columns, incl. content/summary)
  * for the active workspace via deterministic filtering. RLS scopes by account;
@@ -170,7 +281,7 @@ export async function retrieveMemoryRecords(
 
   let dbQuery = supabase
     .from("memories")
-    .select(SELECT_FIELDS)
+    .select(MEMORY_SELECT_FIELDS)
     .order("created_at", { ascending: false })
     .limit(RETRIEVAL_CAP);
   dbQuery = memoryProfileId

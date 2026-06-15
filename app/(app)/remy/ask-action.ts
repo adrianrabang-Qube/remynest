@@ -4,9 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import {
   retrieveAskResults,
-  retrieveAskRecords,
   type AskRetrievalResults,
 } from "@/lib/remy/ask-retrieval";
+import { retrieveAskRecordsHybrid } from "@/lib/remy/semantic-retrieval";
 import {
   answerAskQuestion,
   buildAskContext,
@@ -67,7 +67,15 @@ export async function answerAskRemy(
   if (!user) return { answer: null, count: 0, failed: false };
 
   const memoryProfileId = await resolveActiveProfileId();
-  const records = await retrieveAskRecords(supabase, query, memoryProfileId);
+  // Hybrid: semantic recall primary, deterministic fallback (V1.3). Workspace-scoped;
+  // returns the deterministic set unchanged when semantic adds nothing.
+  const records = await retrieveAskRecordsHybrid(
+    supabase,
+    trimmed,
+    query,
+    user.id,
+    memoryProfileId,
+  );
 
   // No memories retrieved → do NOT call the AI (no fabrication possible).
   if (records.length === 0) return { answer: null, count: 0, failed: false };

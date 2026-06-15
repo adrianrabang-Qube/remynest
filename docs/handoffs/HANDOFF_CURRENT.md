@@ -12,6 +12,35 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Intelligence V1.3 — hybrid semantic retrieval** (Phase A of the Companion roadmap; additive, **no schema/RPC change**).
+  Semantic recall becomes the **primary** mechanism; the deterministic engine remains the **fallback floor**.
+  Preserves every guarantee: retrieval-before-generation, no-AI-on-empty, `PROMPT_SAFETY_PREAMBLE`, and
+  active `memory_profile_id` scoping (non-negotiable).
+  - **Pattern reuse:** mirrors the production-proven post-filter in `app/api/memories/search/route.ts:265-340`
+    (RCA at this file's "Search" notes): `match_memories` is used **only for vector ranking** (it is
+    account-scoped and cannot scope to a workspace); candidate ids are **re-fetched scoped by the active
+    `memory_profile_id`** (`.eq`/`.is`, identical to the deterministic path), dropping every out-of-workspace row.
+  - **`lib/remy/semantic-retrieval.ts`** (new, **server-only**) — `semanticRetrieveScoped` (embed → rank →
+    workspace re-fetch with `similarity` attached) + `retrieveAskRecordsHybrid` (runs semantic **and**
+    deterministic via `Promise.all`, then merges). Imports the OpenAI-backed `embeddings` client, so it is
+    imported **only** by the `"use server"` action — never by a client component (verified: no client-bundle
+    leak; build green).
+  - **`lib/remy/retrieval.ts`** — `MEMORY_SELECT_FIELDS` exported (+ `created_at`); `MemoryRecord` gains
+    `created_at`/`similarity`; **pure, unit-tested ranking** added: `recencyScore` (5-yr half-life so old life
+    memories aren't buried), `metadataScore`, `blendedScore` (0.65·similarity + 0.20·recency + 0.15·metadata),
+    `rankRecords`, and `mergeAndRankCandidates` (hard year/decade filter on semantic; union+dedupe with
+    semantic winning; deterministic-only rows get `similarity 0`; returns `[]` when both empty).
+  - **`app/(app)/remy/ask-action.ts`** — `answerAskRemy` swaps `retrieveAskRecords` → `retrieveAskRecordsHybrid`
+    (passes the raw question for embedding + `user.id`). All guards unchanged (no-AI-on-empty at the same line).
+  - **Coverage:** memories without embeddings (legacy / failed write) are invisible to `match_memories`, so the
+    hybrid **unions** with the deterministic engine — keyword/metadata hits still surface (`similarity 0`).
+    Category/tag stay **soft** (shape ranking, never exclude); only absolute year/decade hard-filters semantic.
+  - **Entitlement:** Ask Remy stays available to all users (not premium-gated) per the approved roadmap default —
+    the deterministic fallback guarantees Ask always works; if gating is wanted later, gate only the semantic branch.
+  - **Validated:** 26 unit tests (ranking/recency/metadata/merge/dedupe/year-filter/fallback/isolation-merge) pass;
+    workspace re-scope clause matches the prod-verified pattern; client-bundle clean; lint 0 new (4/160); build ✓
+    (`/remy` 5.02 kB). **Operator (optional, later):** a `match_memories_scoped(... memory_profile_id_input)` RPC
+    removes the over-fetch recall caveat — SQL drafted in the roadmap; not required for V1.3.
 - **Ask Remy Intelligence V1.2 — mood/sentiment-aware context** (Phase B of the Companion roadmap; additive, no schema).
   Surfaces the **existing** emotional enrichment to grounded answers. Preserves all guarantees
   (grounded-only, retrieval-before-generation, no-AI-on-empty, workspace scoping, non-clinical).
