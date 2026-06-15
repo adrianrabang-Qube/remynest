@@ -15,6 +15,119 @@ import type { RetrievalQuery } from "@/lib/remy/retrieval";
  */
 export type AskIntent = "RETRIEVE" | "QUESTION" | "SUMMARY";
 
+/** A single conversational turn (bounded client-side history; never persisted). */
+export interface RemyConversationTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
+/** Max turns of history carried into a prompt (oldest dropped first). */
+export const MAX_CONVERSATION_TURNS = 6;
+
+/**
+ * Follow-up phrases that have NO subject of their own and refer back to the prior
+ * topic ("tell me more", "what happened after that?"). Detected so the caller can
+ * reuse the previous turn's retrieval anchor — retrieval still runs every turn;
+ * history never becomes a source of facts. Anchored (^…$) so phrasings that DO
+ * carry a subject ("tell me more about Galway") are NOT treated as follow-ups.
+ */
+const FOLLOW_UP_PATTERNS: RegExp[] = [
+  /^tell me more( about (that|it|them|him|her|this))?$/,
+  /^(tell me )?more( about (that|it|them|him|her|this))?$/,
+  /^(can you )?expand( on (that|it|this))?$/,
+  /^what happened (after that|next|then)$/,
+  /^(and )?then( what)?$/,
+  /^what else( do you remember)?$/,
+  /^(is there )?anything else$/,
+  /^continue$/,
+  /^go on$/,
+  /^keep going$/,
+];
+
+export function isFollowUp(input: string): boolean {
+  const q = input
+    .toLowerCase()
+    .replace(/[?.!,]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!q) return false;
+  return FOLLOW_UP_PATTERNS.some((re) => re.test(q));
+}
+
+/** The retrieval anchor — the prior real topic, reused by follow-ups. */
+export interface AskAnchor {
+  text: string;
+  query: RetrievalQuery;
+}
+
+/** How a turn resolves: a memory turn (retrieve+answer), a no-anchor follow-up, or non-memory. */
+export type ResolvedAskTurn =
+  | {
+      kind: "memory";
+      retrievalText: string;
+      query: RetrievalQuery;
+      mode: AskIntent;
+      isFollowUp: boolean;
+    }
+  | { kind: "needs-anchor" }
+  | { kind: "none" };
+
+/**
+ * Resolve one Ask turn deterministically (pure). Follow-up phrases are checked
+ * FIRST (they have no subject of their own, so extraction would mis-handle them):
+ * a follow-up reuses the anchor's retrieval query/text; otherwise the turn's own
+ * extracted query is used; otherwise it's not a memory turn (caller navigates).
+ * Follow-ups always run as a grounded QUESTION. Every "memory" result carries a
+ * real RetrievalQuery, so retrieval-before-generation can never be bypassed.
+ */
+export function resolveAskTurn(text: string, anchor: AskAnchor | null): ResolvedAskTurn {
+  if (isFollowUp(text)) {
+    if (!anchor) return { kind: "needs-anchor" };
+    return {
+      kind: "memory",
+      retrievalText: anchor.text,
+      query: anchor.query,
+      mode: "QUESTION",
+      isFollowUp: true,
+    };
+  }
+  const own = extractAskQuery(text);
+  if (own) {
+    return {
+      kind: "memory",
+      retrievalText: text,
+      query: own,
+      mode: classifyAskIntent(text),
+      isFollowUp: false,
+    };
+  }
+  return { kind: "none" };
+}
+
+/** History caps: assistant snippets kept short so prior prose can't pose as fact. */
+export const MAX_ASSISTANT_SNIPPET = 200;
+export const MAX_USER_SNIPPET = 500;
+
+/**
+ * Convert bounded client history into chat messages. Keeps only the last
+ * MAX_CONVERSATION_TURNS, truncates assistant turns hard (so a prior answer can't
+ * masquerade as a memory), collapses whitespace, and drops empties. Pure.
+ */
+export function buildHistoryMessages(
+  history: RemyConversationTurn[],
+): { role: "user" | "assistant"; content: string }[] {
+  return history
+    .slice(-MAX_CONVERSATION_TURNS)
+    .map((turn) => ({
+      role: turn.role,
+      content: (turn.text ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, turn.role === "assistant" ? MAX_ASSISTANT_SNIPPET : MAX_USER_SNIPPET),
+    }))
+    .filter((message) => message.content.length > 0);
+}
+
 const SUMMARY_RE = /\b(summari[sz]e|summari[sz]ing|summary|recap|sum up)\b/;
 
 const QUESTION_LEAD_RE =

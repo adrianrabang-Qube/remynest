@@ -12,6 +12,29 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Ask Remy Intelligence V1.4 — Conversational Memory M1** (Phase D of the Companion roadmap; **client-side only, no schema/persistence/server session**).
+  Enables grounded follow-ups ("tell me more", "what happened after that?", "what else?") while preserving
+  every invariant: **retrieval runs every turn** (history never becomes a fact source), no-AI-on-empty,
+  `PROMPT_SAFETY_PREAMBLE`, and active `memory_profile_id` scoping (all unchanged).
+  - **`lib/remy/ask-intent.ts`** — `RemyConversationTurn {role,text}`; `isFollowUp` (anchored phrase patterns —
+    "tell me more about Galway" is NOT a follow-up); `resolveAskTurn(text, anchor)` (pure, **shared by the
+    component + tests**): follow-up→reuse anchor (`mode QUESTION`); own→extract+classify; else→none. Every
+    "memory" result carries a real `RetrievalQuery`, so retrieval can't be bypassed. `buildHistoryMessages`
+    (bounded: last `MAX_CONVERSATION_TURNS=6`, assistant ≤200 chars, user ≤500, whitespace-collapsed, empties dropped).
+  - **`lib/remy/ask-intelligence.ts`** — `answerAskQuestion(question, context, mode, history=[])` inserts
+    `...buildHistoryMessages(history)` **between** the system prompt and the user message; the Memories block is
+    still built ONLY from freshly-retrieved records. `GROUNDING_SYSTEM` adds an explicit rule: history is for
+    interpreting follow-ups, retrieved memories are the **only** source of facts.
+  - **`app/(app)/remy/ask-action.ts`** — `answerAskRemy(question, query, mode, options?{history, retrievalText})`.
+    For follow-ups the client passes the prior topic as `retrievalText` so the **fresh** retrieval is about that
+    topic. All guards unchanged (workspace scope, no-AI-on-empty at the same line).
+  - **`components/remy/RemyAsk.tsx`** — client transcript (`entries` + `anchor` via `useState`, **no persistence**);
+    `resolveAskTurn` drives each turn; `deriveHistory` builds bounded prior turns; "New conversation" reset;
+    per-answer `AIDisclaimer`; double-submit guard retained. No-anchor follow-up shows a notice, never calls AI.
+  - **Reviewed:** 2-agent adversarial workflow → **PASS** (grounding + constraints/isolation; 0 real defects, only
+    cosmetic notes since fixed). 33 unit tests (isFollowUp / resolveAskTurn anchor-reuse / buildHistoryMessages
+    bounds). Client-bundle clean (RemyAsk + ask-intent are openai-free). Validated: lint 0 new (4/160), build ✓
+    (`/remy` 5.65 kB). **M2 (durable server-persisted sessions) deferred** — operator schema, not in scope.
 - **Ask Remy Intelligence V1.3 — hybrid semantic retrieval** (Phase A of the Companion roadmap; additive, **no schema/RPC change**).
   Semantic recall becomes the **primary** mechanism; the deterministic engine remains the **fallback floor**.
   Preserves every guarantee: retrieval-before-generation, no-AI-on-empty, `PROMPT_SAFETY_PREAMBLE`, and

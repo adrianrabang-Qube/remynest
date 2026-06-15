@@ -12,7 +12,7 @@ import {
   buildAskContext,
   contextSize,
 } from "@/lib/remy/ask-intelligence";
-import type { AskIntent } from "@/lib/remy/ask-intent";
+import type { AskIntent, RemyConversationTurn } from "@/lib/remy/ask-intent";
 import type { RetrievalQuery } from "@/lib/remy/retrieval";
 
 const MAX_QUESTION_LENGTH = 500;
@@ -56,6 +56,7 @@ export async function answerAskRemy(
   question: string,
   query: RetrievalQuery,
   mode: AskIntent,
+  options?: { history?: RemyConversationTurn[]; retrievalText?: string },
 ): Promise<AskAnswer> {
   const trimmed = (question ?? "").trim().slice(0, MAX_QUESTION_LENGTH);
   if (!trimmed) return { answer: null, count: 0, failed: false };
@@ -67,11 +68,15 @@ export async function answerAskRemy(
   if (!user) return { answer: null, count: 0, failed: false };
 
   const memoryProfileId = await resolveActiveProfileId();
-  // Hybrid: semantic recall primary, deterministic fallback (V1.3). Workspace-scoped;
-  // returns the deterministic set unchanged when semantic adds nothing.
+
+  // RETRIEVAL HAPPENS EVERY TURN. For a follow-up ("tell me more"), the client
+  // passes the prior topic as `retrievalText` so the fresh retrieval is about that
+  // topic — history is NEVER the source of facts, only an aid to interpret intent.
+  const retrievalText =
+    (options?.retrievalText ?? question).trim().slice(0, MAX_QUESTION_LENGTH) || trimmed;
   const records = await retrieveAskRecordsHybrid(
     supabase,
-    trimmed,
+    retrievalText,
     query,
     user.id,
     memoryProfileId,
@@ -84,7 +89,7 @@ export async function answerAskRemy(
   const count = contextSize(records);
 
   try {
-    const answer = await answerAskQuestion(trimmed, context, mode);
+    const answer = await answerAskQuestion(trimmed, context, mode, options?.history ?? []);
     if (!answer) return { answer: null, count, failed: true };
     return { answer, count, failed: false };
   } catch {

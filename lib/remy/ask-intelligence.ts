@@ -1,6 +1,10 @@
 import { openai } from "@/lib/openai";
 import { PROMPT_SAFETY_PREAMBLE } from "@/lib/constants/disclaimers";
-import type { AskIntent } from "@/lib/remy/ask-intent";
+import {
+  buildHistoryMessages,
+  type AskIntent,
+  type RemyConversationTurn,
+} from "@/lib/remy/ask-intent";
 import type { MemoryRecord } from "@/lib/remy/retrieval";
 
 /**
@@ -30,6 +34,7 @@ Never invent, assume, or add memories, names, dates, places, people, or events t
 If the provided memories do not contain enough to answer, say so plainly (for example: "The memories I found don't cover that.").
 Refer to memories by their titles where it helps. Keep replies warm, concise, and non-clinical.
 When a memory records an emotional tone (its mood or sentiment), you may gently reflect that recorded tone using the memory's own framing. Never infer, assess, score, or diagnose a person's mood, mental health, or cognitive state — describe only the emotion already recorded with the memory.
+Conversation history (if any) is provided ONLY to help you understand the user's follow-up questions (e.g. "tell me more"). The retrieved memories are the ONLY source of factual information. Never answer from the conversation history alone, and never repeat or invent facts that are not in the retrieved memories. If no memories are provided, say you could not find supporting memories.
 
 ${PROMPT_SAFETY_PREAMBLE}`;
 
@@ -82,6 +87,7 @@ export async function answerAskQuestion(
   question: string,
   context: string,
   mode: AskIntent,
+  history: RemyConversationTurn[] = [],
 ): Promise<string> {
   const task =
     mode === "SUMMARY"
@@ -94,6 +100,9 @@ export async function answerAskQuestion(
       temperature: ASK_TEMPERATURE,
       messages: [
         { role: "system", content: GROUNDING_SYSTEM },
+        // Prior turns: interpretation only — the user message below carries the
+        // freshly-retrieved Memories, which remain the sole source of facts.
+        ...buildHistoryMessages(history),
         {
           role: "user",
           content: `${task}\n\nRequest:\n${question}\n\nMemories:\n${context}`,
