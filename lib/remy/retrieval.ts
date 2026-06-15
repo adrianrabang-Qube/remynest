@@ -68,7 +68,7 @@ export interface MemoryRecord {
   similarity?: number;
 }
 
-function norm(value: string | null | undefined): string {
+export function norm(value: string | null | undefined): string {
   return (value ?? "").toLowerCase().trim();
 }
 
@@ -91,7 +91,7 @@ function escapeRegExp(value: string): string {
  * to plain containment. Replaces raw substring matching; all other retrieval
  * semantics (AND, fields searched, case-insensitivity) are unchanged.
  */
-function containsWord(haystack: string, term: string): boolean {
+export function containsWord(haystack: string, term: string): boolean {
   if (!/[a-z0-9]/i.test(term)) return haystack.includes(term);
   const re = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(term)}(?:[^a-z0-9]|$)`, "i");
   return re.test(haystack);

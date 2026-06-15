@@ -12,6 +12,43 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Phase C2 — Person Extraction Foundation** (extraction **only**; no retrieval/Ask/relationship/UI). Grounded person
+  mentions are persisted into `people` + `memory_person_links` as a **best-effort cognition task** that never blocks or
+  fails memory creation.
+  - **Files:** **`lib/build-people.ts`** (new) — `buildPeople(memoryId, content, ownerAccountId, memoryProfileId,
+    prefetchedPeople?)` + the pure `groundPeople` gate. **`lib/ai-memory.ts`** — `MemoryInsightResponse` extended with
+    `people: ExtractedPerson[]` (`{name, role?, mention, confidence}`), `sanitizePeople`, person-only prompt. **`lib/remy/
+    retrieval.ts`** — exports `norm` + `containsWord` (reused for grounding). **`app/api/memories/create/route.ts`** —
+    `buildPeople` wired as a 3rd cognition task via `Promise.allSettled`, passed `ai?.people ?? []` (**no 2nd AI call**).
+  - **Extraction flow:** create → enrich (existing `generateMemoryInsights`, now returns `people`) → after insert, the
+    cognition task: **grounding gate** (keep only candidates whose `mention` is a verbatim, **word-bounded** substring of
+    content via `containsWord`; dedupe by normalized name) → **resolve/create person** (by `(owner, workspace,
+    normalized_name)`; `normalized_name` is trigger-derived, never set here; 23505 re-resolve for races) → **add alias**
+    (lowercased surface form, dedup) → **link** (`upsert onConflict(memory_id,person_id) ignoreDuplicates`) → **recompute**
+    `mention_count` (= count of links) + `max_mention_confidence` (monotonic).
+  - **Merge policy:** same normalized name folds onto one person (aliases accumulate); different normalized names
+    ("John" vs "John Smith") stay **separate** (no bare-name auto-merge); cross-owner/workspace merge impossible by
+    construction (resolve scoped by `created_by_account_id` + `memory_profile_id`).
+  - **Safety:** runs as the **authenticated owner** (`createClient`, never service role); writes satisfy C1 RLS
+    (owner-write + link requires person-owner + memory-author + same workspace); **never throws** (outer + per-candidate
+    try/catch); AI is **untrusted** (grounding re-validates server-side); **GDPR `delete_user_account` unchanged** — C2
+    adds no schema; people/links cascade off memories/auth.users and the C1 collision-safe re-own already handles them.
+  - **Validation:** `groundPeople` unit tests **9/9** ("Galway/Dad/Mary" → Dad+Mary, drops hallucinated Sarah; "I had a
+    great day" → none; word-boundary: `dad`∌`daddy`, `mary`∌`rosemary`; dedupe; multi-word). **Adversarial review (2-agent):
+    both PASS** (grounding/idempotency/retry; RLS/isolation/integration/GDPR) — only **minor** findings, addressed/
+    documented. Lint 0 new (4/160), build ✓, client-bundle clean (server-only). *Note: live AI extraction not executed
+    here — no `OPENAI_API_KEY`/DB; the grounding gate + idempotency are deterministically verified.*
+  - **Known minor limitations (C-phase hardening candidates, no corruption):** (a) locale casing — `norm` (JS toLowerCase)
+    vs trigger `lower(btrim())` can differ for Turkish İ / Greek final sigma → a rare non-Latin name may get a skipped
+    link (never a duplicate); (b) cached aggregates are eventually-consistent (links authoritative); (c) caregiver-authored
+    memories in a non-owned profile get no people (people-write is owner-only) — intentional; relax the write policy if needed.
+  - **Backfill plan (Deliverable #7 — DOCUMENTED, not implemented):** an **operator** script/admin job reusing `buildPeople`:
+    iterate memories **per owner, per workspace**, oldest→newest in `created_at` pages (reuse the `RETRIEVAL_CAP` paging
+    idiom), calling `buildPeople(id, content, owner, memory_profile_id)` **without** `prefetchedPeople` (it extracts fresh)
+    — or the deterministic-only path for $0. **Idempotent** (unique constraints + 23505 re-resolve + link upsert), so safe
+    to re-run/resume. **Failure handling:** per-memory try/catch (parity with the live task); log + continue; a repair pass
+    targets memories with zero links. **Progress tracking:** a checkpoint (last processed `created_at`/id). **Cost:** prefer
+    the deterministic extractor for backfill; reserve AI extraction for new memories. **Run as the owner** (RLS), never service role.
 - **Phase C1 — People Intelligence Schema Foundation** (DB foundation **only**; migration committed, **NOT applied — operator step**).
   Net-new schema for future People Intelligence. **No extraction, no retrieval, no Ask Remy/UI changes** (those are C2–C5).
   Conforms to verified conventions; preserves every Ask Remy invariant (nothing in the runtime was touched).

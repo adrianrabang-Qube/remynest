@@ -29,7 +29,25 @@ const DEFAULT_MEMORY_RESPONSE = {
   sentiment: "Neutral",
 
   emotionalWeight: "Light",
+
+  people: [] as ExtractedPerson[],
 };
+
+/**
+ * A candidate person mention proposed by the AI (Phase C2). UNTRUSTED — every
+ * candidate must pass the server-side grounding gate (verbatim, word-boundary
+ * match against the memory content) in lib/build-people.ts before it is persisted.
+ */
+export interface ExtractedPerson {
+  /** Canonical name, e.g. "Dad" or "John Smith". */
+  name: string;
+  /** Relationship if explicitly stated (e.g. "father"); omitted otherwise. Never inferred. */
+  role?: string;
+  /** The EXACT words copied verbatim from the memory (grounding evidence). */
+  mention: string;
+  /** 0-100. */
+  confidence: number;
+}
 
 export interface MemoryInsightResponse {
   title: string;
@@ -49,6 +67,9 @@ export interface MemoryInsightResponse {
   sentiment: string;
 
   emotionalWeight: string;
+
+  /** Candidate people mentions (UNTRUSTED; grounded + persisted in Phase C2). */
+  people: ExtractedPerson[];
 }
 
 function logAIStage(
@@ -126,6 +147,41 @@ function safelyParseAIResponse(
   }
 }
 
+/** Clamp an AI confidence to an integer 0-100 (floats <=1 are treated as 0-1 scale). */
+function clampConfidence(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return 0;
+  const scaled = n > 0 && n <= 1 ? n * 100 : n;
+  return Math.max(0, Math.min(100, Math.round(scaled)));
+}
+
+/**
+ * Sanitize the UNTRUSTED people array from the model into well-formed candidates.
+ * Drops anything without a non-empty name AND mention. Does NOT ground them —
+ * grounding (verbatim match vs memory content) happens in lib/build-people.ts.
+ */
+function sanitizePeople(value: unknown): ExtractedPerson[] {
+  if (!Array.isArray(value)) return [];
+  const out: ExtractedPerson[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object") continue;
+    const candidate = raw as Record<string, unknown>;
+    const name =
+      typeof candidate.name === "string" ? candidate.name.trim().slice(0, 120) : "";
+    const mention =
+      typeof candidate.mention === "string"
+        ? candidate.mention.trim().slice(0, 200)
+        : "";
+    if (!name || !mention) continue;
+    const role =
+      typeof candidate.role === "string" && candidate.role.trim()
+        ? candidate.role.trim().slice(0, 60)
+        : undefined;
+    out.push({ name, mention, role, confidence: clampConfidence(candidate.confidence) });
+  }
+  return out;
+}
+
 function normalizeAIResponse(
   payload: Partial<MemoryInsightResponse>
 ): MemoryInsightResponse {
@@ -167,6 +223,8 @@ function normalizeAIResponse(
     emotionalWeight:
       payload.emotionalWeight ||
       DEFAULT_MEMORY_RESPONSE.emotionalWeight,
+
+    people: sanitizePeople(payload.people),
   };
 }
 
@@ -192,6 +250,13 @@ Analyze this memory:
 
 ${normalizedContent}
 
+For "people": list ONLY real human individuals or relationships actually named in the memory
+(e.g. "Dad", "Mary", "John Smith"). NEVER include places, organizations, animals, events, or
+things. For each person: "name" = the canonical name; "role" = the relationship ONLY if the
+memory states it (else omit); "mention" = the EXACT words copied verbatim from the memory above;
+"confidence" = 0-100. If you are unsure whether something is a person, leave it out. Prefer an
+empty array over guessing.
+
 Return valid JSON:
 {
   "title": "",
@@ -202,7 +267,8 @@ Return valid JSON:
   "importance": "",
   "confidence": 0,
   "sentiment": "",
-  "emotionalWeight": ""
+  "emotionalWeight": "",
+  "people": [{ "name": "", "role": "", "mention": "", "confidence": 0 }]
 }
 `,
         },

@@ -5,6 +5,7 @@ import { generateEmbedding } from "@/lib/embeddings";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
+import { buildPeople } from "@/lib/build-people";
 import {
   MemoryAttachmentValidationError,
 } from "@/lib/memory-media";
@@ -757,6 +758,50 @@ cover_image_url:
 
     cognitionTasks.push(
       clusterPromise
+    );
+
+    // =====================================
+    // BUILD PEOPLE (Phase C2 — grounded person extraction)
+    // =====================================
+
+    const peopleStart =
+      performance.now();
+
+    const peoplePromise =
+      buildPeople(
+        data.id,
+        normalizedContent,
+        user.id,
+        activeProfileId ?? null,
+        ai?.people ?? []
+      )
+        .then(
+          (peopleResult) => {
+            logPipelineStage(
+              "people-built",
+              {
+                peopleResult,
+                durationMs: Number(
+                  (
+                    performance.now() -
+                    peopleStart
+                  ).toFixed(2)
+                ),
+              }
+            );
+          }
+        )
+        .catch(
+          (peopleError) => {
+            logPipelineError(
+              "people-error",
+              peopleError
+            );
+          }
+        );
+
+    cognitionTasks.push(
+      peoplePromise
     );
 
     await Promise.allSettled(
