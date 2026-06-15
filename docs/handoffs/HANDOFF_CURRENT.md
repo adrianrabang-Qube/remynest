@@ -12,6 +12,39 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Phase C4 — Ask Remy Person-Aware Retrieval Integration** (wires C3 into the **live** Ask answer path; additive).
+  When a user asks about people ("Dad", "what did Dad and I do in Galway?", "John Smith"), Ask Remy now auto-retrieves
+  person-linked memories and uses them in the grounded answer. No schema/migration/extraction/UI/embeddings/relationship-
+  intelligence; no GDPR-flow change; no new OpenAI calls.
+  - **Files:** **`app/(app)/remy/ask-action.ts`** — `answerAskRemy` now calls `retrievePersonAware` instead of
+    `retrieveAskRecordsHybrid`; propagates `matchedPersonIds`/`matchedPersonNames` in `AskAnswer`; logs **counts only**
+    (no PII names). **`lib/remy/person-retrieval.ts`** — `retrievePersonAware` tags each record with `retrievalReasons`
+    (`semantic`/`keyword`/`person_match`). **`lib/remy/retrieval.ts`** — `MemoryRecord.retrievalReasons?` + pure
+    `retrievalReasonsFor` helper.
+  - **Retrieval flow (before → after):** *Before:* `answerAskRemy → retrieveAskRecordsHybrid (semantic ∪ deterministic)
+    → buildAskContext → answerAskQuestion`. *After:* `answerAskRemy → retrievePersonAware { hybrid base ∪
+    person-linked memories, person-boosted, reasons-tagged } → buildAskContext → answerAskQuestion`. The base hybrid
+    call (and its single embedding) is unchanged; the person arm is **DB-only** and runs in parallel.
+  - **Metadata (Step 3/5):** `AskAnswer` gains `matchedPersonIds`/`matchedPersonNames` (for logging/explainability/future
+    use — **not rendered**; RemyAsk reads only `answer/count/failed`). Each record carries `retrievalReasons` so
+    person-linked memories are identifiable. Server log emits counts only.
+  - **Invariants preserved:** no-AI-on-empty (guard still keys on `records.length===0`, before any AI), grounding
+    (context built **only** from retrieved records; `ask-intelligence` untouched), workspace/owner scoping (every
+    person/memory/link query pins `owner = auth.uid()` + `memory_profile_id`), no duplicates (union deduped by id),
+    **non-person queries identical** to pre-C4 (no resolved people → base set, re-rank == prior order).
+  - **Validation (Step 6):** 6 pure unit tests (`retrievalReasonsFor`; F person-boost; E/B person-less == `rankRecords`)
+    + C3's 14. **G: no new OpenAI calls** (only the pre-existing hybrid embedding; person arm DB-only — grep-verified).
+    A/C/D (live person-linked retrieval + workspace/cross-user isolation) are owner+workspace-scoped by construction;
+    live-DB confirmation is operator-run (no DB here). Lint 0 new (4/160), build ✓ (`/remy` 5.65 kB), `tsc` clean.
+  - **Adversarial review (2-agent): both PASS** — all 24 break attempts (cross-user/workspace leakage, cookie
+    manipulation, ranking corruption, duplicates, retrieval poisoning, GDPR, service-role, new-AI-call) **blocked-safe**.
+    Findings: one **minor fixed** (person names were logged → now counts only); one **minor pre-existing** (active-
+    workspace cookie unvalidated — safe here because owner `.eq` is load-bearing; documented).
+  - **Known limitations:** inherits C3 (unigram+bigram name detection; relationship-word resolution needs role indexing;
+    client-set workspace cookie — safe via owner `.eq`). `matchedPersonNames` returned but intentionally unused by UI.
+  - **Future relationship-intelligence hooks (C5):** `matchedPersonIds`/`matchedPersonNames` (Ask explanations);
+    `retrievalReasons` (UI "why this memory"); `mention_count` + co-occurrence over `memory_person_links` (metrics);
+    a person-summary path could reuse `retrievePersonLinkedRecords` + the existing `answerAskQuestion`.
 - **Phase C3 — Person Retrieval Foundation** (retrieval **only**; read-only, additive). A standalone, composable
   person-aware retriever — **not** wired into Ask Remy (foundation for a future phase). No schema/extraction/UI/
   relationship-intelligence changes; the existing hybrid + `ask-action`/`ask-intelligence` are untouched.

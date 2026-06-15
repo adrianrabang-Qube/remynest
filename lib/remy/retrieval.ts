@@ -66,6 +66,8 @@ export interface MemoryRecord {
   created_at?: string | null;
   /** Attached by the hybrid retriever (semantic cosine ~[0,1]); 0 for deterministic-only rows. */
   similarity?: number;
+  /** Why this record was retrieved (Phase C4 explainability): "semantic" | "keyword" | "person_match". */
+  retrievalReasons?: string[];
 }
 
 export function norm(value: string | null | undefined): string {
@@ -357,6 +359,24 @@ export function matchPeopleByTokens(
  * (a boost, never a hard filter).
  */
 export const PERSON_RANK_BOOST = 2;
+
+/**
+ * Explainability (Phase C4): why a record was retrieved. `baseSimilarityById` maps
+ * ids present in the base hybrid set to their similarity (semantic > 0, else keyword);
+ * `linkedIds` are person-linked ids. Pure. A record may carry multiple reasons.
+ */
+export function retrievalReasonsFor(
+  id: string,
+  baseSimilarityById: Map<string, number>,
+  linkedIds: Set<string>,
+): string[] {
+  const reasons: string[] = [];
+  if (baseSimilarityById.has(id)) {
+    reasons.push((baseSimilarityById.get(id) ?? 0) > 0 ? "semantic" : "keyword");
+  }
+  if (linkedIds.has(id)) reasons.push("person_match");
+  return reasons;
+}
 
 /** Rank a candidate set with the person boost. Pure. Linked rank higher; ties by
  *  blended score then stable index. With an empty linkedIds set this reduces to

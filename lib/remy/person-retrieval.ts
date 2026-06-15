@@ -3,6 +3,7 @@ import {
   extractNameTokens,
   matchPeopleByTokens,
   rankWithPersonBoost,
+  retrievalReasonsFor,
   MEMORY_SELECT_FIELDS,
   type MemoryRecord,
   type PersonRow,
@@ -163,7 +164,13 @@ export async function retrievePersonAware(
   }
 
   const linkedIds = new Set(personRecords.map((r) => r.id));
-  const records = rankWithPersonBoost([...byId.values()], query, linkedIds);
+  const baseSimilarityById = new Map(base.map((r) => [r.id, r.similarity ?? 0]));
+
+  // Boost-rank, then tag each record with WHY it was retrieved (explainability).
+  const records = rankWithPersonBoost([...byId.values()], query, linkedIds).map((r) => ({
+    ...r,
+    retrievalReasons: retrievalReasonsFor(r.id, baseSimilarityById, linkedIds),
+  }));
 
   return { records, matchedPersonIds, matchedPersonNames };
 }

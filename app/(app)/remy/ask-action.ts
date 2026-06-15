@@ -6,7 +6,7 @@ import {
   retrieveAskResults,
   type AskRetrievalResults,
 } from "@/lib/remy/ask-retrieval";
-import { retrieveAskRecordsHybrid } from "@/lib/remy/semantic-retrieval";
+import { retrievePersonAware } from "@/lib/remy/person-retrieval";
 import {
   answerAskQuestion,
   buildAskContext,
@@ -22,7 +22,18 @@ export interface AskAnswer {
   answer: string | null;
   count: number;
   failed: boolean;
+  /** People resolved from the query (Phase C4). For logging/explainability/future use — NOT shown in UI yet. */
+  matchedPersonIds: string[];
+  matchedPersonNames: string[];
 }
+
+const EMPTY_ANSWER: AskAnswer = {
+  answer: null,
+  count: 0,
+  failed: false,
+  matchedPersonIds: [],
+  matchedPersonNames: [],
+};
 
 /**
  * Server action: run a parsed RetrievalQuery through the deterministic Retrieval
@@ -59,13 +70,13 @@ export async function answerAskRemy(
   options?: { history?: RemyConversationTurn[]; retrievalText?: string },
 ): Promise<AskAnswer> {
   const trimmed = (question ?? "").trim().slice(0, MAX_QUESTION_LENGTH);
-  if (!trimmed) return { answer: null, count: 0, failed: false };
+  if (!trimmed) return EMPTY_ANSWER;
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { answer: null, count: 0, failed: false };
+  if (!user) return EMPTY_ANSWER;
 
   const memoryProfileId = await resolveActiveProfileId();
 
@@ -74,7 +85,11 @@ export async function answerAskRemy(
   // topic — history is NEVER the source of facts, only an aid to interpret intent.
   const retrievalText =
     (options?.retrievalText ?? question).trim().slice(0, MAX_QUESTION_LENGTH) || trimmed;
-  const records = await retrieveAskRecordsHybrid(
+
+  // PERSON-AWARE retrieval (Phase C4): hybrid (semantic + deterministic) UNION
+  // person-linked memories, person-boosted. Additive — a query naming no known
+  // person returns exactly the hybrid result. Workspace/owner scoped; no new AI call.
+  const { records, matchedPersonIds, matchedPersonNames } = await retrievePersonAware(
     supabase,
     retrievalText,
     query,
@@ -83,16 +98,26 @@ export async function answerAskRemy(
   );
 
   // No memories retrieved → do NOT call the AI (no fabrication possible).
-  if (records.length === 0) return { answer: null, count: 0, failed: false };
+  if (records.length === 0) {
+    return { ...EMPTY_ANSWER, matchedPersonIds, matchedPersonNames };
+  }
 
   const context = buildAskContext(records);
   const count = contextSize(records);
 
+  // Explainability/observability (no UI). Log COUNTS only — never the person names
+  // (PII) — to keep memory-derived identities out of server logs.
+  console.info("[ask-remy] person-aware retrieval", {
+    matchedPersonCount: matchedPersonIds.length,
+    personLinked: records.filter((r) => r.retrievalReasons?.includes("person_match")).length,
+    total: records.length,
+  });
+
   try {
     const answer = await answerAskQuestion(trimmed, context, mode, options?.history ?? []);
-    if (!answer) return { answer: null, count, failed: true };
-    return { answer, count, failed: false };
+    if (!answer) return { answer: null, count, failed: true, matchedPersonIds, matchedPersonNames };
+    return { answer, count, failed: false, matchedPersonIds, matchedPersonNames };
   } catch {
-    return { answer: null, count, failed: true };
+    return { answer: null, count, failed: true, matchedPersonIds, matchedPersonNames };
   }
 }
