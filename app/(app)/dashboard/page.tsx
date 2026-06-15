@@ -751,7 +751,7 @@ export default async function DashboardPage() {
     },
     {
       id: "memory-chat",
-      title: "Continue memory chat",
+      title: "Ask Remy",
       href: "/memory-chat",
     },
   ];

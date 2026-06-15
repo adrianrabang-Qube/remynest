@@ -141,7 +141,7 @@ const QUESTION_CUE_RE = /\b(happened|mention|mentions|tell me about)\b/;
  * intents ("show me the timeline") still route to navigation, not retrieval.
  */
 const LEAD_STRIP_RE =
-  /^(tell me about|tell me|what happened in|what happened|what do you know about|what about|what were|what was|who was|who were|when did|when was|where did|where was|summari[sz]e|sum up|summary of|give me a summary of|recap)\s+/;
+  /^(tell me about|tell me|what happened in|what happened|what do you know about|what about|what were|what was|who was|who were|who is|who are|who s|when did|when was|where did|where was|summari[sz]e|sum up|summary of|give me a summary of|recap)\s+/;
 
 /** Filler removed when picking the subject term from a stripped phrase. */
 const FALLBACK_FILLER = new Set([

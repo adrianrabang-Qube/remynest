@@ -37,7 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, mobile: "primary" },
   { href: "/memories", label: "Memories", icon: BookHeart, mobile: "primary" },
   { href: "/search", label: "Search", icon: Search, mobile: "drawer" },
-  { href: "/memory-chat", label: "Memory Chat", icon: MessageCircle, mobile: "drawer" },
+  { href: "/memory-chat", label: "Ask Remy", icon: MessageCircle, mobile: "drawer" },
   { href: "/memories/new", label: "New", icon: Plus, mobile: "new" },
   { href: "/timeline", label: "Timeline", icon: Clock, mobile: "drawer" },
   { href: "/library", label: "Library", icon: Library, mobile: "drawer" },
@@ -54,7 +54,7 @@ export const MOBILE_PRIMARY_NAV: NavItem[] = NAV_ITEMS.filter(
 export const MOBILE_NEW_ACTION: NavItem =
   NAV_ITEMS.find((i) => i.mobile === "new") ?? NAV_ITEMS[0];
 
-/** Drawer ("More") links (Memory Chat, Reminders, Insights). */
+/** Drawer ("More") links (Ask Remy, Reminders, Insights). */
 export const MOBILE_DRAWER_NAV: NavItem[] = NAV_ITEMS.filter(
   (i) => i.mobile === "drawer",
 );

@@ -71,12 +71,12 @@ export default function MemoryChatPage() {
       {/* Header */}
       <div>
         <h1 className="text-5xl font-bold text-gray-900">
-          RemyNest AI
+          Remy
         </h1>
 
         <p className="text-gray-500 mt-3 text-lg">
-          Conversational semantic
-          memory recall.
+          Ask Remy anything about your memories, people, reminders,
+          relationships, and life story.
         </p>
       </div>
 
@@ -89,7 +89,7 @@ export default function MemoryChatPage() {
               e.target.value
             )
           }
-          placeholder="Ask RemyNest about your memories..."
+          placeholder="Ask Remy anything about your memories…"
           className="w-full h-32 rounded-2xl border border-gray-200 p-5 outline-none resize-none text-lg"
         />
 
@@ -100,7 +100,7 @@ export default function MemoryChatPage() {
         >
           {loading
             ? "Thinking..."
-            : "Search Memories"}
+            : "Ask Remy"}
         </button>
 
         <AIDisclaimer

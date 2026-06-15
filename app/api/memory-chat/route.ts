@@ -257,7 +257,7 @@ export async function POST(req: Request) {
           messages: [
             {
               role: "system",
-              content: `You are RemyNest AI.
+              content: `You are Remy, the RemyNest companion.
 
 You help users retrieve and reflect on memories from their personal timeline.
 

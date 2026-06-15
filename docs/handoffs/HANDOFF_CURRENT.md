@@ -5,6 +5,26 @@
 
 **Last updated:** 2026-06-15
 
+## Remy AI Architecture Rule (authoritative)
+**Remy is the sole AI identity within RemyNest.** All intelligence capabilities are
+implementation layers *behind* Remy — they are NOT user-facing AI products. Capabilities
+include (non-exhaustive): Memory Retrieval, People Intelligence, Relationship Intelligence,
+Timeline Intelligence, Reminder Intelligence, Biography Generation, Search, and any future
+intelligence systems. **Users interact only with Remy.** Every intelligence request — "Who is
+John Smith?", "What happened in 2023?", "Tell me about my relationship with Dad", "Summarise my
+childhood", "What memories mention Galway?" — is answered *as Remy*.
+- **No future PR may introduce a separate AI assistant, AI chat, AI agent, AI tab, AI page, or
+  AI brand** (e.g. "Memory Chat", "Relationship AI", "Timeline AI", "Biography AI", "RemyNest
+  AI") without explicit architectural approval. New capabilities ship as internal layers routed
+  through Remy.
+- **User-facing naming:** "Remy" (the identity / chat header) and "Ask Remy" (the entry point /
+  nav). Internal module/route/function names (e.g. `/memory-chat`, `answerAskRemy`, `build-people`)
+  are implementation details, not brands.
+- **Known consolidation debt (do not delete without approval):** two "Ask Remy" surfaces still
+  coexist — `/remy` (RemyAsk, the C1–C5 person/relationship-aware pipeline, Home-linked) and
+  `/memory-chat` (the older semantic chat, in nav). Both are now branded "Remy"/"Ask Remy"
+  (branding consolidated); unifying them onto the C1–C5 pipeline is a recommended follow-up.
+
 ## Current status
 Web app **live in production** (Vercel → `www.remynest.com`). **Delete Account
 shipped and validated** end-to-end. Single authoritative workflow established in
@@ -12,6 +32,21 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Remy Identity Consolidation V1 + "Who is X?" routing fix** (branding + one-line client fix; no functionality removed).
+  Establishes the **Remy AI Architecture Rule** (see top of this doc): Remy is the sole AI identity; all capabilities
+  are internal layers behind Remy.
+  - **Branding (Task 1/3):** user-facing "Memory Chat" / "RemyNest AI" → **Remy / Ask Remy**: nav label
+    (`nav-config.ts` "Memory Chat"→"Ask Remy"), `/memory-chat` page header ("RemyNest AI"→"Remy") + subtitle/placeholder/
+    button ("Search Memories"→"Ask Remy"), dashboard CTA ("Continue memory chat"→"Ask Remy"), `manifest.ts` description,
+    and the memory-chat LLM persona ("You are RemyNest AI"→"You are Remy, the RemyNest companion"). Routes/function names
+    unchanged (implementation details). `landing-backup.tsx` left as-is (dead, unimported). No "Relationship/Timeline/
+    Biography/People/Search/Caregiver AI" brands exist — those capabilities were already internal-only.
+  - **"Who is John Smith?" fix (Task 2):** `ask-intent.ts` `LEAD_STRIP_RE` gained present-tense `who is|who are|who s`
+    (mirrors existing `who was|who were`). Previously "Who is X?" produced a null `extractAskQuery` → `resolveAskTurn`
+    `{kind:"none"}` → the client's fixed "doesn't know" notice **before** any server call. Now it resolves to a memory
+    turn → `answerAskRemy` → the existing C3/C4 person-aware pipeline resolves the person from the raw query tokens.
+    Verified: "Who is John Smith?", "Who are Mary and John?", "Who's Dad?", "Who is Sarah?" all reach `answerAskRemy`
+    (QUESTION mode); "What happened in 2020?" + "Who was Dad?" unchanged (regression-safe). No new AI; C4/C5 untouched.
 - **Phase C5 — Relationship Intelligence Foundation** (derived-on-read metrics over **existing** data; additive).
   Derives relationship signals from `people` + `memory_person_links` + `memories` — **no** new extraction/embeddings/
   schema/AI/graph/persistence/UI. Read-only, owner+workspace scoped, authenticated client (never service role).
