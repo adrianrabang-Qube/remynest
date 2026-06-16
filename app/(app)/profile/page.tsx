@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { getRemyCollections } from "@/lib/remy/collections";
 import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
@@ -31,9 +32,7 @@ function ageFromDob(dob?: string | null): number | null {
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const identity = await resolveAccountIdentity();

@@ -1,6 +1,7 @@
 import PendingInvites from "@/components/PendingInvites";
 
 import { createClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 import {
   getAccessibleProfiles,
@@ -161,9 +162,7 @@ export default async function DashboardPage() {
     activeProfileId;
 
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   logDashboardStage(
     "dashboard-auth-loaded",
@@ -199,9 +198,18 @@ export default async function DashboardPage() {
       .eq("id", user.id)
       .maybeSingle();
 
+    // The email fallback exists only to catch a split/legacy profile row that
+    // might hold the premium subscription. If the id-keyed row is already
+    // premium it always wins the selection below, so the second round-trip is
+    // pure waste — skip it. (Behavior-identical: when profileById is premium the
+    // original code also resolved `profile` to profileById.)
+    const idIsPremium =
+      profileById != null &&
+      resolveSubscription(profileById).isPremium;
+
     const {
       data: profileByEmail,
-    } = user.email
+    } = !idIsPremium && user.email
       ? await supabase
           .from("profiles")
           .select("*")
@@ -435,91 +443,9 @@ export default async function DashboardPage() {
   const remyReminderSummary =
     deriveDashboardFocus(focusReminders).summary;
 
-  const remySignals = await buildRemySignals(
-    supabase,
-    {
-      memoryProfileId:
-        effectiveActiveProfileId,
-      totalMemories: memoryCount,
-      reminders: {
-        today: remyReminderSummary.todayTotal,
-        overdue: remyReminderSummary.overdue,
-        upcomingToday:
-          remyReminderSummary.upcomingToday,
-        completedToday:
-          remyReminderSummary.completedToday,
-        routines:
-          remyReminderSummary.routines,
-      },
-      subjectName: remySubjectName,
-      isCareContext: !isMyNestWorkspace,
-      pendingInvites:
-        pendingInvites?.length ?? 0,
-      accessibleProfiles:
-        accessibleProfiles.length,
-      userId: user.id,
-    }
-  );
-
-  const remyObservations =
-    generateRemyObservations(
-      remySignals,
-      "dashboard"
-    );
-
-  // Remy Activity (evidence layer) — separate from observation generation.
-  // Reuses the already-fetched reminders; fetches recent memories + clusters.
-  const remyActivitySources =
-    await fetchRemyActivitySources(
-      supabase,
-      {
-        memoryProfileId:
-          effectiveActiveProfileId,
-        userId: user.id,
-      }
-    );
-
-  const remyActivities =
-    buildRemyActivities({
-      memories:
-        remyActivitySources.memories,
-      reminders: focusReminders,
-      clusters:
-        remyActivitySources.clusters,
-    });
-
-  // Remy Collections (top themes; includeDetails gives date ranges, reused by
-  // the Timeline to anchor "theme begins appearing" events to a year).
-  const remyCollections =
-    await getRemyCollections(
-      supabase,
-      user.id,
-      { limit: 4, includeDetails: true }
-    );
-
-  // Remy Connections (top stories — anchor title + connected count).
-  const remyConnections =
-    await getRemyConnections(
-      supabase,
-      user.id,
-      { limit: 4 }
-    );
-
-  // Life Chapters (most significant periods — title + range + count).
-  const remyLifeChapters =
-    await getRemyLifeChapters(
-      supabase,
-      user.id,
-      { sort: "count", limit: 4 }
-    );
-
-  // Memory date coverage — reuses existing counts (no extra query).
-  const remyDateCoverage = computeCoverage(
-    memoryCount,
-    remySignals.intelligence?.historicalTotal ?? 0
-  );
-
-  // Family Workspace Intelligence — only for a family (>= 2 accessible profiles).
+  // Family Workspace Intelligence is only loaded for a family (>= 2 accessible
+  // profiles); derive the profile list here so its loader can join the parallel
+  // wave below.
   const familyProfiles = (
     accessibleProfiles || []
   ).map((p) => ({
@@ -530,13 +456,81 @@ export default async function DashboardPage() {
       "Family member",
   }));
 
-  const familyIntelligence =
+  // PERF: these six Remy loaders are mutually independent — each only needs data
+  // already resolved above (supabase, user.id, memoryCount, focusReminders,
+  // accessibleProfiles). They were previously awaited one-after-another (~6
+  // serial network waves); a single Promise.all collapses them to one wave.
+  // Behavior is unchanged: identical inputs, identical outputs, same downstream
+  // assignment. (Mirrors the existing pattern in lib/remy/home-model.ts.)
+  const [
+    remySignals,
+    remyActivitySources,
+    remyCollections,
+    remyConnections,
+    remyLifeChapters,
+    familyIntelligence,
+  ] = await Promise.all([
+    buildRemySignals(supabase, {
+      memoryProfileId: effectiveActiveProfileId,
+      totalMemories: memoryCount,
+      reminders: {
+        today: remyReminderSummary.todayTotal,
+        overdue: remyReminderSummary.overdue,
+        upcomingToday: remyReminderSummary.upcomingToday,
+        completedToday: remyReminderSummary.completedToday,
+        routines: remyReminderSummary.routines,
+      },
+      subjectName: remySubjectName,
+      isCareContext: !isMyNestWorkspace,
+      pendingInvites: pendingInvites?.length ?? 0,
+      accessibleProfiles: accessibleProfiles.length,
+      userId: user.id,
+    }),
+    // Evidence layer — recent memories + clusters (reminders reused below).
+    fetchRemyActivitySources(supabase, {
+      memoryProfileId: effectiveActiveProfileId,
+      userId: user.id,
+    }),
+    // Top themes; includeDetails gives date ranges (reused by the Timeline).
+    getRemyCollections(supabase, user.id, {
+      limit: 4,
+      includeDetails: true,
+    }),
+    // Top stories — anchor title + connected count.
+    getRemyConnections(supabase, user.id, { limit: 4 }),
+    // Most significant periods — title + range + count.
+    getRemyLifeChapters(supabase, user.id, {
+      sort: "count",
+      limit: 4,
+    }),
+    // Family intelligence only for a family (>= 2 accessible profiles).
     familyProfiles.length >= 2
-      ? await getFamilyIntelligence(
-          supabase,
-          familyProfiles
-        )
-      : null;
+      ? getFamilyIntelligence(supabase, familyProfiles)
+      : Promise.resolve(null),
+  ]);
+
+  const remyObservations =
+    generateRemyObservations(
+      remySignals,
+      "dashboard"
+    );
+
+  // Remy Activity (evidence layer) — reuses the already-fetched reminders + the
+  // memories/clusters loaded in the parallel wave above.
+  const remyActivities =
+    buildRemyActivities({
+      memories:
+        remyActivitySources.memories,
+      reminders: focusReminders,
+      clusters:
+        remyActivitySources.clusters,
+    });
+
+  // Memory date coverage — reuses existing counts (no extra query).
+  const remyDateCoverage = computeCoverage(
+    memoryCount,
+    remySignals.intelligence?.historicalTotal ?? 0
+  );
 
   // Remy Notifications — pure synthesis of the intelligence already computed
   // above (no extra queries). Single source of truth for the updates layer.

@@ -35,6 +35,43 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile Launch-Readiness Sprint V3 — dashboard/auth query performance** (behavior-preserving; no new features/schema/Voice/AI/billing/architecture changes).
+  Implements the high-ROI, evidence-backed fixes from the mobile-slowness investigation (every (app) page is `force-dynamic`,
+  so the dashboard fan-out re-runs server-side on every navigation over cellular). **All changes verified behavior-preserving by
+  a 3-skeptic adversarial workflow (greenlit) + lint 0-new + build ✓.**
+  - **Phase A1 — Dashboard loaders parallelized.** `app/(app)/dashboard/page.tsx`: the six independent Remy loaders
+    (`buildRemySignals`, `fetchRemyActivitySources`, `getRemyCollections`, `getRemyConnections`, `getRemyLifeChapters`,
+    `getFamilyIntelligence`) were awaited **sequentially** (~6 serial network waves); now a single **`Promise.all`** (mirrors the
+    existing `lib/remy/home-model.ts` pattern). `familyProfiles` moved above the wave; pure derivations (`generateRemyObservations`,
+    `buildRemyActivities`, `computeCoverage`) stay after. Identical inputs/outputs, same throw-on-failure abort semantics.
+    **Est. ~560–1050ms off the dashboard critical path.**
+  - **Phase A2 — Redundant profile query removed.** The dashboard fetched `profiles` **twice** (`select('*')` by id AND by
+    email). Now the email fallback runs **only when the id-row isn't already premium** (`idIsPremium` short-circuit) — provably
+    selection-identical (the id-row is first in `candidates`, so it always wins when premium), saving one round-trip + payload
+    for premium users.
+  - **Phase A3 — Request-level dedup via React `cache()`.** New **`lib/auth/current-user.ts`** (`getCurrentUser`, `cache()`-wrapped —
+    `auth.getUser()` is a network JWT validation, not a local read). `getAccessibleProfiles` (`lib/profile-access.ts`) and
+    `resolveAccountIdentity` (`lib/account-identity.ts`) are now `cache()`-wrapped and route their `getUser` through
+    `getCurrentUser`; the layout, dashboard, profile page, and search route also use it. Result per request: **`getUser` ~6→1**,
+    **`getAccessibleProfiles` 2→1** (the layout + page no longer duplicate it). `cache()` is strictly per-request (no
+    cross-user/cross-request leakage; `noStore()` still prevents cross-request Data-Cache reuse — they're orthogonal). Benefits
+    **every page under the layout**, not just the dashboard. **Est. ~400–900ms/nav.**
+  - **Phase A4 — DEFERRED (documented).** `retryPendingDeletionForUser` (`app/(app)/layout.tsx`, a per-nav service-role GDPR
+    check) can't be safely gated to once-per-session without an auth-flow cookie: Next 14 RSC layouts can't set cookies during
+    render, and `cache()` only dedups within one request. The safe fix (set a flag cookie in **middleware** or a **post-login
+    route handler**, read it in the layout, clear on logout) touches the auth flow → out of this sprint's scope. Recommended as
+    a follow-up. (The `cache()` work already removed the layout's *duplicate* `getUser`/`getAccessibleProfiles`.)
+  - **Phase B — Destructive haptic.** `components/memories/CompactMemoryRow.tsx` delete action now fires `hapticWarning()`
+    (additive; native-only). Primary-button/nav/create/save/login/workspace haptics + global press states + per-route skeletons
+    already shipped in V1/V2.
+  - **Phase C — Reminders responsive gutters.** `app/(app)/reminders/page.tsx` `px-6 py-10 → px-4 py-8 md:px-6 md:py-10`
+    (no mobile cramping on a 375px screen; desktop unchanged). Presentation-only.
+  - **Phase D — My Nest = the V2 safe-area fix** (`safe-area-inset-top` on all 14 top surfaces + `contentInset:'never'`),
+    verified intact. It "still appeared broken" on Build 3 only because V2 is **unpushed** (the device ran pre-V2 production).
+    Permanent resolution is in code; needs deploy + `npx cap sync ios` + rebuild + on-device confirmation.
+  - **Net (once deployed): ~1.5–2.5s of stacked round-trips removed per dashboard navigation**, plus reduced Supabase load
+    (cost) on every authenticated page. No DB schema change. **Operator: verify the hot indexes** (`memories(memory_profile_id,
+    created_at)`, `memories(user_id, memory_date)`) in the Supabase SQL editor — assumed present, not verifiable in-repo.
 - **Mobile Experience Sprint V2 — My Nest safe-area fix + perceived-perf + caching** (behavior-preserving; no new features/schema/Voice/AI/billing changes).
   Responds to TestFlight Build 3 feedback (haptics dead, My Nest still broken, nav slow, feels like a website). **Root-cause
   finding first:** Build 3 ran the **pre-Sprint web app** because **`65fb730` (Sprint V1) was never pushed** — `server.url`

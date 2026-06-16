@@ -9,6 +9,7 @@ import { retryPendingDeletionForUser } from "@/lib/gdpr/retry-pending-deletion";
 import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
 // serve this segment (or its identity read) from cache.
@@ -24,9 +25,7 @@ export default async function AppLayout({
   // Failure recovery: if a prior deletion completed data/storage but not the
   // auth user, finish it now (next-login retry) and end the session.
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (user) {
     const wasPending = await retryPendingDeletionForUser(user.id);
     if (wasPending) {

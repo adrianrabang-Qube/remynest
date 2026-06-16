@@ -1,6 +1,8 @@
+import { cache } from "react";
 import { unstable_noStore as noStore } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { resolveSubscription } from "@/lib/billing/resolve-subscription";
 import type {
   ProfilePlan,
@@ -22,20 +24,24 @@ export interface AccountIdentity {
   preferredName: string;
 }
 
-export async function resolveAccountIdentity(): Promise<AccountIdentity | null> {
-  // Per-user, subscription-sensitive identity must never be served from Next's
-  // Data Cache (the billing/dashboard paths bypass caching the same way).
-  noStore();
+// cache(): request-level dedup. The layout, Settings, and Profile pages resolve
+// identity within one request; memoizing avoids repeating the getUser + profile
+// round-trips. noStore() still prevents any CROSS-request Data-Cache reuse, so
+// per-user/subscription freshness is unchanged — cache() only dedups within the
+// single in-flight render.
+export const resolveAccountIdentity = cache(
+  async (): Promise<AccountIdentity | null> => {
+    // Per-user, subscription-sensitive identity must never be served from Next's
+    // Data Cache (the billing/dashboard paths bypass caching the same way).
+    noStore();
 
-  const supabase = await createClient();
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
 
-  if (!user) {
-    return null;
-  }
+    if (!user) {
+      return null;
+    }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -68,4 +74,5 @@ export async function resolveAccountIdentity(): Promise<AccountIdentity | null> 
   };
 
   return { summary, firstName, preferredName };
-}
+  },
+);

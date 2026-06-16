@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronRight, FileText, MoreHorizontal } from "lucide-react";
 
 import { formatMemoryDateLabel } from "@/lib/memories/memory-date";
+import { hapticWarning } from "@/lib/haptics";
 
 type RowAttachment = { type?: string; url?: string };
 
@@ -155,6 +156,7 @@ export default function CompactMemoryRow({
               type="button"
               role="menuitem"
               onClick={() => {
+                void hapticWarning(); // destructive-action feedback (native only)
                 setMenuOpen(false);
                 onDelete();
               }}

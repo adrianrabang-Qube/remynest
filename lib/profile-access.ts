@@ -1,4 +1,7 @@
+import { cache } from "react";
+
 import { createClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 type ProfileRelationship = {
   memory_profile_id: string;
@@ -15,12 +18,13 @@ type MemoryProfile = {
   [key: string]: unknown;
 };
 
-export async function getAccessibleProfiles() {
+// cache(): request-level dedup. This runs in BOTH the (app) layout and the page
+// (dashboard/profile/etc.) on a single navigation; memoizing collapses the two
+// full executions (3-4 redundant Supabase round-trips) into one per request.
+export const getAccessibleProfiles = cache(async () => {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     return [];
@@ -184,4 +188,4 @@ export async function getAccessibleProfiles() {
   );
 
   return dedupedProfiles;
-}
+});

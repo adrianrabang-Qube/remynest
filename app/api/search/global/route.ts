@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { getRemyCollections } from "@/lib/remy/collections";
 import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
@@ -33,9 +34,7 @@ function matches(value: string | null | undefined, needle: string): boolean {
 
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

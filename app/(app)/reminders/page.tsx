@@ -45,7 +45,7 @@ export default async function RemindersPage({
   // 🚫 No active profile
   if (!activeProfileId) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-10">
         <div className="rounded-3xl border border-gold/30 bg-gold/10 p-6 text-charcoal-soft">
           My Nest mode active. Reminders are isolated from care profiles.
         </div>
@@ -436,7 +436,7 @@ export default async function RemindersPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-10">
 
       {/* Header */}
       <div className="mb-8">
