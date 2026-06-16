@@ -87,7 +87,7 @@ export default function TimelineDayGroup({
 
   return (
     <section className="space-y-4 max-md:space-y-2">
-      <div className="sticky top-0 z-10 bg-[#f5f1e8]/95 backdrop-blur-sm py-2 max-md:top-[12.5rem] max-md:py-1.5">
+      <div className="sticky top-0 z-10 bg-[#f5f1e8]/95 backdrop-blur-sm py-2 max-md:top-[calc(12.5rem_+_env(safe-area-inset-top))] max-md:py-1.5">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-2xl font-bold text-gray-500 uppercase tracking-wide max-md:text-xs max-md:font-semibold">
             {date}

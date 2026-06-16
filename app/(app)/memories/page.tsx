@@ -714,7 +714,7 @@ const sortedMemories = [
 
       {/* Semantic Search — compact, and sticky on mobile so it stays reachable
           while scrolling the feed. Desktop layout unchanged. */}
-      <div className="flex gap-2 max-md:sticky max-md:top-14 max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+      <div className="flex gap-2 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
         <input
           type="text"
           placeholder="Search memories..."

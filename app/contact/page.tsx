@@ -34,7 +34,7 @@ const ENTERPRISE_FEATURES = [
  */
 export default function ContactPage() {
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12 text-neutral-800">
+    <main className="mx-auto max-w-2xl px-6 pb-12 pt-[calc(3rem_+_env(safe-area-inset-top))] text-neutral-800">
       <h1 className="text-3xl font-semibold">Contact RemyNest</h1>
       <p className="mt-3 text-neutral-600">
         We&apos;d love to hear from organizations, partners, and investors who

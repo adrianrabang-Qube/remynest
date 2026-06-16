@@ -19,7 +19,7 @@ export default function LegalPage({
   children,
 }: LegalPageProps) {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
+    <main className="mx-auto max-w-3xl px-6 pb-12 pt-[calc(3rem_+_env(safe-area-inset-top))]">
       <Link
         href="/"
         className="text-sm text-neutral-500 hover:text-black"

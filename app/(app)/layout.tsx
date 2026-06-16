@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import AppNavbar from "@/components/navigation/AppNavbar";
+import NavigationProgress from "@/components/navigation/NavigationProgress";
 import OneSignalInit from "@/components/OneSignalInit";
 import { WorkspaceBanner } from "@/components/navigation/WorkspaceBanner";
 import { createClient } from "@/lib/supabase/server";
@@ -76,6 +77,9 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen bg-stone-50">
+      {/* Immediate in-flight navigation feedback (perceived performance). */}
+      <NavigationProgress />
+
       {/* Loads the OneSignal Web SDK + registers the device for push. Self-guards
           on an authenticated user; this segment is already auth-gated. */}
       <OneSignalInit />

@@ -77,7 +77,7 @@ export default function LandingClient() {
       </div>
 
       {/* NAVBAR */}
-      <header className="relative z-20 border-b border-black/5 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-black/5 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
           <h1 className="text-2xl font-bold text-[#243428]">

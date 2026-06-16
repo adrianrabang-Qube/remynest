@@ -150,7 +150,7 @@ export default function SearchView() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       {/* Search input + sticky filter chips */}
-      <div className="sticky top-14 z-20 -mx-4 bg-sand/90 px-4 pb-3 pt-2 backdrop-blur-md md:top-0 md:mx-0 md:rounded-b-2xl md:px-2">
+      <div className="sticky top-[calc(3.5rem_+_env(safe-area-inset-top))] z-20 -mx-4 bg-sand/90 px-4 pb-3 pt-2 backdrop-blur-md md:top-0 md:mx-0 md:rounded-b-2xl md:px-2">
         <form
           role="search"
           aria-label="Search RemyNest"

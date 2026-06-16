@@ -28,7 +28,7 @@ export default function MemorySection<T extends MemoryRowData>({
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-semibold text-gray-500 max-md:sticky max-md:top-[6.75rem] max-md:z-10 max-md:mb-0 max-md:bg-stone-50/95 max-md:py-2 max-md:backdrop-blur">
+      <h2 className="mb-2 text-sm font-semibold text-gray-500 max-md:sticky max-md:top-[calc(6.75rem_+_env(safe-area-inset-top))] max-md:z-10 max-md:mb-0 max-md:bg-stone-50/95 max-md:py-2 max-md:backdrop-blur">
         {label}
       </h2>
 

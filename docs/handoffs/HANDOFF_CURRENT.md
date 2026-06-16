@@ -35,6 +35,46 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile Experience Sprint V2 — My Nest safe-area fix + perceived-perf + caching** (behavior-preserving; no new features/schema/Voice/AI/billing changes).
+  Responds to TestFlight Build 3 feedback (haptics dead, My Nest still broken, nav slow, feels like a website). **Root-cause
+  finding first:** Build 3 ran the **pre-Sprint web app** because **`65fb730` (Sprint V1) was never pushed** — `server.url`
+  loads production (`origin/main` = `da4d334`), so haptics/skeletons/press-states/login were never on the device even though the
+  operator installed the native `CapacitorHaptics` pod. **The #1 fix is to push.** This commit adds the code-side improvements:
+  - **My Nest (P0) — real root cause = iOS status-bar occlusion, not horizontal overflow.** `viewport-fit=cover` (app/layout.tsx)
+    draws the WebView under the status bar / Dynamic Island, but `env(safe-area-inset-top)` was applied **nowhere** (all 4
+    prior usages were bottom-only). Fix: `MobileTopBar` + desktop `AppNavbar` headers now pad
+    `pt-[max(…,env(safe-area-inset-top))]` + left/right insets; **`capacitor.config.ts` `ios.contentInset: 'always'→'never'`**
+    so CSS `env()` is the single source of inset truth (the `always`↔`cover` pair double-inset and shifted the sticky header).
+    The earlier `overflow-x: clip` fix (da4d334) chased the wrong axis. *(contentInset is native → needs `npx cap sync ios` +
+    rebuild to take effect; verify on a notched device.)*
+  - **Coherent safe-area system (every WebView-reachable top surface).** Because `contentInset:'never'` makes the web layer own
+    all insets, padding was added to **every** top-of-screen surface so none renders under the status bar: `(app)` headers,
+    `app/(auth)/layout.tsx`, the marketing landing header, the legal shell (`components/legal/LegalPage.tsx` → privacy/terms/
+    cookies), `app/contact`, `app/account-deletion`. The 6 coupled sticky sub-header offsets (Search/Timeline/Memories/Library
+    `top-14`, `MemorySection` `top-[6.75rem]`, `TimelineDayGroup` `top-[12.5rem]`) were coupled to `+ env(safe-area-inset-top)`.
+    **All safe-area edits are provable web no-ops** (`env()=0` off-device → byte-identical rendering), verified by lint+build +
+    emitted CSS; they only affect notched native rendering.
+  - **Perceived performance (P0).** New **`components/navigation/NavigationProgress.tsx`** — a slim top bar giving immediate
+    (<100ms) in-flight feedback on every internal-link navigation while the `force-dynamic` route renders server-side. Purely
+    passive (one capture-phase listener that only sets local state; never `preventDefault`/`stopPropagation`), so it cannot
+    affect routing. Guarded so nested controls (e.g. MemoryCard Edit/Delete buttons inside the card `<Link>`) don't trigger it,
+    with an 8s failsafe auto-reset. Mounted in `app/(app)/layout.tsx`.
+  - **Caching / cost (P0).** `components/QueryProvider.tsx` `QueryClient` now sets `defaultOptions` (`staleTime 60s`,
+    `gcTime 5m`, `refetchOnWindowFocus:false`, `retry:1`) — a sensible floor that cuts redundant Supabase/API refetches on
+    mobile. **Behavior preserved**: call-site options override defaults (the memories list keeps its own 2-min staleTime +
+    optimistic `setQueryData`/`invalidateQueries`).
+  - **Misc responsiveness/interaction.** `app/(app)/error.tsx` `h-screen → min-h-[100dvh]` (iOS dynamic-viewport bug);
+    haptic feedback on workspace switch (`WorkspaceSelector`).
+  - **Adversarial verification (2 workflow passes).** First pass caught **2 real HIGH regressions** — both fixed before commit:
+    (1) NavigationProgress would stick at 84% on MemoryCard Edit/Delete (nested-button-in-Link cancels nav) → fixed via the
+    nearest-interactive-ancestor guard + failsafe; (2) `contentInset:'never'` occluding unpadded marketing/auth/legal pages →
+    fixed by padding every top surface. Second pass confirmed both fixes safe + caught the legal/contact/account-deletion gap
+    (now closed). Validated: **lint 0 new (164 = 4 err/160 warn)**, **build ✓**, safe-area CSS emitted.
+  - **Remaining (operator / device / next sprint):** **PUSH `65fb730` + this commit** (highest-impact — restores haptics +
+    deploys all fixes), then `npx cap sync ios` + rebuild for the contentInset change, then verify My Nest + safe-area on a
+    notched device. Not addressed here (deliberate scope/risk): header touch targets <44px (needs coordinated header+sticky-offset
+    retune), the global marketing-scale typography + `p{muted}` defaults, the Card/Button/Modal design-system primitives, and
+    the dominant "website-feel" which is the **remote-URL WebView architecture** (a separate, larger project).
 - **Mobile Experience Sprint V1 — perceived-responsiveness layer** (interaction polish only; no new features, no Voice Engine, no schema, no Android).
   Targets the "feels like a website wrapped in an app" deadness identified in the Mobile Experience audit — adds the missing
   tactile + feedback layer over the existing remote-URL Capacitor WebView. **5 phases, all additive:**

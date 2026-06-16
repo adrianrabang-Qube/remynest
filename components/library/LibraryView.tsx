@@ -60,7 +60,7 @@ export default function LibraryView() {
   return (
     <div className="space-y-4">
       {/* Sticky search + filter chips on mobile */}
-      <div className="space-y-3 max-md:sticky max-md:top-14 max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+      <div className="space-y-3 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
         <label className="flex items-center gap-2 rounded-2xl border border-sand-deep/70 bg-white px-3 py-2">
           <Search className="h-4 w-4 shrink-0 text-charcoal-muted" aria-hidden />
           <input

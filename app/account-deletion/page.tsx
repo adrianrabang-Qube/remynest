@@ -15,7 +15,7 @@ export const metadata = pageMetadata({
  */
 export default function AccountDeletionPage() {
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12 text-neutral-800">
+    <main className="mx-auto max-w-2xl px-6 pb-12 pt-[calc(3rem_+_env(safe-area-inset-top))] text-neutral-800">
       <h1 className="text-3xl font-semibold">Delete your RemyNest account</h1>
       <p className="mt-3 text-neutral-600">
         You can permanently delete your RemyNest account and personal data at any

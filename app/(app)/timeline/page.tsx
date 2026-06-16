@@ -353,7 +353,7 @@ export default async function TimelinePage({
       {/* Compact control bar — sticky on mobile so the toggle, search and
           filters stay reachable while scrolling the feed. The wrapper keeps the
           original `space-y-6` on desktop, so desktop layout is unchanged. */}
-      <div className="space-y-6 max-md:space-y-2 max-md:sticky max-md:top-14 max-md:z-20 max-md:-mx-4 max-md:border-b max-md:border-sand-deep/40 max-md:bg-[#f5f1e8]/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+      <div className="space-y-6 max-md:space-y-2 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:border-b max-md:border-sand-deep/40 max-md:bg-[#f5f1e8]/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
         <TimelineViewToggle
           currentView={currentView}
           searchQuery={searchQuery}

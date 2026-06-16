@@ -28,7 +28,13 @@ const config: CapacitorConfig = {
     ],
   },
   ios: {
-    contentInset: 'always',
+    // `viewport-fit=cover` (app/layout.tsx) makes CSS env(safe-area-inset-*) the
+    // single source of truth for insets — the headers/nav pad themselves. Pairing
+    // that with WKWebView's own `contentInset: 'always'` DOUBLE-insets and fights
+    // `cover`, which shifted the sticky mobile header (the "My Nest" top-left
+    // defect). `'never'` lets the web layer own all insets. (Native config —
+    // requires `npx cap sync ios` + a rebuild to take effect.)
+    contentInset: 'never',
     limitsNavigationsToAppBoundDomains: false,
   },
   android: {

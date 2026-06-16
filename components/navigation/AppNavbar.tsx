@@ -59,7 +59,7 @@ export default function AppNavbar({
   return (
     <>
       {/* Desktop top navigation — unchanged, shown at md and up. */}
-      <header className="hidden md:flex sticky top-0 z-40 justify-between items-center px-6 py-3.5 border-b border-sand-deep/60 bg-sand/80 backdrop-blur-md">
+      <header className="hidden md:flex sticky top-0 z-40 justify-between items-center pl-[max(1.5rem,env(safe-area-inset-left))] pr-[max(1.5rem,env(safe-area-inset-right))] pt-[max(0.875rem,env(safe-area-inset-top))] pb-3.5 border-b border-sand-deep/60 bg-sand/80 backdrop-blur-md">
         <NavLinks />
 
         <div className="flex items-center gap-4">

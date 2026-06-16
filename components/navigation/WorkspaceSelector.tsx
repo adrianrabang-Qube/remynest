@@ -9,6 +9,7 @@ import {
 } from "@/app/(app)/dashboard/profile-actions";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
 import CreateProfileForm from "@/components/CreateProfileForm";
+import { haptic } from "@/lib/haptics";
 
 export interface WorkspaceOption {
   id: string;
@@ -66,6 +67,7 @@ export default function WorkspaceSelector({
   }, [open]);
 
   function switchTo(action: () => Promise<unknown>) {
+    void haptic("light"); // acknowledge the workspace switch on native
     startTransition(() => {
       void Promise.resolve(action()).then(() => {
         router.refresh();
