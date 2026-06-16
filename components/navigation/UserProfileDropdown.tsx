@@ -38,7 +38,7 @@ export default function UserProfileDropdown({
           ×
         </button>
       ) : null}
-      <ProfileHub profile={profile} />
+      <ProfileHub profile={profile} onNavigate={onClose} />
     </div>
   );
 }

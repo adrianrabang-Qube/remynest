@@ -35,6 +35,29 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **TestFlight UX defect fixes — modal layering · dropdown close-on-nav · drawer safe-area** (3 targeted mobile-UX fixes; no features/logic/schema/AI changes; adversarially verified, all fixed-safe).
+  - **Issue 1 — Create/Edit Memory modal layering.** `components/CreateMemoryModal.tsx` + `components/EditMemoryModal.tsx` root
+    `fixed inset-0` overlays had **no `z-index`**, so the page's sticky search bar (z-20) + `MobileTopBar`/`MobileBottomNav`
+    (z-40) painted **above** the modal. Fix: added **`z-50`** (the app's overlay tier — matches `MobileNavDrawer`/
+    `WorkspaceSelector`/`UpgradeModal`/`DeleteAccountModal`). Verified the modal sits in the **root stacking context** (no
+    ancestor `transform`/`filter`/`opacity` trap), so `z-50` wins globally; all modal interactions (inputs, file picker,
+    Save/Cancel) intact.
+  - **Issue 2 — Profile dropdown/drawer stayed open on navigation.** The profile-menu nav links live in nested `ProfileHub`
+    sections and never closed the host, so the destination rendered behind a still-open menu. Fix: `components/profile/ProfileHub.tsx`
+    gains an optional `onNavigate` and a **click-delegation** handler that closes the host only when a real `a[href]` is tapped
+    (covers "View profile" + every nested section link); `ProfileSection` is static and all in-form controls are `<button>`/
+    `<input>`, so form/section interactions don't false-close. Wired from `UserProfileDropdown` (desktop) + `MobileNavDrawer`
+    (mobile). The handler only calls `onNavigate` (no `preventDefault`/`stopPropagation`), so `<Link>` navigation is preserved
+    (anchor handler fires, then the ancestor closes via idempotent `setState`).
+  - **Issue 3 — Top content under the status bar (safe-area).** `components/navigation/MobileNavDrawer.tsx` is a full-height
+    (`top-0`) drawer whose header had **no `safe-area-inset-top`**; under `viewport-fit=cover` the "Menu" title/close rendered
+    under the notch. Fix: header `px-5 py-4 → px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]` (web no-op: `py-4`=`1rem`).
+    **Audited the other overlays:** the `WorkspaceSelector` bottom sheet (hosts "Manage care profiles") is bottom-anchored at
+    `max-h-[85vh]` → its top sits ~15vh below the screen edge, already clear of every iPhone notch (a speculative height-cap was
+    **reverted** to avoid changing behavior). The **primary** header/My-Nest safe-area padding is already on `origin/main`
+    (`MobileTopBar`/`AppNavbar`, Sprint V2 `67e3a18`) — the remaining dependency is a **production redeploy + `npx cap sync ios`
+    + native rebuild + on-device confirmation**, not a code fix.
+  - Validated: lint 0 new (164 = 4 err/160 warn — the 4 are pre-existing generated `cordova.js`), build ✓, `tsc` clean.
 - **Mobile Launch-Readiness Sprint V3 — dashboard/auth query performance** (behavior-preserving; no new features/schema/Voice/AI/billing/architecture changes).
   Implements the high-ROI, evidence-backed fixes from the mobile-slowness investigation (every (app) page is `force-dynamic`,
   so the dashboard fan-out re-runs server-side on every navigation over cellular). **All changes verified behavior-preserving by

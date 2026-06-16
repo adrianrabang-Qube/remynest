@@ -9,10 +9,17 @@ import type { ProfileSummary } from "./types";
 
 interface ProfileHubProps {
   profile: ProfileSummary;
+  /**
+   * Called when an internal navigation link inside the hub is tapped, so the
+   * host dropdown/drawer can close itself immediately — otherwise the
+   * destination page renders behind a still-open menu (TestFlight defect).
+   */
+  onNavigate?: () => void;
 }
 
 export default function ProfileHub({
   profile,
+  onNavigate,
 }: ProfileHubProps) {
   const {
     canAccessVault,
@@ -20,7 +27,20 @@ export default function ProfileHub({
   } = useProfileAccess(profile);
 
   return (
-    <div className="space-y-5">
+    <div
+      className="space-y-5"
+      onClick={(event) => {
+        // Delegation: close the host menu only when a real navigation link is
+        // tapped (covers "View profile" + every nested section link). Section
+        // expand/collapse controls are <button>s, so they never trigger a close.
+        if (
+          onNavigate &&
+          (event.target as HTMLElement).closest("a[href]")
+        ) {
+          onNavigate();
+        }
+      }}
+    >
       <ProfileHeader profile={profile} />
 
       {/* The identity layer — Profile V2. Settings sections remain below. */}

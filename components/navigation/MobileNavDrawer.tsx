@@ -91,7 +91,9 @@ export default function MobileNavDrawer({
       />
 
       <div className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-sand-deep/60 px-5 py-4">
+        {/* Full-height drawer (top-0): pad the header for the status bar / notch
+            so "Menu" + close never sit under it (env() is 0 on web → no-op there). */}
+        <div className="flex items-center justify-between border-b border-sand-deep/60 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
           <span className="font-serif text-lg font-semibold text-charcoal">
             Menu
           </span>
@@ -114,7 +116,7 @@ export default function MobileNavDrawer({
 
           {profile && (
             <div className="border-t border-sand-deep/60 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-              <ProfileHub profile={profile} />
+              <ProfileHub profile={profile} onNavigate={onClose} />
             </div>
           )}
         </div>

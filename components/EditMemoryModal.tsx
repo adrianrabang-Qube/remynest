@@ -56,7 +56,7 @@ export default function EditMemoryModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
       <div className="bg-white p-6 rounded w-full max-w-md space-y-4">
         <h2 className="text-lg font-semibold">Edit Memory</h2>
 
