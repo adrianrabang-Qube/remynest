@@ -14,6 +14,7 @@ import {
 } from "@/lib/remy/ask-intent";
 import type { AskRetrievalResult } from "@/lib/remy/ask-retrieval";
 import { askRemyRetrieval, answerAskRemy } from "@/app/(app)/remy/ask-action";
+import { haptic } from "@/lib/haptics";
 
 const MAX_SHOWN = 10;
 
@@ -72,6 +73,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
     if (loading) return; // guard double-submit (each answer is a paid LLM call)
     const text = input.trim();
     if (!text) return;
+    void haptic("light"); // acknowledge the send
     setNotice(null);
 
     const resolved = resolveAskTurn(text, anchor);

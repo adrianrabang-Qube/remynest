@@ -6,6 +6,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { haptic } from "@/lib/haptics";
+
 import {
   MOBILE_PRIMARY_NAV,
   MOBILE_NEW_ACTION,
@@ -32,6 +34,7 @@ function Tab({
   return (
     <Link
       href={href}
+      onClick={() => haptic("light")}
       aria-current={active ? "page" : undefined}
       className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition ${
         active ? "text-sage" : "text-charcoal-muted hover:text-sage"
@@ -81,11 +84,12 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
       <li className="flex flex-1 items-center justify-center">
         <Link
           href={withContext(MOBILE_NEW_ACTION.href)}
+          onClick={() => haptic("medium")}
           aria-label="New memory"
           aria-current={
             isNavItemActive(pathname, MOBILE_NEW_ACTION.href) ? "page" : undefined
           }
-          className="flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-sage text-white shadow-lg ring-4 ring-sand transition hover:bg-sage-deep"
+          className="flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-sage text-white shadow-lg ring-4 ring-sand transition hover:bg-sage-deep active:scale-95"
         >
           <NewIcon className="h-6 w-6" aria-hidden />
         </Link>
@@ -108,7 +112,10 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
       <li className="flex flex-1">
         <button
           type="button"
-          onClick={onOpenMore}
+          onClick={() => {
+            void haptic("light");
+            onOpenMore();
+          }}
           aria-haspopup="dialog"
           className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition ${
             moreActive ? "text-sage" : "text-charcoal-muted hover:text-sage"

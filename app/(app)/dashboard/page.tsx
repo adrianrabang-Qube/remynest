@@ -127,51 +127,19 @@ export default async function DashboardPage() {
   const supabase =
     await createClient();
 
-  console.error(
-    "[DASHBOARD_RUNTIME_MARKER] page.tsx EXECUTING",
-    {
-      file: "app/(app)/dashboard/page.tsx",
-      dashboardRequestId,
-    }
-  );
-
   let accessibleProfiles: Profile[] = [];
 
   try {
-    console.error(
-      "[DASHBOARD_RUNTIME_MARKER] BEFORE getAccessibleProfiles"
-    );
-
     accessibleProfiles =
       await getAccessibleProfiles();
-
-    console.error(
-      "[DASHBOARD_RUNTIME_MARKER] AFTER getAccessibleProfiles",
-      {
-        count:
-          accessibleProfiles?.length || 0,
-        profiles:
-          accessibleProfiles,
-      }
-    );
   } catch (error) {
-    console.error(
-      "[DASHBOARD_RUNTIME_MARKER] getAccessibleProfiles FAILED",
+    logDashboardError(
+      "accessible-profiles-failed",
       error
     );
 
     accessibleProfiles = [];
   }
-
-  console.error(
-    "[DASHBOARD_RUNTIME_MARKER] accessibleProfiles-final",
-    {
-      count:
-        accessibleProfiles?.length || 0,
-      profiles:
-        accessibleProfiles,
-    }
-  );
 
   const activeContext =
     await getActiveContext();
@@ -192,17 +160,6 @@ export default async function DashboardPage() {
   const effectiveActiveProfileId =
     activeProfileId;
 
-  console.info(
-    "[ACTIVE_PROFILE_RESOLUTION]",
-    {
-      activeContext,
-      resolvedActiveProfileId,
-      finalActiveProfileId:
-        activeProfileId,
-      accessibleProfilesCount:
-        accessibleProfiles?.length || 0,
-    }
-  );
 
   const {
     data: { user },
@@ -268,18 +225,6 @@ export default async function DashboardPage() {
       profileById ||
       profileByEmail ||
       null;
-
-    console.info(
-      "[BILLING_DEBUG]",
-      {
-        userId: user.id,
-        userEmail: user.email,
-        profileById,
-        profileByEmail,
-        premiumProfile,
-        resolvedProfile: profile,
-      }
-    );
   }
 
   // Single authoritative subscription resolution for the whole dashboard.
@@ -366,46 +311,6 @@ export default async function DashboardPage() {
       }
     );
   }
-
-  // =====================================
-  // PROFILE SWITCHER DATA
-  // =====================================
-
-  const switcherProfiles = Array.from(
-    new Map(
-      (accessibleProfiles || []).map((profile) => [
-          profile.id,
-          {
-            id: profile.id,
-            profile_name:
-              profile.profile_name,
-            preferred_name:
-              profile.preferred_name,
-            shared:
-              Boolean(profile.shared),
-            access_level:
-              profile.access_level ||
-              "owner",
-          },
-        ]
-      )
-    ).values()
-  );
-
-  console.error(
-    "[PROFILE_SWITCHER_PAYLOAD]",
-    switcherProfiles
-  );
-
-  console.error(
-    "[PROFILE_SWITCHER_DEDUPED_COUNT]",
-    {
-      rawCount:
-        accessibleProfiles?.length || 0,
-      dedupedCount:
-        switcherProfiles.length,
-    }
-  );
 
   // =====================================
   // ACTIVE PROFILE
@@ -789,21 +694,6 @@ export default async function DashboardPage() {
         dashboardDurationMs,
     },
   });
-
-  console.info(
-    "[dashboard-page] billing-state",
-    {
-      userId: user.id,
-      userEmail: user.email,
-      subscription_plan:
-        profile?.subscription_plan,
-      is_premium:
-        profile?.is_premium,
-      subscription_status:
-        profile?.subscription_status,
-      resolvedCurrentPlan: resolvedSubscription.plan,
-    }
-  );
 
   return (
     <WorkspaceShell>

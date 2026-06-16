@@ -6,6 +6,7 @@ import {
 } from "@/lib/memory-upload-client";
 import MemoryDateField from "@/components/memories/MemoryDateField";
 import type { ResolvedMemoryDate } from "@/lib/memories/memory-date";
+import { haptic, hapticSuccess } from "@/lib/haptics";
 
 export default function CreateMemoryModal({
   onClose,
@@ -33,6 +34,7 @@ export default function CreateMemoryModal({
   const [error, setError] = useState("");
 
   async function handleSubmit() {
+    void haptic("medium"); // acknowledge the save tap
     setLoading(true);
     setError("");
 
@@ -49,6 +51,7 @@ export default function CreateMemoryModal({
         memoryDate: memoryDate.memoryDate,
         memoryDatePrecision: memoryDate.precision,
       });
+      void hapticSuccess(); // memory saved
     } catch (createError) {
       console.error(createError);
       setError(

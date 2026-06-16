@@ -3,7 +3,7 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-15
+**Last updated:** 2026-06-16
 
 ## Remy AI Architecture Rule (authoritative)
 **Remy is the sole AI identity within RemyNest.** All intelligence capabilities are
@@ -35,6 +35,44 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Mobile Experience Sprint V1 — perceived-responsiveness layer** (interaction polish only; no new features, no Voice Engine, no schema, no Android).
+  Targets the "feels like a website wrapped in an app" deadness identified in the Mobile Experience audit — adds the missing
+  tactile + feedback layer over the existing remote-URL Capacitor WebView. **5 phases, all additive:**
+  - **Phase 1 — Native haptics.** New **`lib/haptics.ts`** (client-safe; native-only via `Capacitor.isNativePlatform()`,
+    dynamic `import("@capacitor/haptics")`, fully guarded/try-caught — a no-op on web/desktop so SSR + browser are unaffected).
+    Exposes `haptic("light"|"medium"|"heavy")`, `hapticSuccess()`, `hapticWarning()`. Wired into the primary interaction points:
+    `MobileBottomNav` (tab tap = light, center "New" = medium, "More" = light), `RemyAsk` (send = light), `CreateMemoryModal`
+    (save = medium + success on create), `EditMemoryModal` (save = medium + success on update), `LoginClient` (submit = light,
+    error = warning). Added `@capacitor/haptics@^8.0.2` to `package.json` (matches the v8 Capacitor line).
+  - **Phase 2 — Global press states.** `app/globals.css`: `-webkit-tap-highlight-color: transparent` on all elements +
+    an `@media (hover: none)` `:active { opacity: 0.6 }` rule for links/buttons/role=button (opacity-only so it never
+    overrides existing `active:scale-*` transforms; `:not(:disabled)` so disabled controls stay inert). Gives every tappable
+    element instant visual acknowledgement on touch.
+  - **Phase 3 — Loading skeletons (no blank screens).** Upgraded the shared **`app/(app)/loading.tsx`** from bare
+    "Loading…" to a real pulse skeleton, and added tailored route skeletons for the five high-traffic routes:
+    `dashboard` (stat-card grid + widgets), `memories` (search bar + rows), `timeline` (chronological rows), `search`
+    (bar + filter chips + results), `remy` (header + Ask box + cards). These render during Next's client-side RSC route
+    transitions (in-app `<Link>` navigations), so navigating between pages no longer flashes blank. *(The initial cold
+    document load is still a native splash — route skeletons cover soft navigations, which dominate in-session use.)*
+  - **Phase 4 — Login experience.** `LoginClient` rewritten around a real `<form onSubmit>` (Enter-to-submit), correct
+    mobile keyboard semantics (`type="email" inputMode="email" autoComplete="email" autoCapitalize="none"`; password
+    `autoComplete="current-password"`), an inline spinner, `active:scale-[.98]` press feedback, and a **sustained** loading
+    state (stays true through navigation — no flash back to "Login"), plus haptics (light on submit, warning on error).
+  - **Phase 5 — Remove debug overhead.** Stripped all leftover diagnostic `console` markers from `app/(app)/dashboard/page.tsx`
+    (`[DASHBOARD_RUNTIME_MARKER]`, the `getAccessibleProfiles` BEFORE/AFTER/FAILED/final markers — the catch now routes through
+    `logDashboardError("accessible-profiles-failed", …)`, `[ACTIVE_PROFILE_RESOLUTION]`, `[BILLING_DEBUG]`, the two
+    `[PROFILE_SWITCHER_*]` markers, `[dashboard-page] billing-state`). Removing the switcher logs orphaned the
+    `switcherProfiles` dedupe block (the live switcher reads `accessibleProfiles` directly), so it was deleted too. The
+    structured `logDashboardStage`/`logDashboardError` helpers are kept.
+  - **Validated:** lint **0 new** (164 = 4 err/160 warn, exact baseline), build ✓ (compiled successfully; `/remy`, `/search`,
+    `/timeline`, `/dashboard`, `/memories` all built with their new `loading.tsx`). **Desktop / mobile-web:** haptics are a
+    guarded no-op, press states are `hover:none`-gated, skeletons are platform-agnostic → zero desktop regression by
+    construction. **Capacitor iOS:** native haptics + press feedback are live device behaviour — **operator must run on a
+    physical device** (the simulator does not emit haptics; the WebView here can't be exercised without a signed build).
+  - **Remaining mobile-experience gaps (next sprint candidates):** the dominant "website-in-an-app" feel is the **remote-URL
+    WebView** (full SSR site in WKWebView) — true native-feel needs page transitions / a prefetch+cache strategy / or a
+    bundled-asset move, all out of this sprint's scope. Also unaddressed here: haptics on delete-confirm / reminder-create /
+    dashboard card actions, pull-to-refresh, optimistic mutations, and the cold-start splash→content handoff.
 - **Mobile header sticky-position fix** (real root cause of the "My Nest" selector clipping; mobile-only, no desktop change).
   The sticky mobile header (`MobileTopBar`) rendered horizontally shifted off-screen (left edge / Workspace Selector
   clipped). **Root cause:** `body { overflow-x: hidden }` (`app/globals.css:43`) makes `<body>` a horizontal scroll

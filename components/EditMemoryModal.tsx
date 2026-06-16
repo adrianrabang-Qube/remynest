@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MemoryDateField from "@/components/memories/MemoryDateField";
+import { haptic, hapticSuccess } from "@/lib/haptics";
 import {
   selectionFromMemoryDate,
   type ResolvedMemoryDate,
@@ -42,6 +43,7 @@ export default function EditMemoryModal({
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
+    void haptic("medium"); // acknowledge the save tap
     setLoading(true);
     await onUpdate({
       title,
@@ -49,6 +51,7 @@ export default function EditMemoryModal({
       memoryDate: memoryDate.memoryDate,
       memoryDatePrecision: memoryDate.precision,
     });
+    void hapticSuccess(); // changes saved
     setLoading(false);
   }
 

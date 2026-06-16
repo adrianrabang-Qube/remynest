@@ -55,6 +55,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * Mobile touch feedback (Mobile Experience Sprint V1).
+ * Remove the default grey iOS tap-highlight flash everywhere, and on touch devices
+ * (no hover) give every interactive element an IMMEDIATE press state so taps feel
+ * acknowledged. Uses `opacity` only — never `transform` — so it can never override
+ * elements that have their own transform (e.g. the bottom-nav center button).
+ * Scoped to `hover: none`, so hover-capable desktop is unaffected.
+ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) {
+  a:active,
+  label:active,
+  button:not(:disabled):active,
+  [role="button"]:active,
+  [type="button"]:not(:disabled):active,
+  [type="submit"]:not(:disabled):active {
+    opacity: 0.6;
+    transition: opacity 0.06s ease;
+  }
+}
+
 /* =========================
    TYPOGRAPHY
 ========================= */
