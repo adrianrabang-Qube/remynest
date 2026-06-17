@@ -1,9 +1,16 @@
 # Claude Code Workflow — RemyNest
 
+> **`/CLAUDE.md` is the single source of workflow truth and is authoritative for the
+> session-start sequence, operating modes, and the Documentation Maintenance /
+> Session Continuity rules. If anything here diverges, `/CLAUDE.md` wins.** This file
+> is supporting guidance (prompt templates + project-specific tips).
+
 How to drive efficient sessions on this codebase. **Start every session by
-reading:** `docs/MASTER_SPEC.md`, `docs/handoffs/HANDOFF_CURRENT.md`, and the
-relevant `docs/features/*` + `docs/architecture/*` file. This avoids
-rediscovery. Update `HANDOFF_CURRENT.md` at the end of each major session.
+reading:** `docs/handoffs/HANDOFF_CURRENT.md` **first** (then the relevant
+`/CLAUDE.md` sections, then `docs/MASTER_SPEC.md` / `docs/features/*` /
+`docs/architecture/*` only as the task needs). This avoids rediscovery. Update
+`HANDOFF_CURRENT.md` (and `/CLAUDE.md` for architectural decisions) at the end of
+each major session.
 
 ## Ground rules (project-specific)
 - **Schema is dashboard-managed** (no repo migrations except delete-account).
