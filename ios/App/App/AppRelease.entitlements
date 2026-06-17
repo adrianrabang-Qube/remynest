@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Push Notifications (APNs) — RELEASE builds (TestFlight + App Store). Uses the
+	  APNs PRODUCTION environment, which is REQUIRED for TestFlight/App Store push
+	  delivery (a development/sandbox entitlement on a distribution build causes
+	  silently-dropped pushes — "Delivered" in OneSignal, nothing on device). Debug
+	  builds use AppDebug.entitlements (aps-environment=development, sandbox). Linked
+	  per-configuration via CODE_SIGN_ENTITLEMENTS in project.pbxproj (Release -> this file).
+	-->
+	<key>aps-environment</key>
+	<string>production</string>
+</dict>
+</plist>
