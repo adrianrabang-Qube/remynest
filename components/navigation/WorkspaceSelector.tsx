@@ -3,10 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  setActiveProfile,
-  setPersonalWorkspace,
-} from "@/app/(app)/dashboard/profile-actions";
+import { setActiveProfile } from "@/app/(app)/dashboard/profile-actions";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
 import CreateProfileForm from "@/components/CreateProfileForm";
 import { haptic } from "@/lib/haptics";
@@ -129,23 +126,10 @@ export default function WorkspaceSelector({
               </button>
             </div>
 
+            {/* The "My Nest" (personal workspace) switch was retired from this
+                drawer — it now lives in the profile dropdown (ProfileHub). This
+                drawer keeps care-profile switching + management only. */}
             <ul className="p-2">
-              <li>
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => switchTo(setPersonalWorkspace)}
-                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition hover:bg-sand/50 disabled:opacity-50"
-                >
-                  <span className="font-medium text-charcoal">My Nest</span>
-                  {isMyNest && (
-                    <span aria-hidden className="text-sage">
-                      ✓
-                    </span>
-                  )}
-                </button>
-              </li>
-
               {profiles.map((profile) => {
                 const active = !isMyNest && profile.id === activeProfileId;
                 return (

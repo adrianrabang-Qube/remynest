@@ -8,9 +8,10 @@ export interface ProfileMenuItem {
 }
 
 export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
-  // "My Nest" is rendered as an action button in ProfileMenuItems that calls the
-  // setPersonalWorkspace server action (writes remynest-active-context) — not a
-  // URL ?context= link. Single source of truth = the cookie.
+  // "My Nest" is rendered at the TOP of ProfileHub (not here): it closes the menu,
+  // calls the setPersonalWorkspace server action (writes remynest-active-context —
+  // not a URL ?context= link; single source of truth = the cookie), then navigates
+  // to /home. Care-profile switching/management lives in the workspace drawer.
   //
   // NOTE: "Billing" was removed — it pointed at /dashboard (duplicate nav that
   // redirected users to the dashboard) and subscription management already lives

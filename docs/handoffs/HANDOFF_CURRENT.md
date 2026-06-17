@@ -3,7 +3,7 @@
 > Update every session (it's part of Definition of Done — see CLAUDE.md). Keep
 > short and truthful. Sections below are the mandated HANDOFF standard.
 
-**Last updated:** 2026-06-16
+**Last updated:** 2026-06-17
 
 ## Remy AI Architecture Rule (authoritative)
 **Remy is the sole AI identity within RemyNest.** All intelligence capabilities are
@@ -35,6 +35,14 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **My Nest navigation retired from the workspace drawer → moved to the profile dropdown** (interaction-model simplification; operator-approved). No features/perf/haptics/auth/billing/schema changes; workspace switching (a critical system) **fully preserved**.
+  Rather than keep patching the workspace-drawer overlay/scroll-lock, the **"My Nest" affordance was removed from the drawer** and added to the **profile dropdown** as a Settings-style entry. **What changed:**
+  - **`components/profile/ProfileHub.tsx`** — new top-of-menu **"🏡 My Nest"** entry. `goToMyNest()`: `onNavigate?.()` (closes the dropdown **immediately**, like Settings) → `setPersonalWorkspace()` (writes the `remynest-active-context` cookie = personal context) → `router.push("/home")`. The switch resolves **before** the push (no context race/flicker), and both run independent of the now-unmounting menu (can't strand it open; fail-open `.catch` still navigates). Added `"use client"` (it now uses `useRouter`).
+  - **`components/navigation/WorkspaceSelector.tsx`** — removed the **"My Nest" `<li>`** row (and the now-unused `setPersonalWorkspace` import). The drawer is **otherwise kept** and still rendered in `MobileTopBar` + desktop `AppNavbar`; **care-profile switching (`setActiveProfile`) + "Manage care profiles" (invite/add) are intact**, as is the prior close-immediately trap fix.
+  - **`components/navigation/ProfileMenuItems.tsx`** — removed the old duplicate "Switch to My Nest" button (+ its `useRouter`/`useTransition`/`setPersonalWorkspace` imports); now renders Settings link(s) + sign-out only. **`profile-menu.config.ts`** comment updated.
+  - **No dedicated "My Nest" page** was created — My Nest is a workspace context; its home is `/home`.
+  - **Docs:** `CLAUDE.md` Critical-systems section now records this navigation architecture so future sessions **don't reintroduce** the drawer "My Nest" row / a dedicated page.
+  - **Adversarially verified (2 skeptics + synth): GREENLIGHT, `correct`, no workspace-switching regression.** Lint 0 new (164 = 4 err/160 warn), build ✓, `tsc` clean.
 - **My Nest interaction-trap fix (P0 functional)** — `components/navigation/WorkspaceSelector.tsx` only; no features/perf/UX-polish.
   **Defect (TestFlight):** opening "My Nest" could **trap** the user — the sheet wouldn't reliably close, the underlying page stayed unscrollable, and an invisible `fixed inset-0 z-50` overlay kept capturing pointer events. **Root cause:** in `switchTo`, `setOpen(false)` ran **inside `startTransition` after `router.refresh()`**, so React deferred the close as a transition update until the slow `force-dynamic` SSR refresh resolved (seconds over cellular) — or **never**, if the server action rejected (`validateProfileId` throws; no `.catch`). Meanwhile the scroll-lock effect captured/restored `previousOverflow`, which could orphan a stale `"hidden"`. **Fix (3 parts):** (1) `setOpen(false)` now runs **immediately as an urgent update, outside the transition** → the overlay unmounts and the `[open]` effect cleanup releases the scroll-lock instantly, decoupled from refresh latency/failure; (2) the action chain is `.then(router.refresh).catch(router.refresh)` so a failed switch can never strand the sheet open; (3) the scroll-lock cleanup now restores `document.body.style.overflow = ""` unconditionally (the unlocked default — only two body-lock writers exist app-wide and they're z-index-mutually-exclusive), so it can never orphan a stale `"hidden"`. The switch still runs (cookie + `revalidatePath` + `router.refresh` re-sync the chip/data); all close paths (backdrop/×/Escape/switch) release the lock; the dropdown close-on-nav (`ProfileHub`/`MobileNavDrawer`) is untouched. **Adversarially verified (2 skeptics + synth): GREENLIGHT, fixed-safe, no regression.** Lint 0 new (164), build ✓. *(Follow-up, non-blocking: a toast on a failed switch — strictly better than the old hang-open.)*
 - **TestFlight UX defect fixes — modal layering · dropdown close-on-nav · drawer safe-area** (3 targeted mobile-UX fixes; no features/logic/schema/AI changes; adversarially verified, all fixed-safe).

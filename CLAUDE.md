@@ -54,6 +54,17 @@ Authentication · Supabase (RLS) · Stripe billing · OneSignal · memory CRUD �
 media uploads · timeline · search · memory chat · AI insights (non-clinical) ·
 profile/workspace switching · caregiver workflows · GDPR export/delete.
 
+**Workspace navigation (authoritative, 2026-06-17):** **"My Nest"** (the personal
+workspace) navigation lives in the **profile dropdown** — `ProfileHub` renders the
+"My Nest" entry, which closes the menu, calls `setPersonalWorkspace` (cookie), and
+navigates to `/home`. **Care-profile switching + management** (enter a care
+workspace, invite caregiver, add a person) lives in the **workspace drawer**
+(`WorkspaceSelector`, in the header). The drawer's old "My Nest" row was
+**intentionally retired** to stop patching its overlay/scroll-lock trap. There is
+**no dedicated "My Nest" page** (it is a workspace context; its home is `/home`).
+Do **not** reintroduce a "My Nest" row in the workspace drawer, a "Switch to My
+Nest" button in `ProfileMenuItems`, or a dedicated My Nest route.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;
