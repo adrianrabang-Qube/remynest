@@ -22,16 +22,23 @@ interface AppLayoutProps {
 export default async function AppLayout({
   children,
 }: AppLayoutProps) {
-  // Failure recovery: if a prior deletion completed data/storage but not the
-  // auth user, finish it now (next-login retry) and end the session.
   const supabase = await createClient();
   const user = await getCurrentUser();
-  if (user) {
-    const wasPending = await retryPendingDeletionForUser(user.id);
-    if (wasPending) {
-      await supabase.auth.signOut();
-      redirect("/login?deleted=1");
-    }
+
+  // Defense-in-depth auth gate. The (app) route GROUP is the authentication
+  // boundary — every route under it requires a session. The middleware enforces
+  // this at the edge (protect-by-default), but gating here means an (app) route
+  // can never render unauthenticated even if the edge config is ever bypassed,
+  // and route-group membership (not an allowlist) guarantees newly-added (app)
+  // routes are always covered.
+  if (!user) redirect("/login");
+
+  // Failure recovery: if a prior deletion completed data/storage but not the
+  // auth user, finish it now (next-login retry) and end the session.
+  const wasPending = await retryPendingDeletionForUser(user.id);
+  if (wasPending) {
+    await supabase.auth.signOut();
+    redirect("/login?deleted=1");
   }
 
   // Single source of truth for navbar identity (same resolver as /settings).

@@ -45,7 +45,13 @@ waiting for approval**: investigate → implement → test → `npm run lint` �
   not by scanning code.
 
 ## Engineering rules
-- Respect middleware route registration; RLS scoping (the service-role client
+- **Auth is protect-by-default (`middleware.ts`, authoritative 2026-06-17):** every
+  route is PROTECTED unless explicitly in `PUBLIC_ROUTES` (and the `(app)` route
+  group is also auth-gated in its layout). Make a *genuinely public* page public by
+  adding it to `PUBLIC_ROUTES`; do **not** reintroduce a PROTECTED_ROUTES allowlist
+  (it silently bounced logged-in users on any forgotten authenticated route — the
+  B1 launch blocker). New authenticated routes need no registration.
+- Respect this auth model; RLS scoping (the service-role client
   **bypasses RLS** — scope every admin query by user id); **return structured
   results, never `throw`, for expected business rules** (Server Action errors are
   redacted in production); non-clinical AI language.

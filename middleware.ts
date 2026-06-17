@@ -25,21 +25,12 @@ const PUBLIC_ROUTES = [
   "/contact",
 ];
 
-const PROTECTED_ROUTES = [
-  "/home",
-  "/remy",
-  "/dashboard",
-  "/memories",
-  "/timeline",
-  "/reminders",
-  "/insights",
-  "/memory-chat",
-  "/onboarding",
-  "/profiles",
-  "/search",
-  "/settings",
-  "/api",
-];
+// NOTE: there is intentionally NO PROTECTED_ROUTES allowlist. The middleware
+// protects BY DEFAULT — any route that is not explicitly public (PUBLIC_ROUTES),
+// not a bypass/static asset, and not a public API route requires authentication.
+// An allowlist silently broke any authenticated route that was forgotten (it
+// bounced logged-in users to /login); protect-by-default makes new authenticated
+// routes safe automatically and fails CLOSED if a public route is ever forgotten.
 
 const PUBLIC_API_ROUTES = [
   "/api/stripe/webhook",
@@ -151,18 +142,6 @@ function isAuthRoute(
   );
 }
 
-function isProtectedRoute(
-  pathname: string
-) {
-  return PROTECTED_ROUTES.some(
-    (route) =>
-      pathname === route ||
-      pathname.startsWith(
-        `${route}/`
-      )
-  );
-}
-
 function createRedirectResponse(
   request: NextRequest,
   path: string
@@ -260,13 +239,14 @@ export async function middleware(
     }
 
     // =========================================
-    // ROUTE CLASSIFICATION
+    // ROUTE CLASSIFICATION — PROTECT BY DEFAULT
     // =========================================
-
-    const protectedRoute =
-      isProtectedRoute(
-        pathname
-      );
+    // After the bypass / static / public-API returns above, a route is PROTECTED
+    // unless it is explicitly in PUBLIC_ROUTES. This replaces the old
+    // PROTECTED_ROUTES allowlist, which silently broke any authenticated route
+    // that was forgotten (e.g. /profile, /collections, /library, /memory-dates)
+    // by bouncing logged-in users to /login. Every authenticated route is now
+    // covered automatically.
 
     const publicRoute =
       isPublicRoute(pathname);
@@ -276,9 +256,12 @@ export async function middleware(
     // =========================================
     // CONDITIONAL AUTH LOOKUP
     // =========================================
+    // Resolve the user for every NON-public route (to let the authenticated user
+    // through, or redirect the unauthenticated one below) AND for auth routes (to
+    // redirect an already-authenticated user to /home).
 
     if (
-      protectedRoute ||
+      !publicRoute ||
       isAuthRoute(pathname)
     ) {
       const supabase =
