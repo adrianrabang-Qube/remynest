@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-query";
 
 import MemorySection from "@/components/memories/MemorySection";
+import { useIsNativePlatform } from "@/lib/platform";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
 import {
@@ -146,6 +147,12 @@ function MemoriesPageContent() {
   const [isSearching, setIsSearching] =
     useState(false);
 
+  // Apple 3.1.1: on native, premium-gated semantic search shows a neutral notice
+  // instead of a silent dead-end. Web behavior is unchanged (notice stays null).
+  const native = useIsNativePlatform();
+  const [searchNotice, setSearchNotice] =
+    useState<string | null>(null);
+
   const isSearchActive =
     searchQuery.trim().length > 0;
 
@@ -155,11 +162,13 @@ function MemoriesPageContent() {
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
+      setSearchNotice(null);
       return;
     }
 
     try {
       setIsSearching(true);
+      setSearchNotice(null);
 
       const res = await fetch(
         "/api/memories/search",
@@ -177,6 +186,19 @@ function MemoriesPageContent() {
           }),
         }
       );
+
+      if (res.status === 402) {
+        // Premium-gated semantic search. On native there is no purchase UI, so
+        // show a neutral notice instead of a silent dead-end; on web, preserve the
+        // existing behavior (fall through to the throw below).
+        if (native) {
+          setSearchResults([]);
+          setSearchNotice(
+            "Semantic search is a Premium feature."
+          );
+          return;
+        }
+      }
 
       if (!res.ok) {
         throw new Error(
@@ -216,7 +238,7 @@ function MemoriesPageContent() {
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery, activeProfileId, workspaceType]);
+  }, [searchQuery, activeProfileId, workspaceType, native]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -758,9 +780,19 @@ const sortedMemories = [
           />
         )}
 
+      {/* Premium-gated search notice — native only; neutral, no purchase CTA. */}
+      {searchNotice && (
+        <div className="rounded-xl border border-sand-deep/60 bg-sand/30 p-6 text-center">
+          <p className="text-sm text-charcoal-soft">
+            {searchNotice}
+          </p>
+        </div>
+      )}
+
       {/* No Search Results */}
       {isSearchActive &&
         !isSearching &&
+        !searchNotice &&
         searchResults.length === 0 && (
           <div className="rounded-xl border border-gray-200 p-6 text-center">
             <p className="text-sm text-gray-500">

@@ -1,4 +1,7 @@
+"use client";
+
 import UpgradeButton from "@/components/UpgradeButton";
+import { useIsNativePlatform } from "@/lib/platform";
 
 type DashboardAccountStatusProps = {
   currentPlan?: string | null;
@@ -16,6 +19,7 @@ export default function DashboardAccountStatus({
 
   const normalizedPlan = currentPlan?.trim().toUpperCase();
 
+  const native = useIsNativePlatform();
   const isFamily = normalizedPlan === "FAMILY";
   const isPremiumPlan = normalizedPlan === "PREMIUM";
   const isFree = !isFamily && !isPremiumPlan;
@@ -48,6 +52,8 @@ export default function DashboardAccountStatus({
             ? "Your Family subscription is active. Collaboration, shared caregiving, and expanded family features are enabled."
             : isPremiumPlan
             ? "Your premium subscription is active. Advanced cognition, semantic search, and expanded features are enabled."
+            : native
+            ? "You're on the Free plan."
             : "Upgrade anytime for advanced AI cognition, semantic memory search, expanded storage, and premium RemyNest capabilities."}
         </p>
 

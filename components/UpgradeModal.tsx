@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { BILLING_PLANS, getPlanPriceLabel } from "@/lib/billing/plans";
+import { isNativePlatform, useIsNativePlatform } from "@/lib/platform";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -36,12 +37,46 @@ export default function UpgradeModal({
   reason = "care-profile-limit",
   requiredFeature,
 }: UpgradeModalProps) {
+  const native = useIsNativePlatform();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] =
     useState<BillingPlan>("PREMIUM");
 
   if (!open) return null;
+
+  // Apple Guideline 3.1.1: on native iOS, show a neutral Premium-feature notice —
+  // no plans, no prices, no purchase CTA, no external/"subscribe on the web" link.
+  if (native) {
+    const nativeHeadline =
+      reason === "caregiver-collaboration"
+        ? "Caregiver collaboration is a Family plan feature"
+        : reason === "care-profile-limit"
+          ? "You've reached your care profile limit"
+          : "This is a Premium feature";
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-label={nativeHeadline}
+      >
+        <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+          <h2 className="text-xl font-bold mb-2">{nativeHeadline}</h2>
+          <p className="text-gray-600 mb-6">
+            This feature is part of a higher RemyNest plan.
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full border rounded-xl py-3"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Offer only plans above the user's current one — and, when a feature gate is
   // in play, only those that actually unlock it (per BILLING_PLANS).
@@ -59,6 +94,8 @@ export default function UpgradeModal({
       : selectedPlan;
 
   async function handleUpgrade() {
+    // Apple Guideline 3.1.1 — never initiate web checkout inside the native app.
+    if (isNativePlatform()) return;
     setLoading(true);
     setError(null);
 

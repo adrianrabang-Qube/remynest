@@ -3,12 +3,16 @@
 import { useState } from "react";
 
 import { getPlanPriceLabel } from "@/lib/billing/plans";
+import { isNativePlatform, useIsNativePlatform } from "@/lib/platform";
 
 export default function UpgradeButton() {
+  const native = useIsNativePlatform();
   const [selectedPlan, setSelectedPlan] = useState<"PREMIUM" | "FAMILY">("PREMIUM");
   const [loading, setLoading] = useState(false);
 
   const handleUpgrade = async () => {
+    // Apple Guideline 3.1.1 — never initiate web checkout inside the native app.
+    if (isNativePlatform()) return;
     try {
       setLoading(true);
 
@@ -34,6 +38,10 @@ export default function UpgradeButton() {
       setLoading(false);
     }
   };
+
+  // Apple Guideline 3.1.1: no in-app subscription-purchase UI on native iOS.
+  // (Premium is purchased on the web; the entitlement reflects automatically.)
+  if (native) return null;
 
   return (
     <div className="space-y-4">

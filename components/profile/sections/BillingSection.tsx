@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useBillingStatus } from "../hooks/useBillingStatus";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { BILLING_PLANS, getPlanPriceLabel } from "@/lib/billing/plans";
+import { isNativePlatform, useIsNativePlatform } from "@/lib/platform";
 
 export default function BillingSection() {
+  const native = useIsNativePlatform();
   const [loading, setLoading] =
     useState(false);
   const [error, setError] =
@@ -55,6 +57,8 @@ export default function BillingSection() {
       : selectedPlan;
 
   async function upgradePlan() {
+    // Apple Guideline 3.1.1 — never initiate web checkout inside the native app.
+    if (isNativePlatform()) return;
     try {
       setError(null);
       setAction("checkout");
@@ -101,6 +105,9 @@ export default function BillingSection() {
   }
 
   async function openCustomerPortal() {
+    // Apple Guideline 3.1.1 — the Stripe portal can expose plan upgrades/purchases;
+    // never open it inside the native app.
+    if (isNativePlatform()) return;
     try {
       setError(null);
       setAction("portal");
@@ -208,6 +215,8 @@ export default function BillingSection() {
 
       <div className="flex flex-wrap gap-3">
 
+        {/* Apple 3.1.1: plan/price selector is purchase UI — web only. */}
+        {!native && (
         <div className="flex gap-2 w-full">
           {OFFER_PLANS.map((plan) => {
             const isCurrent = plan === currentPlan;
@@ -250,8 +259,10 @@ export default function BillingSection() {
             );
           })}
         </div>
+        )}
 
-        {billing?.customerPortalEnabled ? (
+        {/* Apple 3.1.1: the Stripe portal can expose upgrades/purchases — web only. */}
+        {!native && (billing?.customerPortalEnabled ? (
           <button
             onClick={openCustomerPortal}
             disabled={loading}
@@ -287,9 +298,10 @@ export default function BillingSection() {
           >
             Portal unavailable
           </div>
-        )}
+        ))}
 
-        {canUpgrade && (
+        {/* Apple 3.1.1: upgrade/checkout CTA is purchase UI — web only. Cancel stays. */}
+        {!native && canUpgrade && (
           <button
             onClick={upgradePlan}
             disabled={loading}

@@ -65,6 +65,13 @@ waiting for approval**: investigate → implement → test → `npm run lint` �
   remaining V1 gate is product/App-Store work (e.g. Apple 3.1.1 / IAP), not infra.
 - No `eslint-disable` / TS suppression; never weaken auth or validation; no Stripe
   or schema changes without approval.
+- **iOS purchase compliance (Apple 3.1.1, authoritative 2026-06-17):** never surface
+  Stripe / web-checkout / customer-portal purchase UI on native — gate every purchase
+  entry point with `lib/platform.ts` (`useIsNativePlatform()` render guard +
+  `isNativePlatform()` handler short-circuit). New purchase/upgrade UI must be
+  **web-only**; on native show a neutral Premium-feature state with **no** external
+  link or "subscribe on the web" text (anti-steering 3.1.3). Cancellation (no
+  redirect) may stay. Do not reintroduce an un-gated checkout/portal CTA.
 - Destructive / outward-facing actions (DB migration, deletion, Vercel, deploy) are
   **operator steps** unless explicitly authorized — provide the exact command.
 - **`main` auto-deploys to production.** Don't commit/push/merge unless asked
