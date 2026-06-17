@@ -55,6 +55,14 @@ waiting for approval**: investigate → implement → test → `npm run lint` �
   **bypasses RLS** — scope every admin query by user id); **return structured
   results, never `throw`, for expected business rules** (Server Action errors are
   redacted in production); non-clinical AI language.
+- **Infra / launch-blocker audit CLOSED (authoritative 2026-06-17):** B1 auth
+  (protect-by-default), B2 storage privacy (`memory-media` bucket is **private** —
+  PHI served via signed URLs only), B3 caregiver-authz RLS (`20260608180000`
+  applied), and B5 prod env (Stripe LIVE + Sentry) are **DONE**. **B4 PITR is
+  intentionally deferred post-launch (cost)** — daily backups are the recovery
+  baseline (accepted coarser-RPO risk; enable PITR at scale). **Do not re-flag
+  B1–B3/B5 or PITR as open launch blockers** — they are resolved/decided. The
+  remaining V1 gate is product/App-Store work (e.g. Apple 3.1.1 / IAP), not infra.
 - No `eslint-disable` / TS suppression; never weaken auth or validation; no Stripe
   or schema changes without approval.
 - Destructive / outward-facing actions (DB migration, deletion, Vercel, deploy) are

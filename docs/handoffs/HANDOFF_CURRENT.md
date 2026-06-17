@@ -35,6 +35,13 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **Infrastructure / launch-blocker audit — CLOSED (2026-06-17).** Final outcome of B1–B5:
+  - **B1 — middleware protect-by-default (auth):** ✅ **Complete** — fixed (`c8106e5`) + pushed/deployed (GitHub sync).
+  - **B2 — `memory-media` storage privacy:** ✅ **Complete** — bucket flipped to **private**; PHI photos now served only via short-lived signed URLs (no anonymous public access).
+  - **B3 — caregiver-authz RLS hardening:** ✅ **Complete** — migration `20260608180000` applied; the direct-INSERT write-IDOR on `profile_relationships`/`caregiver_invites` is closed.
+  - **B4 — backups / PITR:** ⏸️ **PITR intentionally DEFERRED to post-launch scaling (cost decision).** Daily backups remain the recovery baseline. **Rationale & accepted risk:** PITR's value is a finer recovery granularity (recover to any second vs to the last daily snapshot); deferring it means a coarser **RPO of up to ~24h** in a worst-case restore. For V1's data volume this is an operator-accepted trade-off against PITR's ongoing cost; **revisit and enable PITR when data volume/criticality grows** (it can be turned on later with no app change). Daily-backup presence + a periodic test-restore (`docs/BACKUP_OPERATOR_CHECKLIST.md`) remain the minimum bar.
+  - **B5 — production env (Stripe LIVE + Sentry):** ✅ **Verified**.
+  - **Net: infrastructure launch blockers = 0.** Remaining V1 gate is **product / App-Store work**, not infrastructure (top item: Apple 3.1.1 / IAP — see Next priorities). Runbook archived at `docs/LAUNCH_BLOCKERS_OPERATOR_RUNBOOK.md`.
 - **Launch blockers B2–B5 verified & runbooked — all are operator/dashboard actions, ZERO required code changes** (launch-readiness; investigation-only re-verify + operator runbooks). Authoritative runbook: **`docs/LAUNCH_BLOCKERS_OPERATOR_RUNBOOK.md`** (supersedes the stale `docs/FINAL_LAUNCH_BLOCKERS.md`).
   - **B2 — `memory-media` bucket public (PHI):** OPEN. Code is fully private-bucket-ready (path storage + signed URLs on every render path; verified each surface). Fix = operator **flip bucket to private** (zero broken-image window; signed URLs unaffected). Runbook: prereqs/flip/validation/rollback.
   - **B3 — caregiver-authz RLS migration `20260608180000` unapplied (write-IDOR):** OPEN. Migration **verified correct + idempotent**, closes the direct-INSERT IDOR on `profile_relationships`/`caregiver_invites` while matching the legit owner-create + accept-invite flows (SELECT policies untouched). Fix = operator **apply the migration** (`supabase db push` or SQL editor). Runbook incl. IDOR-probe + legit-flow regression validation + rollback.
@@ -2217,8 +2224,12 @@ in with Apple. P1: set Sentry env in Vercel; native push;
 Android build + store submission.
 
 ## Blockers
-None blocking web production. Mobile store submission blocked on Apple Developer /
-Play Console accounts + native push + Android SDK.
+**Infrastructure: NONE** — the B1–B5 audit is **CLOSED** (B1/B2/B3/B5 done; B4 PITR
+deferred post-launch by accepted decision — see Completed work). The remaining V1
+gate is **product / App-Store work**. Top product-development blocker: **Apple
+Guideline 3.1.1** — the Stripe web-checkout upgrade flow runs inside the iOS WebView
+with no native-platform gate → near-certain App Store rejection. Ranked product plan
+is the operator's current focus (see Next priorities).
 
 ## Recent commits
 - `fix(remy)` avatar crop calibration — tight square head crops for all 9 moods (measured)
