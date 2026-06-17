@@ -58,21 +58,33 @@ export default function WorkspaceSelector({
       if (event.key === "Escape") setOpen(false);
     }
     document.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
+      // ALWAYS release to the unlocked default. The app sets no inline body
+      // overflow except these mutually-exclusive overlays, so restoring "" can
+      // never orphan a stale "hidden" (the previous capture-and-restore could,
+      // which is what left scrolling stuck after the sheet closed). Runs on
+      // every close AND on unmount, so the lock can never outlive the sheet.
+      document.body.style.overflow = "";
     };
   }, [open]);
 
   function switchTo(action: () => Promise<unknown>) {
     void haptic("light"); // acknowledge the workspace switch on native
+    // Close the sheet IMMEDIATELY as an urgent update — NOT inside the
+    // transition. Previously setOpen(false) ran inside startTransition after
+    // router.refresh(), so React deferred the close until the slow force-dynamic
+    // SSR refresh resolved (seconds over cellular) — or never, if the action
+    // rejected — leaving the user trapped behind the overlay with scrolling
+    // locked. Closing first, then refreshing in the background, releases the
+    // overlay + scroll-lock instantly and mirrors the dropdown's close-then-act
+    // behavior. The .catch guarantees a failed switch can never strand state.
+    setOpen(false);
     startTransition(() => {
-      void Promise.resolve(action()).then(() => {
-        router.refresh();
-        setOpen(false);
-      });
+      void Promise.resolve(action())
+        .then(() => router.refresh())
+        .catch(() => router.refresh());
     });
   }
 
