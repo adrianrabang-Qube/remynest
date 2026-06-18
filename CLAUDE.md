@@ -97,6 +97,18 @@ page** (it is a workspace context; its home is `/home`).
 Do **not** reintroduce a "My Nest" row in the workspace drawer, a "Switch to My
 Nest" button in `ProfileMenuItems`, or a dedicated My Nest route.
 
+**WorkspaceSelector drawer must be portaled (authoritative, 2026-06-18):** the
+`WorkspaceSelector` open-drawer overlay (`fixed inset-0`) is rendered via
+`createPortal(…, document.body)`. This is **required**, not cosmetic: the selector
+is mounted inside the `backdrop-blur-md` app headers (`MobileTopBar`, `AppNavbar`),
+and a non-`none` `backdrop-filter` establishes the **containing block** for
+`position:fixed` descendants on WebKit/iOS — so an *inline* (non-portaled) overlay
+re-roots to the header box and leaks the "Manage care profiles"/"Create profile"
+fragments under the status bar on Home/My Nest (the long-standing TestFlight
+corruption; prior header/safe-area fixes missed it). **Do not** un-portal that
+overlay, and **do not** render any new `fixed`/full-screen modal inline under a
+`backdrop-filter`/`transform`/`filter` ancestor — portal it to `document.body`.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

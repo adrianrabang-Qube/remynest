@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { setActiveProfile } from "@/app/(app)/dashboard/profile-actions";
@@ -98,7 +99,17 @@ export default function WorkspaceSelector({
         <span className="text-xs text-charcoal-muted">▾</span>
       </button>
 
-      {open && (
+      {/* Portal the overlay to <body> so its `fixed inset-0` resolves against the
+          WKWebView VIEWPORT, not the backdrop-blur-md header it is mounted inside
+          (MobileTopBar.tsx:37 / AppNavbar.tsx:62) — a non-`none` backdrop-filter
+          makes that header the containing block for `position:fixed` descendants
+          on WebKit, which re-rooted the drawer to the header box and leaked the
+          Manage care profiles / Create profile fragments under the status bar on
+          Home/My Nest. The portal restores full-screen positioning AND backdrop
+          click-trapping. `open` is always false during SSR/initial hydration, so
+          createPortal runs only client-side, where document.body exists. */}
+      {open &&
+        createPortal(
         <div
           className="fixed inset-0 z-50"
           role="dialog"
@@ -186,7 +197,8 @@ export default function WorkspaceSelector({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
