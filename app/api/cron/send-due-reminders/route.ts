@@ -118,11 +118,11 @@ type OneSignalReminderPayload = {
 };
 
 async function sendOneSignalNotification(
-  playerId: string,
+  externalUserId: string,
   reminder: OneSignalReminderPayload
 ) {
   const response = await fetch(
-    "https://onesignal.com/api/v1/notifications",
+    "https://api.onesignal.com/notifications",
     {
       method: "POST",
 
@@ -138,9 +138,19 @@ async function sendOneSignalNotification(
           process.env
             .NEXT_PUBLIC_ONESIGNAL_APP_ID,
 
-        include_player_ids: [
-          playerId,
-        ],
+        // Target the OneSignal USER by External ID (the Supabase user id the app
+        // bridges via OneSignal.login(user.id)) so EVERY active push subscription
+        // linked to that user — web + all iOS/Android devices — receives the
+        // reminder. Replaces brittle single-device include_player_ids targeting
+        // (device_registrations.player_id), which missed native iOS (never stored
+        // there), extra devices, and rotated/stale subscription ids.
+        include_aliases: {
+          external_id: [
+            externalUserId,
+          ],
+        },
+
+        target_channel: "push",
 
         headings: {
           en: "RemyNest Reminder",
@@ -312,54 +322,12 @@ export async function GET(req: Request) {
       }
 
       // =====================================
-      // GET DEVICE
-      // =====================================
-
-      const {
-        data: device,
-        error: deviceError,
-      } = await supabase
-        .from(
-          "device_registrations"
-        )
-        .select("*")
-        .eq(
-          "user_id",
-          reminder.user_id
-        )
-        .order("created_at", {
-          ascending: false,
-        })
-        .limit(1)
-        .single();
-
-      if (
-        deviceError ||
-        !device
-      ) {
-        logReminderError(
-          "device-fetch-error",
-          {
-            requestId,
-
-            reminderId:
-              reminder.id,
-
-            deviceError,
-          }
-        );
-
-        await unlockReminder(
-          supabase,
-          reminder.id
-        );
-
-        continue;
-      }
-
-      // =====================================
       // SEND PUSH
       // =====================================
+      // Targeted by OneSignal External ID (reminder.user_id) — no device lookup.
+      // Every active push subscription on that OneSignal user is reached, so this
+      // no longer depends on device_registrations and no longer skips reminders
+      // for users without a stored web player_id.
 
       let notificationSuccess =
         false;
@@ -367,7 +335,7 @@ export async function GET(req: Request) {
       try {
         const notificationData =
           await sendOneSignalNotification(
-            device.player_id,
+            reminder.user_id,
             reminder
           );
 
