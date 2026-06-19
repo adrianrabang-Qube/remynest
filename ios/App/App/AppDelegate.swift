@@ -70,11 +70,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         case "login":
             if let externalId = body["externalId"] as? String, !externalId.isEmpty {
                 OneSignal.login(externalId)
+                sendBridgeLoginAck(externalId: externalId)
             }
         case "logout":
             OneSignal.logout()
         default:
             break
+        }
+    }
+
+    /// Acknowledge a completed bridge login back to the web layer so it can confirm
+    /// the native `OneSignal.login` actually executed (the web's
+    /// `window.__oneSignalBridgeAck`). The web flips its identity state from
+    /// "requested" to "confirmed" on receipt; older builds without this simply keep
+    /// re-posting login on auth events — harmless and idempotent.
+    private func sendBridgeLoginAck(externalId: String) {
+        guard let webView = bridgeWebView() else { return }
+        // externalId is a server-issued UUID; strip quotes/backslashes defensively
+        // before interpolating into the JS string literal.
+        let safe = externalId
+            .replacingOccurrences(of: "\\", with: "")
+            .replacingOccurrences(of: "\"", with: "")
+        let js = "window.__oneSignalBridgeAck && window.__oneSignalBridgeAck({ externalId: \"\(safe)\", status: \"ok\" });"
+        DispatchQueue.main.async {
+            webView.evaluateJavaScript(js, completionHandler: nil)
         }
     }
 

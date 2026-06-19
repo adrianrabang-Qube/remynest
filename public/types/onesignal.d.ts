@@ -19,6 +19,7 @@ declare global {
     }): Promise<void>
     Notifications: OneSignalNotifications
     login(userId: string): Promise<void>
+    logout(): Promise<void>
     User?: OneSignalUser
   }
 
