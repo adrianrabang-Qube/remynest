@@ -109,6 +109,23 @@ corruption; prior header/safe-area fixes missed it). **Do not** un-portal that
 overlay, and **do not** render any new `fixed`/full-screen modal inline under a
 `backdrop-filter`/`transform`/`filter` ancestor — portal it to `document.body`.
 
+**Native iOS reminder notifications are device-local (authoritative, 2026-06-20):**
+reminders are scheduled **on-device** via `@capacitor/local-notifications`
+(`lib/native-reminders.ts` reconcile engine + `<NativeReminderSync>` mounted on the
+reminders page) so they fire **offline / without OneSignal / cron / APNs**.
+`reconcileLocalReminders` is a **no-op off native iOS** — web/Android keep the server
+cron path (hybrid; the cron is the fallback, not removed). The engine reads existing
+reminder columns only (no schema change). **iOS plugin linking is CocoaPods, not SPM:**
+main's Xcode project links Capacitor plugins via the `ios/App/Podfile` `capacitor_pods`
+function (+ `App.xcworkspace`), so `CapacitorLocalNotifications` was added **there**;
+Capacitor-8 `cap sync`'s `CapApp-SPM/Package.swift` is **inert on main** (0 SPM refs in
+the project) and is removed. **Do not** migrate main to SPM / re-add `CapApp-SPM`,
+regenerate the iOS project (`cap add ios`), or replace the Podfile/AppDelegate — those
+carry the **OneSignal native init + bridge/ack pod (`OneSignalXCFramework 5.5.2`)** and
+the APNs entitlements (OneSignal and local notifications **coexist**; this feature did
+not touch OneSignal). Activation is an operator step: `cd ios/App && pod install` + a
+native build. See `docs/features/local-notifications.md`.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

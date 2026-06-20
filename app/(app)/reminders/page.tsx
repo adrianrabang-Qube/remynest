@@ -6,6 +6,7 @@ import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField"
 import ReminderCenter, {
   type ReminderRecord,
 } from "@/components/reminders/ReminderCenter";
+import NativeReminderSync from "@/components/reminders/NativeReminderSync";
 import {
   logReminderEvent,
   REMINDER_STATUS,
@@ -435,8 +436,20 @@ export default async function RemindersPage({
     );
   }
 
+  const localReminders = (reminders ?? []).map((r) => ({
+    id: r.id,
+    title: r.title ?? null,
+    remind_at: r.remind_at,
+    recurring: r.recurring ?? false,
+    frequency: r.frequency ?? null,
+    completed: r.completed ?? false,
+  }));
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-10">
+
+      {/* Mirror reminders into on-device iOS local notifications (no-op on web). */}
+      <NativeReminderSync reminders={localReminders} />
 
       {/* Header */}
       <div className="mb-8">
