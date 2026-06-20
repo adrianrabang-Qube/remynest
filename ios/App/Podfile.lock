@@ -6,6 +6,8 @@ PODS:
   - CapacitorCordova (8.4.0)
   - CapacitorHaptics (8.0.2):
     - Capacitor
+  - CapacitorLocalNotifications (8.2.0):
+    - Capacitor
   - CapacitorSplashScreen (8.0.1):
     - Capacitor
   - CapacitorStatusBar (8.0.2):
@@ -65,6 +67,7 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
+  - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - OneSignalXCFramework (= 5.5.2)
@@ -82,6 +85,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
+  CapacitorLocalNotifications:
+    :path: "../../node_modules/@capacitor/local-notifications"
   CapacitorSplashScreen:
     :path: "../../node_modules/@capacitor/splash-screen"
   CapacitorStatusBar:
@@ -92,10 +97,11 @@ SPEC CHECKSUMS:
   CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
   CapacitorCordova: 71d81f350e6c30bf2a846593b5c480fbd68e9bac
   CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
+  CapacitorLocalNotifications: 2615aa008f608b95d3921a778ee1988abf1e6148
   CapacitorSplashScreen: 4b46c72298db552b3c57ce021ef028b6dc7f1fa7
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
   OneSignalXCFramework: 2f46ff87ccefd9afe8e3b5f9fe357072191205ff
 
-PODFILE CHECKSUM: 0f4f736b96a3efaa0a687c7a196e625544cdb809
+PODFILE CHECKSUM: 21c1d77c918b0d23aefe7b517191e1e5872d0e80
 
 COCOAPODS: 1.16.2
