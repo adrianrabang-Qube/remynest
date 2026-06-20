@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>RemyNest</title>
+    <style>
+      html, body { height: 100%; margin: 0; font-family: -apple-system, system-ui, sans-serif; }
+      .wrap { height: 100%; display: flex; flex-direction: column; align-items: center;
+              justify-content: center; gap: 12px; color: #333; text-align: center; padding: 24px; }
+      .muted { color: #888; font-size: 14px; }
+      a { color: #2563eb; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Local fallback only. The Capacitor shell normally loads
+      https://www.remynest.com (see capacitor.config.ts -> server.url).
+      This page is shown only if the remote URL cannot be reached.
+    -->
+    <div class="wrap">
+      <h1>RemyNest</h1>
+      <p class="muted">Connecting to RemyNest…</p>
+      <p class="muted">If this screen persists, check your connection or open
+        <a href="https://www.remynest.com">www.remynest.com</a>.</p>
+    </div>
+  </body>
+</html>
