@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { redirect } from "next/navigation";
+import NativeReminderSync from "@/components/reminders/NativeReminderSync";
 
 export const dynamic = "force-dynamic";
 
@@ -312,8 +313,20 @@ export default async function RemindersPage({
     );
   }
 
+  const localReminders = (reminders ?? []).map((r) => ({
+    id: r.id,
+    title: r.title ?? null,
+    remind_at: r.remind_at,
+    recurring: r.recurring ?? false,
+    frequency: r.frequency ?? null,
+    completed: r.completed ?? false,
+  }));
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
+
+      {/* Mirror reminders into on-device iOS local notifications (no-op on web). */}
+      <NativeReminderSync reminders={localReminders} />
 
       {/* Header */}
       <div className="mb-8">

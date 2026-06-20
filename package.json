@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@capacitor/local-notifications": "^8.2.0",
     "@stripe/stripe-js": "^9.4.0",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "^0.10.2",
