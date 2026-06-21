@@ -2,9 +2,10 @@ import UIKit
 import Capacitor
 import WebKit
 import OneSignalFramework
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
+class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
@@ -15,6 +16,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
     private static let bridgeName = "oneSignalBridge"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // --- Foreground presentation of LOCAL reminders --------------------------
+        // Register our UNUserNotificationCenter delegate BEFORE OneSignal.initialize so
+        // OneSignal's notification-center swizzling forwards non-OneSignal (local)
+        // notifications to our willPresent. Without a pre-init delegate, OneSignal owns
+        // the foreground path and on-device reminders are silently suppressed while the
+        // app is active. Capacitor still installs its own delegate later for taps/deep
+        // links, and OneSignal push is unaffected (it swizzles regardless of init order).
+        UNUserNotificationCenter.current().delegate = self
+
         // --- Native OneSignal (APNs) initialization ------------------------------
         // RemyNest's web app runs inside a remote-URL WKWebView, where the OneSignal
         // *Web* SDK cannot create an iOS push subscription. Initializing the *native*
@@ -29,6 +39,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
             NSLog("[OneSignal] ONESIGNAL_APP_ID missing/placeholder in Info.plist — native push disabled")
         }
         return true
+    }
+
+    // MARK: - UNUserNotificationCenterDelegate (foreground presentation)
+
+    /// Present LOCAL reminders (interval/calendar triggers) as banner + sound + badge +
+    /// notification-center entry while the app is active. Remote OneSignal/APNs pushes
+    /// (UNPushNotificationTrigger) are left to OneSignal's own handling so existing
+    /// OneSignal foreground behavior is unchanged.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        if notification.request.trigger is UNPushNotificationTrigger {
+            completionHandler([])
+        } else {
+            completionHandler([.banner, .list, .sound, .badge])
+        }
     }
 
     /// The (public, non-secret) OneSignal App ID from Info.plist; nil if unset/placeholder.

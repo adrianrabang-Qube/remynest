@@ -33,6 +33,7 @@ RemyNest is a **remote-URL Capacitor app** (the iOS app loads production in a WK
 | `components/reminders/NativeReminderSync.tsx` | **new** — client component; reconciles on render via a list-signature effect, renders `null` |
 | `app/(app)/reminders/page.tsx` | wired: map server `reminders` → `LocalReminder[]`, mount `<NativeReminderSync>` above `<ReminderCenter>` |
 | `ios/App/Podfile` | **+1 line** — `pod 'CapacitorLocalNotifications'` added to `capacitor_pods` (CocoaPods — see below) |
+| `ios/App/App/AppDelegate.swift` | **foreground presentation** — `UNUserNotificationCenterDelegate` + `willPresent` (see below) |
 | `package.json` / `package-lock.json` | `@capacitor/local-notifications@^8.2.0` |
 
 ## Native wiring on main — CocoaPods, NOT SPM (authoritative)
@@ -42,7 +43,12 @@ Capacitor 8's `npx cap sync ios` **defaults to Swift Package Manager** — it wr
 
 - **Do not** migrate main to SPM or re-add `CapApp-SPM` — it would create a dual-link mismatch and risk the OneSignal pod.
 - **Do not** regenerate the iOS project (`cap add ios`) or replace the Podfile/AppDelegate — they carry the OneSignal native init + bridge/ack and the APNs entitlements.
-- `OneSignalInit.tsx`, `AppDelegate.swift`, and the entitlements were **not modified** by this feature.
+- `OneSignalInit.tsx` and the entitlements are **not modified**. `AppDelegate.swift` gained **only** a foreground-presentation delegate (below); the OneSignal native init + bridge/ack are untouched.
+
+## Foreground presentation (app active) — authoritative
+Local reminders fire when locked/backgrounded, but iOS suppresses the **foreground** banner unless a `willPresent` returns presentation options. **OneSignal owns the foreground path** — it swizzles `UNUserNotificationCenter.setDelegate:` and the `willPresent` selector, and only forwards non-OneSignal notifications to a `willPresent`-implementing delegate registered **before** `OneSignal.initialize`. Capacitor's own `NotificationRouter` is installed *after* init (in `CapacitorBridge.init`), so its banner-returning `willPresent` never reached local reminders → silent while the app was active.
+
+**Fix (`ios/App/App/AppDelegate.swift`):** `AppDelegate` now conforms to `UNUserNotificationCenterDelegate` and sets `UNUserNotificationCenter.current().delegate = self` **before** `OneSignal.initialize`. Its `willPresent` returns `[.banner, .list, .sound, .badge]` for **local** reminders (interval/calendar triggers) and `[]` for **remote** pushes (`UNPushNotificationTrigger`) — so OneSignal/APNs foreground behavior is unchanged. **Do not** remove this delegate or move the assignment after `OneSignal.initialize`. Requires a native rebuild (operator). Validated: `xcodebuild` simulator build **SUCCEEDED**.
 
 ## Recurring, timezone & DST
 - **daily** → `schedule.on = { hour, minute }` · **weekly** → `{ weekday, hour, minute }` (iOS 1=Sun..7=Sat) · **monthly** → `{ day, hour, minute }`.

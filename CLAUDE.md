@@ -122,9 +122,16 @@ Capacitor-8 `cap sync`'s `CapApp-SPM/Package.swift` is **inert on main** (0 SPM 
 the project) and is removed. **Do not** migrate main to SPM / re-add `CapApp-SPM`,
 regenerate the iOS project (`cap add ios`), or replace the Podfile/AppDelegate — those
 carry the **OneSignal native init + bridge/ack pod (`OneSignalXCFramework 5.5.2`)** and
-the APNs entitlements (OneSignal and local notifications **coexist**; this feature did
-not touch OneSignal). Activation is an operator step: `cd ios/App && pod install` + a
-native build. See `docs/features/local-notifications.md`.
+the APNs entitlements (OneSignal and local notifications **coexist**). **Foreground
+banner (authoritative, 2026-06-21):** OneSignal swizzles `UNUserNotificationCenter`
+and owns the foreground path, so local reminders were silent while the app was open.
+`AppDelegate` now conforms to `UNUserNotificationCenterDelegate` and sets
+`center.delegate = self` **before** `OneSignal.initialize`, returning
+`[.banner,.list,.sound,.badge]` for local (interval/calendar) triggers and `[]` for
+remote pushes (`UNPushNotificationTrigger`) — OneSignal/push behavior unchanged. **Do
+not** remove that delegate or move the assignment after `OneSignal.initialize`.
+Activation is an operator step: `cd ios/App && pod install` + a native build. See
+`docs/features/local-notifications.md`.
 
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
