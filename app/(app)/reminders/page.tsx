@@ -498,7 +498,13 @@ export default async function RemindersPage({
         </h2>
         <span className="text-charcoal-muted text-sm group-open:rotate-180 transition">▾</span>
       </summary>
+      {/* `key` forces a remount (clearing the uncontrolled fields incl. the date
+          input's client state) after a successful create — which adds a reminder, so
+          the count changes — and on a workspace switch (activeProfileId changes). The
+          server-action redirect is a same-route soft nav that otherwise reuses the
+          form DOM and keeps the previous title / date / recurrence. */}
       <form
+        key={`${activeProfileId ?? "personal"}-${(reminders ?? []).length}`}
         action={createReminder}
         className="mt-4"
       >
