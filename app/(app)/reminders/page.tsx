@@ -33,7 +33,9 @@ export default async function RemindersPage({
     redirect("/login");
   }
 
-  // 🧠 Context Isolation
+  // 🧠 Context: CARE = a care profile; PERSONAL ("My Nest") = no profile, scoped to
+  // this user via the app-wide convention memory_profile_id IS NULL + user_id (same
+  // as memories / timeline / search).
   const isMyNestContext =
     searchParams?.context ===
     "my-nest";
@@ -43,31 +45,27 @@ export default async function RemindersPage({
       ? null
       : await resolveActiveProfileId();
 
-  // 🚫 No active profile
-  if (!activeProfileId) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-10">
-        <div className="rounded-3xl border border-gold/30 bg-gold/10 p-6 text-charcoal-soft">
-          My Nest mode active. Reminders are isolated from care profiles.
-        </div>
-      </div>
-    );
-  }
+  const isPersonal = !activeProfileId;
 
-  // 📦 Fetch reminders
+  // 📦 Fetch reminders — CARE: by profile; PERSONAL: own null-profile reminders.
+  const remindersQuery = supabase
+    .from("reminders")
+    .select("*");
+
   const {
     data: reminders,
     error: remindersError,
-  } = await supabase
-    .from("reminders")
-    .select("*")
-    .eq(
-      "memory_profile_id",
-      activeProfileId
-    )
-    .order("created_at", {
-      ascending: false,
-    });
+  } = await (isPersonal
+    ? remindersQuery
+        .is("memory_profile_id", null)
+        .eq("user_id", user.id)
+    : remindersQuery.eq(
+        "memory_profile_id",
+        activeProfileId
+      )
+  ).order("created_at", {
+    ascending: false,
+  });
 
   if (remindersError) {
     console.log(
@@ -77,13 +75,16 @@ export default async function RemindersPage({
     console.log(remindersError);
   }
 
-  // Care-profile name for the Caregiver-context framing.
-  const { data: activeProfile } =
-    await supabase
-      .from("memory_profiles")
-      .select("preferred_name, profile_name")
-      .eq("id", activeProfileId)
-      .maybeSingle();
+  // Care-profile name for the Caregiver-context framing (null in My Nest / personal).
+  const activeProfile = isPersonal
+    ? null
+    : (
+        await supabase
+          .from("memory_profiles")
+          .select("preferred_name, profile_name")
+          .eq("id", activeProfileId)
+          .maybeSingle()
+      ).data;
 
   const careProfileName =
     activeProfile?.preferred_name ||
@@ -112,18 +113,18 @@ export default async function RemindersPage({
       );
     }
 
+    // CARE = a care profile (re-resolved from the cookie); PERSONAL ("My Nest") =
+    // no profile, owned by this user (memory_profile_id IS NULL + user_id).
     const activeProfileId =
-      await resolveActiveProfileId();
+      isMyNestContext
+        ? null
+        : await resolveActiveProfileId();
 
-    if (!activeProfileId) {
-      throw new Error(
-        "My Nest mode active. Reminder creation requires an active care profile."
-      );
-    }
-
-    // Server-side ownership check — the active-context cookie is client-settable,
-    // so verify the user actually owns / has caregiver access to this profile.
+    // Server-side ownership check for CARE only — the active-context cookie is
+    // client-settable, so verify the user actually owns / has caregiver access to
+    // the profile. Personal reminders are owned by user_id (no profile to check).
     if (
+      activeProfileId &&
       !(await userCanAccessProfile(
         user.id,
         activeProfileId
@@ -293,6 +294,12 @@ export default async function RemindersPage({
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      throw new Error(
+        "Not authenticated"
+      );
+    }
+
     const id = formData.get(
       "id"
     ) as string;
@@ -304,18 +311,23 @@ export default async function RemindersPage({
 
     const newCompleted = !completed;
 
-    // PRIMARY (backward-compatible) write — the source of truth today.
-    const { error } =
-      await supabase
-        .from("reminders")
-        .update({
-          completed: newCompleted,
-        })
-        .eq("id", id)
-        .eq(
+    // PRIMARY (backward-compatible) write — the source of truth today. Scope CARE
+    // by profile, PERSONAL ("My Nest") by null-profile + owner.
+    const completedWrite = supabase
+      .from("reminders")
+      .update({
+        completed: newCompleted,
+      })
+      .eq("id", id);
+
+    const { error } = await (isPersonal
+      ? completedWrite
+          .is("memory_profile_id", null)
+          .eq("user_id", user.id)
+      : completedWrite.eq(
           "memory_profile_id",
           activeProfileId
-        );
+        ));
 
     if (error) {
       console.log(
@@ -331,9 +343,7 @@ export default async function RemindersPage({
 
     // Best-effort lifecycle mirror — no-op until the migration adds these
     // columns. NEVER blocks completion: the `completed` write above succeeded.
-    const {
-      error: lifecycleError,
-    } = await supabase
+    const lifecycleWrite = supabase
       .from("reminders")
       .update({
         status: newCompleted
@@ -343,15 +353,22 @@ export default async function RemindersPage({
           ? new Date().toISOString()
           : null,
         completed_by: newCompleted
-          ? user?.id ?? null
+          ? user.id
           : null,
         actor_role: "caregiver",
       })
-      .eq("id", id)
-      .eq(
-        "memory_profile_id",
-        activeProfileId
-      );
+      .eq("id", id);
+
+    const {
+      error: lifecycleError,
+    } = await (isPersonal
+      ? lifecycleWrite
+          .is("memory_profile_id", null)
+          .eq("user_id", user.id)
+      : lifecycleWrite.eq(
+          "memory_profile_id",
+          activeProfileId
+        ));
 
     if (lifecycleError) {
       console.warn(
@@ -393,19 +410,30 @@ export default async function RemindersPage({
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      throw new Error(
+        "Not authenticated"
+      );
+    }
+
     const id = formData.get(
       "id"
     ) as string;
 
-    const { error } =
-      await supabase
-        .from("reminders")
-        .delete()
-        .eq("id", id)
-        .eq(
+    // Scope CARE by profile, PERSONAL ("My Nest") by null-profile + owner.
+    const deleteWrite = supabase
+      .from("reminders")
+      .delete()
+      .eq("id", id);
+
+    const { error } = await (isPersonal
+      ? deleteWrite
+          .is("memory_profile_id", null)
+          .eq("user_id", user.id)
+      : deleteWrite.eq(
           "memory_profile_id",
           activeProfileId
-        );
+        ));
 
     if (error) {
       console.log(
