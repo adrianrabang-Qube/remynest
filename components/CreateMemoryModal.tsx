@@ -5,6 +5,7 @@ import {
   buildMemoryUploadPayload,
 } from "@/lib/memory-upload-client";
 import MemoryDateField from "@/components/memories/MemoryDateField";
+import AttachmentManager from "@/components/memories/AttachmentManager";
 import type { ResolvedMemoryDate } from "@/lib/memories/memory-date";
 import { haptic, hapticSuccess } from "@/lib/haptics";
 
@@ -91,18 +92,10 @@ export default function CreateMemoryModal({
           </div>
         ) : null}
 
-        <input
-          type="file"
-          multiple
-          className="border p-2 w-full"
-          onChange={(e) => {
-            const files =
-              Array.from(
-                e.target.files ?? []
-              );
-
-            setUploadedFiles(files);
-          }}
+        <AttachmentManager
+          files={uploadedFiles}
+          onFilesChange={setUploadedFiles}
+          disabled={loading}
         />
 
         <div className="flex gap-2">

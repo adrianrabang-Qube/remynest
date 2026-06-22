@@ -461,32 +461,45 @@ const res = await fetch(
       content,
       memoryDate,
       memoryDatePrecision,
+      attachments,
+      uploadedFiles,
     }: {
       id: string;
       title: string;
       content: string;
       memoryDate?: string | null;
       memoryDatePrecision?: string;
+      attachments?: unknown[];
+      uploadedFiles?: File[];
     }) => {
+      // Multi-photo edit — multipart so the PUT can upload new files and merge
+      // them with the kept attachments via the shared pipeline.
+      const form = new FormData();
+      form.append("title", title);
+      form.append("content", content);
+      form.append(
+        "profileId",
+        activeProfileId ?? ""
+      );
+      form.append(
+        "memoryDate",
+        memoryDate ?? ""
+      );
+      form.append(
+        "memoryDatePrecision",
+        memoryDatePrecision ?? "day"
+      );
+      form.append(
+        "attachments",
+        JSON.stringify(attachments ?? [])
+      );
+      uploadedFiles?.forEach((file) =>
+        form.append("uploadedFiles", file)
+      );
+
       const res = await fetch(
         `/api/memories/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            title,
-            content,
-            profileId:
-              activeProfileId,
-            memoryDate:
-              memoryDate ?? null,
-            memoryDatePrecision:
-              memoryDatePrecision ?? "day",
-          }),
-        }
+        { method: "PUT", body: form }
       );
 
       if (!res.ok) {

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import MemoryDateField from "@/components/memories/MemoryDateField";
+import AttachmentManager, {
+  type ManagedAttachment,
+} from "@/components/memories/AttachmentManager";
 import { haptic, hapticSuccess } from "@/lib/haptics";
 import {
   selectionFromMemoryDate,
@@ -14,6 +17,8 @@ type Memory = {
   content: string;
   memory_date?: string | null;
   memory_date_precision?: string | null;
+  attachments?: ManagedAttachment[] | null;
+  cover_image_url?: string | null;
 };
 
 export default function EditMemoryModal({
@@ -28,6 +33,8 @@ export default function EditMemoryModal({
     content: string;
     memoryDate: string | null;
     memoryDatePrecision: string;
+    attachments: ManagedAttachment[];
+    uploadedFiles: File[];
   }) => Promise<void>;
 }) {
   const [title, setTitle] = useState(memory.title);
@@ -40,6 +47,14 @@ export default function EditMemoryModal({
           | ResolvedMemoryDate["precision"]
           | undefined) ?? "day",
     });
+  const [keptAttachments, setKeptAttachments] =
+    useState<ManagedAttachment[]>(
+      Array.isArray(memory.attachments)
+        ? memory.attachments
+        : []
+    );
+  const [newFiles, setNewFiles] =
+    useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
@@ -50,6 +65,8 @@ export default function EditMemoryModal({
       content,
       memoryDate: memoryDate.memoryDate,
       memoryDatePrecision: memoryDate.precision,
+      attachments: keptAttachments,
+      uploadedFiles: newFiles,
     });
     void hapticSuccess(); // changes saved
     setLoading(false);
@@ -79,6 +96,19 @@ export default function EditMemoryModal({
           )}
           onChange={setMemoryDate}
         />
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">
+            Photos
+          </label>
+          <AttachmentManager
+            existing={keptAttachments}
+            onExistingChange={setKeptAttachments}
+            files={newFiles}
+            onFilesChange={setNewFiles}
+            disabled={loading}
+          />
+        </div>
 
         <div className="flex gap-2">
           <button

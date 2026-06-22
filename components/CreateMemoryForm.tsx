@@ -17,6 +17,8 @@ import {
   type MemoryDateMode,
 } from "@/lib/memories/memory-date";
 
+import AttachmentManager from "@/components/memories/AttachmentManager";
+
 const MEMORY_FORM_TAG =
   "create-memory-form";
 
@@ -115,6 +117,9 @@ export default function CreateMemoryForm() {
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
+
+  const [files, setFiles] =
+    useState<File[]>([]);
 
   // =====================================
   // NORMALIZED INPUTS
@@ -248,31 +253,59 @@ export default function CreateMemoryForm() {
           }
         );
 
-        const response = await fetch(
-          "/api/memories/create",
-          {
-            method: "POST",
+        let response: Response;
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              title:
-                normalizedTitle,
-
-              content:
-                normalizedContent,
-
-              memoryDate:
-                resolvedMemoryDate.memoryDate,
-
-              memoryDatePrecision:
-                resolvedMemoryDate.precision,
-            }),
+        if (files.length > 0) {
+          // Multi-photo create — send multipart so the existing upload pipeline
+          // stores the images. The create route accepts both JSON and FormData.
+          const form = new FormData();
+          form.append("title", normalizedTitle);
+          form.append("content", normalizedContent);
+          if (resolvedMemoryDate.memoryDate) {
+            form.append(
+              "memoryDate",
+              resolvedMemoryDate.memoryDate
+            );
+            form.append(
+              "memoryDatePrecision",
+              resolvedMemoryDate.precision
+            );
           }
-        );
+          files.forEach((file) =>
+            form.append("uploadedFiles", file)
+          );
+
+          response = await fetch(
+            "/api/memories/create",
+            { method: "POST", body: form }
+          );
+        } else {
+          response = await fetch(
+            "/api/memories/create",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body: JSON.stringify({
+                title:
+                  normalizedTitle,
+
+                content:
+                  normalizedContent,
+
+                memoryDate:
+                  resolvedMemoryDate.memoryDate,
+
+                memoryDatePrecision:
+                  resolvedMemoryDate.precision,
+              }),
+            }
+          );
+        }
 
         const data =
           await response.json();
@@ -322,6 +355,8 @@ export default function CreateMemoryForm() {
 
         setContent("");
 
+        setFiles([]);
+
         startTransition(() => {
           router.refresh();
         });
@@ -350,6 +385,7 @@ export default function CreateMemoryForm() {
       normalizedTitle,
       normalizedContent,
       resolvedMemoryDate,
+      files,
       router,
     ]
   );
@@ -486,6 +522,18 @@ export default function CreateMemoryForm() {
             )}
           </select>
         )}
+      </div>
+
+      {/* Photos — optional; multi-photo via the shared picker */}
+      <div className="space-y-2 rounded-xl border border-gray-200 p-4">
+        <label className="text-sm font-medium text-gray-700">
+          Photos
+        </label>
+        <AttachmentManager
+          files={files}
+          onFilesChange={setFiles}
+          disabled={loading || isPending}
+        />
       </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400">

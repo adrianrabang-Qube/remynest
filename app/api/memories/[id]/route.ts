@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import {
   normalizeAttachments,
   resolveCoverImageUrl,
+  type MemoryAttachment,
 } from "@/lib/memory-media";
+import { buildMemoryMediaPayload } from "@/lib/memory-media-pipeline";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 export async function PUT(
@@ -18,17 +20,83 @@ export async function PUT(
 
   if (!user) return new Response("Unauthorized", { status: 401 });
 
-  const body = await req.json();
+  const contentType =
+    req.headers.get("content-type") ?? "";
 
-  const normalizedAttachments =
-    normalizeAttachments(
+  let title: unknown;
+  let content: unknown;
+  let attachments: MemoryAttachment[];
+  let coverImageUrl: string | null;
+  let hasMemoryDate = false;
+  let memoryDateValue: unknown = null;
+  let memoryDatePrecisionValue: unknown = "day";
+
+  if (
+    contentType.includes("multipart/form-data")
+  ) {
+    // Multi-photo edit: kept existing attachments (JSON) + new files (multipart).
+    // Reuse the create pipeline to upload new files and merge with the kept set.
+    const form = await req.formData();
+
+    title = form.get("title");
+    content = form.get("content");
+
+    let kept: unknown = [];
+    const keptRaw = form.get("attachments");
+    if (
+      typeof keptRaw === "string" &&
+      keptRaw.trim()
+    ) {
+      try {
+        kept = JSON.parse(keptRaw);
+      } catch {
+        kept = [];
+      }
+    }
+
+    const uploadedFiles = form
+      .getAll("uploadedFiles")
+      .filter((f): f is File => f instanceof File);
+
+    const media =
+      await buildMemoryMediaPayload({
+        body: { attachments: kept, uploadedFiles },
+        userId: user.id,
+      });
+
+    attachments = media.attachments;
+    // Cover = first image of the FINAL set (kept + newly uploaded). The pipeline
+    // only returns a cover when files were uploaded, so derive it here so a
+    // remove-only edit recomputes the cover correctly too.
+    coverImageUrl =
+      attachments.find(
+        (a) => a.type === "image"
+      )?.url ?? null;
+
+    hasMemoryDate = form.has("memoryDate");
+    const md = form.get("memoryDate");
+    memoryDateValue =
+      typeof md === "string" && md.trim()
+        ? md
+        : null;
+    memoryDatePrecisionValue =
+      form.get("memoryDatePrecision");
+  } else {
+    // Backward-compatible JSON path — unchanged behavior for existing callers.
+    const body = await req.json();
+    title = body.title;
+    content = body.content;
+    attachments = normalizeAttachments(
       body.attachments
     );
-
-  const normalizedCoverImageUrl =
-    resolveCoverImageUrl(
+    coverImageUrl = resolveCoverImageUrl(
       body.coverImageUrl
     );
+    hasMemoryDate = "memoryDate" in body;
+    memoryDateValue = body.memoryDate;
+    memoryDatePrecisionValue =
+      body.memoryDatePrecision;
+  }
 
   // Historical date — only touched when the caller includes it, so other PUT
   // callers are unaffected. Effective date = coalesce(memory_date, created_at).
@@ -37,11 +105,13 @@ export async function PUT(
     memory_date_precision?: string | null;
   } = {};
 
-  if ("memoryDate" in body) {
+  if (hasMemoryDate) {
     const resolved =
       validateAndResolveMemoryDate(
-        body.memoryDate,
-        body.memoryDatePrecision
+        memoryDateValue as string | null,
+        memoryDatePrecisionValue as
+          | string
+          | undefined
       );
 
     if (!resolved.ok) {
@@ -61,14 +131,12 @@ export async function PUT(
   const { error } = await supabase
     .from("memories")
     .update({
-      title: body.title,
-      content: body.content,
+      title,
+      content,
 
-      attachments:
-        normalizedAttachments,
+      attachments,
 
-      cover_image_url:
-        normalizedCoverImageUrl,
+      cover_image_url: coverImageUrl,
 
       ...memoryDateUpdate,
     })
