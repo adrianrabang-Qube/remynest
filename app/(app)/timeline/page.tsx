@@ -212,7 +212,9 @@ export default async function TimelinePage({
     .select("*")
     .order("created_at", {
       ascending: false,
-    });
+    })
+    // Deterministic tiebreaker (created_at is not unique) for stable ordering.
+    .order("id", { ascending: false });
 
   const query =
     isMyNestContext
@@ -239,7 +241,8 @@ export default async function TimelinePage({
 
   const allMemories: Memory[] =
     await signMemories(
-      Array.isArray(memories) ? memories : []
+      Array.isArray(memories) ? memories : [],
+      { variant: "thumb", maxImagesPerMemory: 4 }
     );
 
   // =====================================

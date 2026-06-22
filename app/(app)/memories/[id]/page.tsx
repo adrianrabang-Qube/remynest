@@ -65,7 +65,7 @@ export default async function MemoryPage({
 
   // Private media → short-lived signed URLs for this authorized memory.
   const memory =
-    (await signMemory(rawMemory)) ?? rawMemory;
+    (await signMemory(rawMemory, { variant: "medium" })) ?? rawMemory;
 
   const attachments = Array.isArray(memory.attachments)
     ? memory.attachments

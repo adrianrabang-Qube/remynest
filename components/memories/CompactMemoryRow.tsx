@@ -8,7 +8,7 @@ import { ChevronRight, FileText, MoreHorizontal } from "lucide-react";
 import { formatMemoryDateLabel } from "@/lib/memories/memory-date";
 import { hapticWarning } from "@/lib/haptics";
 
-type RowAttachment = { type?: string; url?: string };
+type RowAttachment = { type?: string; url?: string; fallbackUrl?: string };
 
 export interface MemoryRowData {
   id: string;
@@ -43,13 +43,16 @@ export default function CompactMemoryRow({
   onDelete,
 }: CompactMemoryRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [thumbErrored, setThumbErrored] = useState(false);
 
   const title = memory.ai_title || memory.title || "Untitled memory";
   const preview = memory.ai_summary || memory.content || "";
 
-  const thumbnail = memory.attachments?.find(
+  const thumbAttachment = memory.attachments?.find(
     (a) => a.type === "image" && a.url,
-  )?.url;
+  );
+  const thumbnail = thumbAttachment?.url;
+  const thumbFallback = thumbAttachment?.fallbackUrl;
 
   const attachmentCount = memory.attachments?.length ?? 0;
   const hasImages = !!memory.attachments?.some((a) => a.type === "image");
@@ -90,12 +93,15 @@ export default function CompactMemoryRow({
         {thumbnail ? (
           <div className="relative h-12 w-12 shrink-0">
             <Image
-              src={thumbnail}
+              src={thumbErrored && thumbFallback ? thumbFallback : thumbnail}
               alt=""
               width={48}
               height={48}
               unoptimized
               loading="lazy"
+              onError={() => {
+                if (thumbFallback) setThumbErrored(true);
+              }}
               className="h-12 w-12 rounded-xl border border-sand-deep/50 object-cover"
             />
             {imageCount > 1 && (

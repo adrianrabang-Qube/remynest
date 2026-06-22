@@ -4,7 +4,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-export type ViewerImage = { url: string; name?: string };
+export type ViewerImage = {
+  url: string;
+  name?: string;
+  /** Untransformed signed URL — used if the medium transform fails to load. */
+  fallbackUrl?: string;
+};
 
 /**
  * Full-screen photo viewer — portaled to document.body (CLAUDE.md authoritative:
@@ -27,6 +32,8 @@ export default function PhotoViewer({
   onClose: () => void;
 }) {
   const [active, setActive] = useState(startIndex);
+  // Slides whose transformed src failed -> render the untransformed fallbackUrl.
+  const [failed, setFailed] = useState<Set<number>>(new Set());
   const trackRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -111,11 +118,24 @@ export default function PhotoViewer({
             >
               {inWindow && img.url ? (
                 <Image
-                  src={img.url}
+                  src={
+                    failed.has(i) && img.fallbackUrl
+                      ? img.fallbackUrl
+                      : img.url
+                  }
                   alt={img.name ?? "Photo"}
                   fill
                   unoptimized
                   sizes="100vw"
+                  onError={() => {
+                    if (img.fallbackUrl) {
+                      setFailed((prev) => {
+                        const next = new Set(prev);
+                        next.add(i);
+                        return next;
+                      });
+                    }
+                  }}
                   className="object-contain"
                 />
               ) : null}

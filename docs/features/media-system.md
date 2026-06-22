@@ -4,9 +4,12 @@
 Photo/video upload attached to memories, stored in Supabase Storage.
 
 ## Architecture
-- Bucket **`memory-media`** (PUBLIC). Path: `users/{userId}/memories/{ts}-{name}`.
-- Pipeline: `lib/memory-media.ts` (upload + public URL), `memory-media-upload.ts`,
+- Bucket **`memory-media`** (**PRIVATE**). Path: `users/{userId}/memories/{ts}-{name}`.
+- Pipeline: `lib/memory-media.ts` (upload + `storagePath`), `memory-media-upload.ts`,
   `memory-media-pipeline.ts`, `memory-upload-client.ts`.
+- Delivery: `lib/memory-media-signing.ts` mints short-lived **signed URLs** (1 h TTL)
+  server-side via the service-role client (PHI never publicly resolvable). `storagePath`
+  is preserved so edit round-trips never persist a transient signed URL.
 - Memories reference media via `cover_image_url` and `attachments` (jsonb array of
   `{url, name/filename, mimeType}`).
 
@@ -22,9 +25,9 @@ client-direct upload)_; deletion via GDPR prefix cleanup.
 (render media).
 
 ## Limitations
-- **Public bucket** → media URLs are publicly resolvable by anyone with the URL
-  (privacy consideration; pre-existing).
-- File-type/size validation in `lib/memory-media.ts` _(verify limits)_.
+- Originals are stored full-resolution (≤ 25 MB); thumbnails are derived on-demand
+  (see below), not stored.
+- File-type/size validation in `lib/memory-media.ts` (25 MB cap; image/video/audio/pdf).
 
 ## Active initiative (2026-06-21): Memory Media Experience Upgrade
 Multi-media memories. **The storage model already supports multiple attachments** —
@@ -39,5 +42,33 @@ the `mimeType` field — no further attachment redesign. Fold in the **image-dec
 fix (serve resized thumbnails via `lib/memory-media-signing.ts` + paginate the
 memories/timeline feeds). See `docs/roadmap/launch-roadmap.md` + HANDOFF.
 
+## Thumbnail architecture (Phase 0, 2026-06-22)
+Hybrid size ladder served from the single stored original (one Supabase "origin image"
+regardless of how many sizes). Variants are minted in `lib/memory-media-signing.ts`:
+- **THUMB** `400×400 cover q70` — feed/list (`MemoryGalleryPreview`, `CompactMemoryRow`,
+  `TimelineRow`).
+- **MEDIUM** `1080 contain q75` — detail page (`MemoryGallery`) + `PhotoViewer`.
+- **ORIGINAL** — fallback only.
+
+Images use **Supabase on-the-fly transforms** (imgproxy, CDN-cached) via the SINGULAR
+`createSignedUrl(path, ttl, { transform })`; the BATCH `createSignedUrls` (the
+untransformed baseline) is always run first as the hard fallback. `signMemories`/
+`signMemory` take `{ variant, maxImagesPerMemory }` — feed routes pass `thumb` (cap 4),
+the detail page passes `medium`. Each image carries a `fallbackUrl` (the untransformed
+signed URL) so the client (`MediaThumb`, `PhotoViewer`, `CompactMemoryRow`) recovers
+from a transform render failure (e.g. > 25 MB / > 50 MP input).
+
+**Operator gate:** transforms require Supabase Image Transformations (Pro plan) **and**
+the env flag **`MEMORY_IMAGE_TRANSFORMS_ENABLED=true`**. Default **OFF** → signing is
+byte-identical to the untransformed baseline (no broken images, no regression) until the
+operator enables transforms on the project and sets the flag.
+
+**Pagination:** `app/api/memories/route.ts` + `app/api/timeline/route.ts` accept
+`limit`/`offset` (`.range`, default 50) to bound the per-request singular-signing
+fan-out; the memories feed client aggregates pages into its flat array (optimistic
+mutations unchanged).
+
 ## Future enhancements
-Private bucket + signed URLs; image/video transcoding; thumbnails; virus scanning.
+Video poster + PDF first-page stored derivatives (into the existing
+`attachment.thumbnailUrl` field); audio waveform; image/video transcoding; virus
+scanning; feed virtualization at very high memory counts.

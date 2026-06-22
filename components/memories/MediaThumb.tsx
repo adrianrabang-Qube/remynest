@@ -5,6 +5,8 @@ import { useState } from "react";
 
 export type GalleryAttachment = {
   url?: string;
+  /** Untransformed signed URL — used if the transformed `url` fails to load. */
+  fallbackUrl?: string;
   type?: string; // "image" | "video" | "audio" | "document" | "file"
   name?: string;
   filename?: string;
@@ -30,21 +32,30 @@ export default function MediaThumb({
   alt?: string;
   sizes?: string;
 }) {
-  const [errored, setErrored] = useState(false);
+  // 0 = transformed url · 1 = untransformed fallbackUrl · 2 = placeholder.
+  const [stage, setStage] = useState(0);
   const type = attachment.type || "file";
   const label =
     alt || attachment.name || attachment.filename || "Attachment";
 
   if (type === "image" && attachment.url) {
+    const src =
+      stage === 0
+        ? attachment.url
+        : stage === 1 && attachment.fallbackUrl
+          ? attachment.fallbackUrl
+          : FALLBACK;
     return (
       <Image
-        src={errored ? FALLBACK : attachment.url}
+        src={src}
         alt={label}
         fill
         unoptimized
         loading="lazy"
         sizes={sizes ?? "200px"}
-        onError={() => setErrored(true)}
+        onError={() =>
+          setStage((s) => (s === 0 && attachment.fallbackUrl ? 1 : 2))
+        }
         className="object-cover"
       />
     );

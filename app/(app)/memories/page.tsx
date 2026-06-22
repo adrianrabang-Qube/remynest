@@ -266,41 +266,42 @@ function MemoriesPageContent() {
       activeProfileId !== undefined,
 
     queryFn: async () => {
-      const url =
-        activeProfileId
-          ? `/api/memories?profileId=${activeProfileId}`
-          : `/api/memories`;
+      const PAGE_SIZE = 50;
+      const base = activeProfileId
+        ? `/api/memories?profileId=${activeProfileId}`
+        : `/api/memories`;
 
-      const res = await fetch(
-        url,
-        {
+      // Server-paginated (bounds the per-request transform-signing fan-out),
+      // aggregated back into the flat array the feed + optimistic mutations use.
+      const all: Memory[] = [];
+      let offset = 0;
+
+      for (;;) {
+        const url = `${base}${
+          base.includes("?") ? "&" : "?"
+        }limit=${PAGE_SIZE}&offset=${offset}`;
+
+        const res = await fetch(url, {
           cache: "no-store",
-        }
-      );
+        });
 
-      if (!res.ok) {
-        throw new Error(
-          "Failed to fetch memories"
-        );
+        if (!res.ok) {
+          throw new Error("Failed to fetch memories");
+        }
+
+        const responseData = await res.json();
+        const page = normalizeMemoryArray(responseData);
+        all.push(...page);
+
+        if (page.length < PAGE_SIZE) break;
+        offset += PAGE_SIZE;
       }
 
-      const responseData =
-  await res.json();
+      console.log("[memories-page] fetch-complete", {
+        memoryCount: all.length,
+      });
 
-const normalizedMemories =
-  normalizeMemoryArray(
-    responseData
-  );
-
-console.log(
-  "[memories-page] fetch-complete",
-  {
-    memoryCount:
-      normalizedMemories.length,
-  }
-);
-
-return normalizedMemories;
+      return all;
     },
 
     staleTime: 1000 * 60 * 2,

@@ -7,8 +7,26 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories } from "@/lib/memory-media-signing";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const parsedLimit = Number.parseInt(
+      searchParams.get("limit") ?? "",
+      10
+    );
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, 100)
+        : 50;
+    const parsedOffset = Number.parseInt(
+      searchParams.get("offset") ?? "",
+      10
+    );
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset > 0
+        ? parsedOffset
+        : 0;
+
     const supabase =
       await createClient();
 
@@ -52,7 +70,10 @@ export async function GET() {
         )
         .order("created_at", {
           ascending: false,
-        });
+        })
+        // Deterministic tiebreaker so offset paging is stable (created_at is not unique).
+        .order("id", { ascending: false })
+        .range(offset, offset + limit - 1);
 
     if (error) {
       console.log(error);
@@ -69,7 +90,10 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      await signMemories(data || [])
+      await signMemories(data || [], {
+        variant: "thumb",
+        maxImagesPerMemory: 4,
+      })
     );
   } catch (error) {
     console.log(error);

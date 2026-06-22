@@ -155,6 +155,29 @@ viewer. **Architect storage so future media (video/voice/audio/docs/PDF) add via
 memories/timeline **image-decode OOM** fix (serve thumbnails via
 `lib/memory-media-signing.ts` + paginate). See `docs/roadmap/launch-roadmap.md`.
 
+**Thumbnail Architecture (authoritative, 2026-06-22):** the image-decode OOM fix is
+implemented as a **hybrid size ladder** served from the single stored original (the
+`memory-media` bucket is **PRIVATE** + signed — never reintroduce a public bucket).
+`lib/memory-media-signing.ts` mints **THUMB** (`400×400 cover q70`, feed/list) and
+**MEDIUM** (`1080 contain q75`, detail + `PhotoViewer`) via the **SINGULAR**
+`createSignedUrl(path, ttl, { transform })` (Supabase on-the-fly transforms, CDN-cached);
+the **BATCH `createSignedUrls`** (untransformed) is always run first as the **hard
+fallback** — do **not** drop it. `signMemories`/`signMemory` take `{ variant,
+maxImagesPerMemory }`; **variant is optional — default (no variant) is byte-identical to
+the untransformed baseline**, so leave search/create/reminiscence callers as-is. Each
+image carries `fallbackUrl` (untransformed) for client recovery (`MediaThumb` 2-stage,
+`PhotoViewer` per-slide, `CompactMemoryRow`). **Operator gate (authoritative):**
+transforms require Supabase Image Transformations (**Pro plan**) **and** env
+**`MEMORY_IMAGE_TRANSFORMS_ENABLED=true`**; **default OFF** is the no-regression
+guarantee — the feature is inert until the operator enables both. `/api/memories` +
+`/api/timeline` are **paginated** (`limit`/`offset` `.range`, default 50) to bound the
+singular-signing fan-out; the memories feed client **aggregates pages into a flat array**
+(do not convert the feed query to infinite-scroll — it would break the optimistic
+create/edit/delete mutations). Do **not** re-flag thumbnails/pagination as a TODO. See
+`docs/features/media-system.md`. Future-media previews (video poster, PDF first-page)
+reuse the existing `attachment.thumbnailUrl` field — a stored-derivative branch, not yet
+built.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

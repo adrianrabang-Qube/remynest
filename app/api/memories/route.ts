@@ -152,6 +152,26 @@ export async function GET(
       }
     );
 
+    // Pagination — bounds the per-request transform-signing fan-out (thumbs use
+    // singular createSignedUrl calls). Defaults preserve a generous page so most
+    // users still load in one request; the client aggregates pages.
+    const parsedLimit = Number.parseInt(
+      searchParams.get("limit") ?? "",
+      10
+    );
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, 100)
+        : 50;
+    const parsedOffset = Number.parseInt(
+      searchParams.get("offset") ?? "",
+      10
+    );
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset > 0
+        ? parsedOffset
+        : 0;
+
     let memoriesQuery =
       supabase
         .from("memories")
@@ -175,12 +195,14 @@ export async function GET(
     }
 
     const { data, error } =
-      await memoriesQuery.order(
-        "created_at",
-        {
+      await memoriesQuery
+        .order("created_at", {
           ascending: false,
-        }
-      );
+        })
+        // Deterministic tiebreaker so offset paging is stable across the
+        // client's separate page requests (created_at is not unique).
+        .order("id", { ascending: false })
+        .range(offset, offset + limit - 1);
 
     if (error) {
       console.error(
@@ -222,7 +244,10 @@ export async function GET(
       }
     );
 
-    const signedData = await signMemories(data ?? []);
+    const signedData = await signMemories(data ?? [], {
+      variant: "thumb",
+      maxImagesPerMemory: 4,
+    });
 
     return NextResponse.json({
       data: signedData,
@@ -235,6 +260,9 @@ export async function GET(
             : "care",
         memoryCount:
           data?.length ?? 0,
+        limit,
+        offset,
+        hasMore: (data?.length ?? 0) === limit,
         durationMs,
       },
     });
