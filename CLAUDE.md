@@ -178,6 +178,27 @@ create/edit/delete mutations). Do **not** re-flag thumbnails/pagination as a TOD
 reuse the existing `attachment.thumbnailUrl` field — a stored-derivative branch, not yet
 built.
 
+**Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
+**accounting** (bytes) is implemented as a `storage_ledger` table maintained
+**incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires
+`AFTER INSERT OR UPDATE OF attachments, memory_profile_id, user_id`) that projects the
+`attachments` jsonb — **chosen over dynamic compute** for O(1) reads, and a trigger
+(not app dual-write) **because the upload pipeline is frozen**. The trigger is
+**null/non-array/malformed-safe and must stay that way — it can NEVER raise**, or it
+would abort memory writes (a critical system). `reconcile_storage_ledger()` does
+idempotent backfill + drift repair; `storage_account_usage` (`security_invoker`) is the
+read path. In RemyNest **`workspace_id == memory_profile_id`** (NULL = My Nest), so no
+separate `profile_id` column. **`lib/storage/`** holds plan limits as **config only**
+(FREE/STARTER/PREMIUM/FAMILY — **no pricing/checkout/billing**; decoupled from the frozen
+`lib/billing` via the `resolveStorageTier()` seam, default FREE), `getStorageUsage`
+(service-role, **always scoped by the member id set** — family-pool-ready by summing
+across members, **no schema redesign needed**), and `checkStorageQuota` (structured
+result, never throws, byte-based → future-media-proof). The enforcement primitive is
+**not** wired into the frozen upload pipeline. **Migration is an operator step** (apply
+`20260623120000_storage_ledger_foundation.sql` in the Supabase SQL editor). Do **not**
+re-derive these decisions or wire enforcement into upload without unfreezing it. See
+`docs/features/storage-ledger.md`.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;
