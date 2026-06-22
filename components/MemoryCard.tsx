@@ -1,15 +1,11 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
 import {
   formatMemoryDateLabel,
   formatAddedDate,
 } from "@/lib/memories/memory-date";
-
-const IMAGE_ATTACHMENT_FALLBACK =
-  "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' fill='%23f3f4f6'/%3E%3Ctext x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' fill='%236b7280'%3EImage unavailable%3C/text%3E%3C/svg%3E";
+import MemoryGalleryPreview from "@/components/memories/MemoryGalleryPreview";
 
 type Attachment = {
   name?: string;
@@ -45,9 +41,6 @@ export default function MemoryCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const [imageError, setImageError] =
-    useState<Record<number, boolean>>({});
-
   const memoryDateLabel = memory.created_at
     ? formatMemoryDateLabel({
         created_at: memory.created_at,
@@ -78,58 +71,12 @@ export default function MemoryCard({
           {memory.content}
         </p>
 
-        {Array.isArray(memory.attachments) && memory.attachments.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            {memory.attachments
-              .slice(0, 3)
-              .map((attachment, index) => {
-                const name =
-                  attachment.name ||
-                  attachment.filename ||
-                  "Attachment";
-
-                if (attachment.type === "image" && attachment.url) {
-                  return (
-                    <Image
-                      key={index}
-                      src={
-                        imageError[index]
-                          ? IMAGE_ATTACHMENT_FALLBACK
-                          : attachment.url
-                      }
-                      alt={name}
-                      width={96}
-                      height={80}
-                      unoptimized
-                      onError={() => {
-                        setImageError((prev) => ({
-                          ...prev,
-                          [index]: true,
-                        }));
-                      }}
-                      className="h-20 w-full rounded-2xl object-cover border border-gray-200"
-                    />
-                  );
-                }
-
-                const badgeLabel =
-                  attachment.type === "video"
-                    ? "Video"
-                    : attachment.type === "audio"
-                    ? "Audio"
-                    : "File";
-
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-700"
-                  >
-                    {badgeLabel}
-                  </div>
-                );
-              })}
-          </div>
-        )}
+        {Array.isArray(memory.attachments) &&
+          memory.attachments.length > 0 && (
+            <MemoryGalleryPreview
+              attachments={memory.attachments}
+            />
+          )}
 
         {/* AI Summary */}
         {memory.ai_summary && (

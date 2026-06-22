@@ -53,6 +53,8 @@ export default function CompactMemoryRow({
 
   const attachmentCount = memory.attachments?.length ?? 0;
   const hasImages = !!memory.attachments?.some((a) => a.type === "image");
+  const imageCount =
+    memory.attachments?.filter((a) => a.type === "image").length ?? 0;
   const attachmentLabel =
     attachmentCount > 0
       ? `${attachmentCount} ${
@@ -86,14 +88,22 @@ export default function CompactMemoryRow({
       >
         {/* Leading: thumbnail or fallback icon */}
         {thumbnail ? (
-          <Image
-            src={thumbnail}
-            alt=""
-            width={48}
-            height={48}
-            unoptimized
-            className="h-12 w-12 shrink-0 rounded-xl border border-sand-deep/50 object-cover"
-          />
+          <div className="relative h-12 w-12 shrink-0">
+            <Image
+              src={thumbnail}
+              alt=""
+              width={48}
+              height={48}
+              unoptimized
+              loading="lazy"
+              className="h-12 w-12 rounded-xl border border-sand-deep/50 object-cover"
+            />
+            {imageCount > 1 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-black/70 px-1 text-[10px] font-semibold text-white">
+                {imageCount}
+              </span>
+            )}
+          </div>
         ) : (
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
             <FileText className="h-5 w-5" aria-hidden />

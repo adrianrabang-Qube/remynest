@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signMemory, signMemories } from "@/lib/memory-media-signing";
 import MemoryCoverImage from "@/components/MemoryCoverImage";
+import MemoryGallery from "@/components/memories/MemoryGallery";
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
 import {
   formatMemoryDateLabel,
@@ -69,6 +70,16 @@ export default async function MemoryPage({
   const attachments = Array.isArray(memory.attachments)
     ? memory.attachments
     : [];
+
+  // Images feed the swipeable gallery (+ full-screen viewer); other media
+  // (video/audio/file) keep their inline native rendering below.
+  const imageAttachments = attachments.filter(
+    (a: MemoryAttachment) =>
+      (a.type || "file") === "image" && a.url
+  );
+  const otherAttachments = attachments.filter(
+    (a: MemoryAttachment) => (a.type || "file") !== "image"
+  );
 
   // 🔗 Semantic related memories
   let relatedMemories: RelatedMemory[] = [];
@@ -238,8 +249,13 @@ export default async function MemoryPage({
               Attachments
             </h2>
 
+            {imageAttachments.length > 0 && (
+              <MemoryGallery images={imageAttachments} />
+            )}
+
+            {otherAttachments.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2">
-              {attachments.map((attachment: MemoryAttachment, index: number) => {
+              {otherAttachments.map((attachment: MemoryAttachment, index: number) => {
                 const name =
                   attachment.name ||
                   attachment.filename ||
@@ -251,30 +267,6 @@ export default async function MemoryPage({
                     : null;
                 const mimeType = attachment.mimeType || "";
                 const type = attachment.type || "file";
-
-                if (type === "image") {
-                  return (
-                    <div
-                      key={index}
-                      className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm"
-                    >
-                      <MemoryCoverImage
-                        src={url || ""}
-                        alt={name}
-                        className="w-full h-56 object-cover"
-                      />
-                      <div className="p-4">
-                        <div className="font-semibold text-sm text-gray-900">
-                          {name}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {mimeType}
-                          {size ? ` · ${size}` : ""}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
 
                 if (type === "video") {
                   return (
@@ -344,6 +336,7 @@ export default async function MemoryPage({
                 );
               })}
             </div>
+            )}
           </div>
         )}
 
