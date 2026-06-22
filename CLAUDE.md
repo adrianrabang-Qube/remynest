@@ -133,6 +133,28 @@ not** remove that delegate or move the assignment after `OneSignal.initialize`.
 Activation is an operator step: `cd ios/App && pod install` + a native build. See
 `docs/features/local-notifications.md`.
 
+**Reminder system is STABLE/VERIFIED — PROTECTED (authoritative, 2026-06-21):** the
+end-to-end reminder system was **operator-validated on a physical iPhone (TestFlight
+Build 8)** — notification delivery PASSES on **lock screen, background, AND foreground**;
+plus My Nest + Care create/store/schedule/dashboard and the Add Reminder form reset
+(after create + workspace switch). It is **production-ready with no active defects**.
+Treat it as **frozen**: do **not** modify reminder creation/scheduling logic,
+`NativeReminderSync`, local-notification code, `AppDelegate` notification code, OneSignal
+integration, the reminder dashboard, reminder workspace isolation, reminder delivery, or
+the form-reset implementation (`app/(app)/reminders/page.tsx` form `key`) — **unless a
+future bug report explicitly proves a NEW defect**. Reminder work is now **bug-fix only**
+and **must begin with an investigation proving the defect** before any code change.
+
+**Active development focus (authoritative, 2026-06-21): Memory Media Experience
+Upgrade** — multi-media memories (reminders are done). **Phase 1: multiple photos per
+memory** — reuse `memories.attachments` (jsonb array of `{url, name, mimeType}`) +
+`cover_image_url`; **no schema redesign, backward compatible, no data-loss migration**.
+Phases 2-4: gallery previews (Facebook-album grids) → detail carousel → full-screen
+viewer. **Architect storage so future media (video/voice/audio/docs/PDF) add via the
+`attachments` `mimeType` field without another attachment-system redesign.** Fold in the
+memories/timeline **image-decode OOM** fix (serve thumbnails via
+`lib/memory-media-signing.ts` + paginate). See `docs/roadmap/launch-roadmap.md`.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

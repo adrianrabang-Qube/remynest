@@ -26,5 +26,18 @@ client-direct upload)_; deletion via GDPR prefix cleanup.
   (privacy consideration; pre-existing).
 - File-type/size validation in `lib/memory-media.ts` _(verify limits)_.
 
+## Active initiative (2026-06-21): Memory Media Experience Upgrade
+Multi-media memories. **The storage model already supports multiple attachments** —
+`attachments` is a jsonb array of `{url, name, mimeType}` (+ `cover_image_url`) — the
+current UX surfaces a single cover image, so the upgrade is primarily **UI + the
+create/edit pipeline** (backward compatible; **no data-loss migration**). Phases:
+(1) multiple photos per memory (create/edit add+remove; preserve single-image
+memories); (2) gallery previews (Facebook-album grids); (3) detail carousel
+(swipe + pagination, mobile-first); (4) full-screen viewer (tap-expand, swipe,
+pinch-zoom, hi-res). **Architect for future media** (video/voice/audio/docs/PDF) via
+the `mimeType` field — no further attachment redesign. Fold in the **image-decode OOM**
+fix (serve resized thumbnails via `lib/memory-media-signing.ts` + paginate the
+memories/timeline feeds). See `docs/roadmap/launch-roadmap.md` + HANDOFF.
+
 ## Future enhancements
 Private bucket + signed URLs; image/video transcoding; thumbnails; virus scanning.

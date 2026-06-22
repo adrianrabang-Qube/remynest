@@ -35,6 +35,8 @@ shipped and validated** end-to-end. Single authoritative workflow established in
 command center). **Reminder Lifecycle Sprint 1** is paused pending operator migration
 (`20260609120000_reminder_lifecycle_foundation.sql` committed, NOT applied).
 
+- **🎯 REMINDER SYSTEM — FULLY VALIDATED ON DEVICE + PRODUCTION-READY + PROTECTED (2026-06-21, authoritative).** Operator verified the complete reminder system on a **physical iPhone (TestFlight Build 8)**: notification delivery **PASSES in all three states — lock screen, background/other app, AND foreground (inside RemyNest)** — so native local scheduling + iOS delivery + the foreground `willPresent` fix (`e329219`) are **live and working**. Also PASS: My Nest + Care reminder create/store/schedule/dashboard, and the Add Reminder form reset (after create + workspace switch). **No active reminder defects.** **PROTECTION RULE (see CLAUDE.md, authoritative):** the reminder system is **STABLE/VERIFIED / frozen** — do **not** modify reminder creation/scheduling, `NativeReminderSync`, local-notification + `AppDelegate` notification code, OneSignal, the reminder dashboard, workspace isolation, delivery, or the form-reset implementation **unless a future bug report proves a NEW defect** (investigation-first, bug-fix only).
+- **🚀 NEW PRIMARY FOCUS — Memory Media Experience Upgrade.** Reminders are done; the active initiative is **multi-media memories**. **Phase 1 (immediate target): multiple photos per memory** — create/edit add+remove images; **preserve existing single-image memories; no data-loss migration; backward compatible**. Storage already accommodates this: `memories.attachments` is a **jsonb array of `{url, name, mimeType}`** (+ `cover_image_url`), so Phase 1 is primarily **UI + the create/edit pipeline, not a schema redesign**; the `mimeType` field keeps it future-extensible (Phase 2 gallery previews → Phase 3 detail carousel → Phase 4 full-screen viewer; future media = video/voice/audio/docs/PDF). ⚠️ **Fold in:** the diagnosed iOS WKWebView **image-decode OOM** (unpaginated memories/timeline serve full-res originals — `lib/memory-media-signing.ts` + `unoptimized` renderers) — multi-photo amplifies it, so serve thumbnails + paginate as part of this work. See `docs/roadmap/launch-roadmap.md`.
 - **Add Reminder form reset — FIXED (`app/(app)/reminders/page.tsx`, form `key` only).** After a successful create — or a workspace switch — the create form kept the previous title / date / recurrence: the inputs are **uncontrolled** and `createReminder`'s `redirect` is a **same-route soft nav** that reused the form DOM (no remount). Added `key={`${activeProfileId ?? "personal"}-${(reminders ?? []).length}`}` to the `<form>` → it remounts when the reminder count changes (create) or the active profile changes (workspace switch), clearing all fields (incl. `ReminderDateTimeField`'s client state). **UI-only:** no change to creation/storage/scheduling/`NativeReminderSync`/OneSignal/`AppDelegate`. Lint 0-new, build ✓.
 - **My Nest (PERSONAL) reminders — ENABLED in code; app-layer only, NO migration required (committed, NOT pushed).** Reminder Center was care-profile-only; it now honors the app-wide `memory_profile_id IS NULL + user_id` convention (same as memories/timeline/search). **`app/(app)/reminders/page.tsx`:** removed the My-Nest early-return + the create throw; PERSONAL reads/writes scoped `.is("memory_profile_id", null).eq("user_id", uid)`, CARE unchanged (`.eq("memory_profile_id", activeProfileId)` + `userCanAccessProfile`). **Hardened `app/(app)/reminders/[id]/page.tsx`** (was an unscoped `select * eq(id)` → a cross-user read once personal rows exist): added auth + app-level authz (personal→`user_id` owner; care→`userCanAccessProfile`), independent of RLS. **DB verified (2026-06-21, operator):** `reminders.memory_profile_id` is **nullable**, RLS **enabled**, and existing policies are **`user_id`-based** (`auth.uid() = user_id`, no `memory_profile_id IS NOT NULL` restriction) — so production **already supports null-profile (My Nest) reminders**. The defensively-written migration `20260621120000` was therefore **redundant and removed** (no schema/RLS change needed). Validated: lint 0-new, build ✓; adversarially reviewed (no cross-user/cross-context leak; CARE byte-identical). **DEPLOY: just push** (`main` auto-deploys) — **no migration step**; My Nest reminders work immediately. On-device: they schedule + fire via the existing `NativeReminderSync` (no profile dependency).
 - **Foreground reminder banner — FIXED in code (`AppDelegate` `willPresent`); needs native Build 8.** Reminders fired when locked/backgrounded but were silent while the app was open: OneSignal swizzles `UNUserNotificationCenter` and owns the foreground presentation path, so Capacitor's banner-returning `willPresent` never ran for local reminders. **Fix (`ios/App/App/AppDelegate.swift` only):** `AppDelegate` conforms to `UNUserNotificationCenterDelegate` and sets `center.delegate = self` **before** `OneSignal.initialize`, returning `[.banner,.list,.sound,.badge]` for local (interval/calendar) reminders and `[]` for remote pushes (`UNPushNotificationTrigger`) — OneSignal/push behavior preserved. Validated: `xcodebuild` simulator build **SUCCEEDED**. **Committed, NOT pushed** (native-only, no web deploy); operator archives a fresh Release build (Build 8) to activate. See `docs/features/local-notifications.md`.
@@ -2242,23 +2244,25 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   endpoints; schema not version-controlled; `npm audit` advisories.
 
 ## Active branch
-`main` (production; auto-deploys) — **in sync with `origin/main` at `36107ed`**
-(local notifications feature `60362fd` + lock `36107ed` **pushed/deployed**). `pod
-install` done locally (plugin linked, OneSignal intact, project unchanged). The ONLY
-remaining step is the operator's native **Release** Build 7 (archive + TestFlight) —
-the installed binary predates the plugin + production APNs entitlement; see the
-TestFlight checklist + `docs/features/local-notifications.md`. **Separately OPEN:**
-the iOS WKWebView **OOM (SIGKILL)** from unoptimized full-res image decode on the
-unpaginated memories/timeline feeds (diagnosed, unfixed) — orthogonal to reminders.
-`cognition-v2` was the throwaway prototype (stale UI, 180 behind) — **not** to be
-merged. `feat/capacitor-mobile` holds earlier mobile work (pushed, unmerged).
+`main` (production; auto-deploys) — in sync with `origin/main`. The reminder system —
+local notifications (`60362fd`/`36107ed`), My Nest reminders (`823e1a9`), foreground
+`willPresent` (`e329219`), form reset (`fa66306`) — is **shipped, on-device-validated,
+and production-ready** (TestFlight **Build 8** live; lock/background/foreground all
+PASS). `cognition-v2` was the throwaway prototype (stale UI) — **not** to be merged;
+`feat/capacitor-mobile` holds earlier mobile work (pushed, unmerged). **Next work lands
+on a feature branch for the Memory Media Experience Upgrade** (Phase 1: multi-photo
+memories — see Next priorities + `docs/roadmap/launch-roadmap.md`).
 
 ## Next priorities
-P0: **on-device validation of native local notifications** (`cd ios/App && pod install`
-→ open `App.xcworkspace` → physical iPhone → run the test plan in
-`docs/features/local-notifications.md`); fix `/api/stripe/cancel`; fix/remove broken
-OneSignal endpoints; confirm Sign in with Apple. P1: set Sentry env in Vercel;
-Android build + store submission.
+**P0 (new primary): Memory Media Experience Upgrade — Phase 1: multiple photos per
+memory** (create/edit add+remove images; preserve single-image memories; no data-loss
+migration; backward compatible; reuse the existing `memories.attachments` jsonb array +
+`cover_image_url`). Then Phase 2 gallery previews → Phase 3 detail carousel → Phase 4
+full-screen viewer; **fold in the memories/timeline image-decode OOM fix** (serve
+thumbnails via `lib/memory-media-signing.ts` + paginate). **Reminder system: DONE +
+PROTECTED — bug-fix only, investigation-first.** Other open product items (unchanged):
+fix `/api/stripe/cancel`; fix/remove broken OneSignal endpoints; confirm Sign in with
+Apple; Sentry env in Vercel; Android build + store submission.
 
 ## Blockers
 **Infrastructure: NONE** — the B1–B5 audit is **CLOSED** (B1/B2/B3/B5 done; B4 PITR
@@ -2269,6 +2273,10 @@ with no native-platform gate → near-certain App Store rejection. Ranked produc
 is the operator's current focus (see Next priorities).
 
 ## Recent commits
+- `fa66306` fix(reminders): reset Add Reminder form after create / workspace switch (form `key` remount) — **validated on device**
+- `325e8f0` chore(reminders): drop redundant My Nest migration — prod DB already supports null-profile (user_id RLS)
+- `823e1a9` feat(reminders): enable My Nest (PERSONAL) reminders via memory_profile_id IS NULL + user_id (+ `[id]` route authz hardening)
+- `e329219` fix(ios): foreground reminder banner (AppDelegate willPresent) — **Build 8 shipped; foreground delivery PASS on device**
 - `36107ed` chore(ios): commit pod install lock linking CapacitorLocalNotifications (pushed; feature now DEPLOYED — native Build 7 pending operator)
 - `feat(reminders)` native iOS local notifications on `main` — on-device reconcile engine (`lib/native-reminders.ts` + `NativeReminderSync`), `@capacitor/local-notifications` pod added to the Podfile, OneSignal/AppDelegate/entitlements untouched; lint 0-new + web build ✓ (on-device pending operator)
 - `fix(remy)` avatar crop calibration — tight square head crops for all 9 moods (measured)
