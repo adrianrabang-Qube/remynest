@@ -56,25 +56,38 @@ export default function EditMemoryModal({
   const [newFiles, setNewFiles] =
     useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit() {
     void haptic("medium"); // acknowledge the save tap
     setLoading(true);
-    await onUpdate({
-      title,
-      content,
-      memoryDate: memoryDate.memoryDate,
-      memoryDatePrecision: memoryDate.precision,
-      attachments: keptAttachments,
-      uploadedFiles: newFiles,
-    });
-    void hapticSuccess(); // changes saved
-    setLoading(false);
+    setError("");
+
+    try {
+      await onUpdate({
+        title,
+        content,
+        memoryDate: memoryDate.memoryDate,
+        memoryDatePrecision: memoryDate.precision,
+        attachments: keptAttachments,
+        uploadedFiles: newFiles,
+      });
+      void hapticSuccess(); // changes saved
+    } catch (updateError) {
+      console.error(updateError);
+      setError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Failed to update memory. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded w-full max-w-md space-y-4">
+      <div className="bg-white p-6 rounded w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
         <h2 className="text-lg font-semibold">Edit Memory</h2>
 
         <input
@@ -109,6 +122,12 @@ export default function EditMemoryModal({
             disabled={loading}
           />
         </div>
+
+        {error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
 
         <div className="flex gap-2">
           <button

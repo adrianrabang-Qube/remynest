@@ -67,7 +67,7 @@ export default function CreateMemoryModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white p-6 rounded w-full max-w-xl space-y-4">
+      <div className="bg-white p-6 rounded w-full max-w-xl max-h-[90vh] overflow-y-auto space-y-4">
         <h2 className="text-lg font-semibold">Create Memory</h2>
 
         <input
