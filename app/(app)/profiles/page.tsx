@@ -6,6 +6,7 @@ import { getFamilyIntelligence } from "@/lib/remy/family";
 import { computeCoverage } from "@/lib/remy/date-coverage";
 import { buildPersonUnderstanding } from "@/lib/remy/understanding";
 import PersonRow from "@/components/profile/people/PersonRow";
+import AddPersonButton from "@/components/profile/people/AddPersonButton";
 
 export const dynamic = "force-dynamic";
 
@@ -90,20 +91,26 @@ export default async function ProfilesPage() {
 
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
-      <header>
-        <h1 className="text-xl font-semibold text-charcoal md:text-2xl">People</h1>
-        <p className="mt-0.5 text-sm text-charcoal-muted">
-          Everyone in your care network
-        </p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-charcoal md:text-2xl">People</h1>
+          <p className="mt-0.5 text-sm text-charcoal-muted">
+            Everyone in your care network
+          </p>
+        </div>
+        {rows.length > 0 && <AddPersonButton />}
       </header>
 
       {rows.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center">
-          <p className="text-sm text-charcoal-soft">No care profiles yet.</p>
+          <p className="text-sm text-charcoal-soft">No people yet.</p>
           <p className="mt-1 text-sm text-charcoal-muted">
-            Add a person from the workspace menu at the top — or they&apos;ll appear
-            here when shared with you.
+            Add a person you care for to keep their memories organised — or they&apos;ll
+            appear here when shared with you.
           </p>
+          <div className="mt-4 flex justify-center">
+            <AddPersonButton />
+          </div>
         </div>
       ) : (
         <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white shadow-soft">

@@ -191,7 +191,7 @@ export default function WorkspaceSelector({
                     <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
                       Add a person
                     </p>
-                    <CreateProfileForm />
+                    <CreateProfileForm onSuccess={() => setOpen(false)} />
                   </div>
                 </div>
               )}

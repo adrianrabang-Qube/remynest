@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { createProfile } from "@/app/(app)/dashboard/actions";
 import type { BillingPlan } from "@/lib/billing/plans";
@@ -13,7 +14,12 @@ interface LimitInfo {
   currentCount: number;
 }
 
-export default function CreateProfileForm() {
+export default function CreateProfileForm({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+} = {}) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
@@ -28,8 +34,9 @@ export default function CreateProfileForm() {
 
       if (result.ok) {
         showToast("Person added");
-        // Brief delay so the confirmation is visible before the list refreshes.
-        setTimeout(() => window.location.reload(), 700);
+        // Soft refresh + let the parent close the drawer/modal — no full-page reload.
+        router.refresh();
+        onSuccess?.();
         return;
       }
 
@@ -58,12 +65,12 @@ export default function CreateProfileForm() {
 
   return (
     <div className="rounded-2xl border p-6 bg-white shadow-sm">
-      <h2 className="text-2xl font-semibold mb-6">Create Profile</h2>
+      <h2 className="text-2xl font-semibold mb-6">Add a person</h2>
 
       <form action={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">
-            Profile Name
+            Their name
           </label>
           <input
             type="text"
@@ -106,9 +113,9 @@ export default function CreateProfileForm() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded-xl disabled:opacity-50"
+          className="bg-sage text-white px-6 py-3 rounded-xl transition hover:bg-sage-deep disabled:opacity-50"
         >
-          {loading ? "Creating..." : "Create Profile"}
+          {loading ? "Adding..." : "Add Person"}
         </button>
       </form>
 
