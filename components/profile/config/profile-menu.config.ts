@@ -13,9 +13,15 @@ export const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   // not a URL ?context= link; single source of truth = the cookie), then navigates
   // to /home. Care-profile switching/management lives in the workspace drawer.
   //
-  // NOTE: "Billing" was removed — it pointed at /dashboard (duplicate nav that
-  // redirected users to the dashboard) and subscription management already lives
-  // in Settings (BillingSection). Slot reserved for a future Vault entry.
+  // Subscription management is the canonical /account/subscription page (plan +
+  // storage + BillingSection). This is the single entry point — the former inline
+  // ProfileHub "Billing" section was retired to remove the duplicate surface.
+  {
+    label: "Subscription",
+    href: "/account/subscription",
+    icon: "💳",
+    requiresAuth: true,
+  },
   {
     label: "Settings",
     href: "/settings",

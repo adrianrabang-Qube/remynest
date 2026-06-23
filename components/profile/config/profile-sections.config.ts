@@ -3,7 +3,6 @@ import type { ComponentType } from "react";
 import ProfileMenuItems from "@/components/navigation/ProfileMenuItems";
 import SecuritySection from "../sections/SecuritySection";
 import NotificationsSection from "../sections/NotificationsSection";
-import BillingSection from "../sections/BillingSection";
 import VaultSection from "../sections/VaultSection";
 import CaregivingSection from "../sections/CaregivingSection";
 import GDPRSection from "../sections/GDPRSection";
@@ -34,10 +33,9 @@ export const PROFILE_SECTIONS: readonly ProfileSectionConfig[] = [
     component: NotificationsSection,
   },
 
-  {
-    title: "Billing",
-    component: BillingSection,
-  },
+  // "Billing" section retired — subscription management is consolidated onto the
+  // canonical /account/subscription page (reachable via the profile menu), which
+  // renders BillingSection alongside StorageUsageCard. Avoids the duplicate surface.
 
   {
     title: "Vault",

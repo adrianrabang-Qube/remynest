@@ -85,15 +85,15 @@ export default function LandingClient() {
           </h1>
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-            <a className="hover:text-[#243428] transition">
+            <a href="#how-it-works" className="hover:text-[#243428] transition">
               Features
             </a>
 
-            <a className="hover:text-[#243428] transition">
+            <a href="#private-secure" className="hover:text-[#243428] transition">
               Security
             </a>
 
-            <a className="hover:text-[#243428] transition">
+            <a href="#caregivers" className="hover:text-[#243428] transition">
               Caregivers
             </a>
           </nav>
@@ -129,19 +129,19 @@ export default function LandingClient() {
           >
 
             <div className="mb-6 inline-flex rounded-full border border-black/5 bg-white/70 px-4 py-2 text-sm backdrop-blur-xl text-gray-700">
-              AI Cognitive Memory Platform
+              AI Memory Preservation
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#243428]">
               Preserve Memory.
               <br />
-              Extend Human Continuity.
+              Keep Your Family&apos;s Story.
             </h1>
 
             <p className="mt-8 max-w-2xl text-lg md:text-xl text-gray-600">
               RemyNest helps people preserve memories,
               organize thoughts, manage reminders,
-              and support cognitive continuity using AI.
+              and revisit them with a helpful AI assistant.
             </p>
 
             <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row">
@@ -154,13 +154,17 @@ export default function LandingClient() {
 
               <div className="flex gap-4">
 
-                <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
-                   App Store
-                </button>
+                <a href="/download">
+                  <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
+                     App Store
+                  </button>
+                </a>
 
-                <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
-                  Google Play
-                </button>
+                <a href="/download">
+                  <button className="rounded-2xl border border-black/5 bg-white/70 px-6 py-3 text-sm font-medium text-gray-700 backdrop-blur-xl transition hover:bg-white">
+                    Google Play
+                  </button>
+                </a>
 
               </div>
 
@@ -179,7 +183,7 @@ export default function LandingClient() {
                   className="absolute -left-20 top-24 hidden w-56 rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-2xl shadow-xl lg:block"
                 >
                   <div className="text-xs uppercase tracking-[0.3em] text-[#7c8d7f]">
-                    Memory Recall
+                    Memory Search
                   </div>
 
                   <div className="mt-4 text-lg font-semibold text-[#243428]">
@@ -187,7 +191,7 @@ export default function LandingClient() {
                   </div>
 
                   <div className="mt-3 text-sm text-gray-500">
-                    Retrieved instantly using semantic memory search.
+                    Found instantly with smart search.
                   </div>
                 </motion.div>
 
@@ -244,7 +248,7 @@ export default function LandingClient() {
                         className="rounded-3xl border border-white/10 bg-white/5 p-4"
                       >
                         <div className="text-xs uppercase tracking-[0.2em] text-cyan-400">
-                          Semantic Search
+                          Smart Search
                         </div>
 
                         <div className="mt-2 text-white">
@@ -261,16 +265,21 @@ export default function LandingClient() {
                         transition={{ duration: 5, repeat: Infinity }}
                         className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-400/20 to-blue-500/10 p-5"
                       >
-                        <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
-                          Cognitive Continuity
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs uppercase tracking-[0.2em] text-cyan-300">
+                            AI Insights
+                          </div>
+                          <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-100">
+                            Coming Soon
+                          </span>
                         </div>
 
                         <div className="mt-3 text-lg font-semibold text-white">
-                          AI detected emotional importance.
+                          Highlights worth revisiting
                         </div>
 
                         <div className="mt-2 text-sm text-gray-300">
-                          This memory was prioritized for future recall.
+                          Smart highlights for the memories that matter most.
                         </div>
                       </motion.div>
 
@@ -287,7 +296,7 @@ export default function LandingClient() {
                   className="absolute -right-20 bottom-24 hidden w-56 rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-2xl shadow-xl lg:block"
                 >
                   <div className="text-xs uppercase tracking-[0.3em] text-[#7c8d7f]">
-                    Caregiver Continuity
+                    Caregiver Support
                   </div>
 
                   <div className="mt-4 text-lg font-semibold text-[#243428]">
@@ -295,7 +304,7 @@ export default function LandingClient() {
                   </div>
 
                   <div className="mt-3 text-sm text-gray-500">
-                    Family members remain connected across timelines.
+                    Family members stay connected to the memories you share.
                   </div>
                 </motion.div>
 
@@ -312,7 +321,7 @@ export default function LandingClient() {
                 </h3>
 
                 <p className="mt-2 text-sm text-gray-500">
-                  Semantic Recall
+                  Smart Search
                 </p>
               </div>
 
@@ -322,7 +331,7 @@ export default function LandingClient() {
                 </h3>
 
                 <p className="mt-2 text-sm text-gray-500">
-                  Cognitive Continuity
+                  Caregiver Support
                 </p>
               </div>
 
@@ -366,34 +375,11 @@ export default function LandingClient() {
             <div className="rounded-3xl border border-black/5 bg-white/70 p-5 backdrop-blur-xl shadow-xl">
 
               <p className="text-sm text-gray-500">
-                AI Recall Active
+                AI Assistant Active
               </p>
 
               <p className="mt-2 text-lg font-semibold text-[#243428]">
-                Emotional continuity improving
-              </p>
-
-            </div>
-          </motion.div>
-
-          <motion.div
-            animate={{
-              y: [0, 12, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-            }}
-            className="absolute -right-8 bottom-10 hidden xl:block"
-          >
-            <div className="rounded-3xl border border-[#243428]/10 bg-[#243428]/5 p-5 backdrop-blur-xl shadow-xl">
-
-              <p className="text-sm text-[#243428]">
-                Memory Confidence
-              </p>
-
-              <p className="mt-2 text-3xl font-bold text-[#243428]">
-                98%
+                Your memories, organized
               </p>
 
             </div>
@@ -413,11 +399,11 @@ export default function LandingClient() {
               <div className="mt-4 rounded-2xl bg-white p-5 text-black border border-black/5">
 
                 <p className="text-xs uppercase tracking-widest text-gray-400">
-                  Semantic Recall
+                  AI Summaries
                 </p>
 
                 <p className="mt-3 text-sm leading-relaxed text-gray-700">
-                  “Your father smiled most during evening family dinners near Galway.”
+                  “A gentle summary of your week, gathered from the memories you saved.”
                 </p>
 
               </div>
@@ -426,12 +412,15 @@ export default function LandingClient() {
 
             <div className="mt-6 space-y-4">
 
-              <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
-                Voice memory transcribed successfully
+              <div className="flex items-center justify-between rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
+                <span>Voice Memories</span>
+                <span className="rounded-full bg-[#243428]/10 px-2.5 py-1 text-xs font-medium text-[#243428]">
+                  Coming Soon
+                </span>
               </div>
 
               <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
-                Routine consistency improved this week
+                Your week, summarized
               </div>
 
               <div className="rounded-2xl border border-black/5 bg-white p-5 text-gray-700">
@@ -447,24 +436,24 @@ export default function LandingClient() {
       </section>
 
       {/* TRUST RIBBON */}
-      <section className="relative z-10 px-6 pb-10">
+      <section id="private-secure" className="relative z-10 px-6 pb-10">
 
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-10 rounded-3xl border border-black/5 bg-white/70 px-8 py-6 backdrop-blur-xl shadow-xl">
 
           <div className="text-gray-600">
-            Semantic AI Recall
+            Smart Search
           </div>
 
           <div className="text-gray-600">
-            Healthcare Potential
+            Private by Design
           </div>
 
           <div className="text-gray-600">
-            Cognitive Support
+            AI Summaries
           </div>
 
           <div className="text-gray-600">
-            Caregiver Continuity
+            Caregiver Support
           </div>
 
         </div>
@@ -472,12 +461,12 @@ export default function LandingClient() {
       </section>
 
       {/* TIMELINE */}
-      <section className="relative z-10 px-6 py-24">
+      <section id="how-it-works" className="relative z-10 px-6 py-24">
 
         <div className="mx-auto max-w-6xl">
 
           <h2 className="text-4xl md:text-5xl font-bold text-center text-[#243428]">
-            Built For Human Continuity
+            How RemyNest Works
           </h2>
 
           <div className="mt-20 grid gap-8 md:grid-cols-3">
@@ -506,12 +495,12 @@ export default function LandingClient() {
               </div>
 
               <h3 className="mt-4 text-2xl font-semibold text-[#243428]">
-                AI Understands Context
+                AI Helps You Organize
               </h3>
 
               <p className="mt-4 text-gray-600">
-                Semantic AI connects memories,
-                emotional patterns, and continuity.
+                RemyNest connects related memories
+                and helps you find them in seconds.
               </p>
 
             </div>
@@ -523,12 +512,12 @@ export default function LandingClient() {
               </div>
 
               <h3 className="mt-4 text-2xl font-semibold text-[#243428]">
-                Support Daily Life
+                Support Families &amp; Caregivers
               </h3>
 
               <p className="mt-4 text-gray-600">
-                Help users, caregivers,
-                and families maintain continuity.
+                Help families and caregivers stay close
+                to the memories that matter.
               </p>
 
             </div>
@@ -540,12 +529,12 @@ export default function LandingClient() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="relative z-10 px-6 py-24">
+      <section id="caregivers" className="relative z-10 px-6 py-24">
 
         <div className="mx-auto max-w-6xl">
 
           <h2 className="text-center text-4xl md:text-5xl font-bold text-[#243428]">
-            Future-Focused Memory Support
+            Made For Families &amp; Caregivers
           </h2>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
@@ -553,11 +542,11 @@ export default function LandingClient() {
             <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
 
               <p className="text-gray-600">
-                “A completely new direction for cognitive continuity and AI memory systems.”
+                “RemyNest makes it easy to keep our family&apos;s memories safe in one place.”
               </p>
 
               <p className="mt-6 text-sm text-[#7c8d7f]">
-                Healthcare Vision
+                Family User
               </p>
 
             </div>
@@ -565,11 +554,11 @@ export default function LandingClient() {
             <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
 
               <p className="text-gray-600">
-                “RemyNest feels like the beginning of a second-brain platform.”
+                “A calm, simple home for the memories that matter most.”
               </p>
 
               <p className="mt-6 text-sm text-[#7c8d7f]">
-                AI Product Perspective
+                Early User
               </p>
 
             </div>
@@ -577,11 +566,11 @@ export default function LandingClient() {
             <div className="rounded-3xl border border-black/5 bg-white/70 p-8 backdrop-blur-xl shadow-xl">
 
               <p className="text-gray-600">
-                “The caregiver continuity direction has massive long-term potential.”
+                “Sharing memories with the people who care for mum has never been easier.”
               </p>
 
               <p className="mt-6 text-sm text-[#7c8d7f]">
-                Cognitive Support Focus
+                Caregiver
               </p>
 
             </div>
@@ -598,24 +587,28 @@ export default function LandingClient() {
         <div className="mx-auto max-w-5xl rounded-[40px] border border-black/5 bg-white/70 p-12 text-center backdrop-blur-2xl shadow-xl">
 
           <h2 className="text-4xl md:text-6xl font-bold text-[#243428]">
-            Build Your Second Brain
+            Preserve What Matters Most
           </h2>
 
           <p className="mt-6 text-lg text-gray-600">
-            RemyNest combines AI memory recall,
-            reminders, and cognitive continuity
-            into one modern platform.
+            RemyNest brings your memories, reminders,
+            and family history together
+            in one safe place.
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
 
-            <button className="rounded-2xl bg-[#243428] px-8 py-4 font-semibold text-white hover:scale-105 transition hover:bg-[#2f4633]">
-              Download For iPhone
-            </button>
+            <a href="/download">
+              <button className="rounded-2xl bg-[#243428] px-8 py-4 font-semibold text-white hover:scale-105 transition hover:bg-[#2f4633]">
+                Download For iPhone
+              </button>
+            </a>
 
-            <button className="rounded-2xl border border-black/10 bg-white px-8 py-4 font-semibold text-gray-700 hover:bg-[#f7f4ed] transition">
-              Download For Android
-            </button>
+            <a href="/download">
+              <button className="rounded-2xl border border-black/10 bg-white px-8 py-4 font-semibold text-gray-700 hover:bg-[#f7f4ed] transition">
+                Download For Android
+              </button>
+            </a>
 
           </div>
 
@@ -635,18 +628,18 @@ export default function LandingClient() {
             </h3>
 
             <p className="mt-2 text-sm text-gray-500">
-              AI-powered cognitive continuity platform.
+              A safe place for your memories.
             </p>
 
           </div>
 
           <div className="flex gap-6 text-sm text-gray-500">
 
-            <a className="hover:text-[#243428] transition">
+            <a href="/privacy" className="hover:text-[#243428] transition">
               Privacy
             </a>
 
-            <a className="hover:text-[#243428] transition">
+            <a href="/support" className="hover:text-[#243428] transition">
               Security
             </a>
 
