@@ -22,9 +22,12 @@ migration `20260623120000` to prod Supabase (else `storage_account_usage` is mis
 → uploads fail closed) · push the 14 commits (auto-deploys) · set Sentry env + verify
 the 6 Stripe vars + webhook secret match the live endpoint · smoke-test upload→quota→
 checkout→webhook.
-**Web funnel:** build `/pricing`, `/download` (+ wire the landing store buttons, no
-href today), resolve the `/terms` jurisdiction placeholder, populate legal company
-particulars + stand up mailboxes.
+**Web funnel:** `/pricing`, `/download`, `/support`, `/account/subscription` are
+**BUILT** (2026-06-23 — see HANDOFF; `BILLING_PLANS`-driven, 3.1.1-gated checkout +
+web-only portal, no new billing logic). Remaining: **wire the landing store buttons
+to `/download`** (no href today), set `NEXT_PUBLIC_APP_STORE_URL`/`_PLAY_STORE_URL` at
+submission, resolve the `/terms` jurisdiction placeholder, populate legal company
+particulars + **stand up the `support@/privacy@/dpo@/security@` mailboxes**.
 **Brand rasters:** SVG masters + the 6 Remy states + the **generator script** now
 exist (`scripts/generate-brand-assets.mjs`, full spec in `docs/brand/asset-production.md`)
 → remaining is the **operator run** `npm i -D sharp && node scripts/generate-brand-assets.mjs`
@@ -40,10 +43,11 @@ report · confirm no OAuth login exposed.
 
 ### B. HIGH PRIORITY (before launch)
 Set `MEMORY_IMAGE_TRANSFORMS_ENABLED=true` · change landing JSON-LD category off
-`HealthApplication` · reword `AIInsightSummary` clinical copy · build `/support` +
-declare the support URL · add UGC report/block + an EULA abuse clause (shared/caregiver
-profiles) · build a web subscription-management page (surface `/api/stripe/portal`) ·
-generate marketing/social raster exports.
+`HealthApplication` · reword `AIInsightSummary` clinical copy · **[DONE] `/support`
+built** (declare the support URL `https://www.remynest.com/support` at submission) ·
+add UGC report/block + an EULA abuse clause (shared/caregiver profiles) · **[DONE]
+web subscription-management page** (`/account/subscription` surfaces `/api/stripe/portal`,
+web-only) · generate marketing/social raster exports.
 
 ### C. NICE-TO-HAVE
 Regenerate `favicon.ico` · `/ai-transparency` page (doc 08 ready) · cookie-consent

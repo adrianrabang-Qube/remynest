@@ -23,6 +23,9 @@ const PUBLIC_ROUTES = [
   "/cookies",
   "/account-deletion",
   "/contact",
+  "/pricing",
+  "/download",
+  "/support",
 ];
 
 // NOTE: there is intentionally NO PROTECTED_ROUTES allowlist. The middleware
