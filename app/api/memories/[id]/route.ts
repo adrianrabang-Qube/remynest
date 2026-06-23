@@ -5,6 +5,7 @@ import {
   type MemoryAttachment,
 } from "@/lib/memory-media";
 import { buildMemoryMediaPayload } from "@/lib/memory-media-pipeline";
+import { enforceUploadQuota } from "@/lib/storage/upload-guard";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 export async function PUT(
@@ -57,6 +58,19 @@ export async function PUT(
     const uploadedFiles = form
       .getAll("uploadedFiles")
       .filter((f): f is File => f instanceof File);
+
+    // Pre-upload quota enforcement on the NEW files (kept attachments are already
+    // counted). Validate before any storage write; fails closed; 0-byte = pass.
+    const quota = await enforceUploadQuota(user.id, uploadedFiles);
+    if (!quota.allowed) {
+      return Response.json(
+        {
+          error: quota.reason ?? "Storage limit exceeded",
+          quota,
+        },
+        { status: 413 }
+      );
+    }
 
     const media =
       await buildMemoryMediaPayload({

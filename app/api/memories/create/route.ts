@@ -15,6 +15,7 @@ import {
 } from "@/lib/memory-media-pipeline";
 
 import { signMemory } from "@/lib/memory-media-signing";
+import { enforceUploadQuota } from "@/lib/storage/upload-guard";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 const MEMORY_PIPELINE_TAG =
@@ -246,6 +247,22 @@ export async function POST(req: Request) {
       title,
       content,
     } = body;
+
+    // Pre-upload quota enforcement — validate the WHOLE batch BEFORE any storage
+    // write. Reuses the storage ledger; fails closed; 0-byte batches pass through.
+    const uploadFiles = (
+      Array.isArray(body.uploadedFiles) ? body.uploadedFiles : []
+    ).filter((f): f is File => f instanceof File);
+    const quota = await enforceUploadQuota(user.id, uploadFiles);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: quota.reason ?? "Storage limit exceeded",
+          quota,
+        },
+        { status: 413 }
+      );
+    }
 
     const memoryMediaPayload =
       await buildMemoryMediaPayload({

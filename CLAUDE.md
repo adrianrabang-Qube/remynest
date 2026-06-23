@@ -193,10 +193,18 @@ separate `profile_id` column. **`lib/storage/`** holds plan limits as **config o
 `lib/billing` via the `resolveStorageTier()` seam, default FREE), `getStorageUsage`
 (service-role, **always scoped by the member id set** — family-pool-ready by summing
 across members, **no schema redesign needed**), and `checkStorageQuota` (structured
-result, never throws, byte-based → future-media-proof). The enforcement primitive is
-**not** wired into the frozen upload pipeline. **Migration is an operator step** (apply
+result, never throws, byte-based → future-media-proof). **Upload enforcement IS wired
+(authoritative, 2026-06-23):** `enforceUploadQuota` (`lib/storage/upload-guard.ts`)
+sums the **total batch** bytes, resolves pool members (`resolveStoragePoolMembers` →
+`[userId]` today, the family seam) and calls `checkStorageQuota`, then gates
+**`POST /api/memories/create`** and **`PUT /api/memories/[id]`** **before**
+`buildMemoryMediaPayload` (the storage-write choke point) — over-quota → **HTTP 413
+`{ error, quota }`**. A **0-byte batch always passes** (text-only memory / remove-only
+edit never blocked); **fails closed** on a degraded usage read; the edit path counts
+only the **new** files. Do **not** duplicate this accounting or add a second
+enforcement path — reuse `enforceUploadQuota`. **Migration is an operator step** (apply
 `20260623120000_storage_ledger_foundation.sql` in the Supabase SQL editor). Do **not**
-re-derive these decisions or wire enforcement into upload without unfreezing it. See
+re-derive the ledger decisions or redesign the schema. See
 `docs/features/storage-ledger.md`.
 
 ## Mandatory documentation maintenance (Definition of Done)

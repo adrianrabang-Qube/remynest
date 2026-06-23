@@ -59,8 +59,22 @@ everyone — the seam where future billing maps a subscription → a storage tie
 ## APIs
 - **GET `/api/storage/usage`** → the usage summary for the authed user.
 - **POST `/api/storage/check`** `{ bytes }` → projected-usage quota check.
-Both auth-gated (protect-by-default). The check route is the enforcement
-**primitive** — it is **not** yet wired into the (frozen) upload pipeline.
+Both auth-gated (protect-by-default).
+
+## Upload enforcement (wired 2026-06-23)
+`lib/storage/upload-guard.ts` `enforceUploadQuota(userId, files)` — the pre-upload
+guard. It sums the **total batch** bytes (`totalUploadBytes`), resolves pool members
+(`lib/storage/pool.ts` `resolveStoragePoolMembers` → `[userId]` today — the family
+seam), calls **`checkStorageQuota`** (no duplicated accounting), and returns the full
+UI payload (`currentUsage`, `limit`, `remaining`, `projectedUsage`, `percentUsed`,
+formatted + raw). A **0-byte batch always passes** (text-only memory / remove-only
+edit are never blocked). It is injected **just before `buildMemoryMediaPayload`** (the
+shared storage-write choke point) in **`POST /api/memories/create`** and **`PUT
+/api/memories/[id]`** — covering every client upload path. On over-quota the routes
+return **HTTP 413** `{ error, quota }` (structured, never throws). **Fails closed** —
+a degraded usage read blocks an upload with files. On the edit path only the **new**
+files count (kept attachments are already in the ledger). Not wired: a client-side
+pre-check (future UI) — the server is authoritative.
 
 ## Family-pool readiness (no later redesign)
 The ledger keys per `user_id`; pooling is a query-time `SUM` over a resolved member
@@ -75,5 +89,5 @@ statement backfills existing attachments. Until applied, the new code is dormant
 (no existing UI calls it).
 
 ## Not in scope (future)
-Plan pricing / Stripe checkout; upload-pipeline enforcement wiring; storage-plan
-mapping from billing; `storage_pools` membership tables; UI (usage meter).
+Plan pricing / Stripe checkout; storage-plan mapping from billing; `storage_pools`
+membership tables; client-side pre-upload UI (usage meter / warning).
