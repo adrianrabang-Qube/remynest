@@ -47,7 +47,9 @@ Hybrid size ladder served from the single stored original (one Supabase "origin 
 regardless of how many sizes). Variants are minted in `lib/memory-media-signing.ts`:
 - **THUMB** `400×400 cover q70` — feed/list (`MemoryGalleryPreview`, `CompactMemoryRow`,
   `TimelineRow`).
-- **MEDIUM** `1080 contain q75` — detail page (`MemoryGallery`) + `PhotoViewer`.
+- **MEDIUM** `1080 contain q75` — detail page (`MemoryGallery`) + `PhotoViewer` main
+  image (±1 windowed). The viewer's full-screen experience adds prev/next buttons,
+  ←/→ keys, and a **thumbnail strip** that uses the small **THUMB** variant (lazy).
 - **ORIGINAL** — fallback only.
 
 Images use **Supabase on-the-fly transforms** (imgproxy, CDN-cached) via the SINGULAR

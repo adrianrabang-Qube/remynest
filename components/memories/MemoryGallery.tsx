@@ -14,8 +14,11 @@ import PhotoViewer from "@/components/memories/PhotoViewer";
  */
 export default function MemoryGallery({
   images,
+  thumbnails,
 }: {
   images: GalleryAttachment[];
+  /** Small thumb-variant URLs (same order as images) for the viewer's strip. */
+  thumbnails?: string[];
 }) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   if (images.length === 0) return null;
@@ -63,6 +66,7 @@ export default function MemoryGallery({
       {viewerIndex !== null ? (
         <PhotoViewer
           images={viewerImages}
+          thumbnails={thumbnails}
           startIndex={viewerIndex}
           onClose={() => setViewerIndex(null)}
         />

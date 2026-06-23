@@ -64,8 +64,13 @@ export default async function MemoryPage({
   }
 
   // Private media → short-lived signed URLs for this authorized memory.
-  const memory =
-    (await signMemory(rawMemory, { variant: "medium" })) ?? rawMemory;
+  // Medium for the main gallery/viewer; thumb for the viewer's strip — signed in
+  // parallel to overlap the round-trips.
+  const [mediumSigned, memoryThumb] = await Promise.all([
+    signMemory(rawMemory, { variant: "medium" }),
+    signMemory(rawMemory, { variant: "thumb" }),
+  ]);
+  const memory = mediumSigned ?? rawMemory;
 
   const attachments = Array.isArray(memory.attachments)
     ? memory.attachments
@@ -80,6 +85,17 @@ export default async function MemoryPage({
   const otherAttachments = attachments.filter(
     (a: MemoryAttachment) => (a.type || "file") !== "image"
   );
+
+  // Small thumb-variant URLs (same order as imageAttachments) for the viewer's
+  // thumbnail strip — so the strip decodes small thumbs, not full medium images.
+  // (memoryThumb is signed above in parallel with the medium variant.)
+  const thumbAttachments =
+    memoryThumb && Array.isArray(memoryThumb.attachments)
+      ? (memoryThumb.attachments as MemoryAttachment[])
+      : [];
+  const imageThumbnails = thumbAttachments
+    .filter((a) => (a.type || "file") === "image" && a.url)
+    .map((a) => a.url ?? "");
 
   // 🔗 Semantic related memories
   let relatedMemories: RelatedMemory[] = [];
@@ -250,7 +266,10 @@ export default async function MemoryPage({
             </h2>
 
             {imageAttachments.length > 0 && (
-              <MemoryGallery images={imageAttachments} />
+              <MemoryGallery
+                images={imageAttachments}
+                thumbnails={imageThumbnails}
+              />
             )}
 
             {otherAttachments.length > 0 && (
