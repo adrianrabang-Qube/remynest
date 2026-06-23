@@ -4,6 +4,59 @@ Derived from current code reality (see MASTER_SPEC + HANDOFF_CURRENT). Web app i
 **live in production**; remaining work is hardening, fixing known breakages, and
 mobile store readiness.
 
+## 📋 V1 LAUNCH-READINESS AUDIT (2026-06-23) — ~72% to launch
+**Code-complete, submission-incomplete.** Core engineering + the hardest risk
+surfaces are DONE (storage subscription/quota single-source-of-truth, multi-media
+memories, reminders+push [Build 8 FROZEN], Apple 3.1.1/3.1.3 gating, account
+deletion + GDPR, brand foundation, full Stripe lifecycle). Remaining ~28% is
+launch-BLOCKING operator + submission work. **iOS ~90% ready; Android ~55%** (no FCM
+/ manifest perms / signing). Corrections from prior roadmap: `/api/stripe/cancel` IS
+implemented; `save-onesignal`/`save-subscription` are nonexistent (not broken);
+**Sign in with Apple is NOT required** — login is email/password only (no OAuth);
+Android adaptive icon + splash + iOS 1024 master + splash ARE done; Sentry is wired
+(`instrumentation` + `withSentryConfig`) but env-unset.
+
+### A. LAUNCH-BLOCKING
+**Operator go-live (do first, 3 one-liners + verify):** apply the `storage_ledger`
+migration `20260623120000` to prod Supabase (else `storage_account_usage` is missing
+→ uploads fail closed) · push the 14 commits (auto-deploys) · set Sentry env + verify
+the 6 Stripe vars + webhook secret match the live endpoint · smoke-test upload→quota→
+checkout→webhook.
+**Web funnel:** build `/pricing`, `/download` (+ wire the landing store buttons, no
+href today), resolve the `/terms` jurisdiction placeholder, populate legal company
+particulars + stand up mailboxes.
+**Brand rasters:** true-square PWA icons 192/512 (currently 1536×1024 dups), full iOS
+App Store icon ladder, App Store 6.7" screenshots (1290×2796), Play feature graphic
+(1024×500) + screenshots.
+**Android:** `google-services.json` (FCM) · manifest perms (POST_NOTIFICATIONS,
+CAMERA, READ_MEDIA_IMAGES/VIDEO) · keystore + signed AAB.
+**Store submission:** reviewer demo account + sample data + App Review notes · ASC
+Privacy labels + Play Data Safety · content-rating questionnaires · Play pre-launch
+report · confirm no OAuth login exposed.
+
+### B. HIGH PRIORITY (before launch)
+Set `MEMORY_IMAGE_TRANSFORMS_ENABLED=true` · change landing JSON-LD category off
+`HealthApplication` · reword `AIInsightSummary` clinical copy · build `/support` +
+declare the support URL · add UGC report/block + an EULA abuse clause (shared/caregiver
+profiles) · build a web subscription-management page (surface `/api/stripe/portal`) ·
+generate marketing/social raster exports.
+
+### C. NICE-TO-HAVE
+Regenerate `favicon.ico` · `/ai-transparency` page (doc 08 ready) · cookie-consent
+posture w/ counsel · deep-links decision · align android `contentInset` · leave
+ENTERPRISE price IDs unset for V1.
+
+### D. POST-LAUNCH (deferred — not launch scope)
+Voice/audio memories · transcription · AI summaries · semantic search V2 / advanced AI
+· animated Remy · dark-theme rollout (tokens ready) · rollback/phased-release runbook.
+
+### Recommended execution order
+1. **Operator go-live** (migration + push + env + smoke-test). 2. **Legal/content
+gates** (jurisdiction, mailboxes, JSON-LD, AI copy). 3. **Web funnel** (/pricing,
+/download, /support, subscription mgmt). 4. **Brand rasters**. 5. **iOS submission**
+(iOS could launch ahead of Android). 6. **Android submission** (longest track).
+7. **Post-launch**.
+
 ## 🎯 LAUNCH PRIORITY (authoritative, 2026-06-23) — App-Store launch, NOT advanced AI
 The memory-media + storage + branding work is largely **DONE** (11 unpushed commits on
 `main`; see HANDOFF). Focus shifts to **launch readiness**. Order:

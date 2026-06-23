@@ -2267,8 +2267,21 @@ launch-readiness** (subscription/storage-plan integration → per-file-cap revis
 productization → App-Store prep — see Next priorities + `docs/roadmap/launch-roadmap.md`).
 
 ## Next priorities
-**Authoritative direction (2026-06-23): App-Store LAUNCH focus, NOT advanced AI** (see
-the CLAUDE.md "Launch priority" note). The memory/storage/media/branding work below is
+**V1 LAUNCH AUDIT (2026-06-23): ~72% to launch — code-complete, submission-incomplete**
+(full report + A/B/C/D matrix + execution order in `docs/roadmap/launch-roadmap.md`).
+**Immediate path = 3 operator one-liners + a smoke test:** (1) apply the
+`storage_ledger` migration `20260623120000` to prod Supabase (**critical** — without
+the `storage_account_usage` view every upload fails closed); (2) set **Sentry** env
+(wired but disabled) + verify the 6 **Stripe** vars + webhook secret match the live
+endpoint + set `MEMORY_IMAGE_TRANSFORMS_ENABLED=true`; (3) **push the 14 commits**
+(auto-deploys) then smoke-test upload→quota→checkout→webhook. Then: web funnel
+(`/pricing`, `/download`, `/support`, sub-management), brand rasters (true-square PWA
+icons, iOS icon ladder, store screenshots, Play feature graphic), then iOS submission
+(**~90% ready — can launch ahead of Android ~55%**), then Android (FCM + manifest
+perms + signing). **Corrections:** `/api/stripe/cancel` IS implemented; the
+`save-*` endpoints are nonexistent (not broken); **Sign in with Apple NOT required**
+(login is email/password only — confirm no OAuth in prod). **Authoritative direction:
+App-Store LAUNCH focus, NOT advanced AI** (see the CLAUDE.md "Launch priority" note). The memory/storage/media/branding work below is
 largely **IMPLEMENTED** (11 unpushed commits — see Recent commits / the per-feature
 bullets above). Launch roadmap, in order:
 1. **Memory-system completion** — multi-photo ✅ · storage accounting ✅ · storage usage
