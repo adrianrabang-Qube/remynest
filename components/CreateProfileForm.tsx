@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createProfile } from "@/app/(app)/dashboard/actions";
 import type { BillingPlan } from "@/lib/billing/plans";
 import UpgradeModal from "./UpgradeModal";
+import { useToast } from "@/components/ToastProvider";
 
 interface LimitInfo {
   plan: BillingPlan;
@@ -16,6 +17,7 @@ export default function CreateProfileForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitInfo, setLimitInfo] = useState<LimitInfo | null>(null);
+  const { showToast } = useToast();
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -25,7 +27,9 @@ export default function CreateProfileForm() {
       const result = await createProfile(formData);
 
       if (result.ok) {
-        window.location.reload();
+        showToast("Person added");
+        // Brief delay so the confirmation is visible before the list refreshes.
+        setTimeout(() => window.location.reload(), 700);
         return;
       }
 

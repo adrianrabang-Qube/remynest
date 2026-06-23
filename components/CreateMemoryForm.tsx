@@ -11,6 +11,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ToastProvider";
 
 import {
   buildMemoryDate,
@@ -87,6 +88,7 @@ function normalizeInput(
 export default function CreateMemoryForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const requestIdRef = useRef(
     crypto.randomUUID()
@@ -374,6 +376,8 @@ export default function CreateMemoryForm() {
           queryKey: ["storage-usage"],
         });
 
+        showToast("Memory saved");
+
         startTransition(() => {
           router.refresh();
         });
@@ -405,6 +409,7 @@ export default function CreateMemoryForm() {
       files,
       router,
       queryClient,
+      showToast,
     ]
   );
 

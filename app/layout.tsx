@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 
 import QueryProvider from "@/components/QueryProvider";
+import ToastProvider from "@/components/ToastProvider";
 import {
   SITE_URL,
   SITE_NAME,
@@ -82,7 +83,9 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="font-sans antialiased bg-sand text-charcoal">
         <QueryProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </QueryProvider>
       </body>
     </html>

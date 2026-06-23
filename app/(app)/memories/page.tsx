@@ -22,6 +22,7 @@ import EditMemoryModal from "@/components/EditMemoryModal";
 import StorageFullModal, {
   type UploadQuotaPayload,
 } from "@/components/storage/StorageFullModal";
+import { useToast } from "@/components/ToastProvider";
 import {
   resolveEffectiveDate,
   effectiveSortValue,
@@ -88,6 +89,7 @@ function normalizeMemoryArray(
 
 function MemoriesPageContent() {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const [showCreate, setShowCreate] =
     useState(false);
@@ -458,6 +460,7 @@ const res = await fetch(
       // Close only on success — a quota 413 keeps the modal open so the draft +
       // picked files survive for retry after the user frees space.
       setShowCreate(false);
+      showToast("Memory saved");
       queryClient.invalidateQueries({
         queryKey: ["storage-usage"],
       });
@@ -868,11 +871,20 @@ const sortedMemories = [
 
       {/* Empty */}
       {!isLoading &&
-        normalizedMemories.length ===
-  0 && (
-          <p className="text-gray-500">
-            No memories yet.
-          </p>
+        normalizedMemories.length === 0 && (
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
+            <p className="text-charcoal-soft">No memories yet.</p>
+            <p className="mt-1 text-sm text-charcoal-muted">
+              Add your first memory to start your timeline.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            >
+              Add your first memory
+            </button>
+          </div>
         )}
 
       {/* TODAY */}
