@@ -70,7 +70,31 @@ operator enables transforms on the project and sets the flag.
 fan-out; the memories feed client aggregates pages into its flat array (optimistic
 mutations unchanged).
 
+## Mixed media — video (Phase B, 2026-06-23)
+Memories support **mixed photo + video** in one `attachments` array (no separate
+video system — videos reuse the attachment model). The architecture was already
+media-generic; Phase B unlocked video through the display surfaces:
+- **Upload:** `AttachmentManager` accepts `image/*` + `video/*` (type-aware previews;
+  no `<video>` mounted in the picker). The pipeline already allowlists `video/*`,
+  derives `type:"video"`, and enforces the **25 MB cap on video too** (larger videos
+  are rejected — a video-specific cap is a future decision).
+- **Indicator:** `MediaThumb` renders video as a **play-icon tile**, so the feed
+  card (`MemoryGalleryPreview`) shows mixed media automatically.
+- **Viewer:** `PhotoViewer` (`ViewerImage.type`) renders `<video controls
+  playsInline preload="none">` for video slides — **preload="none" + the ±1
+  windowing = no off-screen video decode** (WKWebView-safe). The thumbnail strip
+  shows a play tile for video; prev/next + keyboard + swipe work across mixed media.
+- **Detail page** routes **image + video → the gallery/viewer**; audio/file stay
+  inline. Videos are **not** Supabase-transformed (thumb/medium are image-only); a
+  video's signed URL is the plain object URL.
+- **Storage:** video counts toward quota unchanged (byte-based `totalUploadBytes` +
+  the ledger trigger's `media_type` projection) — the usage card + storage-full 413
+  modal work for video with no special-casing.
+- **Decision:** components were **evolved in place, not renamed** (`MediaThumb` is the
+  media seam). **Future audio/documents** plug into the same seams (allowlist +
+  `MediaThumb` dispatch + byte accounting already accommodate them).
+
 ## Future enhancements
-Video poster + PDF first-page stored derivatives (into the existing
-`attachment.thumbnailUrl` field); audio waveform; image/video transcoding; virus
-scanning; feed virtualization at very high memory counts.
+Video **poster** (first-frame) + PDF first-page stored derivatives (into the existing
+`attachment.thumbnailUrl` field); audio upload + waveform/player; a video-specific
+size cap; image/video transcoding; virus scanning; feed virtualization.

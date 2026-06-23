@@ -26,6 +26,7 @@ export default function MemoryGallery({
   const viewerImages = images.map((a) => ({
     url: a.url ?? "",
     name: a.name ?? a.filename,
+    type: a.type,
     fallbackUrl: a.fallbackUrl,
   }));
 

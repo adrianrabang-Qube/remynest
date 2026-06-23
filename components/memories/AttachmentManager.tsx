@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo } from "react";
+import { Play } from "lucide-react";
 
 export type ManagedAttachment = {
   url?: string;
@@ -9,20 +10,25 @@ export type ManagedAttachment = {
   filename?: string;
   name?: string;
   type?: string;
+  mimeType?: string;
   [key: string]: unknown;
 };
 
+// Phase B: photos + videos. Adding audio/PDF later is a one-line change here
+// (the upload pipeline already allowlists audio/* + application/pdf).
+const ACCEPTED_PREFIXES = ["image/", "video/"];
+const ACCEPT_ATTR = "image/*,video/*";
+
+function isVideo(typeOrMime?: string): boolean {
+  return typeof typeOrMime === "string" && typeOrMime.startsWith("video");
+}
+
 /**
- * Photo picker with thumbnail preview + per-item remove, shared by memory create
- * and edit. Intentionally minimal (Phase 1/2 — no gallery/carousel/full-screen):
- *
- * - `existing`: already-saved attachments (edit only), rendered from their (signed)
- *   `url`; removing one calls `onExistingChange` with the kept set (order preserved).
- * - `files`: newly-selected images, previewed via object URLs (revoked on change).
- *
- * Image-only and mobile-first. Renders via `next/image` `unoptimized` to match the
- * codebase's signed-URL convention (no Next image-optimization for rotating signed
- * URLs / blob previews).
+ * Media picker with thumbnail/preview + per-item remove, shared by memory create
+ * and edit. Photos preview as thumbnails; videos preview as a play tile (no
+ * `<video>` element is mounted in the picker — avoids decoding frames for every
+ * selected clip). Mobile-first; renders via `next/image` `unoptimized` to match
+ * the codebase's signed-URL / blob-preview convention.
  */
 export default function AttachmentManager({
   existing,
@@ -39,29 +45,34 @@ export default function AttachmentManager({
 }) {
   // Object URLs for new-file previews — derived when the file set changes and
   // revoked on the next change / unmount (no setState inside an effect).
+  // Only images need a preview object URL; videos render a play tile, so we don't
+  // allocate (or hold) a blob URL for them.
   const previews = useMemo(
-    () => files.map((f) => URL.createObjectURL(f)),
+    () =>
+      files.map((f) =>
+        f.type.startsWith("image/") ? URL.createObjectURL(f) : ""
+      ),
     [files]
   );
 
   useEffect(() => {
     return () => {
-      previews.forEach((u) =>
-        URL.revokeObjectURL(u)
-      );
+      previews.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [previews]);
 
   function addFiles(selected: FileList | null) {
     if (!selected) return;
-    const images = Array.from(selected).filter((f) =>
-      f.type.startsWith("image/")
+    const accepted = Array.from(selected).filter((f) =>
+      ACCEPTED_PREFIXES.some((p) => f.type.startsWith(p))
     );
-    if (images.length) onFilesChange([...files, ...images]);
+    if (accepted.length) onFilesChange([...files, ...accepted]);
   }
 
   const removeBtn =
-    "absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-base leading-none text-white shadow";
+    "absolute -right-1.5 -top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-base leading-none text-white shadow";
+  const tile =
+    "relative aspect-square overflow-hidden rounded-lg bg-gray-100";
 
   const existingList = existing ?? [];
   const hasAny = existingList.length > 0 || files.length > 0;
@@ -70,74 +81,81 @@ export default function AttachmentManager({
     <div className="space-y-3">
       {hasAny && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {existingList.map((a, i) => (
-            <div
-              key={`existing-${(a.storagePath as string) ?? (a.url as string) ?? i}`}
-              className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
-            >
-              {typeof a.url === "string" && a.url ? (
-                <Image
-                  src={a.url}
-                  alt={(a.filename as string) || (a.name as string) || "Photo"}
-                  fill
-                  unoptimized
-                  sizes="120px"
-                  className="object-cover"
-                />
-              ) : null}
-              {!disabled && onExistingChange ? (
-                <button
-                  type="button"
-                  aria-label="Remove photo"
-                  onClick={() =>
-                    onExistingChange(existingList.filter((_, j) => j !== i))
-                  }
-                  className={removeBtn}
-                >
-                  ×
-                </button>
-              ) : null}
-            </div>
-          ))}
+          {existingList.map((a, i) => {
+            const video = isVideo(a.type) || isVideo(a.mimeType);
+            return (
+              <div
+                key={`existing-${(a.storagePath as string) ?? (a.url as string) ?? i}`}
+                className={tile}
+              >
+                {video ? (
+                  <VideoTile />
+                ) : typeof a.url === "string" && a.url ? (
+                  <Image
+                    src={a.url}
+                    alt={a.filename || a.name || "Photo"}
+                    fill
+                    unoptimized
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                ) : null}
+                {!disabled && onExistingChange ? (
+                  <button
+                    type="button"
+                    aria-label="Remove attachment"
+                    onClick={() =>
+                      onExistingChange(existingList.filter((_, j) => j !== i))
+                    }
+                    className={removeBtn}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            );
+          })}
 
-          {files.map((f, i) => (
-            <div
-              key={`new-${i}-${f.name}`}
-              className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
-            >
-              {previews[i] ? (
-                <Image
-                  src={previews[i]}
-                  alt={f.name}
-                  fill
-                  unoptimized
-                  sizes="120px"
-                  className="object-cover"
-                />
-              ) : null}
-              {!disabled ? (
-                <button
-                  type="button"
-                  aria-label="Remove photo"
-                  onClick={() =>
-                    onFilesChange(files.filter((_, j) => j !== i))
-                  }
-                  className={removeBtn}
-                >
-                  ×
-                </button>
-              ) : null}
-            </div>
-          ))}
+          {files.map((f, i) => {
+            const video = f.type.startsWith("video/");
+            return (
+              <div key={`new-${i}-${f.name}`} className={tile}>
+                {video ? (
+                  <VideoTile />
+                ) : previews[i] ? (
+                  <Image
+                    src={previews[i]}
+                    alt={f.name}
+                    fill
+                    unoptimized
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                ) : null}
+                {!disabled ? (
+                  <button
+                    type="button"
+                    aria-label="Remove attachment"
+                    onClick={() =>
+                      onFilesChange(files.filter((_, j) => j !== i))
+                    }
+                    className={removeBtn}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       )}
 
       <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50">
         <span aria-hidden>＋</span>
-        <span>Add photos</span>
+        <span>Add photos or videos</span>
         <input
           type="file"
-          accept="image/*"
+          accept={ACCEPT_ATTR}
           multiple
           disabled={disabled}
           className="hidden"
@@ -147,6 +165,17 @@ export default function AttachmentManager({
           }}
         />
       </label>
+    </div>
+  );
+}
+
+function VideoTile() {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-gray-800">
+      <Play
+        className="h-6 w-6 fill-white text-white"
+        aria-label="Video"
+      />
     </div>
   );
 }

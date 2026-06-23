@@ -26,22 +26,6 @@ export async function buildMemoryMediaPayload({
         )
       : [];
 
-      console.log(
-  "[memory-media-pipeline]",
-  {
-    uploadedFilesType:
-      typeof body.uploadedFiles,
-
-    isArray:
-      Array.isArray(
-        body.uploadedFiles
-      ),
-
-    value:
-      body.uploadedFiles,
-  }
-);
-
   return handleMemoryMediaUpload(
     {
       attachments,

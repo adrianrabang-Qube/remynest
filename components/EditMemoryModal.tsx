@@ -112,7 +112,7 @@ export default function EditMemoryModal({
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
-            Photos
+            Photos &amp; videos
           </label>
           <AttachmentManager
             existing={keptAttachments}

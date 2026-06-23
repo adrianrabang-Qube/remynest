@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { Play } from "lucide-react";
 
 export type GalleryAttachment = {
   url?: string;
@@ -61,14 +62,24 @@ export default function MediaThumb({
     );
   }
 
+  // Video → a play-indicator tile (poster support can later read attachment
+  // thumbnailUrl here without changing callers).
+  if (type === "video") {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-gray-800">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
+          <Play className="h-5 w-5 fill-white text-white" aria-label="Video" />
+        </span>
+      </div>
+    );
+  }
+
   const badge =
-    type === "video"
-      ? "▶ Video"
-      : type === "audio"
-        ? "♪ Audio"
-        : type === "document"
-          ? "PDF / Doc"
-          : "File";
+    type === "audio"
+      ? "♪ Audio"
+      : type === "document"
+        ? "PDF / Doc"
+        : "File";
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-gray-100 px-2 text-center text-xs font-medium text-gray-600">

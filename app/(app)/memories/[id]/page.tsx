@@ -76,26 +76,29 @@ export default async function MemoryPage({
     ? memory.attachments
     : [];
 
-  // Images feed the swipeable gallery (+ full-screen viewer); other media
-  // (video/audio/file) keep their inline native rendering below.
-  const imageAttachments = attachments.filter(
-    (a: MemoryAttachment) =>
-      (a.type || "file") === "image" && a.url
+  // Visual media (images + videos) feed the swipeable gallery + full-screen
+  // viewer; other media (audio/file) keep their inline native rendering below.
+  const isVisualMedia = (a: MemoryAttachment) => {
+    const t = a.type || "file";
+    return t === "image" || t === "video";
+  };
+  const mediaAttachments = attachments.filter(
+    (a: MemoryAttachment) => isVisualMedia(a) && a.url
   );
   const otherAttachments = attachments.filter(
-    (a: MemoryAttachment) => (a.type || "file") !== "image"
+    (a: MemoryAttachment) => !isVisualMedia(a)
   );
 
-  // Small thumb-variant URLs (same order as imageAttachments) for the viewer's
-  // thumbnail strip — so the strip decodes small thumbs, not full medium images.
-  // (memoryThumb is signed above in parallel with the medium variant.)
+  // Strip thumbnails aligned (same order) with mediaAttachments: images use the
+  // small thumb-variant URL; videos render a play tile (by type) so their slot is
+  // left blank here. (memoryThumb is signed above in parallel with the medium variant.)
   const thumbAttachments =
     memoryThumb && Array.isArray(memoryThumb.attachments)
       ? (memoryThumb.attachments as MemoryAttachment[])
       : [];
-  const imageThumbnails = thumbAttachments
-    .filter((a) => (a.type || "file") === "image" && a.url)
-    .map((a) => a.url ?? "");
+  const mediaThumbnails = thumbAttachments
+    .filter((a) => isVisualMedia(a) && a.url)
+    .map((a) => ((a.type || "file") === "image" ? a.url ?? "" : ""));
 
   // 🔗 Semantic related memories
   let relatedMemories: RelatedMemory[] = [];
@@ -265,10 +268,10 @@ export default async function MemoryPage({
               Attachments
             </h2>
 
-            {imageAttachments.length > 0 && (
+            {mediaAttachments.length > 0 && (
               <MemoryGallery
-                images={imageAttachments}
-                thumbnails={imageThumbnails}
+                images={mediaAttachments}
+                thumbnails={mediaThumbnails}
               />
             )}
 
@@ -287,30 +290,8 @@ export default async function MemoryPage({
                 const mimeType = attachment.mimeType || "";
                 const type = attachment.type || "file";
 
-                if (type === "video") {
-                  return (
-                    <div
-                      key={index}
-                      className="rounded-3xl overflow-hidden border border-gray-100 bg-white shadow-sm"
-                    >
-                      <video
-                        src={url}
-                        controls
-                        className="w-full h-56 bg-black"
-                      />
-                      <div className="p-4">
-                        <div className="font-semibold text-sm text-gray-900">
-                          {name}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {mimeType}
-                          {size ? ` · ${size}` : ""}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
+                // Video is rendered by the gallery/viewer above (mediaAttachments);
+                // otherAttachments only contains audio/file here.
                 if (type === "audio") {
                   return (
                     <div

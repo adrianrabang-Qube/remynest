@@ -3,10 +3,13 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Play } from "lucide-react";
 
 export type ViewerImage = {
   url: string;
   name?: string;
+  /** "image" | "video" — drives <Image> vs <video> rendering. Defaults to image. */
+  type?: string;
   /** Untransformed signed URL — used if the medium transform fails to load. */
   fallbackUrl?: string;
 };
@@ -181,27 +184,45 @@ export default function PhotoViewer({
               className="relative flex h-full w-full shrink-0 snap-center items-center justify-center"
             >
               {inWindow && img.url ? (
-                <Image
-                  src={
-                    failed.has(i) && img.fallbackUrl
-                      ? img.fallbackUrl
-                      : img.url
-                  }
-                  alt={img.name ?? "Photo"}
-                  fill
-                  unoptimized
-                  sizes="100vw"
-                  onError={() => {
-                    if (img.fallbackUrl) {
-                      setFailed((prev) => {
-                        const next = new Set(prev);
-                        next.add(i);
-                        return next;
-                      });
+                img.type === "video" ? (
+                  // Memory-safe: preload="none" -> no frame decode until the user
+                  // taps play; only the in-window (current ±1) videos mount at all.
+                  <video
+                    src={img.url}
+                    controls
+                    playsInline
+                    preload="none"
+                    className="max-h-full max-w-full"
+                  />
+                ) : img.type && img.type !== "image" ? (
+                  // Future-media seam — non-image/non-video never reaches the
+                  // viewer today (audio/file render inline), but fail gracefully.
+                  <div className="px-6 text-center text-sm text-white/70">
+                    Unsupported media type
+                  </div>
+                ) : (
+                  <Image
+                    src={
+                      failed.has(i) && img.fallbackUrl
+                        ? img.fallbackUrl
+                        : img.url
                     }
-                  }}
-                  className="object-contain"
-                />
+                    alt={img.name ?? "Photo"}
+                    fill
+                    unoptimized
+                    sizes="100vw"
+                    onError={() => {
+                      if (img.fallbackUrl) {
+                        setFailed((prev) => {
+                          const next = new Set(prev);
+                          next.add(i);
+                          return next;
+                        });
+                      }
+                    }}
+                    className="object-contain"
+                  />
+                )
               ) : null}
             </div>
           );
@@ -218,7 +239,7 @@ export default function PhotoViewer({
                 thumbRefs.current[i] = el;
               }}
               onClick={() => goTo(i)}
-              aria-label={`Go to photo ${i + 1}`}
+              aria-label={`Go to item ${i + 1}`}
               aria-current={i === active}
               className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition ${
                 i === active
@@ -226,15 +247,24 @@ export default function PhotoViewer({
                   : "border-transparent opacity-60"
               }`}
             >
-              <Image
-                src={thumbnails?.[i] ?? img.url}
-                alt=""
-                fill
-                unoptimized
-                loading="lazy"
-                sizes="56px"
-                className="object-cover"
-              />
+              {img.type === "video" ? (
+                <span className="flex h-full w-full items-center justify-center bg-gray-800">
+                  <Play
+                    className="h-4 w-4 fill-white text-white"
+                    aria-label="Video"
+                  />
+                </span>
+              ) : (
+                <Image
+                  src={thumbnails?.[i] || img.url}
+                  alt=""
+                  fill
+                  unoptimized
+                  loading="lazy"
+                  sizes="56px"
+                  className="object-cover"
+                />
+              )}
             </button>
           ))}
         </div>
