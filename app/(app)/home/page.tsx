@@ -10,6 +10,8 @@ import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
 import RemyVoicePreview from "@/components/remy/RemyVoicePreview";
 import RemyStorySnapshot from "@/components/remy/RemyStorySnapshot";
 import ProfileCoverageCard from "@/components/profile/identity/ProfileCoverageCard";
+import MyNestExplainer from "@/components/profile/MyNestExplainer";
+import { getAccessibleProfiles } from "@/lib/profile-access";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,10 @@ export default async function RemyHomePage() {
 
   const { understanding, voiceLines, briefing, story, lifeJourney, coverage, nextAction } =
     await buildRemyHomeModel(supabase, user.id);
+
+  // First-run explainer condition: in My Nest (this page IS the My Nest home) with no
+  // care profiles yet. Component self-manages dismissal.
+  const careProfiles = await getAccessibleProfiles();
 
   return (
     <div className="space-y-4 p-4 md:space-y-5 md:p-6">
@@ -66,6 +72,9 @@ export default async function RemyHomePage() {
           </Link>
         </section>
       )}
+
+      {/* First-run education: what My Nest is vs a care profile (dismissible). */}
+      {careProfiles.length === 0 && <MyNestExplainer />}
 
       {/* Entry point into the dedicated companion experience */}
       <Link
