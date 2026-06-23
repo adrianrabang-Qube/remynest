@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="72" viewBox="0 0 300 72" role="img" aria-label="RemyNest">
   <g transform="translate(4,4)">
-    <ellipse cx="32" cy="27" rx="8.5" ry="9.5" fill="#C9A86A"/>
-    <g fill="none" stroke="#ECE5D8" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 30 C 9 45 20 53 32 53 C 44 53 55 45 55 30"/>
-      <path d="M16 32 C 16 43 24 49 32 49 C 40 49 48 43 48 32"/>
-      <path d="M23 34 C 23 41 27 45 32 45 C 37 45 41 41 41 34"/>
+    <path d="M32 14.5 C 30 12 26.5 11 26.5 8.3 C 26.5 6.6 28 5.6 29.4 5.6 C 30.6 5.6 31.5 6.3 32 7.2 C 32.5 6.3 33.4 5.6 34.6 5.6 C 36 5.6 37.5 6.6 37.5 8.3 C 37.5 11 34 12 32 14.5 Z" fill="#E3A24A"/>
+    <g fill="none" stroke="#ECE5D8" stroke-linecap="round">
+      <path d="M12 33 C 12 48 21 55 32 55 C 43 55 52 48 52 33" stroke-width="2.6"/>
+      <path d="M18.5 35 C 18.5 46 25 51 32 51 C 39 51 45.5 46 45.5 35" stroke-width="2.2"/>
     </g>
+    <path d="M21 33 L13.5 29 L16 36 Z" fill="#C9A86A"/>
+    <ellipse cx="30" cy="31" rx="10" ry="8.5" fill="#F3E7C8"/>
+    <path d="M24.5 30 Q31 27.5 37 31.5 Q31.5 35.5 24.5 32 Z" fill="#C9A86A"/>
+    <path d="M40 28.8 L46 30.4 L40 32.4 Z" fill="#E3A24A"/>
+    <circle cx="36.3" cy="28" r="1.7" fill="#5B3E8E"/>
   </g>
   <text x="80" y="47" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="38" font-weight="600" letter-spacing="-0.5">
-    <tspan fill="#ECE5D8">Remy</tspan><tspan fill="#8FAE8A">Nest</tspan>
+    <tspan fill="#ECE5D8">Remy</tspan><tspan fill="#C9A86A">Nest</tspan>
   </text>
 </svg>

@@ -6,14 +6,14 @@
  *   npm i -D sharp
  *   node scripts/generate-brand-assets.mjs
  *
- * Outputs (all derived from public/brand/logo-mark-dark.svg = sand arcs + gold egg
- * on a transparent ground, composited onto the brand sage):
+ * Outputs (all derived from public/brand/logo-mark-dark.svg = the Remy Bird cream/gold
+ * mark on a transparent ground, composited onto the brand PURPLE):
  *   public/icon-192.png, public/icon-512.png            (true-square PWA, replaces the broken 1536x1024 dups)
  *   public/brand/icons/maskable-192.png, maskable-512.png (PWA maskable, safe-zone padded)
  *   public/brand/store/app-store-icon-1024.png          (iOS App Store — opaque, NOT pre-rounded; iOS masks)
  *   public/brand/store/play-icon-512.png                (Play full)
  *   public/brand/store/play-adaptive-foreground-432.png (transparent; mark in inner 66%)
- *   public/brand/store/play-adaptive-background-432.png (solid sage)
+ *   public/brand/store/play-adaptive-background-432.png (solid purple)
  *   public/brand/icons/favicon-16/32/48.png             (favicon PNGs; .ico via a png-to-ico step)
  *
  * After running: drop the iOS 1024 into ios AppIcon, run `npx @capacitor/assets generate`
@@ -32,12 +32,12 @@ const out = (p) => {
   return f;
 };
 
-const SAGE = { r: 0x4f, g: 0x6b, b: 0x5b, alpha: 1 };
+const GROUND = { r: 0x5b, g: 0x3e, b: 0x8e, alpha: 1 }; // Remy Bird purple (purpleDeep #5B3E8E)
 const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
-const MARK = readFileSync(brand("logo-mark-dark.svg")); // sand arcs + gold egg, transparent
+const MARK = readFileSync(brand("logo-mark-dark.svg")); // Remy Bird (cream/gold), transparent
 
-/** Render the mark centered in a `size` square; `bg` SAGE for app icons, TRANSPARENT for foregrounds. */
-async function icon(size, file, { bg = SAGE, scale = 0.72 } = {}) {
+/** Render the mark centered in a `size` square; `bg` GROUND for app icons, TRANSPARENT for foregrounds. */
+async function icon(size, file, { bg = GROUND, scale = 0.72 } = {}) {
   const m = Math.round(size * scale);
   const mark = await sharp(MARK, { density: 512 })
     .resize(m, m, { fit: "contain", background: TRANSPARENT })
@@ -64,7 +64,7 @@ await icon(512, "public/brand/icons/maskable-512.png", { scale: 0.6 });
 await icon(1024, "public/brand/store/app-store-icon-1024.png");
 await icon(512, "public/brand/store/play-icon-512.png");
 await icon(432, "public/brand/store/play-adaptive-foreground-432.png", { bg: TRANSPARENT, scale: 0.62 });
-await solid(432, "public/brand/store/play-adaptive-background-432.png", SAGE);
+await solid(432, "public/brand/store/play-adaptive-background-432.png", GROUND);
 for (const s of [16, 32, 48]) await icon(s, `public/brand/icons/favicon-${s}.png`, { scale: 0.78 });
 
 console.log("\nDone. Next: png-to-ico for favicon.ico, wire native icons via @capacitor/assets, cap sync, delete the old non-square dups.");

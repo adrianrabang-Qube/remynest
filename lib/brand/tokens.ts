@@ -3,11 +3,13 @@
  * geometry. Imported by the Next.js asset routes (app/icon.tsx, app/apple-icon.tsx,
  * app/opengraph-image.tsx) and mirrored by tailwind.config.js + app/globals.css.
  *
- * TWO-TIER IDENTITY (authoritative — see CLAUDE.md / docs/brand/brand-guidelines.md):
- *   PRODUCT/BRAND  = sage / sand / gold  → logo, app icon, favicon, OG, all UI chrome.
- *   COMPANION/REMY = purple + gold pendant → the in-app avatar/chat ONLY (kept here
- *                    only so the boundary is explicit; NEVER use on the product brand).
- *   Gold is the shared bridge token between the two systems.
+ * UNIFIED REMY BIRD IDENTITY (authoritative 2026-06-23 — supersedes the prior
+ * two-tier sage-product/purple-companion doctrine; see CLAUDE.md / brand-guidelines):
+ *   IDENTITY LAYER = purple / gold / navy → logo, app icon, favicon, OG, splash,
+ *     login/signup, marketing — the single Remy Bird brand (mascot = companion = mark).
+ *   APPLICATION CHROME = sage / sand / charcoal (BRAND below) → the in-app UI is
+ *     UNCHANGED. Do NOT recolor the app; the gold bridge lets purple identity coexist
+ *     with sage chrome (the purple companion sprite already sits in sage chrome).
  */
 
 // ---- Product/brand primitives (verbatim from tailwind.config.js) ------------
@@ -26,7 +28,27 @@ export const BRAND = {
   white: "#FFFFFF",
 } as const;
 
-// ---- Companion/Remy character palette (IN-APP ONLY — never on product brand) -
+// ---- Unified Remy Bird IDENTITY (logo / icon / favicon / OG / splash / auth) ----
+// First-class identity tier (purple + gold + navy). Read by the asset render routes.
+export const IDENTITY = {
+  purpleLight: "#8A6BD0", // bird ground (gradient top) — matches the companion sprite
+  purpleDeep: "#5B3E8E", // bird ground (gradient bottom)
+  bird: "#5B3E8E", // bird body on LIGHT surfaces
+  birdWing: "#8A6BD0",
+  birdCream: "#F3E7C8", // bird body on PURPLE grounds
+  gold: "#C9A86A", // nest rings / wordmark "Nest" / accents
+  pendant: "#E3A24A", // beak + heart highlight
+  cream: "#ECE5D8", // nest rings / wordmark on dark grounds
+  navy: "#2A2350", // wordmark "Remy"
+} as const;
+
+// WCAG: navy/sand ~12:1 (AA). Gold #C9A86A is a large-graphic/logo treatment only
+// (fails as body text — use goldInk for accent TEXT); the bird-on-purple icon is a
+// graphic, so gold is permitted there.
+
+// ---- Companion/Remy character palette (the validated in-app sprite — unchanged) -
+// Kept for the existing avatar/chat surfaces; the sprite (public/remy/remy-blueprint.png)
+// is FROZEN — do not recolor it.
 export const REMY = {
   purpleLight: "#8A6BD0",
   purpleDeep: "#5B3E8E",

@@ -16,35 +16,37 @@ hand-written family journal; Inter keeps it modern and effortless. Remy, our
 companion songbird, is the friendly family guide who helps each generation tend the
 nest.
 
-## 2. Two-tier identity (authoritative)
-The brand runs **two coexisting systems** that share **gold** as the bridge:
-- **Product / Brand = sage · sand · gold** → logo, app icon, favicon, OG, marketing,
-  all UI chrome.
-- **Companion / Remy = purple `#8A6BD0`→`#5B3E8E` + gold pendant `#E3A24A`** → the
-  **in-app avatar / chat / mood states ONLY**.
+## 2. Unified Remy Bird identity (authoritative, 2026-06-23 — supersedes the two-tier system)
+RemyNest has **ONE brand**: the **Remy Bird** (mascot = AI companion = product mark).
+Implemented **identity-only (Option 1)** — two LAYERS, gold is the bridge:
+- **IDENTITY LAYER = purple `#8A6BD0`→`#5B3E8E` · gold `#C9A86A` · navy `#2A2350`**
+  → logo, app icon, favicon, OG, splash, login/signup, marketing. The bird is the hero;
+  the nest survives as supporting **nest-rings** + a gold heart.
+- **APPLICATION CHROME = sage · sand · charcoal** → the in-app UI, **UNCHANGED**.
 
-**Rules:** the product logo is the sage **nest** mark (never the purple bird on the
-app icon). Do **not** recolor the validated in-app Remy sprite to sage. Do **not**
-put purple Remy on the product brand. A simplified geometric **brand Remy** (sage/
-gold, `public/brand/remy-mark.svg`) is the *secondary* character mark.
+**Rules:** the product mark is now the **purple/gold Remy Bird** (the bird app icon is
+correct — the old "never purple bird on the app icon" rule is **retired**). **Do NOT
+recolor the app** sage→purple (Option 2 is deferred post-launch). **Do NOT recolor the
+validated in-app Remy sprite** (`public/remy/remy-blueprint.png`) — it already IS the
+bird. Tokens: `IDENTITY` (identity) + `BRAND` (chrome) in `lib/brand/tokens.ts`.
 
-## 3. Logo system
-- **Primary mark:** a woven geometric **nest** (three concentric rounded-cap sage
-  arcs) cradling a gold egg/keepsake — `public/brand/logo-mark.svg`.
-- **Lockups:** horizontal (`logo-horizontal.svg`, default header), stacked
-  (`logo-stacked.svg`, login/OG), icon-only (`logo-mark.svg` / `logo-mark-reversed.svg`
-  for app icon + favicon).
-- **Wordmark:** "RemyNest" in **Fraunces** 600; optional two-tone — "Remy" charcoal
-  `#2F3E34`, "Nest" sage `#4F6B5B`.
-- **Variants:** full-color (sage + gold), charcoal mono, **reversed** (sand mark on
-  a sage fill — `logo-mark-reversed.svg`), gold-on-sage keepsake.
-- **Light vs dark package:** light = `logo-{mark,horizontal,stacked}.svg` (sage arcs,
-  two-tone wordmark) for light/sand surfaces. **Dark** = `logo-{mark,horizontal,
-  stacked}-dark.svg` (**sand `#ECE5D8` arcs + gold egg; wordmark "Remy" sand / "Nest"
-  moss `#8FAE8A`**) for dark surfaces — never the light logo on a dark field.
+## 3. Logo system (Remy Bird)
+- **Primary mark:** the **Remy Bird** — a gold/cream bird cradled in concentric gold
+  **nest-rings** with a gold heart above. On-light = purple bird + gold nest
+  (`public/brand/logo-mark.svg`); on-purple/app-icon = cream/gold bird on a purple tile
+  (`logo-mark-reversed.svg`). Raster master = `logo-mark-dark.svg` (cream/gold bird on
+  transparent — the generator composites it onto purple).
+- **Lockups:** horizontal (`logo-horizontal.svg`), stacked (`logo-stacked.svg`,
+  login/signup/OG), icon-only (`logo-mark*.svg`). Reusable React lockup for auth
+  surfaces = `components/brand/RemyBirdLogo.tsx`.
+- **Wordmark:** "RemyNest" in **Fraunces** 600 — **"Remy" navy `#2A2350`** + **"Nest"
+  gold `#C9A86A`** (a large-graphic/logo treatment — exempt from the gold-as-text rule).
+- **Light vs dark package:** light = `logo-{mark,horizontal,stacked}.svg` (purple bird,
+  navy/gold wordmark). **Dark** = `logo-{mark,horizontal,stacked}-dark.svg` (cream bird,
+  cream "Remy" / gold "Nest") for dark surfaces.
 - **Clear-space:** ≥ the x-height of the wordmark "e" (≥25% of the mark width for
-  icon-only). **Min size:** horizontal 120px wide; icon 32px; favicon uses the
-  simplified two-arc nest (`app/icon.svg`).
+  icon-only). **Min size:** horizontal 120px wide; icon 32px; favicon is a bold
+  simplified bird (`app/icon.svg`). Splash master = `public/brand/splash.svg`.
 - **Misuse:** never set the wordmark in gold (fails contrast), never stretch/recolor
   outside the variants, never place the mark on a busy/low-contrast field.
 
@@ -121,6 +123,16 @@ Elder-care first: 17px body floor, generous line-height (≥1.5), high text cont
 Type/zoom (`rem`, viewport zoom enabled), `prefers-reduced-motion`.
 
 ## 9. Changelog / decisions
+- **2026-06-23 (UNIFIED REMY BIRD — supersedes the two-tier system)** — RemyNest now
+  has ONE brand: the purple/gold Remy Bird (mascot = companion = product mark),
+  **identity-only (Option 1)** — flipped the SVG logo system, `app/icon.svg`,
+  `apple-icon.tsx`, `opengraph-image.tsx`, login/signup (`RemyBirdLogo`), `IDENTITY`
+  tokens, the splash master, and the raster generator (composites onto **purple**) to
+  the bird. **Application chrome (sage/sand/charcoal) is UNCHANGED — no app recolor**
+  (Option 2 deferred). Tagline on OG → "A safe place for your memories." **Operator/
+  designer follow-ups:** run the raster generator + native icon/splash wiring, replace
+  `public/logo.png` (still sage), polished bird illustration. Retired the "purple is
+  companion-only / sage nest is the product" rule.
 - **2026-06-23** — System established: two-tier identity, nest logo, dark-theme
   tokens+mechanism, WCAG fixes (gold-as-text barred, body-text + focus contrast),
   type scale.

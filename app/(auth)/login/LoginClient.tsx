@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { haptic, hapticWarning } from "@/lib/haptics";
+import RemyBirdLogo from "@/components/brand/RemyBirdLogo";
 
 export default function LoginClient() {
   const supabase = createClient();
@@ -40,7 +41,8 @@ export default function LoginClient() {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Login</h1>
+      <RemyBirdLogo className="mb-6 mt-2" />
+      <h1 className="text-xl font-semibold mb-4 text-center">Welcome back</h1>
 
       <form onSubmit={handleLogin}>
         <input
@@ -69,7 +71,7 @@ export default function LoginClient() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-black px-4 py-2.5 font-medium text-white transition active:scale-[.98] active:opacity-90 disabled:opacity-70 disabled:active:scale-100"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-sage px-4 py-2.5 font-medium text-white transition hover:bg-sage-deep active:scale-[.98] active:opacity-90 disabled:opacity-70 disabled:active:scale-100"
         >
           {loading && (
             <span
