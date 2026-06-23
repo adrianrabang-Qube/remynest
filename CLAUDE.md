@@ -238,11 +238,15 @@ page · marketing site · App-Store + Google-Play assets · download redirects �
 pages · subscription pages; **(4) App-Store launch prep** — screenshots · metadata ·
 Privacy/Terms · **Restore Purchases** flow · subscription disclosures · launch
 checklist.
-**POST-LAUNCH — DEFERRED, do NOT implement now:** Voice-recording memories, voice
+**POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, reaffirmed 2026-06-23):**
+the **Remy Live Companion** and its emotional-animation system in **ALL forms** —
+**Rive animations, Lottie animations, emotional state machines, live reactions**,
+animation triggers, companion framework, future-emotion planning (do **not** even
+evaluate Rive vs Lottie or design a state machine); **Voice-recording memories, voice
 transcription, AI memory summaries, Semantic Search V2, advanced AI memory
-intelligence, **audio / document / PDF uploads**, and the **Remy live emotional
-animation system** (the Phase-1 animated-Remy plan is shelved until post-launch — do
-not start it).
+intelligence**; and **audio / document / PDF uploads**. None of these are started
+pre-launch. **Current priorities are launch-only (1) Storage Subscription System →
+(2) Media Expansion → (3) Productization → (4) Launch Readiness.**
 **Reminders + push are production-stable and FROZEN** (reaffirmed): do not modify
 reminder scheduling, push-notification delivery, OneSignal integration, iOS
 notification permissions, or the notification infrastructure.

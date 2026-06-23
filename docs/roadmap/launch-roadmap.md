@@ -35,10 +35,12 @@ The memory-media + storage + branding work is largely **DONE** (11 unpushed comm
 - [ ] Screenshots · metadata · **Restore Purchases** flow · subscription disclosures ·
   launch checklist
 
-## ⛔ POST-LAUNCH — DEFERRED (do NOT implement now)
-Voice-recording memories · voice transcription · AI memory summaries · Semantic Search
-V2 · advanced AI memory intelligence · **audio/document/PDF uploads** · **Remy live
-emotional animation system**.
+## ⛔ POST-LAUNCH — DEFERRED (do NOT implement now; reaffirmed 2026-06-23)
+**Remy Live Companion** + emotional animation in ALL forms (**Rive animations · Lottie
+animations · emotional state machines · live reactions** · animation triggers ·
+companion framework — do not even evaluate Rive vs Lottie) · Voice-recording memories ·
+voice transcription · AI memory summaries · Semantic Search V2 · advanced AI memory
+intelligence · **audio/document/PDF uploads**.
 
 ## 🔒 FROZEN
 Reminders · push delivery · OneSignal · iOS notification permissions · notification infra.

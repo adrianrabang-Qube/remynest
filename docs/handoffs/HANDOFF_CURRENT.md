@@ -2288,9 +2288,12 @@ bullets above). Launch roadmap, in order:
    subscription disclosures · launch checklist.
 
 **FROZEN (reaffirmed):** reminders · push delivery · OneSignal · iOS notification
-permissions · notification infra. **POST-LAUNCH DEFERRED — do NOT start:** voice
-memories, transcription, AI summaries, Semantic Search V2, advanced AI intelligence,
-audio/document/PDF uploads, **Remy live emotional animation system**. Open launch-blocker
+permissions · notification infra. **POST-LAUNCH DEFERRED — do NOT start (reaffirmed
+2026-06-23):** the **Remy Live Companion** + emotional-animation system in ALL forms
+(**Rive/Lottie animations, emotional state machines, live reactions**, animation
+triggers, companion framework — do not even evaluate Rive vs Lottie); voice memories,
+transcription, AI summaries, Semantic Search V2, advanced AI intelligence; and
+audio/document/PDF uploads. Open launch-blocker
 product items (unchanged): fix `/api/stripe/cancel`; fix/remove broken OneSignal
 endpoints; confirm Sign in with Apple; Sentry env in Vercel; Android build + store
 submission. **Apple 3.1.1 native purchase-gating is implemented** for the storage upgrade
