@@ -10,6 +10,7 @@ import {
   Sparkles,
   Library,
   Search,
+  Users,
 } from "lucide-react";
 
 /** Where an item sits in the mobile hybrid nav. */
@@ -36,6 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/home", label: "Home", icon: Home, mobile: "primary" },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, mobile: "primary" },
   { href: "/memories", label: "Memories", icon: BookHeart, mobile: "primary" },
+  { href: "/profiles", label: "People", icon: Users, mobile: "drawer" },
   { href: "/search", label: "Search", icon: Search, mobile: "drawer" },
   { href: "/remy", label: "Ask Remy", icon: MessageCircle, mobile: "drawer" },
   { href: "/memories/new", label: "New", icon: Plus, mobile: "new" },
