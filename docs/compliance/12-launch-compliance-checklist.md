@@ -13,7 +13,7 @@ until its blockers (🔴) are complete.
 - [ ] Splash/launch screen finalised
 - [ ] Camera, Photo Library, Notifications work on device
 - [ ] Push notifications deliver via OneSignal (APNs key configured)
-- [ ] **Sign in with Apple** works (required because Google login is offered) 🔴
+- [ ] **Email/password sign-in** works on device (no third-party login — Sign in with Apple is **not required**, 4.8 N/A) 🔴
 - [ ] Supabase **session persists** across app restarts in the WebView wrapper
 - [ ] Uploads (photo/video) work from a real device
 
@@ -52,9 +52,9 @@ until its blockers (🔴) are complete.
 - [ ] Category = Lifestyle (not Medical); age rating questionnaire completed
 - [ ] Support URL + email live and reachable
 
-**Subscriptions (if applicable)**
-- [ ] IAP products configured; price/period/auto-renew disclosed
-- [ ] Restore Purchases implemented; no external payment links for digital goods
+**Subscriptions (web-only Stripe — no native purchase)**
+- [ ] Native exposes NO purchase UI (Apple 3.1.1 gating via `lib/platform.ts`); no Apple IAP
+- [ ] No Restore Purchases (N/A — no native purchases); no external / "subscribe on the web" payment links or steering on native (3.1.3)
 
 **Anti-rejection gate (from `09-...md`)**
 - [ ] Native value demonstrated (anti-4.2) 🔴

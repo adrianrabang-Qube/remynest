@@ -79,9 +79,11 @@ legal bases and sub-processors.
 > (opt-in reminders), Files (handle/export user content). All requested just-in-time with
 > clear purpose strings. Microphone is **not** used in this version.
 >
-> **Subscriptions (if applicable):** Premium features are sold via in-app purchase;
-> restore-purchases is supported; subscription terms, Privacy Policy and Terms links are
-> in-app and in the listing.
+> **Subscriptions:** Premium storage is sold **web-only via Stripe** (no Apple IAP / no
+> in-app purchase). On native, the app shows a neutral Premium state with **no purchase
+> UI, no checkout, and no external payment links** (Apple 3.1.1/3.1.3 gating). Restore
+> Purchases is N/A (no native purchases). Privacy Policy + Terms links are in-app and in
+> the listing.
 >
 > **Architecture note (for completeness):** The mobile app is a Capacitor wrapper that
 > renders RemyNest's responsive web experience and adds native capabilities (push

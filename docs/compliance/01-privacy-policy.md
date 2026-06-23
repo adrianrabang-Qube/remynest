@@ -34,14 +34,12 @@ may act as a **processor** for that account holder in respect of that content.
 
 We collect the following categories of personal data:
 
-**a) Account and identity data.** Your name and email address; authentication
-identifiers; and, where you sign in with Google or Apple, the unique identifier and
-basic profile information those providers return (for "Sign in with Apple", this may be
-a private relay email).
+**a) Account and identity data.** Your name and email address and authentication
+identifiers. RemyNest uses **email/password sign-in only**; we do not offer or use any
+third-party / social login (no Google or Apple sign-in).
 
 **b) Authentication and credentials.** A securely hashed password (we never store
-passwords in plain text) or OAuth tokens from Google/Apple. We do not receive your
-Google or Apple password.
+passwords in plain text). We do not receive or store any third-party login credentials.
 
 **c) User-generated content.** Memories, notes, text, photos, videos and associated
 metadata that you create or upload; in future, voice recordings and voice
