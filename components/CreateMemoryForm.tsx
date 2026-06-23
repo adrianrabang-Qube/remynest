@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   buildMemoryDate,
@@ -85,6 +86,7 @@ function normalizeInput(
 
 export default function CreateMemoryForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const requestIdRef = useRef(
     crypto.randomUUID()
@@ -366,6 +368,12 @@ export default function CreateMemoryForm() {
 
         setFiles([]);
 
+        // A new memory may have added attachments — refresh storage usage so the
+        // card/banner reflect it immediately (no storage-accounting change).
+        queryClient.invalidateQueries({
+          queryKey: ["storage-usage"],
+        });
+
         startTransition(() => {
           router.refresh();
         });
@@ -396,6 +404,7 @@ export default function CreateMemoryForm() {
       resolvedMemoryDate,
       files,
       router,
+      queryClient,
     ]
   );
 

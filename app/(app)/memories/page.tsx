@@ -693,6 +693,10 @@ const res = await fetch(
           activeProfileId,
         ],
       });
+      // Deleting a memory frees storage — refresh the usage card/banner immediately.
+      queryClient.invalidateQueries({
+        queryKey: ["storage-usage"],
+      });
     },
   });
 
