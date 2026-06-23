@@ -88,6 +88,32 @@ Apply the migration in the Supabase SQL editor (schema is dashboard-managed):
 statement backfills existing attachments. Until applied, the new code is dormant
 (no existing UI calls it).
 
+## Storage UI + upgrade experience (2026-06-23)
+- `lib/storage/format.ts` — pure client-safe `formatBytes` (no server imports).
+- `components/storage/useStorageUsage.ts` — react-query `GET /api/storage/usage`.
+- `components/storage/StorageUsageCard.tsx` — plan + used/limit/remaining + percent +
+  bar. `full` variant in **Settings** (`/settings` Storage section), `compact` widget
+  on the **Dashboard**. Upgrade CTA renders only when **not native**.
+- `components/storage/StorageFullModal.tsx` — surfaces the upload **HTTP 413
+  `{ error, quota }`** (current / limit / remaining / projected). Wired into the
+  memories page **create + edit** mutations and the dashboard **CreateMemoryForm**
+  (on 413 → `setStorageFull(quota)`); the optimistic rollback still runs.
+  `memories/new` sends JSON metadata only (no binary upload) so it never 413s.
+- `components/storage/StorageUpgradeModal.tsx` — reusable; **web** shows the storage
+  tier ladder and reuses **`POST /api/stripe/checkout {plan, interval}`** (PREMIUM/
+  FAMILY map to a Stripe price; STARTER has none → "Coming soon"). **No Stripe
+  backend change.**
+- `components/storage/ModalShell.tsx` — portaled-to-`document.body` overlay (WebKit
+  rule), Escape / click-outside / scroll-lock.
+
+**Apple 3.1.1 / 3.1.3 (authoritative):** every purchase entry point is gated by
+`useIsNativePlatform()` (render, hide-first) + `isNativePlatform()` (handler
+short-circuit). On native iOS there are **no plans, prices, checkout, external links,
+or "manage/subscribe on the web" steering text** — only a neutral free-up-space
+message. (The task's literal native example *"Manage your subscription on the web"*
+was intentionally **not** used — it would violate the 3.1.3 anti-steering rule.)
+
 ## Not in scope (future)
-Plan pricing / Stripe checkout; storage-plan mapping from billing; `storage_pools`
-membership tables; client-side pre-upload UI (usage meter / warning).
+Plan pricing changes / new Stripe products (e.g. a STARTER price); storage-plan
+mapping from billing (`resolveStorageTier` still defaults FREE); `storage_pools`
+membership tables + per-profile family reporting UI.

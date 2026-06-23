@@ -29,6 +29,7 @@ import DashboardHeader from "./components/DashboardHeader";
 import DashboardStats from "./components/DashboardStats";
 import DashboardAccountStatus from "./components/DashboardAccountStatus";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
+import StorageUsageCard from "@/components/storage/StorageUsageCard";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
 import DashboardFocus from "./components/DashboardFocus";
@@ -865,6 +866,9 @@ export default async function DashboardPage() {
             activeProfile?.profile_name
           }
         />
+
+        {/* STORAGE USAGE — compact widget */}
+        <StorageUsageCard variant="compact" />
 
         {/* ACCOUNT STATUS */}
         <DashboardAccountStatus

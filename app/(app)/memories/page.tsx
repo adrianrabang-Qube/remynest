@@ -19,6 +19,9 @@ import MemorySection from "@/components/memories/MemorySection";
 import { useIsNativePlatform } from "@/lib/platform";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
+import StorageFullModal, {
+  type UploadQuotaPayload,
+} from "@/components/storage/StorageFullModal";
 import {
   resolveEffectiveDate,
   effectiveSortValue,
@@ -88,6 +91,9 @@ function MemoriesPageContent() {
 
   const [showCreate, setShowCreate] =
     useState(false);
+
+  const [storageFull, setStorageFull] =
+    useState<UploadQuotaPayload | null>(null);
 
   const [editingMemory, setEditingMemory] =
     useState<Memory | null>(null);
@@ -368,17 +374,24 @@ const res = await fetch(
   }
 );
 
-      const responseData = await res.json();
-
       if (!res.ok) {
-        throw new Error(
-          responseData?.error ||
-            responseData?.details ||
-            "Failed to create memory"
-        );
+        let quota: UploadQuotaPayload | undefined;
+        let message = "Failed to create memory";
+        try {
+          const body = await res.json();
+          message = body?.error || body?.details || message;
+          if (res.status === 413) quota = body?.quota;
+        } catch {
+          /* non-JSON error body (e.g. platform body-size 413) */
+        }
+        const err = new Error(message) as Error & {
+          quota?: UploadQuotaPayload;
+        };
+        if (quota) err.quota = quota;
+        throw err;
       }
 
-      return responseData;
+      return res.json();
     },
 
     onMutate: async (newMemory) => {
@@ -427,6 +440,8 @@ const res = await fetch(
       _newMemory,
       context
     ) => {
+      const quota = (_err as Error & { quota?: UploadQuotaPayload }).quota;
+      if (quota) setStorageFull(quota);
       if (context?.previous) {
         queryClient.setQueryData(
           [
@@ -439,6 +454,15 @@ const res = await fetch(
       }
     },
 
+    onSuccess: () => {
+      // Close only on success — a quota 413 keeps the modal open so the draft +
+      // picked files survive for retry after the user frees space.
+      setShowCreate(false);
+      queryClient.invalidateQueries({
+        queryKey: ["storage-usage"],
+      });
+    },
+
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: [
@@ -447,8 +471,6 @@ const res = await fetch(
           activeProfileId,
         ],
       });
-
-      setShowCreate(false);
     },
   });
 
@@ -504,9 +526,22 @@ const res = await fetch(
       );
 
       if (!res.ok) {
-        throw new Error(
-          "Failed to update memory"
-        );
+        let quota: UploadQuotaPayload | undefined;
+        let message = "Failed to update memory";
+        if (res.status === 413) {
+          try {
+            const body = await res.json();
+            quota = body?.quota;
+            message = body?.error || message;
+          } catch {
+            /* ignore parse errors */
+          }
+        }
+        const err = new Error(message) as Error & {
+          quota?: UploadQuotaPayload;
+        };
+        if (quota) err.quota = quota;
+        throw err;
       }
     },
 
@@ -550,6 +585,8 @@ const res = await fetch(
       _updated,
       context
     ) => {
+      const quota = (_err as Error & { quota?: UploadQuotaPayload }).quota;
+      if (quota) setStorageFull(quota);
       if (context?.previous) {
         queryClient.setQueryData(
           [
@@ -562,6 +599,14 @@ const res = await fetch(
       }
     },
 
+    onSuccess: () => {
+      // Close only on success — a quota 413 keeps the edit modal open for retry.
+      setEditingMemory(null);
+      queryClient.invalidateQueries({
+        queryKey: ["storage-usage"],
+      });
+    },
+
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: [
@@ -570,8 +615,6 @@ const res = await fetch(
           activeProfileId,
         ],
       });
-
-      setEditingMemory(null);
     },
   });
 
@@ -889,6 +932,12 @@ const sortedMemories = [
           }}
         />
       )}
+
+      {/* Storage-full (HTTP 413 from upload quota enforcement) */}
+      <StorageFullModal
+        quota={storageFull}
+        onClose={() => setStorageFull(null)}
+      />
     </div>
   );
 }

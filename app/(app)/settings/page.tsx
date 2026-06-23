@@ -6,6 +6,7 @@ import AccountInformationSection from "@/components/profile/sections/AccountInfo
 import ExportDataSection from "@/components/profile/sections/ExportDataSection";
 import PrivacyLinksSection from "@/components/profile/sections/PrivacyLinksSection";
 import DeleteAccountSection from "@/components/profile/sections/DeleteAccountSection";
+import StorageUsageCard from "@/components/storage/StorageUsageCard";
 import { resolveAccountIdentity } from "@/lib/account-identity";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,12 @@ export default async function SettingsPage() {
             firstName={firstName}
             preferredName={preferredName}
           />
+        </ProfileSection>
+
+        <ProfileSection id="storage" title="Storage">
+          <div className="rounded-2xl border border-sand-deep/70 bg-white p-5 shadow-soft">
+            <StorageUsageCard variant="full" />
+          </div>
         </ProfileSection>
 
         <ProfileSection id="export-data" title="Export Your Data">

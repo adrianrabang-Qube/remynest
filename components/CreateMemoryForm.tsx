@@ -18,6 +18,9 @@ import {
 } from "@/lib/memories/memory-date";
 
 import AttachmentManager from "@/components/memories/AttachmentManager";
+import StorageFullModal, {
+  type UploadQuotaPayload,
+} from "@/components/storage/StorageFullModal";
 
 const MEMORY_FORM_TAG =
   "create-memory-form";
@@ -117,6 +120,8 @@ export default function CreateMemoryForm() {
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
+  const [storageFull, setStorageFull] =
+    useState<UploadQuotaPayload | null>(null);
 
   const [files, setFiles] =
     useState<File[]>([]);
@@ -321,10 +326,14 @@ export default function CreateMemoryForm() {
             }
           );
 
-          setErrorMessage(
-            data.error ||
-              "Failed to create memory"
-          );
+          if (response.status === 413 && data?.quota) {
+            setStorageFull(data.quota as UploadQuotaPayload);
+          } else {
+            setErrorMessage(
+              data.error ||
+                "Failed to create memory"
+            );
+          }
 
           return;
         }
@@ -554,6 +563,11 @@ export default function CreateMemoryForm() {
           {errorMessage}
         </div>
       )}
+
+      <StorageFullModal
+        quota={storageFull}
+        onClose={() => setStorageFull(null)}
+      />
 
       <button
         type="submit"
