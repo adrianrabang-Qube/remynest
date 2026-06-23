@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
+
 import { inviteCaregiver } from "@/app/(app)/dashboard/actions";
-import type { BillingPlan } from "@/lib/billing/plans";
-import UpgradeModal from "@/components/UpgradeModal";
+import { BILLING_PLANS } from "@/lib/billing/plans";
+import { useIsNativePlatform } from "@/lib/platform";
+import { useStorageUsage } from "@/components/storage/useStorageUsage";
 
 interface InviteCaregiverFormProps {
   memoryProfileId: string;
@@ -12,48 +15,73 @@ interface InviteCaregiverFormProps {
 export default function InviteCaregiverForm({
   memoryProfileId,
 }: InviteCaregiverFormProps) {
+  const { data: usage } = useStorageUsage();
+  const native = useIsNativePlatform();
+
+  // ENTITLEMENT GATE — checked BEFORE the form renders. Caregiver collaboration is a
+  // Family-plan feature; never show a fully-enabled invite form to a user who can't
+  // use it (Apple 2.1 completeness) and never let them reach a submit dead-end.
+  // Default-closed while usage is loading.
+  const hasAccess =
+    usage != null &&
+    BILLING_PLANS[usage.tier]?.caregiverCollaboration === true;
+
   const [email, setEmail] = useState("");
-  const [relationshipType, setRelationshipType] =
-    useState("family");
-
-  const [accessLevel, setAccessLevel] =
-    useState("full");
-
+  const [relationshipType, setRelationshipType] = useState("family");
+  const [accessLevel, setAccessLevel] = useState("full");
   const [message, setMessage] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  const [showUpgrade, setShowUpgrade] =
-    useState(false);
-  const [upgradePlan, setUpgradePlan] =
-    useState<BillingPlan>("FREE");
+  if (!hasAccess) {
+    // Native (Apple 3.1.1/3.1.3): informational only — no purchase UI, no external
+    // link, no "subscribe on the web" steering. Web: an in-app upgrade path.
+    return (
+      <div className="mt-4 rounded-xl border border-sand-deep/60 bg-white p-4">
+        <h3 className="font-semibold text-charcoal">Caregiver Collaboration</h3>
+        <p className="mt-1 text-sm text-charcoal-soft">
+          Invite family members and caregivers to collaborate inside a shared care
+          space.
+        </p>
+        {native ? (
+          <p className="mt-2 text-xs text-charcoal-muted">
+            Available on the Family plan.
+          </p>
+        ) : (
+          <Link
+            href="/account/subscription"
+            className="mt-3 inline-flex rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white transition hover:bg-sage-deep"
+          >
+            See plans
+          </Link>
+        )}
+      </div>
+    );
+  }
 
-  const [isPending, startTransition] =
-    useTransition();
-
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setMessage("");
 
     startTransition(async () => {
       try {
-        const result =
-          await inviteCaregiver({
-            email,
-            relationshipType,
-            accessLevel,
-            memoryProfileId,
-          });
+        const result = await inviteCaregiver({
+          email,
+          relationshipType,
+          accessLevel,
+          memoryProfileId,
+        });
 
-        // Entitlement gate — open the upgrade flow instead of showing an error.
+        // Defensive only — the pre-gate above means entitled users reach this. If the
+        // server still reports an entitlement gap, show a neutral message (no modal,
+        // no native dead-end).
         if (
           result &&
           "code" in result &&
           result.code === "UPGRADE_REQUIRED"
         ) {
-          setUpgradePlan(result.plan);
-          setShowUpgrade(true);
+          setMessage(
+            "Caregiver collaboration is available on the Family plan."
+          );
           return;
         }
 
@@ -62,128 +90,66 @@ export default function InviteCaregiverForm({
           return;
         }
 
-        setMessage(
-          "✅ Invite sent successfully"
-        );
-
+        setMessage("✅ Invite sent successfully");
         setEmail("");
       } catch (err) {
         console.error(err);
-
-        setMessage(
-          "❌ Failed to send invite"
-        );
+        setMessage("❌ Failed to send invite");
       }
     });
   }
 
   return (
     <div className="mt-4 rounded-xl border p-4 bg-gray-50">
-      <h3 className="font-semibold mb-4">
-        Invite Access
-      </h3>
+      <h3 className="font-semibold mb-4">Invite Access</h3>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-lg border px-4 py-2"
           required
         />
 
         <select
           value={relationshipType}
-          onChange={(e) =>
-            setRelationshipType(
-              e.target.value
-            )
-          }
+          onChange={(e) => setRelationshipType(e.target.value)}
           className="w-full rounded-lg border px-4 py-2"
         >
-          <option value="family">
-            Family
-          </option>
-
-          <option value="caregiver">
-            Caregiver
-          </option>
-
-          <option value="doctor">
-            Doctor
-          </option>
-
-          <option value="friend">
-            Friend
-          </option>
-
-          <option value="support_worker">
-            Support Worker
-          </option>
-
-          <option value="case_manager">
-            Case Manager
-          </option>
-
-          <option value="emergency_contact">
-            Emergency Contact
-          </option>
-
-          <option value="other">
-            Other
-          </option>
+          <option value="family">Family</option>
+          <option value="caregiver">Caregiver</option>
+          <option value="doctor">Doctor</option>
+          <option value="friend">Friend</option>
+          <option value="support_worker">Support Worker</option>
+          <option value="case_manager">Case Manager</option>
+          <option value="emergency_contact">Emergency Contact</option>
+          <option value="other">Other</option>
         </select>
 
         <select
           value={accessLevel}
-          onChange={(e) =>
-            setAccessLevel(e.target.value)
-          }
+          onChange={(e) => setAccessLevel(e.target.value)}
           className="w-full rounded-lg border px-4 py-2"
         >
-          <option value="read">
-            Read Only
-          </option>
-
-          <option value="full">
-            Full Access
-          </option>
-
-          <option value="admin">
-            Admin
-          </option>
+          <option value="read">Read Only</option>
+          <option value="full">Full Access</option>
+          <option value="admin">Admin</option>
         </select>
 
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-black text-white px-4 py-2"
+          className="rounded-lg bg-sage text-white px-4 py-2 transition hover:bg-sage-deep disabled:opacity-60"
         >
-          {isPending
-            ? "Inviting..."
-            : "Send Invite"}
+          {isPending ? "Inviting..." : "Send Invite"}
         </button>
 
         {message && (
-          <p className="text-sm text-gray-700">
-            {message}
-          </p>
+          <p className="text-sm text-gray-700">{message}</p>
         )}
       </form>
-
-      <UpgradeModal
-        open={showUpgrade}
-        onClose={() => setShowUpgrade(false)}
-        currentPlan={upgradePlan}
-        reason="caregiver-collaboration"
-        requiredFeature="caregiverCollaboration"
-      />
     </div>
   );
 }
