@@ -26,6 +26,16 @@ function isVideo(typeOrMime?: string): boolean {
   return typeof typeOrMime === "string" && typeOrMime.startsWith("video");
 }
 
+// Pure reorder helper: a new array with the item moved from→to (no-op if out of range).
+// Order is byte-neutral — the storage ledger projects bytes per attachment, not position.
+function move<T>(arr: T[], from: number, to: number): T[] {
+  if (to < 0 || to >= arr.length) return arr;
+  const next = arr.slice();
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+}
+
 /**
  * Media picker with thumbnail/preview + per-item remove, shared by memory create
  * and edit. Photos preview as thumbnails; videos preview as a play tile (no
@@ -76,6 +86,8 @@ export default function AttachmentManager({
 
   const removeBtn =
     "absolute -right-1.5 -top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-base leading-none text-white shadow";
+  const moveBtn =
+    "flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm leading-none text-white shadow transition disabled:opacity-30";
   const tile =
     "relative aspect-square overflow-hidden rounded-lg bg-gray-100";
 
@@ -117,6 +129,32 @@ export default function AttachmentManager({
                     ×
                   </button>
                 ) : null}
+                {!disabled && onExistingChange && existingList.length > 1 ? (
+                  <div className="absolute inset-x-1 bottom-1 z-10 flex justify-between">
+                    <button
+                      type="button"
+                      aria-label="Move photo earlier"
+                      disabled={i === 0}
+                      onClick={() =>
+                        onExistingChange(move(existingList, i, i - 1))
+                      }
+                      className={moveBtn}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Move photo later"
+                      disabled={i === existingList.length - 1}
+                      onClick={() =>
+                        onExistingChange(move(existingList, i, i + 1))
+                      }
+                      className={moveBtn}
+                    >
+                      ›
+                    </button>
+                  </div>
+                ) : null}
               </div>
             );
           })}
@@ -148,6 +186,28 @@ export default function AttachmentManager({
                   >
                     ×
                   </button>
+                ) : null}
+                {!disabled && files.length > 1 ? (
+                  <div className="absolute inset-x-1 bottom-1 z-10 flex justify-between">
+                    <button
+                      type="button"
+                      aria-label="Move photo earlier"
+                      disabled={i === 0}
+                      onClick={() => onFilesChange(move(files, i, i - 1))}
+                      className={moveBtn}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Move photo later"
+                      disabled={i === files.length - 1}
+                      onClick={() => onFilesChange(move(files, i, i + 1))}
+                      className={moveBtn}
+                    >
+                      ›
+                    </button>
+                  </div>
                 ) : null}
               </div>
             );
