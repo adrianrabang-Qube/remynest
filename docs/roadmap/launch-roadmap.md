@@ -25,9 +25,13 @@ checkout→webhook.
 **Web funnel:** build `/pricing`, `/download` (+ wire the landing store buttons, no
 href today), resolve the `/terms` jurisdiction placeholder, populate legal company
 particulars + stand up mailboxes.
-**Brand rasters:** true-square PWA icons 192/512 (currently 1536×1024 dups), full iOS
-App Store icon ladder, App Store 6.7" screenshots (1290×2796), Play feature graphic
-(1024×500) + screenshots.
+**Brand rasters:** SVG masters + the 6 Remy states + the **generator script** now
+exist (`scripts/generate-brand-assets.mjs`, full spec in `docs/brand/asset-production.md`)
+→ remaining is the **operator run** `npm i -D sharp && node scripts/generate-brand-assets.mjs`
+(true-square PWA icons 192/512 [the current 1536×1024 dups are broken], App Store 1024,
+Play 512 + adaptive, maskable, favicon PNGs) + wire native icons (`@capacitor/assets` +
+`cap sync`) + delete the dups; then **store screenshots** (6.7″ 1290×2796 etc.) + the
+**Play feature graphic** (1024×500) + marketing graphics (📸/🎨).
 **Android:** `google-services.json` (FCM) · manifest perms (POST_NOTIFICATIONS,
 CAMERA, READ_MEDIA_IMAGES/VIDEO) · keystore + signed AAB.
 **Store submission:** reviewer demo account + sample data + App Review notes · ASC

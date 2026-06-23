@@ -38,11 +38,39 @@ gold, `public/brand/remy-mark.svg`) is the *secondary* character mark.
   `#2F3E34`, "Nest" sage `#4F6B5B`.
 - **Variants:** full-color (sage + gold), charcoal mono, **reversed** (sand mark on
   a sage fill — `logo-mark-reversed.svg`), gold-on-sage keepsake.
+- **Light vs dark package:** light = `logo-{mark,horizontal,stacked}.svg` (sage arcs,
+  two-tone wordmark) for light/sand surfaces. **Dark** = `logo-{mark,horizontal,
+  stacked}-dark.svg` (**sand `#ECE5D8` arcs + gold egg; wordmark "Remy" sand / "Nest"
+  moss `#8FAE8A`**) for dark surfaces — never the light logo on a dark field.
 - **Clear-space:** ≥ the x-height of the wordmark "e" (≥25% of the mark width for
   icon-only). **Min size:** horizontal 120px wide; icon 32px; favicon uses the
   simplified two-arc nest (`app/icon.svg`).
 - **Misuse:** never set the wordmark in gold (fails contrast), never stretch/recolor
   outside the variants, never place the mark on a busy/low-contrast field.
+
+## 3a. Remy avatar — character states
+Remy is the **in-app companion** (purple character system; gold is the bridge to the
+product brand). Geometric **brand-Remy** master = `public/brand/remy-mark.svg` (sage/
+gold), plus **6 static state assets** (no animation — animation is post-launch):
+
+| State | File | Cue (non-clinical) |
+|---|---|---|
+| Happy | `remy-happy.svg` | upward-arc eyes, cheeks, open smile |
+| Thinking | `remy-thinking.svg` | eyes glancing up, rising thought dots |
+| Listening | `remy-listening.svg` | wide attentive eyes, gold sound-waves |
+| Celebrating | `remy-celebrating.svg` | raised wings, sparkles, gold heart |
+| Concerned | `remy-concerned.svg` | **gentle** soft brows + slight tilt — never alarming |
+| Sleeping | `remy-sleeping.svg` | closed eyes, drifting Z's |
+
+**Usage:** ≥32px; the in-app sprite (`components/remy/avatar/*`, validated) is
+unchanged — these are the brand/static set. Refined *illustrated* versions are an
+illustrator pass (the geometric SVGs are launch-sufficient).
+
+## 3b. Spacing
+4px base grid · radii from `lib/brand/tokens.ts` (`lg 1rem`, `4xl 2rem`) · soft
+warm-tinted shadows (`shadow-soft`/`soft-lg`) · card padding 1.25–1.5rem · section
+rhythm `space-y-4` (mobile) / `space-y-8` (desktop) · touch targets ≥44×44px ·
+logo clear-space per §3.
 
 ## 4. Color tokens + accessibility
 **Primitives:** sage `#4F6B5B` / sage-deep `#3E5648` / moss `#8FAE8A`; sand `#F5F1EA`
@@ -95,5 +123,13 @@ Type/zoom (`rem`, viewport zoom enabled), `prefers-reduced-motion`.
 ## 9. Changelog / decisions
 - **2026-06-23** — System established: two-tier identity, nest logo, dark-theme
   tokens+mechanism, WCAG fixes (gold-as-text barred, body-text + focus contrast),
-  type scale. Pending follow-ups: raster exports (store/Play/social/PWA squares),
-  the staged 17px/scale migration across ~544 small-text sites, dark-UI rollout.
+  type scale.
+- **2026-06-23 (asset system)** — Added the **dark logo package**
+  (`logo-{mark,horizontal,stacked}-dark.svg`), **6 static Remy state SVGs**
+  (`remy-{happy,thinking,listening,celebrating,concerned,sleeping}.svg`), the
+  **raster generator** (`scripts/generate-brand-assets.mjs`), and the **asset
+  production spec** (`docs/brand/asset-production.md` — icon/store/marketing matrix +
+  audit). **Operator-pending (needs `sharp`/running app/designer):** run the raster
+  script (true-square PWA icons, App Store 1024, Play 512+adaptive, favicon PNGs),
+  capture store screenshots, illustrated marketing. The PWA `icon-192/512.png` +
+  `favicon.png` are currently **broken (1536×1024 non-square)** — the script fixes them.
