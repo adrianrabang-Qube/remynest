@@ -21,6 +21,15 @@ export default function Page() {
           Forgot your password?
         </Link>
       </div>
+      <div className="mx-auto max-w-md px-6 pt-3 text-sm text-charcoal-soft">
+        New to RemyNest?{" "}
+        <Link
+          href="/signup"
+          className="font-medium text-sage hover:text-sage-deep"
+        >
+          Create an account
+        </Link>
+      </div>
       <div className="mx-auto max-w-md px-6 pb-8 pt-6">
         <LegalLinks className="justify-center" />
       </div>
