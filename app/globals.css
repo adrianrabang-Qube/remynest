@@ -16,7 +16,24 @@
   --green: #4F6B5B;     /* Forest Sage */
   --moss: #8FAE8A;      /* Soft Moss */
 
+  --text-soft: #54655B; /* secondary text — AA on sand (5.5:1) */
+  --gold-ink: #7A5E22;  /* text-grade gold (links/accent-text) — AA on light */
   --radius: 20px;
+}
+
+/* Dark theme tokens — warm charcoal-green (NOT black/blue). MECHANISM ONLY:
+   defined + verified, applied via a `.dark` class — not flipped on broadly until
+   components are audited (a scoped follow-up). */
+.dark {
+  --bg: #15201A;
+  --card: #1E2A23;
+  --text: #ECE5D8;
+  --text-soft: #C2C9BE;
+  --muted: #94A096;
+  --accent: #DBC089;
+  --gold-ink: #DBC089;
+  --green: #8FAE8A;
+  --moss: #9CC096;
 }
 
 /* =========================
@@ -107,7 +124,7 @@ h2 {
 }
 
 p {
-  color: var(--muted);
+  color: var(--text);
   line-height: 1.7;
 }
 
@@ -234,12 +251,12 @@ p {
 }
 
 .input:focus {
-  border-color: var(--accent);
+  border-color: var(--green);
 
   background: white;
 
   box-shadow:
-    0 0 0 4px rgba(230,165,126,0.12);
+    0 0 0 4px rgba(79,107,91,0.18);
 }
 
 /* =========================

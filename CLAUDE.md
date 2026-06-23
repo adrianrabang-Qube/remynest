@@ -207,6 +207,26 @@ enforcement path — reuse `enforceUploadQuota`. **Migration is an operator step
 re-derive the ledger decisions or redesign the schema. See
 `docs/features/storage-ledger.md`.
 
+**Brand system (authoritative, 2026-06-23):** RemyNest has **two coexisting brand
+systems sharing GOLD as the bridge** — **(A) Product/Brand = sage `#4F6B5B` / sand
+`#F5F1EA` / gold `#C9A86A`** (logo, app icon, favicon, OG, all UI chrome — "NOT
+healthcare blue") and **(B) Companion/Remy = purple `#8A6BD0`→`#5B3E8E` + pendant
+`#E3A24A`** (the **in-app avatar/chat ONLY**). The product logo is the geometric
+**nest** mark (`public/brand/logo-*.svg`); a simplified sage/gold **brand Remy**
+(`remy-mark.svg`) is the secondary mark. **Do NOT** recolor the validated in-app Remy
+sprite (`components/remy/avatar/*`, `public/remy/remy-blueprint.png`) to sage, and
+**do NOT** put purple Remy on the product brand. Type = **Fraunces** (display/h1–h4)
++ **Inter** (body/UI); body floor **17px**. **A11y (authoritative):** **gold
+`#C9A86A` FAILS as text (1.9:1)** — accent/large-graphic only; use **gold-ink
+`#7A5E22`** for links/accent-text; gold buttons take **charcoal** ink; focus rings are
+**sage**, never gold. Tokens: `lib/brand/tokens.ts` + `tailwind.config.js` +
+`app/globals.css` (`:root` + `.dark`). **Dark theme is mechanism-only** (`darkMode:
+'class'` + `.dark` vars) — do **not** flip dark UI on broadly until components are
+audited. Icons/OG auto-wire via `app/{icon.svg,apple-icon.tsx,opengraph-image.tsx}`.
+See `docs/brand/brand-guidelines.md`. **Pending (staged):** raster exports
+(store/Play/social/true-square PWA), the 17px/scale migration across ~544 small-text
+sites, dark-UI rollout.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

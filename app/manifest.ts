@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Capture memories and ask Remy about your people, reminders, and life story.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f5f1e8",
-    theme_color: "#000000",
+    background_color: "#F5F1EA",
+    theme_color: "#4F6B5B",
     orientation: "portrait",
     icons: [
       {

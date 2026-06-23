@@ -1,11 +1,27 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Dark theme MECHANISM only (tokens defined in app/globals.css .dark block).
+  // Not flipped on broadly yet — a scoped component audit + toggle is a follow-up.
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
+      // RemyNest type scale (additive — default Tailwind sizes still available).
+      // Fraunces (font-serif) for display/h1-h4; Inter (font-sans) for body/UI.
+      fontSize: {
+        display: ["3.5rem", { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "600" }],
+        h1: ["2.5rem", { lineHeight: "1.1", letterSpacing: "-0.025em", fontWeight: "600" }],
+        h2: ["2rem", { lineHeight: "1.15", letterSpacing: "-0.02em", fontWeight: "600" }],
+        h3: ["1.625rem", { lineHeight: "1.2", letterSpacing: "-0.015em", fontWeight: "600" }],
+        h4: ["1.375rem", { lineHeight: "1.25", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "body-lg": ["1.1875rem", { lineHeight: "1.6" }],
+        body: ["1.0625rem", { lineHeight: "1.6" }],
+        small: ["0.9375rem", { lineHeight: "1.5", fontWeight: "500" }],
+        caption: ["0.8125rem", { lineHeight: "1.45", letterSpacing: "0.01em", fontWeight: "500" }],
+      },
       // RemyNest brand palette — Memory · Family · Trust · Legacy · Nature · Care.
       // Intentionally NOT healthcare blue.
       colors: {
@@ -19,8 +35,9 @@ module.exports = {
           deep: "#E7E0D3", // hairline borders / quiet fills
         },
         gold: {
-          DEFAULT: "#C9A86A", // Soft Gold — accent
+          DEFAULT: "#C9A86A", // Soft Gold — accent (FILLS/graphics only, fails as text)
           soft: "#E3D1A9",
+          ink: "#7A5E22", // text-grade gold for links/accent-text — AA on light (5.4:1)
         },
         moss: "#8FAE8A",
         charcoal: {

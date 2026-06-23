@@ -42,10 +42,8 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [SITE_OG_IMAGE],
   },
-  icons: {
-    icon: "/favicon.png",
-    apple: "/icon-192.png",
-  },
+  // Icons are auto-wired by the App-Router file conventions:
+  // app/favicon.ico, app/icon.svg, app/apple-icon.tsx, app/opengraph-image.tsx.
 };
 
 // `viewport-fit=cover` lets the app draw into the iOS safe-area insets so the
@@ -55,6 +53,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Brand sage for browser/PWA chrome (was the manifest's off-brand black). A dark
+  // media variant lands with the dark-UI rollout, not before it.
+  themeColor: "#4F6B5B",
 };
 
 // Body: Inter (clear, calm, Apple-like rhythm).

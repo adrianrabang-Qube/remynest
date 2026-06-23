@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="RemyNest">
+  <ellipse cx="32" cy="27" rx="8.5" ry="9.5" fill="#C9A86A"/>
+  <g fill="none" stroke="#4F6B5B" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 30 C 9 45 20 53 32 53 C 44 53 55 45 55 30"/>
+    <path d="M16 32 C 16 43 24 49 32 49 C 40 49 48 43 48 32"/>
+    <path d="M23 34 C 23 41 27 45 32 45 C 37 45 41 41 41 34"/>
+  </g>
+</svg>
