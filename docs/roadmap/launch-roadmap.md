@@ -4,24 +4,44 @@ Derived from current code reality (see MASTER_SPEC + HANDOFF_CURRENT). Web app i
 **live in production**; remaining work is hardening, fixing known breakages, and
 mobile store readiness.
 
-## 🎯 ACTIVE INITIATIVE (2026-06-21) — Memory Media Experience Upgrade
-Transform memories from single-image into a modern multi-media experience. Storage
-already accommodates it — `memories.attachments` is a **jsonb array of `{url, name,
-mimeType}`** (+ `cover_image_url`) — so this is primarily **UI + the create/edit
-pipeline** (**no schema redesign; backward compatible; no data-loss migration**).
-- [ ] **Phase 1 (current): multiple photos per memory** — create with N images; edit
-  add/remove images; preserve existing single-image memories.
-- [ ] **Phase 2: gallery previews** — Facebook-album-style condensed grids (2 → `[A][B]`;
-  3 → `[A]` / `[B][C]`; 4 → `[A][B]` / `[C][D]`; 5+ → `[A][B]` / `[C][+N]`) so a
-  multi-photo memory is obvious at a glance.
-- [ ] **Phase 3: detail carousel** — swipe left/right, pagination dots, mobile-first,
-  smooth transitions.
-- [ ] **Phase 4: full-screen viewer** — tap to expand, swipe through media,
-  pinch-to-zoom, hi-res.
-- [ ] **Fold in: memories/timeline image-decode OOM fix** — serve resized thumbnails
-  (`lib/memory-media-signing.ts`) + paginate the feeds (multi-photo amplifies the OOM).
-- **Future media (architect for, not now):** video, voice, audio, documents, PDFs —
-  addable via the `attachments` `mimeType` field without another attachment redesign.
+## 🎯 LAUNCH PRIORITY (authoritative, 2026-06-23) — App-Store launch, NOT advanced AI
+The memory-media + storage + branding work is largely **DONE** (11 unpushed commits on
+`main`; see HANDOFF). Focus shifts to **launch readiness**. Order:
+
+### 1. Memory-system completion
+- [x] Multi-photo uploads (create + edit)
+- [x] Storage accounting (`storage_ledger`, **byte-based, total-per-user**)
+- [~] Storage **usage UI** (settings + dashboard done; complete near-limit/warning states)
+- [x] Storage plan **enforcement** (`enforceUploadQuota` → HTTP 413)
+- [~] Storage-limit **upgrade modal** (`StorageFullModal` + `StorageUpgradeModal` done;
+  complete the end-to-end flow)
+- [ ] **Subscription integration** — map a Stripe subscription → a storage tier
+  (`resolveStorageTier` is a FREE stub); make storage plans purchasable; limit reads
+  from the real plan. **← the big remaining gap.**
+
+### 2. Media expansion
+- [x] Photo + video memories; mixed-media gallery; byte-based accounting across media.
+- [ ] **Revisit the 25 MB per-file cap** — storage is enforced by **total-per-user, NOT
+  per-file** (`lib/memory-media.ts`).
+- POST-LAUNCH: audio / voice / documents / PDF uploads (must reuse the SAME accounting).
+
+### 3. Productization
+- [~] Branding **foundation** done (tokens, SVG logos, app-icon/OG routes, guidelines)
+- [ ] Raster exports (App Store 1024 / Play 512 + adaptive / social / true-square PWA)
+- [ ] Landing page · marketing site · download redirects · subscription pages
+- [x] Legal pages (`/privacy`, `/terms`) exist
+
+### 4. App-Store launch prep
+- [ ] Screenshots · metadata · **Restore Purchases** flow · subscription disclosures ·
+  launch checklist
+
+## ⛔ POST-LAUNCH — DEFERRED (do NOT implement now)
+Voice-recording memories · voice transcription · AI memory summaries · Semantic Search
+V2 · advanced AI memory intelligence · **audio/document/PDF uploads** · **Remy live
+emotional animation system**.
+
+## 🔒 FROZEN
+Reminders · push delivery · OneSignal · iOS notification permissions · notification infra.
 
 ## ✅ Reminder system — DONE + PROTECTED (2026-06-21)
 Native local notifications + My Nest reminders + foreground banner + form reset are

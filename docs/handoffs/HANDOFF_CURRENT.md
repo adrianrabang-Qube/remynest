@@ -2253,33 +2253,59 @@ command center). **Reminder Lifecycle Sprint 1** is paused pending operator migr
   endpoints; schema not version-controlled; `npm audit` advisories.
 
 ## Active branch
-`main` (production; auto-deploys) — in sync with `origin/main`. The reminder system —
+`main` (production; auto-deploys) — **ahead of `origin/main` by 11 UNPUSHED commits**
+(multi-photo create/edit · gallery · thumbnail architecture · storage ledger · quota
+enforcement · storage usage UI + upgrade/full modals · Phase B video/mixed-media ·
+branding foundation). **Not pushed** — `main` auto-deploys to prod, so push is an
+operator decision; lint/build green on each. The reminder system —
 local notifications (`60362fd`/`36107ed`), My Nest reminders (`823e1a9`), foreground
 `willPresent` (`e329219`), form reset (`fa66306`) — is **shipped, on-device-validated,
 and production-ready** (TestFlight **Build 8** live; lock/background/foreground all
 PASS). `cognition-v2` was the throwaway prototype (stale UI) — **not** to be merged;
-`feat/capacitor-mobile` holds earlier mobile work (pushed, unmerged). **Next work lands
-on a feature branch for the Memory Media Experience Upgrade** (Phase 1: multi-photo
-memories — see Next priorities + `docs/roadmap/launch-roadmap.md`).
+`feat/capacitor-mobile` holds earlier mobile work (pushed, unmerged). **Next work =
+launch-readiness** (subscription/storage-plan integration → per-file-cap revisit →
+productization → App-Store prep — see Next priorities + `docs/roadmap/launch-roadmap.md`).
 
 ## Next priorities
-**P0 (new primary): Memory Media Experience Upgrade — Phase 1: multiple photos per
-memory** (create/edit add+remove images; preserve single-image memories; no data-loss
-migration; backward compatible; reuse the existing `memories.attachments` jsonb array +
-`cover_image_url`). Then Phase 2 gallery previews → Phase 3 detail carousel → Phase 4
-full-screen viewer; **fold in the memories/timeline image-decode OOM fix** (serve
-thumbnails via `lib/memory-media-signing.ts` + paginate). **Reminder system: DONE +
-PROTECTED — bug-fix only, investigation-first.** Other open product items (unchanged):
-fix `/api/stripe/cancel`; fix/remove broken OneSignal endpoints; confirm Sign in with
-Apple; Sentry env in Vercel; Android build + store submission.
+**Authoritative direction (2026-06-23): App-Store LAUNCH focus, NOT advanced AI** (see
+the CLAUDE.md "Launch priority" note). The memory/storage/media/branding work below is
+largely **IMPLEMENTED** (11 unpushed commits — see Recent commits / the per-feature
+bullets above). Launch roadmap, in order:
+1. **Memory-system completion** — multi-photo ✅ · storage accounting ✅ · storage usage
+   UI (settings + dashboard ✅; **complete** near-limit/warning states + any missing
+   surfaces) · storage plan enforcement ✅ · storage-limit **upgrade modal** ✅
+   (**complete** the end-to-end flow) · **⬅ subscription integration = the big gap**
+   (`resolveStorageTier` is a FREE stub — map a Stripe subscription → a storage tier;
+   make storage plans purchasable; storage limit reads from the real plan).
+2. **Media expansion** — photo + video ✅ · mixed-media gallery ✅ · byte-based accounting
+   across all media ✅. **Remaining: revisit the 25 MB per-file cap** — storage is
+   enforced by **TOTAL-per-user, not per-file** (`lib/memory-media.ts`). *(Audio / voice
+   / documents / PDF uploads are **POST-LAUNCH — do not build now**.)*
+3. **Productization** — branding foundation ✅; **remaining:** raster exports, landing
+   page, marketing site, App-Store + Google-Play assets, download redirects, subscription
+   pages. Legal pages (`/privacy`, `/terms`) **exist**.
+4. **App-Store launch prep** — screenshots · metadata · **Restore Purchases** flow ·
+   subscription disclosures · launch checklist.
+
+**FROZEN (reaffirmed):** reminders · push delivery · OneSignal · iOS notification
+permissions · notification infra. **POST-LAUNCH DEFERRED — do NOT start:** voice
+memories, transcription, AI summaries, Semantic Search V2, advanced AI intelligence,
+audio/document/PDF uploads, **Remy live emotional animation system**. Open launch-blocker
+product items (unchanged): fix `/api/stripe/cancel`; fix/remove broken OneSignal
+endpoints; confirm Sign in with Apple; Sentry env in Vercel; Android build + store
+submission. **Apple 3.1.1 native purchase-gating is implemented** for the storage upgrade
+flow (`useIsNativePlatform`/`isNativePlatform` gate every purchase entry point) — operator
+should still audit all remaining purchase CTAs (e.g. `BillingSection`).
 
 ## Blockers
 **Infrastructure: NONE** — the B1–B5 audit is **CLOSED** (B1/B2/B3/B5 done; B4 PITR
 deferred post-launch by accepted decision — see Completed work). The remaining V1
-gate is **product / App-Store work**. Top product-development blocker: **Apple
-Guideline 3.1.1** — the Stripe web-checkout upgrade flow runs inside the iOS WebView
-with no native-platform gate → near-certain App Store rejection. Ranked product plan
-is the operator's current focus (see Next priorities).
+gate is **product / App-Store work**. **Apple Guideline 3.1.1 — native purchase-gating
+is now IMPLEMENTED** for the storage upgrade flow (every purchase entry point gated by
+`useIsNativePlatform`/`isNativePlatform`; native shows a neutral state — no checkout,
+links, or "manage on the web" steering). Remaining V1 gate = **subscription/storage-plan
+integration + productization + App-Store prep** (see Next priorities). Operator should
+still audit any older purchase CTA (e.g. `BillingSection`) for the same gating.
 
 ## Recent commits
 - `fa66306` fix(reminders): reset Add Reminder form after create / workspace switch (form `key` remount) — **validated on device**

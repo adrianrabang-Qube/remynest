@@ -227,6 +227,35 @@ See `docs/brand/brand-guidelines.md`. **Pending (staged):** raster exports
 (store/Play/social/true-square PWA), the 17px/scale migration across ~544 small-text
 sites, dark-UI rollout.
 
+**Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
+focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
+roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage
+accounting [done] · storage usage UI · storage plan enforcement [done] · storage-limit
+**upgrade modal** · **subscription integration**; **(2) Media expansion** — photo +
+video [done] · mixed-media gallery [done] · storage accounting across all media types
+[done, byte-based]; **(3) Productization** — final branding/logo/app-icon · landing
+page · marketing site · App-Store + Google-Play assets · download redirects · legal
+pages · subscription pages; **(4) App-Store launch prep** — screenshots · metadata ·
+Privacy/Terms · **Restore Purchases** flow · subscription disclosures · launch
+checklist.
+**POST-LAUNCH — DEFERRED, do NOT implement now:** Voice-recording memories, voice
+transcription, AI memory summaries, Semantic Search V2, advanced AI memory
+intelligence, **audio / document / PDF uploads**, and the **Remy live emotional
+animation system** (the Phase-1 animated-Remy plan is shelved until post-launch — do
+not start it).
+**Reminders + push are production-stable and FROZEN** (reaffirmed): do not modify
+reminder scheduling, push-notification delivery, OneSignal integration, iOS
+notification permissions, or the notification infrastructure.
+**Storage model (authoritative):** enforcement is by **TOTAL STORAGE USED PER USER**
+(the purchased capacity), **NOT by individual file size**. The user *purchases storage
+capacity*. At the limit: uploads are **blocked** → the usage UI reflects **full**
+capacity → the **storage-upgrade modal** appears → the user is **directed to storage
+plans**. **All future media types (audio/voice/documents/PDF) MUST reuse the same
+byte-based storage-accounting architecture** (`storage_ledger` + `enforceUploadQuota`).
+**Implication:** the per-file **25 MB cap** in `lib/memory-media.ts` is at odds with
+the total-capacity model — revisit it (raise/remove, gating on **total quota** +
+Supabase object limits) as launch work, not a per-file gate.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;
