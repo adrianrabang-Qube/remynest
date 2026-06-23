@@ -207,32 +207,25 @@ enforcement path — reuse `enforceUploadQuota`. **Migration is an operator step
 re-derive the ledger decisions or redesign the schema. See
 `docs/features/storage-ledger.md`.
 
-**Brand system — UNIFIED REMY BIRD (authoritative, 2026-06-23; SUPERSEDES the prior
-two-tier sage-product/purple-companion doctrine):** RemyNest has **ONE brand** — the
-**Remy Bird** (mascot = AI companion = product mark = the same purple-and-gold bird).
-There is no separate "product brand". It is implemented **identity-only (Option 1):**
-- **IDENTITY LAYER = purple `#8A6BD0`→`#5B3E8E` + gold `#C9A86A` + navy `#2A2350`**
-  (logo, app icon, favicon, OG, splash, login/signup, marketing). The mark is the
-  **bird-in-nest-rings + gold heart**; lockups use navy "Remy" + gold "Nest"
-  (`public/brand/logo-*.svg`, the bird master = `logo-mark-dark.svg` which the raster
-  generator composites onto **purple**). Tokens: `IDENTITY` in `lib/brand/tokens.ts`.
-- **APPLICATION CHROME = sage `#4F6B5B` / sand `#F5F1EA` / charcoal `#2F3E34`** (the
-  `BRAND` tokens): the in-app UI is **UNCHANGED — do NOT recolor the app**. The full
-  sage→purple chrome recolor (Option 2) is **deferred post-launch** behind a component
-  + dark-theme audit; the gold bridge lets purple identity coexist with sage chrome.
-- **FROZEN:** the validated in-app Remy sprite (`components/remy/avatar/*`,
-  `public/remy/remy-blueprint.png`) — do **not** recolor it (it already IS the bird).
-Type = **Fraunces** (display) + **Inter** (body/UI); body floor **17px**. **A11y:**
-gold `#C9A86A` is **large-graphic/logo only** (fails as text — use **gold-ink
-`#7A5E22`** for accent text); navy/sand ~12:1; the bird-on-purple icon is a graphic so
-gold is permitted. Icons/OG auto-wire via `app/{icon.svg,apple-icon.tsx,
-opengraph-image.tsx}` (all read `IDENTITY`). See `docs/brand/brand-guidelines.md`.
-**Operator-pending (no `sharp`/native here):** run `scripts/generate-brand-assets.mjs`
-(→ bird-on-purple PWA/store/Play/maskable/favicon rasters), wire native iOS/Android
-icons + splash (`public/brand/splash.svg` master) via `@capacitor/assets` + `cap sync`,
-replace `public/logo.png` (raster, still sage), and a polished **designer bird
-illustration** can later supersede the geometric SVGs. **Do NOT** reintroduce the
-two-tier "purple is companion-only / sage nest is the product" rule.
+**Brand system (authoritative, 2026-06-23):** RemyNest has **two coexisting brand
+systems sharing GOLD as the bridge** — **(A) Product/Brand = sage `#4F6B5B` / sand
+`#F5F1EA` / gold `#C9A86A`** (logo, app icon, favicon, OG, all UI chrome — "NOT
+healthcare blue") and **(B) Companion/Remy = purple `#8A6BD0`→`#5B3E8E` + pendant
+`#E3A24A`** (the **in-app avatar/chat ONLY**). The product logo is the geometric
+**nest** mark (`public/brand/logo-*.svg`); a simplified sage/gold **brand Remy**
+(`remy-mark.svg`) is the secondary mark. **Do NOT** recolor the validated in-app Remy
+sprite (`components/remy/avatar/*`, `public/remy/remy-blueprint.png`) to sage, and
+**do NOT** put purple Remy on the product brand. Type = **Fraunces** (display/h1–h4)
++ **Inter** (body/UI); body floor **17px**. **A11y (authoritative):** **gold
+`#C9A86A` FAILS as text (1.9:1)** — accent/large-graphic only; use **gold-ink
+`#7A5E22`** for links/accent-text; gold buttons take **charcoal** ink; focus rings are
+**sage**, never gold. Tokens: `lib/brand/tokens.ts` + `tailwind.config.js` +
+`app/globals.css` (`:root` + `.dark`). **Dark theme is mechanism-only** (`darkMode:
+'class'` + `.dark` vars) — do **not** flip dark UI on broadly until components are
+audited. Icons/OG auto-wire via `app/{icon.svg,apple-icon.tsx,opengraph-image.tsx}`.
+See `docs/brand/brand-guidelines.md`. **Pending (staged):** raster exports
+(store/Play/social/true-square PWA), the 17px/scale migration across ~544 small-text
+sites, dark-UI rollout.
 
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch

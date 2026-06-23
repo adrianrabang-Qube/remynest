@@ -4,7 +4,6 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import LegalLinks from "@/components/legal/LegalLinks";
-import RemyBirdLogo from "@/components/brand/RemyBirdLogo";
 
 export default function SignupPage() {
   const supabase = createClient();
@@ -37,8 +36,7 @@ export default function SignupPage() {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <RemyBirdLogo className="mb-6 mt-2" />
-      <h1 className="text-xl font-semibold mb-4 text-center">Create your account</h1>
+      <h1 className="text-2xl font-semibold mb-4">Sign up</h1>
 
       <input
         className="border p-2 w-full mb-3"
@@ -60,7 +58,7 @@ export default function SignupPage() {
       <button
         onClick={handleSignup}
         disabled={loading}
-        className="rounded-lg bg-sage px-4 py-2.5 w-full font-medium text-white transition hover:bg-sage-deep disabled:opacity-70"
+        className="bg-black text-white px-4 py-2 w-full"
       >
         {loading ? "Creating account..." : "Sign up"}
       </button>
