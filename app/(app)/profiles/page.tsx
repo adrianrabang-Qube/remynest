@@ -98,10 +98,13 @@ export default async function ProfilesPage() {
       </header>
 
       {rows.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center text-sm text-charcoal-muted">
-          No care profiles yet. People you add or who are shared with you appear
-          here.
-        </p>
+        <div className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center">
+          <p className="text-sm text-charcoal-soft">No care profiles yet.</p>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            Add a person from the workspace menu at the top — or they&apos;ll appear
+            here when shared with you.
+          </p>
+        </div>
       ) : (
         <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white shadow-soft">
           {rows.map(({ person, understanding }) => (

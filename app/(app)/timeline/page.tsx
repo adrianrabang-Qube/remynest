@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
 import { signMemories } from "@/lib/memory-media-signing";
@@ -378,10 +380,17 @@ export default async function TimelinePage({
 
       {/* Empty State */}
       {!hasResults && (
-        <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6">
-          <p className="text-gray-500">
-            No memories matched your current AI timeline filters.
+        <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6 text-center">
+          <p className="text-charcoal-soft">No memories to show yet.</p>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            Add a memory to see it on your timeline.
           </p>
+          <Link
+            href="/memories/new"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+          >
+            Add a memory
+          </Link>
         </div>
       )}
 

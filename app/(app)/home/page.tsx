@@ -47,6 +47,26 @@ export default async function RemyHomePage() {
         </p>
       </header>
 
+      {/* First-run welcome: a clear next step when there are no memories yet. */}
+      {coverage.total === 0 && (
+        <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-5 shadow-soft">
+          <h2 className="text-lg font-semibold text-charcoal">
+            Welcome to RemyNest
+          </h2>
+          <p className="mt-1 text-sm text-charcoal-soft">
+            Start by adding your first memory — a photo, a note, or a moment you
+            want to keep.
+          </p>
+          <Link
+            href="/memories/new"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+          >
+            Add your first memory
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </section>
+      )}
+
       {/* Entry point into the dedicated companion experience */}
       <Link
         href="/remy"
