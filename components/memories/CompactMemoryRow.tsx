@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, FileText, MoreHorizontal } from "lucide-react";
 
+import MemoryGalleryPreview from "@/components/memories/MemoryGalleryPreview";
 import { formatMemoryDateLabel } from "@/lib/memories/memory-date";
 import { hapticWarning } from "@/lib/haptics";
 
@@ -56,8 +57,13 @@ export default function CompactMemoryRow({
 
   const attachmentCount = memory.attachments?.length ?? 0;
   const hasImages = !!memory.attachments?.some((a) => a.type === "image");
-  const imageCount =
-    memory.attachments?.filter((a) => a.type === "image").length ?? 0;
+  // Multi-image (or mixed image+video) memories show the condensed photo grid
+  // below the row — the same 2 / 3 / 4+ preview as the desktop card, on mobile.
+  const gridCount =
+    memory.attachments?.filter(
+      (a) => a.type === "image" || a.type === "video",
+    ).length ?? 0;
+  const showGrid = gridCount >= 2;
   const attachmentLabel =
     attachmentCount > 0
       ? `${attachmentCount} ${
@@ -87,52 +93,63 @@ export default function CompactMemoryRow({
     <li className="relative">
       <Link
         href={`/memories/${memory.id}`}
-        className="flex items-center gap-3 py-2.5 pl-3 pr-12 transition active:bg-sand/50"
+        className="block py-2.5 pl-3 pr-12 transition active:bg-sand/50"
       >
-        {/* Leading: thumbnail or fallback icon */}
-        {thumbnail ? (
-          <div className="relative h-12 w-12 shrink-0">
-            <Image
-              src={thumbErrored && thumbFallback ? thumbFallback : thumbnail}
-              alt=""
-              width={48}
-              height={48}
-              unoptimized
-              loading="lazy"
-              onError={() => {
-                if (thumbFallback) setThumbErrored(true);
-              }}
-              className="h-12 w-12 rounded-xl border border-sand-deep/50 object-cover"
-            />
-            {imageCount > 1 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-black/70 px-1 text-[10px] font-semibold text-white">
-                {imageCount}
-              </span>
+        <div className="flex items-center gap-3">
+          {/* Leading thumbnail/icon — hidden when the photo grid renders below */}
+          {!showGrid &&
+            (thumbnail ? (
+              <div className="relative h-12 w-12 shrink-0">
+                <Image
+                  src={
+                    thumbErrored && thumbFallback ? thumbFallback : thumbnail
+                  }
+                  alt=""
+                  width={48}
+                  height={48}
+                  unoptimized
+                  loading="lazy"
+                  onError={() => {
+                    if (thumbFallback) setThumbErrored(true);
+                  }}
+                  className="h-12 w-12 rounded-xl border border-sand-deep/50 object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+                <FileText className="h-5 w-5" aria-hidden />
+              </div>
+            ))}
+
+          {/* Center: title + preview + metadata */}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-charcoal">
+              {title}
+            </p>
+            {preview && (
+              <p className="truncate text-xs text-charcoal-soft">{preview}</p>
+            )}
+            {meta && (
+              <p className="mt-0.5 truncate text-[11px] text-charcoal-muted">
+                {meta}
+              </p>
             )}
           </div>
-        ) : (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
-            <FileText className="h-5 w-5" aria-hidden />
-          </div>
-        )}
 
-        {/* Center: title + preview + metadata */}
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-charcoal">{title}</p>
-          {preview && (
-            <p className="truncate text-xs text-charcoal-soft">{preview}</p>
-          )}
-          {meta && (
-            <p className="mt-0.5 truncate text-[11px] text-charcoal-muted">
-              {meta}
-            </p>
-          )}
+          <ChevronRight
+            className="ml-1 h-4 w-4 shrink-0 text-charcoal-muted"
+            aria-hidden
+          />
         </div>
 
-        <ChevronRight
-          className="ml-1 h-4 w-4 shrink-0 text-charcoal-muted"
-          aria-hidden
-        />
+        {/* Multi-image / mixed-media: condensed photo grid (2 side-by-side ·
+            3 large+stacked · 4+ grid with +N), surfaced on the mobile feed.
+            Tap → detail's full swipeable gallery. */}
+        {showGrid && (
+          <div className="mt-2">
+            <MemoryGalleryPreview attachments={memory.attachments} />
+          </div>
+        )}
       </Link>
 
       {/* Trailing: overflow actions (kept out of the link) */}
