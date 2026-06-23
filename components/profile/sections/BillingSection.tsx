@@ -27,6 +27,11 @@ export default function BillingSection() {
     billing?.plan ?? "FREE"
   ).toUpperCase() as BillingPlan;
 
+  // A FREE user has no subscription to manage/cancel. Gate Manage/Portal/Cancel on
+  // this so reviewers never see "FREE • inactive" next to a "Cancel Subscription"
+  // button (Apple 2.1/3.1.1). Upgrade UI stays available (web-only, native-gated).
+  const hasActiveSubscription = currentPlan !== "FREE";
+
   const PLAN_TIER_ORDER: BillingPlan[] = [
     "FREE",
     "PREMIUM",
@@ -183,9 +188,11 @@ export default function BillingSection() {
         <p className="mt-1 text-sm text-charcoal-muted">
           {billingLoading
             ? "Loading subscription..."
-            : `${billing?.plan ?? "No Plan"} • ${
-                billing?.status ?? "Unknown Status"
-              }`}
+            : hasActiveSubscription
+              ? `${BILLING_PLANS[currentPlan]?.displayName ?? currentPlan} plan${
+                  billing?.status ? ` · ${billing.status}` : ""
+                }`
+              : "Free plan"}
         </p>
         {billing?.renewalDate && (
           <p className="mt-1 text-xs text-neutral-400">
@@ -261,8 +268,9 @@ export default function BillingSection() {
         </div>
         )}
 
-        {/* Apple 3.1.1: the Stripe portal can expose upgrades/purchases — web only. */}
-        {!native && (billing?.customerPortalEnabled ? (
+        {/* Apple 3.1.1: the Stripe portal can expose upgrades/purchases — web only.
+            Only for an active subscription (FREE has nothing to manage). */}
+        {!native && hasActiveSubscription && (billing?.customerPortalEnabled ? (
           <button
             onClick={openCustomerPortal}
             disabled={loading}
@@ -326,26 +334,30 @@ export default function BillingSection() {
           </button>
         )}
 
-        <button
-          onClick={cancelSubscription}
-          disabled={loading}
-          className="
-            rounded-full
-            border
-            border-rose-200
-            px-5
-            py-2
-            text-sm
-            text-rose-600/90
-            transition
-            hover:bg-rose-50
-            disabled:opacity-50
-          "
-        >
-          {loading && action === "cancel"
-            ? "Cancelling..."
-            : "Cancel Subscription"}
-        </button>
+        {/* Cancellation (no redirect) may stay on native per Apple 3.1.1 — but only
+            when there is an active subscription to cancel. */}
+        {hasActiveSubscription && (
+          <button
+            onClick={cancelSubscription}
+            disabled={loading}
+            className="
+              rounded-full
+              border
+              border-rose-200
+              px-5
+              py-2
+              text-sm
+              text-rose-600/90
+              transition
+              hover:bg-rose-50
+              disabled:opacity-50
+            "
+          >
+            {loading && action === "cancel"
+              ? "Cancelling..."
+              : "Cancel Subscription"}
+          </button>
+        )}
 
       </div>
     </div>
