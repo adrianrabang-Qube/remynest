@@ -95,9 +95,9 @@ export default function ResetPasswordClient() {
     }
 
     setPhase("done");
-    // The user is now signed in via the recovery session — send them into the app.
+    // Send them into the app via /home, which enforces the onboarding gate.
     setTimeout(() => {
-      router.push("/memories");
+      router.push("/home");
       router.refresh();
     }, 1500);
   }

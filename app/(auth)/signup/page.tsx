@@ -36,7 +36,9 @@ export default function SignupPage() {
     // With email confirmation enabled there is no session yet — prompt the user to
     // confirm via the emailed link instead of routing into the app.
     if (data.session) {
-      router.push("/memories");
+      // Route through /home, which enforces the onboarding gate (new users complete
+      // onboarding before entering the app); /memories had no gate.
+      router.push("/home");
       router.refresh();
       return;
     }

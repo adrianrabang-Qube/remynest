@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
+import RemyNestLogo from "@/components/brand/RemyNestLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -161,18 +162,20 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f1ea] flex items-center justify-center px-6 py-10">
+    <div className="min-h-screen bg-sand flex items-center justify-center px-6 py-10">
 
-      <div className="w-full max-w-2xl bg-white rounded-[32px] border shadow-sm p-8 md:p-10">
+      <div className="w-full max-w-2xl bg-white rounded-[32px] border border-sand-deep/60 shadow-sm p-8 md:p-10">
+
+        <RemyNestLogo className="mb-8" />
 
         {/* HEADER */}
         <div className="mb-10">
 
-          <div className="inline-flex items-center rounded-full bg-[#f5f1ea] border px-4 py-2 text-sm text-gray-600 mb-6">
+          <div className="inline-flex items-center rounded-full bg-sand border px-4 py-2 text-sm text-gray-600 mb-6">
             Welcome to RemyNest
           </div>
 
-          <h1 className="text-5xl font-bold tracking-tight text-[#2f3e34] mb-4">
+          <h1 className="text-5xl font-bold tracking-tight text-charcoal mb-4">
             Let’s personalize your experience
           </h1>
 
@@ -195,7 +198,7 @@ export default async function OnboardingPage() {
           {/* FIRST NAME */}
           <div className="space-y-2">
 
-            <label className="text-sm font-medium text-[#2f3e34]">
+            <label className="text-sm font-medium text-charcoal">
               First Name
             </label>
 
@@ -204,14 +207,14 @@ export default async function OnboardingPage() {
               name="first_name"
               placeholder="John"
               required
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
             />
           </div>
 
           {/* PREFERRED NAME */}
           <div className="space-y-2">
 
-            <label className="text-sm font-medium text-[#2f3e34]">
+            <label className="text-sm font-medium text-charcoal">
               Preferred Name
             </label>
 
@@ -219,7 +222,7 @@ export default async function OnboardingPage() {
               type="text"
               name="preferred_name"
               placeholder="Johnny"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
             />
 
             <p className="text-sm text-gray-400">
@@ -231,7 +234,7 @@ export default async function OnboardingPage() {
           {/* COUNTRY */}
           <div className="space-y-2">
 
-            <label className="text-sm font-medium text-[#2f3e34]">
+            <label className="text-sm font-medium text-charcoal">
               Country
             </label>
 
@@ -239,21 +242,21 @@ export default async function OnboardingPage() {
               type="text"
               name="country"
               placeholder="Ireland"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
             />
           </div>
 
           {/* DATE OF BIRTH */}
           <div className="space-y-2">
 
-            <label className="text-sm font-medium text-[#2f3e34]">
+            <label className="text-sm font-medium text-charcoal">
               Date of Birth
             </label>
 
             <input
               type="date"
               name="date_of_birth"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-black"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
             />
           </div>
 
@@ -275,7 +278,7 @@ export default async function OnboardingPage() {
               Detected Timezone
             </p>
 
-            <p className="font-medium text-[#2f3e34]">
+            <p className="font-medium text-charcoal">
               {
                 Intl.DateTimeFormat()
                   .resolvedOptions()
@@ -287,7 +290,7 @@ export default async function OnboardingPage() {
           {/* BUTTON */}
           <button
             type="submit"
-            className="w-full rounded-2xl bg-black text-white py-4 text-lg font-medium hover:opacity-90 transition"
+            className="w-full rounded-2xl bg-sage text-white py-4 text-lg font-medium hover:bg-sage-deep transition"
           >
             Continue to Home
           </button>
