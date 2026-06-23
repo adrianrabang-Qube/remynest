@@ -4,6 +4,9 @@ import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import { Play } from "lucide-react";
 
+import { formatBytes } from "@/lib/storage/format";
+import { useStorageUsage } from "@/components/storage/useStorageUsage";
+
 export type ManagedAttachment = {
   url?: string;
   storagePath?: string;
@@ -60,6 +63,8 @@ export default function AttachmentManager({
       previews.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [previews]);
+
+  const { data: usage } = useStorageUsage();
 
   function addFiles(selected: FileList | null) {
     if (!selected) return;
@@ -150,21 +155,29 @@ export default function AttachmentManager({
         </div>
       )}
 
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50">
-        <span aria-hidden>＋</span>
-        <span>Add photos or videos</span>
-        <input
-          type="file"
-          accept={ACCEPT_ATTR}
-          multiple
-          disabled={disabled}
-          className="hidden"
-          onChange={(e) => {
-            addFiles(e.target.files);
-            e.currentTarget.value = "";
-          }}
-        />
-      </label>
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50">
+          <span aria-hidden>＋</span>
+          <span>Add photos or videos</span>
+          <input
+            type="file"
+            accept={ACCEPT_ATTR}
+            multiple
+            disabled={disabled}
+            className="hidden"
+            onChange={(e) => {
+              addFiles(e.target.files);
+              e.currentTarget.value = "";
+            }}
+          />
+        </label>
+        {usage && !usage.degraded ? (
+          <span className="text-xs text-charcoal-muted">
+            {formatBytes(usage.remainingBytes)} of{" "}
+            {formatBytes(usage.limitBytes)} left
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }

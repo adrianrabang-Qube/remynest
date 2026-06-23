@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useIsNativePlatform } from "@/lib/platform";
 import { formatBytes } from "@/lib/storage/format";
-import { STORAGE_PLANS } from "@/lib/storage/plans";
+import { BILLING_PLANS } from "@/lib/billing/plans";
 import { useStorageUsage } from "@/components/storage/useStorageUsage";
 import StorageUpgradeModal from "@/components/storage/StorageUpgradeModal";
 
@@ -36,7 +36,7 @@ export default function StorageUsageCard({
   }
 
   const { usedBytes, limitBytes, remainingBytes, percentUsed, tier } = data;
-  const planName = STORAGE_PLANS[tier]?.displayName ?? tier;
+  const planName = BILLING_PLANS[tier]?.displayName ?? tier;
   const pct = Math.min(100, Math.max(0, percentUsed));
   const barColor =
     pct >= 95 ? "bg-red-500" : pct >= 80 ? "bg-amber-500" : "bg-sage";

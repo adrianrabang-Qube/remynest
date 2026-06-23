@@ -30,6 +30,7 @@ import DashboardStats from "./components/DashboardStats";
 import DashboardAccountStatus from "./components/DashboardAccountStatus";
 import DashboardCreateMemory from "./components/DashboardCreateMemory";
 import StorageUsageCard from "@/components/storage/StorageUsageCard";
+import StorageWarningBanner from "@/components/storage/StorageWarningBanner";
 import DashboardActiveProfileWarning from "./components/DashboardActiveProfileWarning";
 import DashboardTelemetry from "./components/DashboardTelemetry";
 import DashboardFocus from "./components/DashboardFocus";
@@ -707,6 +708,9 @@ export default async function DashboardPage() {
           workspaceType={workspaceType}
           remyMood={remyHeaderMood}
         />
+
+        {/* Proactive storage near-limit alert (≥80%) */}
+        <StorageWarningBanner />
 
         {/* REMY HOME SUMMARY — workspace/family "what Remy understands" (the Remy
             Home foundation). Additive: everything below continues unchanged. */}

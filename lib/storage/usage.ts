@@ -1,9 +1,8 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
-import {
-  getStoragePlan,
-  DEFAULT_STORAGE_TIER,
-  type StoragePlanTier,
-} from "./plans";
+import { BILLING_PLANS, type BillingPlan } from "@/lib/billing/plans";
+import { resolveSubscription } from "@/lib/billing/resolve-subscription";
+
+const BYTES_PER_GB = 1024 * 1024 * 1024;
 
 export interface StorageUsage {
   usedBytes: number;
@@ -11,7 +10,8 @@ export interface StorageUsage {
   remainingBytes: number;
   /** Whole-number percentage 0..100. */
   percentUsed: number;
-  tier: StoragePlanTier;
+  /** The user's billing plan — capacity comes from BILLING_PLANS[tier].storageGB. */
+  tier: BillingPlan;
   attachmentCount: number;
   /** Users summed into this figure — [userId] today, all members for a family pool. */
   memberUserIds: string[];
@@ -19,37 +19,61 @@ export interface StorageUsage {
   degraded: boolean;
 }
 
-/**
- * Resolve a user's STORAGE tier. Storage plans are not sold yet, so everyone is
- * FREE. This is the single seam where a future subscription layer maps a billing
- * subscription -> a storage tier; until then it stays decoupled from the frozen
- * `lib/billing`.
- */
-export function resolveStorageTier(): StoragePlanTier {
-  // Future-billing seam: map the user's subscription -> a storage tier here.
-  return DEFAULT_STORAGE_TIER;
+function storageGbToBytes(gb: number | "unlimited"): number {
+  return gb === "unlimited" ? Number.MAX_SAFE_INTEGER : gb * BYTES_PER_GB;
 }
 
 /**
- * Sum ledger usage across a set of users and compare against the tier limit.
+ * Resolve a user's plan from their subscription — the SINGLE source of truth for
+ * storage capacity: `subscription_plan -> BILLING_PLANS -> storageGB -> quota`
+ * (storage is bundled with subscription tiers, not sold standalone). On a
+ * profile-read failure, defaults to FREE (the safe minimum capacity).
+ */
+export async function resolveStorageTier(
+  userId: string
+): Promise<BillingPlan> {
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("is_premium, subscription_status, subscription_plan")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("[storage-usage] profile read failed", error);
+    return "FREE";
+  }
+  // resolveSubscription collapses ENTERPRISE -> PREMIUM; honor ENTERPRISE directly
+  // so its unlimited capacity isn't capped at the PREMIUM tier.
+  if ((data?.subscription_plan ?? "").toUpperCase() === "ENTERPRISE") {
+    return "ENTERPRISE";
+  }
+  return resolveSubscription(data).plan;
+}
+
+/**
+ * Sum ledger usage across a set of users and compare against the PLAN limit.
  * Single-user today (`[userId]`); a family pool passes every member id — the same
  * accounting path, no redesign. Uses the service-role client and is ALWAYS
  * explicitly scoped by the member id set (service role bypasses RLS).
  */
 export async function getStorageUsage(
   userId: string,
-  options?: { memberUserIds?: string[]; tier?: StoragePlanTier }
+  options?: { memberUserIds?: string[]; tier?: BillingPlan }
 ): Promise<StorageUsage> {
   const memberUserIds =
     options?.memberUserIds && options.memberUserIds.length > 0
       ? options.memberUserIds
       : [userId];
 
-  const { data, error } = await supabaseAdmin
-    .from("storage_account_usage")
-    .select("used_bytes, attachment_count")
-    .in("user_id", memberUserIds); // explicit scope — service role bypasses RLS
+  // Resolve the plan (capacity) and the usage in parallel.
+  const [tier, usageRes] = await Promise.all([
+    options?.tier ? Promise.resolve(options.tier) : resolveStorageTier(userId),
+    supabaseAdmin
+      .from("storage_account_usage")
+      .select("used_bytes, attachment_count")
+      .in("user_id", memberUserIds), // explicit scope — service role bypasses RLS
+  ]);
 
+  const { data, error } = usageRes;
   if (error) {
     console.error("[storage-usage] query failed", error);
   }
@@ -64,8 +88,7 @@ export async function getStorageUsage(
     0
   );
 
-  const tier = options?.tier ?? resolveStorageTier();
-  const limitBytes = getStoragePlan(tier).limitBytes;
+  const limitBytes = storageGbToBytes(BILLING_PLANS[tier].storageGB);
   const remainingBytes = Math.max(0, limitBytes - usedBytes);
   const percentUsed =
     limitBytes > 0

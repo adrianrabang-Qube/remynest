@@ -66,7 +66,7 @@ export const BILLING_PLANS: Record<
 
     careProfiles: 3,
 
-    storageGB: 10,
+    storageGB: 25, // launch tier (authoritative 2026-06-23)
 
     aiEnabled: true,
 
@@ -92,7 +92,7 @@ export const BILLING_PLANS: Record<
 
     careProfiles: 5,
 
-    storageGB: 50,
+    storageGB: 100, // launch tier (authoritative 2026-06-23)
 
     aiEnabled: true,
 

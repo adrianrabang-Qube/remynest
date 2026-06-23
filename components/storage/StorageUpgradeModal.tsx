@@ -4,39 +4,28 @@ import { useState } from "react";
 
 import { isNativePlatform, useIsNativePlatform } from "@/lib/platform";
 import {
-  STORAGE_PLANS,
-  type StoragePlanTier,
-} from "@/lib/storage/plans";
-import {
   BILLING_PLANS,
   getPlanPriceLabel,
   type BillingPlan,
 } from "@/lib/billing/plans";
-import { formatBytes } from "@/lib/storage/format";
 import ModalShell from "@/components/storage/ModalShell";
 
 /**
- * Reusable storage upgrade modal. Reuses the EXISTING billing infrastructure —
- * BILLING_PLANS + getPlanPriceLabel + POST /api/stripe/checkout — and the
- * platform guards. No new Stripe/billing backend.
+ * Reusable storage upgrade modal. Storage is bundled with subscription tiers —
+ * BILLING_PLANS is the single source of truth (subscription_plan -> storageGB ->
+ * quota). Reuses the existing POST /api/stripe/checkout + the platform guards; no
+ * new Stripe/billing backend.
  *
  * Apple Guideline 3.1.1 / 3.1.3: on native iOS this renders a neutral notice with
  * NO plans, prices, purchase CTA, external link, or "manage on the web" steering
  * text. Purchase entry points appear only when `useIsNativePlatform()` is false.
  */
-const TIER_ORDER: StoragePlanTier[] = [
-  "FREE",
-  "STARTER",
-  "PREMIUM",
-  "FAMILY",
-];
+const PLAN_ORDER: BillingPlan[] = ["FREE", "PREMIUM", "FAMILY"];
+const PURCHASABLE: BillingPlan[] = ["PREMIUM", "FAMILY"];
 
-// Storage tiers that map to a purchasable Stripe billing plan. STARTER has no
-// Stripe price yet, so it is shown for comparison but is not purchasable.
-const BILLING_FOR_TIER: Partial<Record<StoragePlanTier, BillingPlan>> = {
-  PREMIUM: "PREMIUM",
-  FAMILY: "FAMILY",
-};
+function storageLabel(gb: number | "unlimited"): string {
+  return gb === "unlimited" ? "Unlimited storage" : `${gb} GB storage`;
+}
 
 export default function StorageUpgradeModal({
   open,
@@ -45,7 +34,7 @@ export default function StorageUpgradeModal({
 }: {
   open: boolean;
   onClose: () => void;
-  currentTier?: StoragePlanTier;
+  currentTier?: BillingPlan;
 }) {
   const native = useIsNativePlatform();
   const [loading, setLoading] = useState<BillingPlan | null>(null);
@@ -86,7 +75,7 @@ export default function StorageUpgradeModal({
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Checkout failed");
       }
-      window.location.href = data.url;
+      window.location.assign(data.url);
     } catch (err) {
       setError(
         err instanceof Error
@@ -106,46 +95,42 @@ export default function StorageUpgradeModal({
       </p>
 
       <div className="mb-6 space-y-3">
-        {TIER_ORDER.map((tier) => {
-          const cfg = STORAGE_PLANS[tier];
-          const billing = BILLING_FOR_TIER[tier];
-          const isCurrent = tier === currentTier;
+        {PLAN_ORDER.map((plan) => {
+          const cfg = BILLING_PLANS[plan];
+          const isCurrent = plan === currentTier;
+          const purchasable = PURCHASABLE.includes(plan) && !isCurrent;
           return (
             <div
-              key={tier}
+              key={plan}
               className={`flex items-center justify-between rounded-2xl border p-4 ${
-                isCurrent
-                  ? "border-black bg-gray-50"
-                  : "border-gray-200"
+                isCurrent ? "border-black bg-gray-50" : "border-gray-200"
               }`}
             >
               <div>
                 <h3 className="font-semibold">
                   {cfg.displayName}
-                  {cfg.pooled ? " · shared pool" : ""}
+                  {plan === "FAMILY" ? " · shared" : ""}
                 </h3>
                 <p className="mt-0.5 text-sm text-gray-500">
-                  {formatBytes(cfg.limitBytes)} storage
+                  {storageLabel(cfg.storageGB)}
                 </p>
               </div>
               {isCurrent ? (
                 <span className="text-sm font-medium text-gray-500">
                   Current
                 </span>
-              ) : billing ? (
+              ) : purchasable ? (
                 <button
                   type="button"
-                  onClick={() => handleUpgrade(billing)}
+                  onClick={() => handleUpgrade(plan)}
                   disabled={loading !== null}
                   className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
-                  {loading === billing
+                  {loading === plan
                     ? "Redirecting…"
-                    : `Upgrade · ${getPlanPriceLabel(billing) ?? BILLING_PLANS[billing].displayName}`}
+                    : `Upgrade · ${getPlanPriceLabel(plan) ?? cfg.displayName}`}
                 </button>
-              ) : (
-                <span className="text-sm text-gray-400">Coming soon</span>
-              )}
+              ) : null}
             </div>
           );
         })}

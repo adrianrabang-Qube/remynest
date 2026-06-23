@@ -256,9 +256,14 @@ capacity*. At the limit: uploads are **blocked** → the usage UI reflects **ful
 capacity → the **storage-upgrade modal** appears → the user is **directed to storage
 plans**. **All future media types (audio/voice/documents/PDF) MUST reuse the same
 byte-based storage-accounting architecture** (`storage_ledger` + `enforceUploadQuota`).
-**Implication:** the per-file **25 MB cap** in `lib/memory-media.ts` is at odds with
-the total-capacity model — revisit it (raise/remove, gating on **total quota** +
-Supabase object limits) as launch work, not a per-file gate.
+**Single source of truth (authoritative, 2026-06-23):** `subscription_plan →
+BILLING_PLANS → storageGB → storage quota`. Storage is **bundled with subscription
+tiers** (NOT standalone add-ons; do not create storage-only Stripe products). Launch
+tiers: **FREE 1 GB · PREMIUM 25 GB · FAMILY 100 GB** (enterprise later). The limit comes
+from `lib/billing/plans.ts` `storageGB`; `getStorageUsage` resolves the user's plan via
+`resolveSubscription(profile)`. The **per-file 25 MB cap is REMOVED** — any supported
+media size uploads as long as `used < plan_limit`; the only bounds are the Supabase
+object size limit + the total quota. Do not reintroduce a per-file size gate.
 
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:

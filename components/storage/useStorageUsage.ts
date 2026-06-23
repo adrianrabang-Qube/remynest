@@ -9,7 +9,7 @@ export interface StorageUsageResponse {
   limitBytes: number;
   remainingBytes: number;
   percentUsed: number;
-  tier: "FREE" | "STARTER" | "PREMIUM" | "FAMILY";
+  tier: "FREE" | "PREMIUM" | "FAMILY" | "ENTERPRISE";
   attachmentCount: number;
   memberUserIds: string[];
   degraded: boolean;

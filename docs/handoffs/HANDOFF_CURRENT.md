@@ -2274,12 +2274,15 @@ bullets above). Launch roadmap, in order:
 1. **Memory-system completion** — multi-photo ✅ · storage accounting ✅ · storage usage
    UI (settings + dashboard ✅; **complete** near-limit/warning states + any missing
    surfaces) · storage plan enforcement ✅ · storage-limit **upgrade modal** ✅
-   (**complete** the end-to-end flow) · **⬅ subscription integration = the big gap**
-   (`resolveStorageTier` is a FREE stub — map a Stripe subscription → a storage tier;
-   make storage plans purchasable; storage limit reads from the real plan).
+   (**complete** the end-to-end flow) · **⬅ subscription integration (IN PROGRESS)** —
+   **decided (authoritative): `subscription_plan → BILLING_PLANS.storageGB → quota`** is
+   the single source of truth; storage is **bundled with tiers** (no standalone add-ons);
+   launch tiers **FREE 1 / PREMIUM 25 / FAMILY 100 GB**; `getStorageUsage` resolves the
+   plan via `resolveSubscription`.
 2. **Media expansion** — photo + video ✅ · mixed-media gallery ✅ · byte-based accounting
-   across all media ✅. **Remaining: revisit the 25 MB per-file cap** — storage is
-   enforced by **TOTAL-per-user, not per-file** (`lib/memory-media.ts`). *(Audio / voice
+   across all media ✅. **decided: REMOVE the 25 MB per-file cap** —
+   storage is enforced by **TOTAL-per-user, not per-file** (`lib/memory-media.ts`); any
+   size uploads while `used < plan_limit` (bounded only by the Supabase object limit). *(Audio / voice
    / documents / PDF uploads are **POST-LAUNCH — do not build now**.)*
 3. **Productization** — branding foundation ✅; **remaining:** raster exports, landing
    page, marketing site, App-Store + Google-Play assets, download redirects, subscription

@@ -3,13 +3,13 @@
 import { useState } from "react";
 
 import { useIsNativePlatform } from "@/lib/platform";
-import type { StoragePlanTier } from "@/lib/storage/plans";
+import type { BillingPlan } from "@/lib/billing/plans";
 import ModalShell from "@/components/storage/ModalShell";
 import StorageUpgradeModal from "@/components/storage/StorageUpgradeModal";
 
 /** The `quota` object returned in the upload routes' HTTP 413 body. */
 export interface UploadQuotaPayload {
-  tier?: StoragePlanTier;
+  tier?: BillingPlan;
   currentUsage?: string;
   limit?: string;
   remaining?: string;

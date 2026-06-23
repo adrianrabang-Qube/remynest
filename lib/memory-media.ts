@@ -194,9 +194,10 @@ export class MemoryAttachmentValidationError extends Error {
   }
 }
 
-const MAX_MEMORY_ATTACHMENT_SIZE =
-  25 * 1024 * 1024;
-
+// Per-file size cap REMOVED (authoritative 2026-06-23): storage is enforced by
+// TOTAL usage per user (`enforceUploadQuota`, before the write), NOT per-file. Any
+// supported media size uploads while used < plan limit; the only remaining bound is
+// the Supabase Storage object-size limit (a project setting).
 const ALLOWED_MEMORY_ATTACHMENT_TYPES = [
   "image/",
   "video/",
@@ -219,14 +220,6 @@ function validateMemoryAttachmentFile(
   if (!isAllowedType) {
     throw new MemoryAttachmentValidationError(
       `Unsupported file type: ${type || file.name}`
-    );
-  }
-
-  if (file.size > MAX_MEMORY_ATTACHMENT_SIZE) {
-    throw new MemoryAttachmentValidationError(
-      `File exceeds maximum size of ${
-        MAX_MEMORY_ATTACHMENT_SIZE / 1024 / 1024
-      } MB`
     );
   }
 }
