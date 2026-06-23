@@ -36,7 +36,7 @@ export default function SignupPage() {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Sign up</h1>
+      <h1 className="text-2xl font-semibold mb-4">Create your account</h1>
 
       <input
         className="border p-2 w-full mb-3"
@@ -58,7 +58,7 @@ export default function SignupPage() {
       <button
         onClick={handleSignup}
         disabled={loading}
-        className="bg-black text-white px-4 py-2 w-full"
+        className="rounded-lg bg-sage px-4 py-2.5 w-full font-medium text-white transition hover:bg-sage-deep disabled:opacity-70"
       >
         {loading ? "Creating account..." : "Sign up"}
       </button>
