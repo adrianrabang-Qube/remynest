@@ -11,6 +11,12 @@ import {
 
 import { signMemory } from "@/lib/memory-media-signing";
 import { enforceUploadQuota } from "@/lib/storage/upload-guard";
+import {
+  getStorageObjectInfo,
+  isOwnedStoragePath,
+  normalizeStoragePath,
+  removeStorageObjects,
+} from "@/lib/storage/object-info";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 const MEMORY_PIPELINE_TAG =
@@ -231,6 +237,61 @@ export async function POST(req: Request) {
         },
         { status: 413 }
       );
+    }
+
+    // DIRECT-TO-STORAGE path: media was uploaded straight to Supabase via signed URLs and
+    // arrives here as JSON metadata (NO bytes through this function). Quota is RE-VERIFIED
+    // against the REAL object sizes (never the client-reported size), and every path must
+    // be owner-scoped — so neither quota nor storage path can be spoofed.
+    if (Array.isArray(body.attachments) && body.attachments.length > 0) {
+      const incoming = body.attachments as Array<Record<string, unknown>>;
+
+      for (const a of incoming) {
+        if (!isOwnedStoragePath(a?.storagePath ?? a?.url, user.id)) {
+          return NextResponse.json(
+            { error: "Invalid attachment path" },
+            { status: 400 }
+          );
+        }
+      }
+
+      const verified: Array<Record<string, unknown>> = [];
+      for (const a of incoming) {
+        const path = normalizeStoragePath(a.storagePath ?? a.url);
+        if (!path) continue;
+        const info = await getStorageObjectInfo(supabase, path);
+        if (!info.exists) continue; // phantom (not actually uploaded) — drop it
+        const size =
+          info.size ?? (typeof a.size === "number" ? a.size : 0);
+        verified.push({ ...a, size });
+      }
+
+      const directQuota = await enforceUploadQuota(
+        user.id,
+        verified.map((v) => ({ size: v.size }))
+      );
+      if (!directQuota.allowed) {
+        await removeStorageObjects(
+          supabase,
+          verified.map((v) => String(v.storagePath ?? v.url ?? ""))
+        );
+        return NextResponse.json(
+          {
+            error: directQuota.reason ?? "Storage limit exceeded",
+            quota: directQuota,
+          },
+          { status: 413 }
+        );
+      }
+
+      body.attachments = verified;
+
+      console.info("[create-memory] MEMORY_CREATE_JSON", {
+        userId: user.id,
+        profileId: activeProfileId ?? null,
+        attachmentCount: verified.length,
+        attachmentTypes: verified.map((v) => v.type ?? "unknown"),
+      });
     }
 
     console.info("[create-memory] MEDIA_UPLOAD_START", {
@@ -585,6 +646,14 @@ cover_image_url:
           pipelineMetrics.clusterDurationMs,
       }
     );
+
+    console.info("[create-memory] MEMORY_CREATE_SUCCESS", {
+      userId: user.id,
+      profileId: activeProfileId ?? null,
+      memoryId: data.id,
+      attachmentCount: normalizedAttachments.length,
+      attachmentTypes: normalizedAttachments.map((a) => a.type ?? "unknown"),
+    });
 
     return NextResponse.json(
       await signMemory(data)

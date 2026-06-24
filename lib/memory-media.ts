@@ -333,11 +333,18 @@ export async function handleMemoryMediaUpload({
   if (
     !uploadedFiles?.length
   ) {
+    // Metadata-only path (direct-to-storage uploads, or kept attachments on edit):
+    // derive the cover from the first image of the normalized set — previously this
+    // returned null, which dropped the cover for direct-uploaded create memories.
+    const firstImage = normalizedAttachments.find(
+      (item) => item.type === "image"
+    );
+
     return {
       attachments:
         normalizedAttachments,
 
-      coverImageUrl: null,
+      coverImageUrl: firstImage?.url ?? null,
     };
   }
 

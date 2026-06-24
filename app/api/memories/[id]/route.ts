@@ -1,11 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   normalizeAttachments,
-  resolveCoverImageUrl,
   type MemoryAttachment,
 } from "@/lib/memory-media";
 import { buildMemoryMediaPayload } from "@/lib/memory-media-pipeline";
 import { enforceUploadQuota } from "@/lib/storage/upload-guard";
+import {
+  getStorageObjectInfo,
+  isOwnedStoragePath,
+  normalizeStoragePath,
+  removeStorageObjects,
+} from "@/lib/storage/object-info";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
 
 export async function PUT(
@@ -96,20 +101,87 @@ export async function PUT(
     memoryDatePrecisionValue =
       form.get("memoryDatePrecision");
   } else {
-    // Backward-compatible JSON path — unchanged behavior for existing callers.
+    // JSON path. Two shapes:
+    //  - legacy: { attachments } (kept set only) — unchanged behavior.
+    //  - direct-to-storage: { attachments: kept, newAttachments: [...] } where the NEW
+    //    files were uploaded straight to Supabase via signed URLs. Quota is re-verified
+    //    against REAL object sizes for the NEW files only (kept are already counted), and
+    //    every new path must be owner-scoped.
     const body = await req.json();
     title = body.title;
     content = body.content;
-    attachments = normalizeAttachments(
-      body.attachments
-    );
-    coverImageUrl = resolveCoverImageUrl(
-      body.coverImageUrl
-    );
+
+    const kept = normalizeAttachments(body.attachments);
+
+    const newDirect = Array.isArray(body.newAttachments)
+      ? (body.newAttachments as Array<Record<string, unknown>>)
+      : [];
+
+    if (newDirect.length > 0) {
+      for (const a of newDirect) {
+        if (!isOwnedStoragePath(a?.storagePath ?? a?.url, user.id)) {
+          return new Response("Invalid attachment path", { status: 400 });
+        }
+      }
+
+      const verifiedNew: Array<Record<string, unknown>> = [];
+      for (const a of newDirect) {
+        const path = normalizeStoragePath(a.storagePath ?? a.url);
+        if (!path) continue;
+        const info = await getStorageObjectInfo(supabase, path);
+        if (!info.exists) continue; // phantom — not actually uploaded
+        const size =
+          info.size ?? (typeof a.size === "number" ? a.size : 0);
+        verifiedNew.push({ ...a, size });
+      }
+
+      const directQuota = await enforceUploadQuota(
+        user.id,
+        verifiedNew.map((v) => ({ size: v.size }))
+      );
+      if (!directQuota.allowed) {
+        await removeStorageObjects(
+          supabase,
+          verifiedNew.map((v) => String(v.storagePath ?? v.url ?? ""))
+        );
+        return Response.json(
+          {
+            error: directQuota.reason ?? "Storage limit exceeded",
+            quota: directQuota,
+          },
+          { status: 413 }
+        );
+      }
+
+      attachments = [...kept, ...normalizeAttachments(verifiedNew)];
+      // Cover = first image of the FINAL set (matches the multipart branch).
+      coverImageUrl =
+        attachments.find((a) => a.type === "image")?.url ?? null;
+    } else {
+      attachments = kept;
+      // Recompute the cover from the kept set — the migrated clients no longer send
+      // coverImageUrl, so reading body.coverImageUrl would wipe the cover on every
+      // no-new-file edit (title/content edit, photo removal, reorder).
+      coverImageUrl =
+        attachments.find((a) => a.type === "image")?.url ?? null;
+    }
+
     hasMemoryDate = "memoryDate" in body;
     memoryDateValue = body.memoryDate;
     memoryDatePrecisionValue =
       body.memoryDatePrecision;
+  }
+
+  // SECURITY — owner-scope EVERY final attachment path (kept + new, both branches).
+  // Without this, a client could plant another user's storage path into a memory it owns
+  // (the path passes RLS since the ROW is the attacker's), and the RLS-bypassing
+  // service-role signer would then mint a signed URL for the victim's private object on
+  // read. The PUT is already user_id-scoped, so a user's own memory media is always under
+  // users/{user.id}/ — this only rejects foreign/planted paths.
+  for (const a of attachments) {
+    if (!isOwnedStoragePath(a.storagePath ?? a.url, user.id)) {
+      return new Response("Invalid attachment path", { status: 400 });
+    }
   }
 
   // Historical date — only touched when the caller includes it, so other PUT
