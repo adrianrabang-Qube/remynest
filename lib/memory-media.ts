@@ -205,21 +205,29 @@ const ALLOWED_MEMORY_ATTACHMENT_TYPES = [
   "application/pdf",
 ];
 
+/**
+ * Server-authoritative MIME allowlist for memory attachments. EXCLUDES `image/svg+xml`
+ * (an `image/*` type that can carry script — a stored-XSS risk when served from the
+ * storage origin). Shared by the sign endpoint AND the direct create/edit paths so the
+ * type is validated even when a client uploads straight to its own path, skipping signing.
+ */
+export function isAllowedAttachmentMime(type: unknown): boolean {
+  if (typeof type !== "string" || !type) return false;
+  // Normalize: lowercase, strip media-type parameters (";charset=…") + whitespace, so
+  // `image/svg+xml;charset=utf-8` cannot slip past the svg exclusion.
+  const t = type.toLowerCase().split(";")[0].trim();
+  if (t === "image/svg+xml") return false;
+  return ALLOWED_MEMORY_ATTACHMENT_TYPES.some((allowed) =>
+    allowed.endsWith("/") ? t.startsWith(allowed) : t === allowed
+  );
+}
+
 function validateMemoryAttachmentFile(
   file: File
 ) {
-  const type = file.type || "";
-
-  const isAllowedType = ALLOWED_MEMORY_ATTACHMENT_TYPES.some(
-    (allowed) =>
-      allowed.endsWith("/")
-        ? type.startsWith(allowed)
-        : type === allowed
-  );
-
-  if (!isAllowedType) {
+  if (!isAllowedAttachmentMime(file.type)) {
     throw new MemoryAttachmentValidationError(
-      `Unsupported file type: ${type || file.name}`
+      `Unsupported file type: ${file.type || file.name}`
     );
   }
 }

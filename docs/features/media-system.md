@@ -117,9 +117,19 @@ upload.ts`) → submit JSON to `/api/memories/create` (`attachments`) or PUT
 
 The **legacy multipart** branch in both routes is **dormant fallback (rollback only)**.
 
-**Follow-ups (not blocking):** an orphan-sweep cron (uploaded-but-never-attached objects are
-not ledger-counted) + a Supabase bucket object-size limit; the `info.size ?? clientSize`
-fallback (used only if Storage omits size for a confirmed object — not client-triggerable).
+**Hardening (validated 2026-06-24):** `normalizeStoragePath` is a positive `[A-Za-z0-9._-]`
+segment allowlist (rejects `..`, backslash, empty, and `%2e%2e`/percent-encoded traversal);
+`isAllowedAttachmentMime` (shared by the sign endpoint + the direct create/edit paths)
+excludes `image/svg+xml` (incl. `;charset=` params); an unverifiable real size **fails
+closed** (drops the attachment — never trusts the client size).
+
+**Follow-ups (not launch-blocking):** (1) concurrent-create **TOCTOU** quota race + (2)
+reused-path cross-memory **double-count** — pre-existing; fix with a DB advisory-lock /
+`SECURITY DEFINER` RPC + per-object accounting. (3) an **orphan-sweep cron**
+(uploaded-but-never-attached objects aren't ledger-counted) + a Supabase bucket object-size
+limit. (4) **real content-type spoofing** (client can upload svg/html bytes under a faked
+declared type) — LOW (cross-origin private storage; `<img>` svg inert) → force
+`Content-Disposition: attachment` for non-rendered types or proxy media serving.
 
 ## Future enhancements
 Video **poster** (first-frame) + PDF first-page stored derivatives (into the existing

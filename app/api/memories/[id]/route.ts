@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   normalizeAttachments,
+  isAllowedAttachmentMime,
   type MemoryAttachment,
 } from "@/lib/memory-media";
 import { buildMemoryMediaPayload } from "@/lib/memory-media-pipeline";
@@ -122,6 +123,9 @@ export async function PUT(
         if (!isOwnedStoragePath(a?.storagePath ?? a?.url, user.id)) {
           return new Response("Invalid attachment path", { status: 400 });
         }
+        if (!isAllowedAttachmentMime(a?.mimeType)) {
+          return new Response("Unsupported file type", { status: 400 });
+        }
       }
 
       const verifiedNew: Array<Record<string, unknown>> = [];
@@ -130,9 +134,8 @@ export async function PUT(
         if (!path) continue;
         const info = await getStorageObjectInfo(supabase, path);
         if (!info.exists) continue; // phantom — not actually uploaded
-        const size =
-          info.size ?? (typeof a.size === "number" ? a.size : 0);
-        verifiedNew.push({ ...a, size });
+        if (info.size == null) continue; // unverifiable size — fail closed (no client trust)
+        verifiedNew.push({ ...a, size: info.size });
       }
 
       const directQuota = await enforceUploadQuota(

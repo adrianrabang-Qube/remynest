@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import {
   MemoryAttachmentValidationError,
+  isAllowedAttachmentMime,
 } from "@/lib/memory-media";
 
 import {
@@ -253,6 +254,14 @@ export async function POST(req: Request) {
             { status: 400 }
           );
         }
+        // Re-validate the type server-side (do not trust the sign endpoint as the only
+        // gate — a client could upload straight to its own path and skip signing).
+        if (!isAllowedAttachmentMime(a?.mimeType)) {
+          return NextResponse.json(
+            { error: "Unsupported file type" },
+            { status: 400 }
+          );
+        }
       }
 
       const verified: Array<Record<string, unknown>> = [];
@@ -261,9 +270,8 @@ export async function POST(req: Request) {
         if (!path) continue;
         const info = await getStorageObjectInfo(supabase, path);
         if (!info.exists) continue; // phantom (not actually uploaded) — drop it
-        const size =
-          info.size ?? (typeof a.size === "number" ? a.size : 0);
-        verified.push({ ...a, size });
+        if (info.size == null) continue; // unverifiable size — fail closed (no client trust)
+        verified.push({ ...a, size: info.size });
       }
 
       const directQuota = await enforceUploadQuota(

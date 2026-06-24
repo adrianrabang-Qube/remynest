@@ -2,11 +2,32 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 const BUCKET = "memory-media";
 
-/** Strip leading slashes so paths compare/list consistently. */
+// A legitimate memory-media object path is server-generated from a UUID + a sanitized
+// filename, so every segment is plain `[A-Za-z0-9._-]`. A POSITIVE allowlist (vs a
+// blocklist) is used deliberately so encoded traversal can't slip through.
+const SAFE_PATH_SEGMENT = /^[A-Za-z0-9._-]+$/;
+
+/**
+ * Canonicalize a storage path so the ownership guard and the URL signer agree on ONE
+ * literal path. Strips leading slashes and HARD-REJECTS any segment that is `.`/`..` or is
+ * not a plain `[A-Za-z0-9._-]` token (so empty, backslash, and PERCENT-ENCODED segments
+ * like `%2e%2e` are rejected too). Without this, `users/{me}/../{victim}/x.jpg` — or its
+ * `%2e%2e` encoding — would pass the `startsWith("users/{me}/")` owner check yet resolve to
+ * the victim's object when signed (the singular transform signer puts the path in a URL).
+ */
 export function normalizeStoragePath(path: unknown): string | null {
   if (typeof path !== "string") return null;
   const clean = path.trim().replace(/^\/+/, "");
-  return clean || null;
+  if (!clean) return null;
+  const segments = clean.split("/");
+  if (
+    segments.some(
+      (s) => s === "." || s === ".." || !SAFE_PATH_SEGMENT.test(s),
+    )
+  ) {
+    return null;
+  }
+  return clean;
 }
 
 /**

@@ -3,16 +3,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { enforceUploadQuota } from "@/lib/storage/upload-guard";
+import { isAllowedAttachmentMime } from "@/lib/memory-media";
 
 const BUCKET = "memory-media";
-
-// Mirrors lib/memory-media.ts ALLOWED_MEMORY_ATTACHMENT_TYPES — server-authoritative.
-const ALLOWED_PREFIXES = ["image/", "video/", "audio/"];
-const ALLOWED_EXACT = ["application/pdf"];
-
-function isAllowedMime(type: string): boolean {
-  return ALLOWED_PREFIXES.some((p) => type.startsWith(p)) || ALLOWED_EXACT.includes(type);
-}
 
 function deriveType(
   mime: string,
@@ -86,7 +79,7 @@ export async function POST(req: Request) {
   }));
 
   for (const f of files) {
-    if (!isAllowedMime(f.mimeType)) {
+    if (!isAllowedAttachmentMime(f.mimeType)) {
       return NextResponse.json(
         { error: `Unsupported file type: ${f.mimeType || f.name}` },
         { status: 400 },
