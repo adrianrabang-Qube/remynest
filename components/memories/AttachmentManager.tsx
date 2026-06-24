@@ -85,7 +85,7 @@ export default function AttachmentManager({
   }
 
   const removeBtn =
-    "absolute -right-1.5 -top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-base leading-none text-white shadow";
+    "absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-base leading-none text-white shadow";
   const moveBtn =
     "flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm leading-none text-white shadow transition disabled:opacity-30";
   const tile =
