@@ -4,6 +4,10 @@ import { useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  setActiveProfileCache,
+  invalidateActiveProfileCache,
+} from "@/lib/active-profile-cache";
 
 import { setActiveProfile } from "@/app/(app)/dashboard/profile-actions";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
@@ -70,7 +74,10 @@ export default function WorkspaceSelector({
     };
   }, [open]);
 
-  function switchTo(action: () => Promise<unknown>) {
+  function switchTo(
+    action: () => Promise<unknown>,
+    nextProfileId: string | null,
+  ) {
     void haptic("light"); // acknowledge the workspace switch on native
     // Close the sheet IMMEDIATELY as an urgent update — NOT inside the
     // transition. Previously setOpen(false) ran inside startTransition after
@@ -81,17 +88,20 @@ export default function WorkspaceSelector({
     // overlay + scroll-lock instantly and mirrors the dropdown's close-then-act
     // behavior. The .catch guarantees a failed switch can never strand state.
     setOpen(false);
+    // Optimistically flip the client active workspace using the id we ALREADY know, so
+    // the memories feed + on-page search re-scope IMMEDIATELY — with NO dependency on an
+    // /api/active-profile cookie re-read, which races WKWebView cookie propagation on
+    // native iOS and left the previous fix serving stale memories (RDAT-002 follow-up).
+    // router.refresh() still reconciles the server-rendered chrome (label/banner).
+    setActiveProfileCache(queryClient, nextProfileId);
     startTransition(() => {
       void Promise.resolve(action())
-        .then(() => {
-          // RDAT-002: the cookie changed — re-read the active workspace so the
-          // memories feed + on-page search (keyed on ["active-profile"]) re-scope
-          // IMMEDIATELY, not only when the page later remounts. router.refresh()
-          // updates the server-rendered chrome (label/banner) as before.
-          queryClient.invalidateQueries({ queryKey: ["active-profile"] });
+        .then(() => router.refresh())
+        .catch(() => {
+          // Switch failed — the cookie was not set; revert the optimistic value.
+          invalidateActiveProfileCache(queryClient);
           router.refresh();
-        })
-        .catch(() => router.refresh());
+        });
     });
   }
 
@@ -157,7 +167,12 @@ export default function WorkspaceSelector({
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() => switchTo(() => setActiveProfile(profile.id))}
+                      onClick={() =>
+                        switchTo(
+                          () => setActiveProfile(profile.id),
+                          profile.id,
+                        )
+                      }
                       aria-current={active ? "true" : undefined}
                       className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition hover:bg-sand/50 disabled:opacity-50"
                     >

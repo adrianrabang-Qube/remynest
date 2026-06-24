@@ -10,11 +10,16 @@ import {
 } from "react";
 
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   setActiveProfile,
   setPersonalWorkspace,
 } from "@/app/(app)/dashboard/profile-actions";
+import {
+  setActiveProfileCache,
+  invalidateActiveProfileCache,
+} from "@/lib/active-profile-cache";
 
 const PROFILE_SWITCHER_TAG =
   "profile-switcher";
@@ -58,6 +63,7 @@ export default function ProfileSwitcher({
   activeProfileId,
 }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [isPending, startTransition] =
     useTransition();
@@ -189,6 +195,7 @@ export default function ProfileSwitcher({
             }
           );
 
+          setActiveProfileCache(queryClient, newProfileId);
           startTransition(() => {
             void setActiveProfile(
               newProfileId
@@ -226,6 +233,9 @@ export default function ProfileSwitcher({
                     error,
                   }
                 );
+
+                // Switch failed — revert the optimistic active-profile to server truth.
+                invalidateActiveProfileCache(queryClient);
               })
               .finally(() => {
                 setIsSwitching(false);
@@ -247,6 +257,7 @@ export default function ProfileSwitcher({
       },
       [
         router,
+        queryClient,
         activeProfileId,
         selectedProfile,
         isSwitching,
@@ -305,10 +316,16 @@ export default function ProfileSwitcher({
         disabled={isPending || isSwitching}
         className="mt-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         onClick={() => {
+          setActiveProfileCache(queryClient, null);
           startTransition(() => {
-            void setPersonalWorkspace().then(() => {
-              router.refresh();
-            });
+            void setPersonalWorkspace()
+              .then(() => {
+                router.refresh();
+              })
+              .catch(() => {
+                invalidateActiveProfileCache(queryClient);
+                router.refresh();
+              });
           });
         }}
       >

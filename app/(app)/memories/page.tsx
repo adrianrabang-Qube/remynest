@@ -17,6 +17,7 @@ import {
 
 import MemorySection from "@/components/memories/MemorySection";
 import { useIsNativePlatform } from "@/lib/platform";
+import { ACTIVE_PROFILE_QUERY_KEY } from "@/lib/active-profile-cache";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
 import {
@@ -115,7 +116,7 @@ function MemoriesPageContent() {
   const { data: activeProfile } = useQuery<{
     activeProfileId: string | null;
   }>({
-    queryKey: ["active-profile"],
+    queryKey: ACTIVE_PROFILE_QUERY_KEY,
     queryFn: async () => {
       const res = await fetch("/api/active-profile", {
         cache: "no-store",
@@ -275,7 +276,11 @@ function MemoriesPageContent() {
       const PAGE_SIZE = 50;
       const base = activeProfileId
         ? `/api/memories?profileId=${activeProfileId}`
-        : `/api/memories`;
+        : // My Nest: send the workspace EXPLICITLY so the API scopes to My Nest from the
+          // request param, NOT the active-context cookie — otherwise a Care→My Nest switch
+          // races WKWebView cookie propagation and the bare /api/memories falls back to the
+          // still-stale cookie, re-serving the previous Care workspace's memories.
+          `/api/memories?workspaceType=my-nest`;
 
       // Server-paginated (bounds the per-request transform-signing fan-out),
       // aggregated back into the flat array the feed + optimistic mutations use.

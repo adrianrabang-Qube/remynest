@@ -2,8 +2,13 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { setPersonalWorkspace } from "@/app/(app)/dashboard/profile-actions";
+import {
+  setActiveProfileCache,
+  invalidateActiveProfileCache,
+} from "@/lib/active-profile-cache";
 
 /**
  * Contextual banner shown app-wide while in a Care workspace. Surfaces the active
@@ -16,11 +21,20 @@ export function WorkspaceBanner({
   activeProfileName: string;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [pending, startTransition] = useTransition();
 
   function switchToMyNest() {
+    // Optimistically flip to My Nest (null) so the feed re-scopes instantly — no
+    // /api/active-profile cookie re-read race on native iOS (RDAT-002 follow-up).
+    setActiveProfileCache(queryClient, null);
     startTransition(() => {
-      void setPersonalWorkspace().then(() => router.refresh());
+      void setPersonalWorkspace()
+        .then(() => router.refresh())
+        .catch(() => {
+          invalidateActiveProfileCache(queryClient);
+          router.refresh();
+        });
     });
   }
 

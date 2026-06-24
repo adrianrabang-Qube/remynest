@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Play } from "lucide-react";
 
+import OverlayCloseButton from "@/components/ui/OverlayCloseButton";
+
 export type ViewerImage = {
   url: string;
   name?: string;
@@ -130,17 +132,10 @@ export default function PhotoViewer({
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-black">
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close"
-        className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-2xl leading-none text-white backdrop-blur-sm"
-      >
-        ×
-      </button>
+      <OverlayCloseButton onClick={onClose} />
 
       {multi ? (
-        <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-white/15 px-3 py-1 text-sm text-white backdrop-blur-sm">
+        <div className="absolute left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-20 -translate-x-1/2 rounded-full bg-white/15 px-3 py-1 text-sm text-white backdrop-blur-sm">
           {active + 1} / {images.length}
         </div>
       ) : null}
@@ -152,7 +147,7 @@ export default function PhotoViewer({
             onClick={() => goTo(active - 1)}
             disabled={active === 0}
             aria-label="Previous photo"
-            className={`${navBtn} left-2`}
+            className={`${navBtn} left-[max(0.5rem,env(safe-area-inset-left))]`}
           >
             ‹
           </button>
@@ -161,7 +156,7 @@ export default function PhotoViewer({
             onClick={() => goTo(active + 1)}
             disabled={active === images.length - 1}
             aria-label="Next photo"
-            className={`${navBtn} right-2`}
+            className={`${navBtn} right-[max(0.5rem,env(safe-area-inset-right))]`}
           >
             ›
           </button>
