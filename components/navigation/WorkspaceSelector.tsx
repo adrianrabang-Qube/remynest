@@ -122,7 +122,7 @@ export default function WorkspaceSelector({
             aria-hidden="true"
           />
 
-          <div className="absolute overflow-y-auto overscroll-contain bg-white shadow-2xl max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[85vh] max-md:rounded-t-3xl max-md:pb-[max(1rem,env(safe-area-inset-bottom))] md:right-4 md:top-16 md:max-h-[80vh] md:w-80 md:rounded-2xl">
+          <div className="absolute overflow-y-auto overscroll-contain bg-white shadow-2xl max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:rounded-t-3xl max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] lg:right-4 lg:top-16 lg:max-h-[80vh] lg:w-80 lg:rounded-2xl">
             <div className="sticky top-0 flex items-center justify-between border-b border-sand-deep/60 bg-white px-4 py-3">
               <span className="text-sm font-semibold text-charcoal">
                 Workspace

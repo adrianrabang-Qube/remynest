@@ -103,7 +103,7 @@ export default async function AppLayout({
 
       {/* Mobile: tighter px-4 gutters + pb-24 to clear the fixed bottom nav.
           md+ restores the original px-6 / py-6. */}
-      <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-24 md:px-6 md:pb-6">
+      <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-24 md:px-6 lg:pb-6">
         {children}
       </main>
     </div>

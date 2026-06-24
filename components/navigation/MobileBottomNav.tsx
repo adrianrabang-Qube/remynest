@@ -138,7 +138,7 @@ export default function MobileBottomNav({ onOpenMore }: MobileBottomNavProps) {
   return (
     <nav
       aria-label="Primary"
-      className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-sand-deep/60 bg-sand/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
+      className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-sand-deep/60 bg-sand/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
     >
       <Suspense fallback={<div className="h-14" />}>
         <BottomNavContent onOpenMore={onOpenMore} />

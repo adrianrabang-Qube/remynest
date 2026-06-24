@@ -34,7 +34,7 @@ export default function MobileTopBar({
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="md:hidden sticky top-0 z-40 flex w-full items-center gap-2 border-b border-sand-deep/60 bg-sand/80 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
+    <header className="lg:hidden sticky top-0 z-40 flex w-full items-center gap-2 border-b border-sand-deep/60 bg-sand/80 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 backdrop-blur-md">
       {/* Safe-area-aware padding: with `viewport-fit=cover` (app/layout.tsx) the
           WebView draws under the iOS status bar / Dynamic Island, so the header
           MUST pad by env(safe-area-inset-top) — otherwise the "My Nest"

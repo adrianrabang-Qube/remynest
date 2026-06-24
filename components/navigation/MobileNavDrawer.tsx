@@ -79,7 +79,7 @@ export default function MobileNavDrawer({
 
   return (
     <div
-      className="md:hidden fixed inset-0 z-50"
+      className="lg:hidden fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-label="Menu"
