@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateMemoryInsights } from "@/lib/ai-memory";
-import { generateEmbedding } from "@/lib/embeddings";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { buildRelationships } from "@/lib/build-relationships";
-import { buildClusters } from "@/lib/build-clusters";
-import { buildPeople } from "@/lib/build-people";
 import {
   MemoryAttachmentValidationError,
 } from "@/lib/memory-media";
@@ -23,9 +18,6 @@ const MEMORY_PIPELINE_TAG =
 
 const MEMORY_CONTENT_MAX_LENGTH =
   10_000;
-
-const MEMORY_PIPELINE_TIMEOUT_MS =
-  30_000;
 
 function logPipelineStage(
   stage: string,
@@ -92,12 +84,6 @@ function createPipelineRequestId() {
   return crypto.randomUUID();
 }
 
-function createPipelineAbortSignal() {
-  return AbortSignal.timeout(
-    MEMORY_PIPELINE_TIMEOUT_MS
-  );
-}
-
 function createPipelineMetrics() {
   return {
     aiDurationMs: 0,
@@ -116,27 +102,6 @@ function logPipelineMetrics(
     "pipeline-metrics",
     metrics
   );
-}
-
-async function safelyExecutePipelineTask<T>(
-  stage: string,
-  task: (
-    signal: AbortSignal
-  ) => Promise<T>
-) {
-  try {
-    const signal =
-      createPipelineAbortSignal();
-
-    return await task(signal);
-  } catch (error) {
-    logPipelineError(
-      stage,
-      error
-    );
-
-    return null;
-  }
 }
 
 export async function POST(req: Request) {
@@ -163,6 +128,10 @@ export async function POST(req: Request) {
         }
       );
     }
+
+    console.info("[create-memory] CREATE_MEMORY_START", {
+      userId: user.id,
+    });
 
     // =====================================
     // ACTIVE PROFILE
@@ -264,6 +233,13 @@ export async function POST(req: Request) {
       );
     }
 
+    console.info("[create-memory] MEDIA_UPLOAD_START", {
+      userId: user.id,
+      profileId: activeProfileId ?? null,
+      attachmentCount: uploadFiles.length,
+      attachmentTypes: uploadFiles.map((f) => f.type || "unknown"),
+    });
+
     const memoryMediaPayload =
       await buildMemoryMediaPayload({
         body,
@@ -275,6 +251,13 @@ export async function POST(req: Request) {
 
     const normalizedCoverImageUrl =
       memoryMediaPayload.coverImageUrl;
+
+    console.info("[create-memory] MEDIA_UPLOAD_SUCCESS", {
+      userId: user.id,
+      profileId: activeProfileId ?? null,
+      attachmentCount: normalizedAttachments.length,
+      attachmentTypes: normalizedAttachments.map((a) => a.type ?? "unknown"),
+    });
 
     const normalizedContent =
       normalizeMemoryContent(
@@ -349,178 +332,28 @@ export async function POST(req: Request) {
     );
 
     // =====================================
-    // AI MEMORY ANALYSIS
+    // AI ENRICHMENT — DEFERRED (non-blocking)
+    //   AI insights + embedding NO LONGER run on the create request. Awaiting them
+    //   here (BEFORE the insert) was the primary cause of Vercel function-duration
+    //   timeouts that lost the memory entirely. The row is now persisted immediately
+    //   with the user's title + neutral defaults; the client triggers
+    //   POST /api/memories/[id]/enrich, which fills ai_* + embedding +
+    //   people/clusters/relationships via lib/memory-enrichment.ts.
     // =====================================
 
-    let aiTitle =
-      sanitizeStringValue(
-        title,
-        "Untitled Memory"
-      );
-
-    let aiSummary = "";
-
-    let aiTags: string[] =
-      [];
-
-    let aiCategory =
-      "General";
-
-    let aiMood =
-      "Neutral";
-
-    let aiImportance =
-      "Medium";
-
-    let aiConfidence =
-      85;
-
-    let aiSentiment =
-      "Neutral";
-
-    let aiEmotionalWeight =
-      "Light";
-
-    const aiStart =
-      performance.now();
-
-    const ai =
-      await safelyExecutePipelineTask(
-        "ai-analysis-error",
-        async () => {
-          return generateMemoryInsights(
-            normalizedContent
-          );
-        }
-      );
-
-    if (ai) {
-      aiTitle =
-        sanitizeStringValue(
-          ai.title,
-          aiTitle
-        );
-
-      aiSummary =
-        sanitizeStringValue(
-          ai.summary,
-          ""
-        );
-
-      aiTags = Array.isArray(
-        ai.tags
-      )
-        ? ai.tags.filter(
-            (
-              tag: unknown
-            ): tag is string =>
-              typeof tag ===
-                "string" &&
-              Boolean(
-                tag.trim()
-              )
-          )
-        : [];
-
-      aiCategory =
-        sanitizeStringValue(
-          ai.category,
-          "General"
-        );
-
-      aiMood =
-        sanitizeStringValue(
-          ai.mood,
-          "Neutral"
-        );
-
-      aiImportance =
-        sanitizeStringValue(
-          ai.importance,
-          "Medium"
-        );
-
-      aiConfidence =
-  typeof ai.confidence ===
-    "number"
-    ? Math.round(
-        ai.confidence <= 1
-          ? ai.confidence * 100
-          : ai.confidence
-      )
-    : 85;
-
-      aiSentiment =
-        sanitizeStringValue(
-          ai.sentiment,
-          "Neutral"
-        );
-
-      aiEmotionalWeight =
-        sanitizeStringValue(
-          ai.emotionalWeight,
-          "Light"
-        );
-
-      pipelineMetrics.aiDurationMs =
-        Number(
-          (
-            performance.now() -
-            aiStart
-          ).toFixed(2)
-        );
-
-      logPipelineStage(
-        "ai-analysis-completed",
-        {
-          durationMs:
-            pipelineMetrics.aiDurationMs,
-        }
-      );
-    }
-
-    // =====================================
-    // EMBEDDING
-    // =====================================
-
-    let embedding:
-      | number[]
-      | null = null;
-
-    logPipelineStage(
-      "embedding-generation-started"
+    const aiTitle = sanitizeStringValue(
+      title,
+      "Untitled Memory"
     );
-
-    const embeddingStart =
-      performance.now();
-
-    embedding =
-      await safelyExecutePipelineTask(
-        "embedding-generation-error",
-        async () => {
-          return generateEmbedding(
-            normalizedContent
-          );
-        }
-      );
-
-    if (embedding) {
-      pipelineMetrics.embeddingDurationMs =
-        Number(
-          (
-            performance.now() -
-            embeddingStart
-          ).toFixed(2)
-        );
-
-      logPipelineStage(
-        "embedding-completed",
-        {
-          durationMs:
-            pipelineMetrics.embeddingDurationMs,
-        }
-      );
-    }
+    const aiSummary = "";
+    const aiTags: string[] = [];
+    const aiCategory = "General";
+    const aiMood = "Neutral";
+    const aiImportance = "Medium";
+    const aiConfidence = 85;
+    const aiSentiment = "Neutral";
+    const aiEmotionalWeight = "Light";
+    const embedding: number[] | null = null;
 
     // =====================================
     // INSERT MEMORY
@@ -605,6 +438,13 @@ cover_image_url:
       }
     );
 
+    console.info("[create-memory] MEMORY_INSERT_START", {
+      userId: user.id,
+      profileId: activeProfileId ?? null,
+      attachmentCount: normalizedAttachments.length,
+      attachmentTypes: normalizedAttachments.map((a) => a.type ?? "unknown"),
+    });
+
     const {
       data,
       error,
@@ -650,6 +490,12 @@ cover_image_url:
       }
     );
 
+    console.info("[create-memory] MEMORY_INSERT_SUCCESS", {
+      userId: user.id,
+      profileId: activeProfileId ?? null,
+      memoryId: data.id,
+    });
+
     // =====================================
     // HISTORICAL DATE — best-effort, deploy-safe
     //   The primary insert already succeeded. If the memory_date columns are
@@ -683,147 +529,11 @@ cover_image_url:
     }
 
     // =====================================
-    // ASYNC COGNITION TASKS
+    // ENRICHMENT IS DEFERRED
+    //   relationships / clusters / people are built by the enrichment job
+    //   (POST /api/memories/[id]/enrich), NOT on the create request, so the memory is
+    //   returned to the client immediately. See lib/memory-enrichment.ts.
     // =====================================
-
-    const cognitionTasks: Promise<void>[] = [];
-
-    // =====================================
-    // BUILD RELATIONSHIPS
-    // =====================================
-
-    const relationshipStart =
-      performance.now();
-
-    const relationshipPromise =
-      buildRelationships(
-        data.id
-      )
-        .then(
-          (
-            relationshipResult
-          ) => {
-            pipelineMetrics.relationshipDurationMs =
-              Number(
-                (
-                  performance.now() -
-                  relationshipStart
-                ).toFixed(2)
-              );
-
-            logPipelineStage(
-              "relationships-built",
-              {
-                relationshipResult,
-                durationMs:
-                  pipelineMetrics.relationshipDurationMs,
-              }
-            );
-          }
-        )
-        .catch(
-          (
-            relationshipError
-          ) => {
-            logPipelineError(
-              "relationship-error",
-              relationshipError
-            );
-          }
-        );
-
-    cognitionTasks.push(
-      relationshipPromise
-    );
-
-    // =====================================
-    // BUILD CLUSTERS
-    // =====================================
-
-    const clusterStart =
-      performance.now();
-
-    const clusterPromise =
-      buildClusters(
-        data.id
-      )
-        .then(() => {
-          pipelineMetrics.clusterDurationMs =
-            Number(
-              (
-                performance.now() -
-                clusterStart
-              ).toFixed(2)
-            );
-
-          logPipelineStage(
-            "clusters-built",
-            {
-              durationMs:
-                pipelineMetrics.clusterDurationMs,
-            }
-          );
-        })
-        .catch(
-          (clusterError) => {
-            logPipelineError(
-              "cluster-error",
-              clusterError
-            );
-          }
-        );
-
-    cognitionTasks.push(
-      clusterPromise
-    );
-
-    // =====================================
-    // BUILD PEOPLE (Phase C2 — grounded person extraction)
-    // =====================================
-
-    const peopleStart =
-      performance.now();
-
-    const peoplePromise =
-      buildPeople(
-        data.id,
-        normalizedContent,
-        user.id,
-        activeProfileId ?? null,
-        ai?.people ?? []
-      )
-        .then(
-          (peopleResult) => {
-            logPipelineStage(
-              "people-built",
-              {
-                peopleResult,
-                durationMs: Number(
-                  (
-                    performance.now() -
-                    peopleStart
-                  ).toFixed(2)
-                ),
-              }
-            );
-          }
-        )
-        .catch(
-          (peopleError) => {
-            logPipelineError(
-              "people-error",
-              peopleError
-            );
-          }
-        );
-
-    cognitionTasks.push(
-      peoplePromise
-    );
-
-    await Promise.allSettled(
-      cognitionTasks
-    );
 
     const pipelineDuration =
       performance.now() -

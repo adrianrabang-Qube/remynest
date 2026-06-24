@@ -342,6 +342,15 @@ export default function CreateMemoryForm() {
           return;
         }
 
+        // Deferred AI enrichment — fire-and-forget so the save is instant. The memory
+        // is already persisted + returned; enrichment (insights/embedding/people/
+        // clusters/relationships) runs in its own request and is idempotent/retryable.
+        if (data?.id) {
+          void fetch(`/api/memories/${data.id}/enrich`, {
+            method: "POST",
+          }).catch(() => {});
+        }
+
         const durationMs =
           Number(
             (

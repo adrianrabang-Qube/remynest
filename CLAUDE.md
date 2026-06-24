@@ -178,6 +178,25 @@ create/edit/delete mutations). Do **not** re-flag thumbnails/pagination as a TOD
 reuse the existing `attachment.thumbnailUrl` field — a stored-derivative branch, not yet
 built.
 
+**Memory create = insert-first, AI enrichment is DEFERRED (authoritative, 2026-06-24):**
+`POST /api/memories/create` **uploads → inserts the row → returns immediately**; it does
+**NOT** run AI synchronously. Awaiting `generateMemoryInsights`/`generateEmbedding` (and
+`buildRelationships/clusters/people`) BEFORE the insert — with no `maxDuration` — was the
+primary cause of Vercel function-timeout failures that **lost the memory entirely** (~95%
+on device, Build 9 testing). The enrichment pipeline now lives in **`lib/memory-enrichment.ts`**
+(`enrichMemory` — idempotent, fault-isolated, UPDATE-based) behind **`POST /api/memories/[id]/enrich`**
+(`maxDuration=60`, owner-scoped), triggered **fire-and-forget by the client** after a
+successful save. **Do NOT reintroduce synchronous AI/embedding/cognition on the create
+request.** The enrichment LOGIC (people/relationship/cluster systems) is unchanged — only
+relocated. **Known remaining limit:** media bytes still proxy through the function, so the
+**~4.5 MB Vercel request-body limit** still 413s large videos/batches — the fix is
+**direct-to-storage upload (client→Supabase, API metadata-only)**, PLANNED not built.
+**Responsive nav breakpoint = `lg` (authoritative, 2026-06-24):** the mobile↔desktop nav
+swap is gated at **`lg` (1024px)**, NOT `md` (768px) — landscape iPhones (~844–932px) must
+keep the touch nav. `AppNavbar` `hidden lg:flex`; `MobileTopBar`/`MobileBottomNav`/
+`MobileNavDrawer` `lg:hidden`; `WorkspaceSelector` drawer `max-lg:`/`lg:`; `<main>` `pb-24
+lg:pb-6`. Do not revert these to `md`.
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires
