@@ -105,48 +105,41 @@ function MemoriesPageContent() {
   const [editingMemory, setEditingMemory] =
     useState<Memory | null>(null);
 
-  const [activeProfileId, setActiveProfileId] =
-    useState<string | null | undefined>(undefined);
-
-  const isMyNestContext =
-    activeProfileId === null;
-
-  const workspaceType =
-    isMyNestContext
-      ? "my-nest"
-      : "care";
-
   // =========================
-  // LOAD ACTIVE PROFILE
+  // ACTIVE PROFILE (reactive — RDAT-002)
+  //   Sourced from a React Query query (NOT a one-time useEffect) so a workspace
+  //   switch can invalidate ["active-profile"] and have the memory feed + search
+  //   re-scope IMMEDIATELY, with no remount. The data query stays keyed on
+  //   activeProfileId, so the new value flows straight into the query key.
   // =========================
-  useEffect(() => {
-    async function loadProfile() {
-      try {
-        const res = await fetch(
-          "/api/active-profile",
-          {
-            cache: "no-store",
-          }
-        );
-
-        if (!res.ok) {
-          return;
-        }
-
-        const data = await res.json();
-
-        setActiveProfileId(
-          data.activeProfileId === null
-            ? null
-            : data.activeProfileId || null
-        );
-      } catch (error) {
-        console.error(error);
+  const { data: activeProfile } = useQuery<{
+    activeProfileId: string | null;
+  }>({
+    queryKey: ["active-profile"],
+    queryFn: async () => {
+      const res = await fetch("/api/active-profile", {
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to load active profile");
       }
-    }
+      return res.json();
+    },
+    staleTime: 0,
+  });
 
-    loadProfile();
-  }, []);
+  // `undefined` while loading (gates the memories query exactly as before);
+  // then `null` = My Nest, or the care profile id.
+  const activeProfileId: string | null | undefined =
+    activeProfile === undefined
+      ? undefined
+      : activeProfile.activeProfileId === null
+        ? null
+        : activeProfile.activeProfileId || null;
+
+  const isMyNestContext = activeProfileId === null;
+
+  const workspaceType = isMyNestContext ? "my-nest" : "care";
 
   // =========================
   // SEMANTIC SEARCH STATE

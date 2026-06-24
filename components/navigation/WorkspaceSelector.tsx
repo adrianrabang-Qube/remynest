@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { setActiveProfile } from "@/app/(app)/dashboard/profile-actions";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
@@ -44,6 +45,7 @@ export default function WorkspaceSelector({
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
   const currentLabel = isMyNest
     ? "My Nest"
@@ -81,7 +83,14 @@ export default function WorkspaceSelector({
     setOpen(false);
     startTransition(() => {
       void Promise.resolve(action())
-        .then(() => router.refresh())
+        .then(() => {
+          // RDAT-002: the cookie changed — re-read the active workspace so the
+          // memories feed + on-page search (keyed on ["active-profile"]) re-scope
+          // IMMEDIATELY, not only when the page later remounts. router.refresh()
+          // updates the server-rendered chrome (label/banner) as before.
+          queryClient.invalidateQueries({ queryKey: ["active-profile"] });
+          router.refresh();
+        })
         .catch(() => router.refresh());
     });
   }

@@ -51,6 +51,8 @@
 	<string>RemyNest needs access to your photo library so you can add existing photos and videos to your memories.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>RemyNest needs permission to save photos and videos to your library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>RemyNest uses your microphone to record sound when you capture a video for your memories.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
