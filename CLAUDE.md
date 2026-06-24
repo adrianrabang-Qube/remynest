@@ -178,6 +178,25 @@ create/edit/delete mutations). Do **not** re-flag thumbnails/pagination as a TOD
 reuse the existing `attachment.thumbnailUrl` field — a stored-derivative branch, not yet
 built.
 
+**Media upload = DIRECT-TO-STORAGE, API is metadata-only (authoritative, 2026-06-24):**
+media uploads **client → Supabase Storage directly** via signed URLs; `/api/memories/create`
++ PUT `/api/memories/[id]` receive **JSON attachment metadata, NEVER raw file bytes** — this
+bypasses the ~4.5 MB Vercel function-body limit (large videos work). Flow: `POST
+/api/memories/upload-url` (`lib/memory-direct-upload.ts` `uploadAttachmentsDirect`) →
+`uploadToSignedUrl`. **Security invariants — do NOT weaken:** (1) storage paths are
+**server-generated + owner-scoped** (`users/{userId}/...`) — the client never chooses a path;
+(2) **quota is server-authoritative** — pre-checked at sign time AND **re-verified against the
+REAL object size** (`getStorageObjectInfo`, `lib/storage/object-info.ts`) at create/edit, never
+the client-reported size; (3) **every attachment path is owner-scoped** (`isOwnedStoragePath`)
+on create AND edit **including the kept set** (a PUT that planted a foreign `users/{victim}/`
+path let the RLS-bypassing service-role signer mint a signed URL for the victim's private
+object — a final guard over the whole attachment set blocks it). The legacy multipart branch in
+both routes is **dormant fallback (rollback only)** — do not route clients back to it. Care
+isolation is unchanged (`memory_profile_id` from the server cookie context, not the client).
+**Known follow-up (not a blocker):** orphan objects (uploaded, never attached) aren't
+ledger-counted + there's no sweeper yet — add an orphan-sweep cron + a bucket object-size
+limit. See `docs/features/media-system.md`.
+
 **Memory create = insert-first, AI enrichment is DEFERRED (authoritative, 2026-06-24):**
 `POST /api/memories/create` **uploads → inserts the row → returns immediately**; it does
 **NOT** run AI synchronously. Awaiting `generateMemoryInsights`/`generateEmbedding` (and

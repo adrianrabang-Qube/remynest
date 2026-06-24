@@ -94,6 +94,33 @@ media-generic; Phase B unlocked video through the display surfaces:
   media seam). **Future audio/documents** plug into the same seams (allowlist +
   `MediaThumb` dispatch + byte accounting already accommodate them).
 
+## Direct-to-Storage uploads (authoritative, 2026-06-24)
+Media uploads go **client → Supabase Storage directly** (signed URLs); the API routes
+receive **JSON attachment metadata, never raw bytes** — bypassing the ~4.5 MB Vercel
+function-body limit so large videos/mixed-media succeed.
+
+**Flow:** client → `POST /api/memories/upload-url` (auth + server-authoritative quota
+pre-check + **server-generated owner-scoped paths** `users/{userId}/...` +
+`createSignedUploadUrl`) → `uploadToSignedUrl` straight to Supabase (`lib/memory-direct-
+upload.ts`) → submit JSON to `/api/memories/create` (`attachments`) or PUT
+`/api/memories/[id]` (`attachments` kept + `newAttachments`).
+
+**Server-authoritative guarantees (`lib/storage/object-info.ts`):**
+- **Paths** are server-generated — the client never chooses one (no spoofing / cross-user).
+- **Quota** is re-verified at create/edit against the **real object size** read from Storage
+  (`getStorageObjectInfo`), never the client-reported size; over-quota → 413 + orphan cleanup;
+  the persisted `attachments[].size` is the real size, so the `storage_ledger` trigger counts
+  reality.
+- **Owner-scope** (`isOwnedStoragePath`) is enforced on **every** attachment path on create
+  AND edit (including the *kept* set on PUT) — a foreign `users/{victim}/` path would let the
+  RLS-bypassing signer mint a signed URL for a victim's private object; a final guard rejects it.
+
+The **legacy multipart** branch in both routes is **dormant fallback (rollback only)**.
+
+**Follow-ups (not blocking):** an orphan-sweep cron (uploaded-but-never-attached objects are
+not ledger-counted) + a Supabase bucket object-size limit; the `info.size ?? clientSize`
+fallback (used only if Storage omits size for a confirmed object — not client-triggerable).
+
 ## Future enhancements
 Video **poster** (first-frame) + PDF first-page stored derivatives (into the existing
 `attachment.thumbnailUrl` field); audio upload + waveform/player; a video-specific
