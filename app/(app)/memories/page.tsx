@@ -19,6 +19,11 @@ import MemorySection from "@/components/memories/MemorySection";
 import { useIsNativePlatform } from "@/lib/platform";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
 import EditMemoryModal from "@/components/EditMemoryModal";
+import {
+  uploadAttachmentsDirect,
+  UploadQuotaError,
+  type DirectAttachment,
+} from "@/lib/memory-direct-upload";
 import StorageFullModal, {
   type UploadQuotaPayload,
 } from "@/components/storage/StorageFullModal";
@@ -329,52 +334,33 @@ function MemoriesPageContent() {
   memoryDate?: string | null;
   memoryDatePrecision?: string;
 }) => {
-      const payload =
-  new FormData();
+      // Direct-to-storage: upload files STRAIGHT to Supabase (no bytes through the API),
+      // then create with JSON-only metadata via the production create route.
+      let newAttachments: DirectAttachment[] = [];
+      try {
+        newAttachments = await uploadAttachmentsDirect(data.uploadedFiles ?? []);
+      } catch (uploadErr) {
+        if (uploadErr instanceof UploadQuotaError) {
+          const err = new Error("Storage limit exceeded") as Error & {
+            quota?: UploadQuotaPayload;
+          };
+          err.quota = uploadErr.quota as UploadQuotaPayload;
+          throw err;
+        }
+        throw uploadErr instanceof Error ? uploadErr : new Error("Upload failed");
+      }
 
-payload.append(
-  "title",
-  data.title
-);
-
-if (data.memoryDate) {
-  payload.append(
-    "memoryDate",
-    data.memoryDate
-  );
-
-  payload.append(
-    "memoryDatePrecision",
-    data.memoryDatePrecision ?? "day"
-  );
-}
-
-payload.append(
-  "content",
-  data.content
-);
-
-payload.append(
-  "profileId",
-  activeProfileId ?? ""
-);
-
-data.uploadedFiles?.forEach(
-  (file) => {
-    payload.append(
-      "uploadedFiles",
-      file
-    );
-  }
-);
-
-const res = await fetch(
-  "/api/memories",
-  {
-    method: "POST",
-    body: payload,
-  }
-);
+      const res = await fetch("/api/memories/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: data.title,
+          content: data.content,
+          memoryDate: data.memoryDate ?? null,
+          memoryDatePrecision: data.memoryDatePrecision ?? "day",
+          attachments: newAttachments,
+        }),
+      });
 
       if (!res.ok) {
         let quota: UploadQuotaPayload | undefined;
@@ -393,7 +379,14 @@ const res = await fetch(
         throw err;
       }
 
-      return res.json();
+      const created = await res.json();
+      // Deferred AI enrichment — fire-and-forget (memory already saved).
+      if (created?.id) {
+        void fetch(`/api/memories/${created.id}/enrich`, {
+          method: "POST",
+        }).catch(() => {});
+      }
+      return created;
     },
 
     onMutate: async (newMemory) => {
@@ -498,35 +491,36 @@ const res = await fetch(
       attachments?: unknown[];
       uploadedFiles?: File[];
     }) => {
-      // Multi-photo edit — multipart so the PUT can upload new files and merge
-      // them with the kept attachments via the shared pipeline.
-      const form = new FormData();
-      form.append("title", title);
-      form.append("content", content);
-      form.append(
-        "profileId",
-        activeProfileId ?? ""
-      );
-      form.append(
-        "memoryDate",
-        memoryDate ?? ""
-      );
-      form.append(
-        "memoryDatePrecision",
-        memoryDatePrecision ?? "day"
-      );
-      form.append(
-        "attachments",
-        JSON.stringify(attachments ?? [])
-      );
-      uploadedFiles?.forEach((file) =>
-        form.append("uploadedFiles", file)
-      );
+      // Direct-to-storage: upload NEW files STRAIGHT to Supabase (no bytes through the
+      // PUT route → no ~4.5 MB limit), then send metadata-only JSON. The route merges
+      // kept + new attachments and recomputes the cover.
+      let newAttachments: DirectAttachment[] = [];
+      try {
+        newAttachments = await uploadAttachmentsDirect(uploadedFiles ?? []);
+      } catch (uploadErr) {
+        if (uploadErr instanceof UploadQuotaError) {
+          const err = new Error("Storage limit exceeded") as Error & {
+            quota?: UploadQuotaPayload;
+          };
+          err.quota = uploadErr.quota as UploadQuotaPayload;
+          throw err;
+        }
+        throw uploadErr instanceof Error ? uploadErr : new Error("Upload failed");
+      }
 
-      const res = await fetch(
-        `/api/memories/${id}`,
-        { method: "PUT", body: form }
-      );
+      const res = await fetch(`/api/memories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          profileId: activeProfileId ?? "",
+          memoryDate: memoryDate || null,
+          memoryDatePrecision: memoryDatePrecision ?? "day",
+          attachments: attachments ?? [],
+          newAttachments,
+        }),
+      });
 
       if (!res.ok) {
         let quota: UploadQuotaPayload | undefined;

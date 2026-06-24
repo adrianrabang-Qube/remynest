@@ -20,6 +20,10 @@ import {
 } from "@/lib/memories/memory-date";
 
 import AttachmentManager from "@/components/memories/AttachmentManager";
+import {
+  uploadAttachmentsDirect,
+  UploadQuotaError,
+} from "@/lib/memory-direct-upload";
 import StorageFullModal, {
   type UploadQuotaPayload,
 } from "@/components/storage/StorageFullModal";
@@ -265,29 +269,35 @@ export default function CreateMemoryForm() {
         let response: Response;
 
         if (files.length > 0) {
-          // Multi-photo create — send multipart so the existing upload pipeline
-          // stores the images. The create route accepts both JSON and FormData.
-          const form = new FormData();
-          form.append("title", normalizedTitle);
-          form.append("content", normalizedContent);
-          if (resolvedMemoryDate.memoryDate) {
-            form.append(
-              "memoryDate",
-              resolvedMemoryDate.memoryDate
-            );
-            form.append(
-              "memoryDatePrecision",
-              resolvedMemoryDate.precision
-            );
+          // Direct-to-storage: upload files STRAIGHT to Supabase Storage (no bytes
+          // through the API route → no ~4.5 MB limit), then create with JSON metadata.
+          let newAttachments;
+          try {
+            newAttachments = await uploadAttachmentsDirect(files);
+          } catch (uploadErr) {
+            if (uploadErr instanceof UploadQuotaError) {
+              setStorageFull(uploadErr.quota as UploadQuotaPayload);
+            } else {
+              setErrorMessage(
+                uploadErr instanceof Error && uploadErr.message
+                  ? uploadErr.message
+                  : "Upload failed. Please try again."
+              );
+            }
+            return;
           }
-          files.forEach((file) =>
-            form.append("uploadedFiles", file)
-          );
 
-          response = await fetch(
-            "/api/memories/create",
-            { method: "POST", body: form }
-          );
+          response = await fetch("/api/memories/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: normalizedTitle,
+              content: normalizedContent,
+              memoryDate: resolvedMemoryDate.memoryDate,
+              memoryDatePrecision: resolvedMemoryDate.precision,
+              attachments: newAttachments,
+            }),
+          });
         } else {
           response = await fetch(
             "/api/memories/create",
