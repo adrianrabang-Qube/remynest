@@ -7,6 +7,7 @@ import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { haptic } from "@/lib/haptics";
+import FloatingCompanionButton from "@/components/remy/companion/FloatingCompanionButton";
 
 import {
   MOBILE_PRIMARY_NAV,
@@ -80,19 +81,17 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
         />
       </li>
 
-      {/* Center "New" action */}
+      {/* Center "New" action — now the generic Floating Companion Button. The future
+          Nest Button takes over this exact slot by swapping href → onActivate={toggleRemy};
+          today it stays a Link to /memories/new (memory creation unchanged). */}
       <li className="flex flex-1 items-center justify-center">
-        <Link
+        <FloatingCompanionButton
           href={withContext(MOBILE_NEW_ACTION.href)}
-          onClick={() => haptic("medium")}
-          aria-label="New memory"
-          aria-current={
-            isNavItemActive(pathname, MOBILE_NEW_ACTION.href) ? "page" : undefined
-          }
-          className="flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-sage text-white shadow-lg ring-4 ring-sand transition hover:bg-sage-deep active:scale-95"
+          label="New memory"
+          isActive={isNavItemActive(pathname, MOBILE_NEW_ACTION.href)}
         >
           <NewIcon className="h-6 w-6" aria-hidden />
-        </Link>
+        </FloatingCompanionButton>
       </li>
 
       <li className="flex flex-1">

@@ -10,6 +10,8 @@ import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { RemyProvider } from "@/components/remy/companion/RemyProvider";
+import FloatingCompanionLayer from "@/components/remy/companion/FloatingCompanionLayer";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
 // serve this segment (or its identity read) from cache.
@@ -82,30 +84,38 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Immediate in-flight navigation feedback (perceived performance). */}
-      <NavigationProgress />
+    // Remy companion provider (foundation). Wraps the shell so the Floating layer + future
+    // Nest button have context. `children` is a stable prop, so opening/closing Remy
+    // re-renders ONLY the provider + its context consumers (the layer) — never the app tree.
+    <RemyProvider>
+      <div className="min-h-screen bg-stone-50">
+        {/* Immediate in-flight navigation feedback (perceived performance). */}
+        <NavigationProgress />
 
-      {/* Loads the OneSignal Web SDK + registers the device for push. Self-guards
-          on an authenticated user; this segment is already auth-gated. */}
-      <OneSignalInit />
+        {/* Loads the OneSignal Web SDK + registers the device for push. Self-guards
+            on an authenticated user; this segment is already auth-gated. */}
+        <OneSignalInit />
 
-      <AppNavbar
-        profile={identity?.summary ?? null}
-        workspace={workspace}
-        workspaceProfiles={workspaceProfiles}
-        activeProfileId={activeProfileId}
-      />
+        <AppNavbar
+          profile={identity?.summary ?? null}
+          workspace={workspace}
+          workspaceProfiles={workspaceProfiles}
+          activeProfileId={activeProfileId}
+        />
 
-      {!workspace.isMyNest && activeProfileName && (
-        <WorkspaceBanner activeProfileName={activeProfileName} />
-      )}
+        {!workspace.isMyNest && activeProfileName && (
+          <WorkspaceBanner activeProfileName={activeProfileName} />
+        )}
 
-      {/* Mobile: tighter px-4 gutters + pb-24 to clear the fixed bottom nav.
-          md+ restores the original px-6 / py-6. */}
-      <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-24 md:px-6 lg:pb-6">
-        {children}
-      </main>
-    </div>
+        {/* Mobile: tighter px-4 gutters + pb-24 to clear the fixed bottom nav.
+            md+ restores the original px-6 / py-6. */}
+        <main className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-24 md:px-6 lg:pb-6">
+          {children}
+        </main>
+
+        {/* Remy's home — portaled, above content, below modals, safe-area aware. */}
+        <FloatingCompanionLayer />
+      </div>
+    </RemyProvider>
   );
 }
