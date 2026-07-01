@@ -290,26 +290,25 @@ CSS/Framer plug in with zero consumer change). Performance: `children` is a stab
 split contexts, so opening/closing Remy re-renders ONLY the provider + the layer. **Do NOT
 re-defer, re-scaffold, or re-litigate this foundation.**
 
-**Remy asset pipeline — Master v1.0 + master/production/archive (authoritative, 2026-06-28):**
-the approved canonical character is **Remy Master v1.0** at
-**`public/assets/remy/master/remy_master_v1.png`** — an **immutable brand reference**:
-read-only, never modified/overwritten, never wired into the app. The character must **never**
-be redesigned/reinterpreted; every production export must match this sheet exactly
+**Remy asset pipeline — SINGLE FLAT FOLDER (authoritative, 2026-07-01 — supersedes the
+2026-06-28 master/production/archive structure):** every Remy/Nest asset lives **directly in
+`public/assets/remy/`** — there is **no** `master/`, `production/`, or `archive/` sub-folder
+(the operator retired that structure as over-complicated; those folders were removed and must
+**not** be reintroduced). The approved canonical character is **Remy Master v1.0** at
+**`public/assets/remy/remy_master_v1.png`** — an **immutable brand reference**: read-only,
+never modified/overwritten, **not** registered as an app asset (never wired into the app). The
+character must **never** be redesigned/reinterpreted; every export must match it exactly
 (proportions, scarf, golden-feather heart pendant, palette) — this is the purple+gold
-**Companion/Remy** identity, NOT the product/brand sage mark, and is distinct from the
-separate frozen in-app sprite at `components/remy/avatar/*` + `public/remy/`. The app reads
-Remy/Nest art **only** from **`public/assets/remy/production/`**, and **only** through the
-Asset Registry (`lib/remy/companion/asset-registry.ts`), which is the **SOLE owner of asset
-paths** (the path lives once, in `BASE`; components reference assets by KEY, never by path).
-`public/assets/remy/archive/` holds historical/superseded revisions — never referenced,
-**nothing is ever deleted**. To add/replace art: drop the PNG into `production/` using the
-exact existing filename and flip that registry entry's `kind` `"placeholder"`→`"image"` — no
-other code change. **Current production status:** `remy_idle` + `remy_thinking` are real art;
-the other 12 are transparent placeholders (`remy_listening` is a placeholder on purpose — the
-dropped file duplicated `remy_thinking`; its correct wing-to-ear export is pending). **Do NOT**
-re-point the registry away from `production/`, hardcode an asset path outside the registry,
-re-add a flat `public/assets/remy/*.png` layout, or modify `master/`. See
-`public/assets/remy/README.md`.
+**Companion/Remy** identity, NOT the product/brand sage mark, and is distinct from the separate
+frozen in-app sprite at `components/remy/avatar/*` + `public/remy/`. The app reads Remy/Nest art
+**only** through the Asset Registry (`lib/remy/companion/asset-registry.ts`), the **SOLE owner
+of asset paths** (`BASE = "/assets/remy"`; components reference assets by KEY, never by path).
+**Current status:** the registry has **23 app assets** — 21 real approved artwork (`kind:
+"image"`) + **2 placeholders** (`nest_open`, `shadow`) awaiting their exports. To add/replace
+art: drop the PNG into `public/assets/remy/` using the exact filename and flip that registry
+entry's `kind` `"placeholder"`→`"image"` — no other code change. **Do NOT** re-introduce
+master/production/archive sub-folders, hardcode an asset path outside the registry, or modify
+`remy_master_v1.png`. See `public/assets/remy/README.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

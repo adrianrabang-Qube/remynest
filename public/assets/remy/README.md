@@ -1,55 +1,30 @@
-# Remy — Production Asset Pipeline
+# Remy — Production Assets
 
-Canonical home for every Remy / Nest visual. Three folders, one rule each.
+**One flat folder. Every Remy / Nest asset lives directly here** — no `master/`,
+`production/`, or `archive/` sub-folders.
 
-```
-public/assets/remy/
-├─ master/        # The canonical character reference — READ-ONLY
-│   └─ remy_master_v1.png      ← "Remy Master v1.0" (turnaround + expressions + palette)
-├─ production/    # The ONLY location the app reads (the Asset Registry points here)
-│   └─ <14 named assets>       ← real art where approved, transparent placeholder otherwise
-└─ archive/       # Historical / superseded revisions — never referenced, never deleted
-    └─ <pre-reorg snapshot>
-```
+The app reads these **only** through the Asset Registry
+(`lib/remy/companion/asset-registry.ts`), which is the **single owner of asset paths**:
+components reference assets by **key**, never by path. To add or replace art, drop the PNG
+into this folder using the **exact existing filename**, then flip that entry's `kind` from
+`"placeholder"` to `"image"` in the registry — no other code change.
 
-## master/ — the immutable reference
-`remy_master_v1.png` is the **approved canonical design** (Remy Master v1.0). Treat it as
-**read-only**: never overwrite it, never modify it, never wire it into the app. Every
-production export must match this sheet exactly (proportions, scarf, golden-feather heart
-pendant, colour palette). These are **immutable brand assets** — do not redesign or
-reinterpret the character (see `CLAUDE.md`).
+## The character reference
+`remy_master_v1.png` is the **permanent canonical character reference** (Remy Master v1.0).
+It is **read-only** — never modify it, never overwrite it, and it is **not** registered as an
+app asset. Every export in this folder must match it exactly (proportions, scarf,
+golden-feather heart pendant, palette). Do not redesign or reinterpret the character.
 
-## production/ — the live asset set
-The application reads assets **only** from here, and **only** through the Asset Registry
-(`lib/remy/companion/asset-registry.ts`). Components reference assets by **key**, never by
-path — the path lives in exactly one place (the registry `BASE` constant). To add/replace
-art: drop the PNG into `production/` using the **exact existing filename**, then flip that
-entry's `kind` from `"placeholder"` to `"image"` in the registry. No other code changes.
-
-Master spec per asset: **2048×2048, transparent PNG, centered, no background**, consistent
-proportions/lighting/colour with `master/`.
-
-### Current production status
+## Contents (24 files)
 | File | Status |
 | --- | --- |
-| `remy_idle.png` | ✅ real art (idle pose) |
-| `remy_thinking.png` | ✅ real art (claw-to-head + "?") |
-| `remy_listening.png` | ⏳ placeholder — the dropped file duplicated `remy_thinking`; its correct **wing-to-ear** export is pending |
-| `remy_happy.png` | ⏳ placeholder |
-| `remy_talking.png` | ⏳ placeholder |
-| `remy_wave.png` | ⏳ placeholder |
-| `remy_sleeping.png` | ⏳ placeholder |
-| `remy_celebrating.png` | ⏳ placeholder |
-| `nest_closed.png` | ⏳ placeholder |
-| `nest_open.png` | ⏳ placeholder |
-| `nest_empty.png` | ⏳ placeholder |
-| `golden_feather.png` | ⏳ placeholder |
-| `speech_bubble.png` | ⏳ placeholder |
-| `shadow.png` | ⏳ placeholder |
+| `remy_master_v1.png` | 🔒 canonical reference (read-only, not app-wired) |
+| `remy_idle.png` `remy_listening.png` `remy_thinking.png` `remy_talking.png` | ✅ real art |
+| `remy_happy.png` `remy_surprised.png` `remy_sleeping.png` `remy_searching.png` | ✅ real art |
+| `remy_memory_found.png` `remy_reminding.png` `remy_encouraging.png` `remy_welcome.png` | ✅ real art |
+| `remy_goodbye.png` `remy_confused.png` `remy_wink.png` `remy_celebrating.png` `remy_success.png` | ✅ real art |
+| `golden_feather.png` `nest_empty.png` `nest_closed.png` `speech_bubble.png` | ✅ real art |
+| `nest_open.png` | ⏳ placeholder — awaiting approved export |
+| `shadow.png` | ⏳ placeholder — awaiting approved export |
 
 Placeholders are 1×1 transparent PNGs so the app never 404s while art is in production.
-
-## archive/ — historical revisions
-A faithful snapshot of the pre-reorganization flat layout. Kept for history; **nothing is
-ever deleted**, nothing here is referenced by the app. (Includes the original
-duplicate-of-thinking `remy_listening.png` for the record.)
