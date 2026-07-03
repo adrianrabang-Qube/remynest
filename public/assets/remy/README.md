@@ -23,8 +23,8 @@ golden-feather heart pendant, palette). Do not redesign or reinterpret the chara
 | `remy_happy.png` `remy_surprised.png` `remy_sleeping.png` `remy_searching.png` | ✅ real art |
 | `remy_memory_found.png` `remy_reminding.png` `remy_encouraging.png` `remy_welcome.png` | ✅ real art |
 | `remy_goodbye.png` `remy_confused.png` `remy_wink.png` `remy_celebrating.png` `remy_success.png` | ✅ real art |
-| `golden_feather.png` `nest_empty.png` `nest_closed.png` `speech_bubble.png` | ✅ real art |
-| `nest_open.png` | ⏳ placeholder — awaiting approved export |
-| `shadow.png` | ⏳ placeholder — awaiting approved export |
+| `golden_feather.png` `nest_empty.png` `nest_open.png` `nest_closed.png` | ✅ real art |
+| `speech_bubble.png` `shadow.png` | ✅ real art |
 
-Placeholders are 1×1 transparent PNGs so the app never 404s while art is in production.
+All 23 app assets are real approved artwork; no placeholders remain. (Note: the exports
+currently carry an opaque background rather than transparency — see the app README/handoff.)

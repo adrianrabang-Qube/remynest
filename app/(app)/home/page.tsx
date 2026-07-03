@@ -11,6 +11,7 @@ import RemyVoicePreview from "@/components/remy/RemyVoicePreview";
 import RemyStorySnapshot from "@/components/remy/RemyStorySnapshot";
 import ProfileCoverageCard from "@/components/profile/identity/ProfileCoverageCard";
 import MyNestExplainer from "@/components/profile/MyNestExplainer";
+import { Remy } from "@/components/remy/Remy";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 
 export const dynamic = "force-dynamic";
@@ -55,21 +56,24 @@ export default async function RemyHomePage() {
 
       {/* First-run welcome: a clear next step when there are no memories yet. */}
       {coverage.total === 0 && (
-        <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-5 shadow-soft">
-          <h2 className="text-lg font-semibold text-charcoal">
-            Welcome to RemyNest
-          </h2>
-          <p className="mt-1 text-sm text-charcoal-soft">
-            Start by adding your first memory — a photo, a note, or a moment you
-            want to keep.
-          </p>
-          <Link
-            href="/memories/new"
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
-          >
-            Add your first memory
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+        <section className="flex flex-col items-start gap-4 rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-5 shadow-soft sm:flex-row sm:items-center">
+          <Remy state="welcome" size={112} decorative className="shrink-0" priority />
+          <div>
+            <h2 className="text-lg font-semibold text-charcoal">
+              Welcome to RemyNest
+            </h2>
+            <p className="mt-1 text-sm text-charcoal-soft">
+              Start by adding your first memory — a photo, a note, or a moment you
+              want to keep.
+            </p>
+            <Link
+              href="/memories/new"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            >
+              Add your first memory
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
         </section>
       )}
 

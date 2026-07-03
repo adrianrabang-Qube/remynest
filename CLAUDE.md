@@ -303,10 +303,12 @@ character must **never** be redesigned/reinterpreted; every export must match it
 frozen in-app sprite at `components/remy/avatar/*` + `public/remy/`. The app reads Remy/Nest art
 **only** through the Asset Registry (`lib/remy/companion/asset-registry.ts`), the **SOLE owner
 of asset paths** (`BASE = "/assets/remy"`; components reference assets by KEY, never by path).
-**Current status:** the registry has **23 app assets** — 21 real approved artwork (`kind:
-"image"`) + **2 placeholders** (`nest_open`, `shadow`) awaiting their exports. To add/replace
-art: drop the PNG into `public/assets/remy/` using the exact filename and flip that registry
-entry's `kind` `"placeholder"`→`"image"` — no other code change. **Do NOT** re-introduce
+**Current status:** the registry has **23 app assets, ALL real approved artwork** (`kind:
+"image"`, 0 placeholders). To add/replace art: drop the PNG into `public/assets/remy/` using
+the exact filename (and set `kind: "image"`) — no other code change. **Rendering:** the app
+renders Remy art ONLY through the centralized **`<Remy state="…">`** component
+(`components/remy/Remy.tsx`) — the single, registry-driven, animation-ready render path;
+never hardcode an `<img>`/`next/image` for Remy elsewhere. **Do NOT** re-introduce
 master/production/archive sub-folders, hardcode an asset path outside the registry, or modify
 `remy_master_v1.png`. See `public/assets/remy/README.md`.
 

@@ -3,6 +3,8 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
+import { Remy } from "@/components/remy/Remy";
+
 export default function RootSegmentError({
   error,
   reset,
@@ -17,6 +19,7 @@ export default function RootSegmentError({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center p-6">
+      <Remy state="confused" size={140} decorative />
       <h2 className="text-2xl font-semibold mb-4">
         Something went wrong
       </h2>

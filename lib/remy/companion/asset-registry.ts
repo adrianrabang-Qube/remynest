@@ -4,8 +4,8 @@
  * THE single source of truth for every Remy/Nest visual. Components reference assets by
  * KEY — never by file path — so the path lives ONLY here (the `BASE` constant). Every asset
  * lives DIRECTLY in `/public/assets/remy/` (one flat folder; no master/production/archive
- * sub-folders). Most entries are REAL approved artwork (`kind: "image"`); a couple are
- * transparent placeholders (`kind: "placeholder"`) until their approved export lands.
+ * sub-folders). All 23 app assets are REAL approved artwork (`kind: "image"`); the
+ * `kind: "placeholder"` path stays supported for any future not-yet-exported asset.
  *
  * The permanent character reference `remy_master_v1.png` also lives in `/public/assets/remy/`
  * but is deliberately NOT registered here — it is a read-only brand reference, never wired
@@ -74,10 +74,10 @@ export const REMY_ASSETS: Record<RemyAssetKey, RemyAsset> = {
   remySuccess: { key: "remySuccess", label: "Remy — success", kind: "image", src: `${BASE}/remy_success.png` },
   goldenFeather: { key: "goldenFeather", label: "Golden feather", kind: "image", src: `${BASE}/golden_feather.png` },
   nestEmpty: { key: "nestEmpty", label: "Nest — empty", kind: "image", src: `${BASE}/nest_empty.png` },
-  nestOpen: { key: "nestOpen", label: "Nest — open", kind: "placeholder", src: `${BASE}/nest_open.png` },
+  nestOpen: { key: "nestOpen", label: "Nest — open", kind: "image", src: `${BASE}/nest_open.png` },
   nestClosed: { key: "nestClosed", label: "Nest — closed", kind: "image", src: `${BASE}/nest_closed.png` },
   speechBubble: { key: "speechBubble", label: "Speech bubble", kind: "image", src: `${BASE}/speech_bubble.png` },
-  shadow: { key: "shadow", label: "Companion shadow", kind: "placeholder", src: `${BASE}/shadow.png` },
+  shadow: { key: "shadow", label: "Companion shadow", kind: "image", src: `${BASE}/shadow.png` },
 };
 
 export function getRemyAsset(key: RemyAssetKey): RemyAsset {

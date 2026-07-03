@@ -3,6 +3,8 @@
 import * as Sentry from "@sentry/nextjs"
 import { useEffect } from "react"
 
+import { Remy } from "@/components/remy/Remy"
+
 export default function Error({
   error,
   reset,
@@ -16,6 +18,7 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] gap-4">
+      <Remy state="confused" size={140} decorative />
       <h2 className="text-xl font-semibold">Something went wrong</h2>
 
       <button
