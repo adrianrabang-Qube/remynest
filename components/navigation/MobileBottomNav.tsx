@@ -7,7 +7,7 @@ import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { haptic } from "@/lib/haptics";
-import FloatingCompanionButton from "@/components/remy/companion/FloatingCompanionButton";
+import FloatingCompanionButton from "@/components/navigation/FloatingCompanionButton";
 
 import {
   MOBILE_PRIMARY_NAV,

@@ -4,6 +4,7 @@ import {
   getRemyAsset,
   type RemyAssetKey,
 } from "@/lib/remy/companion/asset-registry";
+import type { RemyExpression } from "@/lib/remy/core/presentation";
 
 /**
  * <Remy> — the SINGLE, centralized way to render the Remy companion character.
@@ -33,25 +34,12 @@ import {
  *  `lib/remy/companion/animation-controller.ts`; this component stays render-only.)
  */
 
-/** Friendly expression names (the 17 character states). Maps 1:1 to registry keys. */
-export type RemyVariant =
-  | "idle"
-  | "listening"
-  | "thinking"
-  | "talking"
-  | "happy"
-  | "surprised"
-  | "sleeping"
-  | "searching"
-  | "memoryFound"
-  | "reminding"
-  | "encouraging"
-  | "welcome"
-  | "goodbye"
-  | "confused"
-  | "wink"
-  | "celebrating"
-  | "success";
+/**
+ * The expression set is defined ONCE in the platform core (`RemyExpression`) — the single
+ * vocabulary shared by the policy engine, presentation types, and this renderer. Aliased here
+ * as `RemyVariant` for the renderer's prop, and mapped to asset keys below.
+ */
+export type RemyVariant = RemyExpression;
 
 const VARIANT_TO_KEY: Record<RemyVariant, RemyAssetKey> = {
   idle: "remyIdle",

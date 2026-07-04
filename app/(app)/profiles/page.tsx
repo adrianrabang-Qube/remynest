@@ -7,7 +7,7 @@ import { computeCoverage } from "@/lib/remy/date-coverage";
 import { buildPersonUnderstanding } from "@/lib/remy/understanding";
 import PersonRow from "@/components/profile/people/PersonRow";
 import AddPersonButton from "@/components/profile/people/AddPersonButton";
-import { RemyStage } from "@/components/remy/platform";
+import { RemyStage } from "@/lib/remy";
 
 export const dynamic = "force-dynamic";
 
@@ -104,7 +104,7 @@ export default async function ProfilesPage() {
 
       {rows.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center">
-          <RemyStage scene="empty.people" size={112} className="mx-auto mb-2" />
+          <RemyStage context="people.empty" size={112} className="mx-auto mb-2" />
           <p className="text-sm text-charcoal-soft">No people yet.</p>
           <p className="mt-1 text-sm text-charcoal-muted">
             Add a person you care for to keep their memories organised — or they&apos;ll

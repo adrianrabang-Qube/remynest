@@ -312,24 +312,33 @@ never hardcode an `<img>`/`next/image` for Remy elsewhere. **Do NOT** re-introdu
 master/production/archive sub-folders, hardcode an asset path outside the registry, or modify
 `remy_master_v1.png`. See `public/assets/remy/README.md`.
 
-**Remy is an application-wide PLATFORM, not a page feature (authoritative, 2026-07-04):** Remy
-is architected like the theme/toast/router — `Application → Remy Platform → UI`, **never**
-`Page → Remy`. **The UI emits SEMANTIC scenes/signals; the platform decides expression,
-visibility, animation, and (future) voice/gesture/emotion.** Feature code imports **only** the
-public barrel **`@/components/remy/platform`** — `<RemyStage scene="…"/>` (in-context surface),
-`useRemyScene("…")` (sticky context), `useRemySignal()` (transient moment). **Pages must NEVER
-choose an expression** (no `<Remy state="…">` in a page) — that decision lives in ONE place, the
-presentation **policy** (`lib/remy/platform/policy.ts`); the semantic vocabulary lives in
-`lib/remy/platform/scenes.ts`. The **runtime** is `RemyProvider`
-(`components/remy/companion/RemyProvider.tsx`, mounted once in `(app)/layout.tsx`) — the sole
-owner of Remy state; it keeps the split state/actions contexts + stable `children` so Remy
-activity never re-renders the app tree. The **only** renderer stays `<Remy>` and the **only**
-asset source stays the registry. **Allowed exception:** error boundaries (`app/error.tsx`,
-`app/(app)/error.tsx`) render the raw `<Remy state="confused">` because the platform may be the
-thing that crashed — keep that exception list small + documented. To add/skin/animate/voice
-Remy, edit the vocabulary/policy/controller seams, **never** the pages. **Do NOT** couple Remy
-to a page, create a second provider/renderer/asset map, or hardcode expressions in features.
-See `docs/architecture/REMY_PLATFORM_ARCHITECTURE.md` (the single source of truth).
+**Remy is an application-wide PLATFORM SERVICE, not a page feature (authoritative, 2026-07-04 —
+v2, supersedes v1):** Remy is a first-class capability like auth/analytics/theme/router. Pipeline:
+`Public API → Event Bus → Brain → Emotion Engine → Policy Engine → Animation/Voice Engines →
+Renderer`. **Features publish SEMANTIC EVENTS; the platform decides everything else** (feeling,
+expression, visibility, animation, future voice). **The ONLY public import path is
+`@/lib/remy`** — `Remy.emit("memory.saved")` (event bus), `Remy.enter/exit("offline")` (sticky
+context), `<RemyStage context="memories.empty"/>` (in-place surface), `useRemyContext("…")`
+(mount-scoped, leak-proof), plus `RemyProvider`/`RemyFloatingPresence` (mounted once by the app
+shell) + semantic types. **Features must NEVER** import `lib/remy/core/*`, `lib/remy/companion/*`,
+or `components/remy/{Remy,companion,platform}/*`, choose an expression, or reference an
+`/assets/remy` path. The pipeline lives in **`lib/remy/core/*`** (pure TS, no React/DOM →
+portable to native hosts): `event-bus`, `events` (+`CONTEXT_PRIORITY`), `brain` (semantic state;
+future: memory/relationship/trust/personality), `emotion`+`emotion-engine` (feeling),
+`policy-engine` (feeling→presentation — the SOLE presentation authority), `presentation` (the
+expression vocabulary), `animation-engine` (over the `AnimationController` seam),
+`voice-engine` (architecture only, no TTS). The React binding is `RemyProvider` (a thin adapter
+over the core). **Exactly one** of each: public API (`lib/remy/index.ts`), renderer
+(`components/remy/Remy.tsx`), provider, asset registry (`lib/remy/companion/asset-registry.ts`),
+event bus, brain. **Allowed exception:** error boundaries (`app/error.tsx`, `app/(app)/error.tsx`)
+render the raw `<Remy state="confused">` (the platform may be the crashed thing) — keep this list
+tiny. To extend: add an event+feeling+look mapping and emit it; to animate/voice/go-native: swap
+a backend behind its `create…` seam or write a new adapter+renderer over the same core — **never
+touch features**. **Do NOT** create a second renderer/provider/registry/public-API/policy, put
+business logic in the renderer/engines, or couple Remy to a page. (This is the **companion
+platform** — distinct from the separate `lib/remy/*.ts` AI-intelligence layer and the frozen
+`components/remy/avatar/*` sprite.) See `docs/architecture/REMY_PLATFORM_V2.md` (the single
+source of truth; v1 `REMY_PLATFORM_ARCHITECTURE.md` is historical).
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

@@ -10,8 +10,7 @@ import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { RemyProvider } from "@/components/remy/companion/RemyProvider";
-import FloatingCompanionLayer from "@/components/remy/companion/FloatingCompanionLayer";
+import { RemyProvider, RemyFloatingPresence } from "@/lib/remy";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
 // serve this segment (or its identity read) from cache.
@@ -114,7 +113,7 @@ export default async function AppLayout({
         </main>
 
         {/* Remy's home — portaled, above content, below modals, safe-area aware. */}
-        <FloatingCompanionLayer />
+        <RemyFloatingPresence />
       </div>
     </RemyProvider>
   );
