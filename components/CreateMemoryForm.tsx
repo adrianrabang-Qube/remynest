@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ToastProvider";
+import { Remy } from "@/lib/remy";
 
 import {
   buildMemoryDate,
@@ -396,11 +397,13 @@ export default function CreateMemoryForm() {
         });
 
         showToast("Memory saved");
+        Remy.emit("memory.created");
 
         startTransition(() => {
           router.refresh();
         });
       } catch (error) {
+        Remy.emit("failure");
         logMemoryFormError(
           "memory-submit-error",
           {

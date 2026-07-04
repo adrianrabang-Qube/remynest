@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-query";
 
 import MemorySection from "@/components/memories/MemorySection";
-import { RemyStage } from "@/lib/remy";
+import { Remy, RemyStage } from "@/lib/remy";
 import { useIsNativePlatform } from "@/lib/platform";
 import { ACTIVE_PROFILE_QUERY_KEY } from "@/lib/active-profile-cache";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
@@ -176,6 +176,7 @@ function MemoriesPageContent() {
 
     try {
       setIsSearching(true);
+      Remy.emit("search.started");
       setSearchNotice(null);
 
       const res = await fetch(
@@ -245,6 +246,7 @@ function MemoriesPageContent() {
       console.error(error);
     } finally {
       setIsSearching(false);
+      Remy.emit("search.finished");
     }
   }, [searchQuery, activeProfileId, workspaceType, native]);
 
@@ -434,6 +436,7 @@ function MemoriesPageContent() {
       _newMemory,
       context
     ) => {
+      Remy.emit("failure");
       const quota = (_err as Error & { quota?: UploadQuotaPayload }).quota;
       if (quota) setStorageFull(quota);
       if (context?.previous) {
@@ -449,6 +452,7 @@ function MemoriesPageContent() {
     },
 
     onSuccess: () => {
+      Remy.emit("memory.created");
       // Close only on success — a quota 413 keeps the modal open so the draft +
       // picked files survive for retry after the user frees space.
       setShowCreate(false);
@@ -581,6 +585,7 @@ function MemoriesPageContent() {
       _updated,
       context
     ) => {
+      Remy.emit("failure");
       const quota = (_err as Error & { quota?: UploadQuotaPayload }).quota;
       if (quota) setStorageFull(quota);
       if (context?.previous) {
@@ -596,6 +601,7 @@ function MemoriesPageContent() {
     },
 
     onSuccess: () => {
+      Remy.emit("memory.saved");
       // Close only on success — a quota 413 keeps the edit modal open for retry.
       setEditingMemory(null);
       queryClient.invalidateQueries({
@@ -669,6 +675,7 @@ function MemoriesPageContent() {
       _id,
       context
     ) => {
+      Remy.emit("failure");
       if (context?.previous) {
         queryClient.setQueryData(
           [
@@ -679,6 +686,10 @@ function MemoriesPageContent() {
           context.previous
         );
       }
+    },
+
+    onSuccess: () => {
+      Remy.emit("memory.deleted");
     },
 
     onSettled: () => {

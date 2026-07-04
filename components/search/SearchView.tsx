@@ -11,6 +11,7 @@ import {
   type SearchHit,
   type SearchResults,
 } from "./types";
+import { Remy } from "@/lib/remy";
 
 const RECENT_KEY = "remynest:recent-searches";
 const RECENT_MAX = 6;
@@ -115,6 +116,7 @@ export default function SearchView() {
         return;
       }
       setLoading(true);
+      Remy.emit("search.started");
       const controller = new AbortController();
       abortRef.current = controller;
       try {
@@ -134,6 +136,7 @@ export default function SearchView() {
         // Aborted or network error — keep the surface stable.
       } finally {
         if (abortRef.current === controller) setLoading(false);
+        Remy.emit("search.finished");
       }
     }, DEBOUNCE_MS);
 

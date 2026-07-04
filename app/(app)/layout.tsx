@@ -11,6 +11,7 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { RemyProvider, RemyFloatingPresence } from "@/lib/remy";
+import RemyConnectivityBridge from "@/components/RemyConnectivityBridge";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
 // serve this segment (or its identity read) from cache.
@@ -114,6 +115,9 @@ export default async function AppLayout({
 
         {/* Remy's home — portaled, above content, below modals, safe-area aware. */}
         <RemyFloatingPresence />
+
+        {/* Bridges browser online/offline into Remy semantic events (no UI). */}
+        <RemyConnectivityBridge />
       </div>
     </RemyProvider>
   );

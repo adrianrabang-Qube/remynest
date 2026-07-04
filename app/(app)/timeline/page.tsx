@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { RemyStage } from "@/lib/remy";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
 import { signMemories } from "@/lib/memory-media-signing";
@@ -381,6 +382,7 @@ export default async function TimelinePage({
       {/* Empty State */}
       {!hasResults && (
         <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6 text-center">
+          <RemyStage context="timeline.empty" size={128} className="mx-auto mb-2" />
           <p className="text-charcoal-soft">No memories to show yet.</p>
           <p className="mt-1 text-sm text-charcoal-muted">
             Add a memory to see it on your timeline.
