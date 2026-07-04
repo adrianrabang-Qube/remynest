@@ -312,6 +312,25 @@ never hardcode an `<img>`/`next/image` for Remy elsewhere. **Do NOT** re-introdu
 master/production/archive sub-folders, hardcode an asset path outside the registry, or modify
 `remy_master_v1.png`. See `public/assets/remy/README.md`.
 
+**Remy is an application-wide PLATFORM, not a page feature (authoritative, 2026-07-04):** Remy
+is architected like the theme/toast/router — `Application → Remy Platform → UI`, **never**
+`Page → Remy`. **The UI emits SEMANTIC scenes/signals; the platform decides expression,
+visibility, animation, and (future) voice/gesture/emotion.** Feature code imports **only** the
+public barrel **`@/components/remy/platform`** — `<RemyStage scene="…"/>` (in-context surface),
+`useRemyScene("…")` (sticky context), `useRemySignal()` (transient moment). **Pages must NEVER
+choose an expression** (no `<Remy state="…">` in a page) — that decision lives in ONE place, the
+presentation **policy** (`lib/remy/platform/policy.ts`); the semantic vocabulary lives in
+`lib/remy/platform/scenes.ts`. The **runtime** is `RemyProvider`
+(`components/remy/companion/RemyProvider.tsx`, mounted once in `(app)/layout.tsx`) — the sole
+owner of Remy state; it keeps the split state/actions contexts + stable `children` so Remy
+activity never re-renders the app tree. The **only** renderer stays `<Remy>` and the **only**
+asset source stays the registry. **Allowed exception:** error boundaries (`app/error.tsx`,
+`app/(app)/error.tsx`) render the raw `<Remy state="confused">` because the platform may be the
+thing that crashed — keep that exception list small + documented. To add/skin/animate/voice
+Remy, edit the vocabulary/policy/controller seams, **never** the pages. **Do NOT** couple Remy
+to a page, create a second provider/renderer/asset map, or hardcode expressions in features.
+See `docs/architecture/REMY_PLATFORM_ARCHITECTURE.md` (the single source of truth).
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

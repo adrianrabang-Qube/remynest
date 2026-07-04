@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-query";
 
 import MemorySection from "@/components/memories/MemorySection";
-import { Remy } from "@/components/remy/Remy";
+import { RemyStage } from "@/components/remy/platform";
 import { useIsNativePlatform } from "@/lib/platform";
 import { ACTIVE_PROFILE_QUERY_KEY } from "@/lib/active-profile-cache";
 import CreateMemoryModal from "@/components/CreateMemoryModal";
@@ -852,7 +852,7 @@ const sortedMemories = [
         !searchNotice &&
         searchResults.length === 0 && (
           <div className="rounded-xl border border-gray-200 p-6 text-center">
-            <Remy state="confused" size={96} decorative className="mx-auto mb-1" />
+            <RemyStage scene="search.empty" size={96} className="mx-auto mb-1" />
             <p className="text-sm text-gray-500">
               No memories found.
             </p>
@@ -867,7 +867,7 @@ const sortedMemories = [
       {!isLoading &&
         normalizedMemories.length === 0 && (
           <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
-            <Remy state="welcome" size={128} decorative className="mx-auto mb-2" />
+            <RemyStage scene="empty.memories" size={128} className="mx-auto mb-2" />
             <p className="text-charcoal-soft">No memories yet.</p>
             <p className="mt-1 text-sm text-charcoal-muted">
               Add your first memory to start your timeline.
