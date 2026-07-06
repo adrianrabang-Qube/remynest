@@ -13,6 +13,7 @@ import {
   type RemyConversationTurn,
 } from "@/lib/remy/ask-intent";
 import type { AskRetrievalResult } from "@/lib/remy/ask-retrieval";
+import type { AskFacts, AskRelatedMemory } from "@/lib/remy/ask-insights";
 import { askRemyRetrieval, answerAskRemy } from "@/app/(app)/remy/ask-action";
 import { haptic } from "@/lib/haptics";
 
@@ -21,13 +22,81 @@ const MAX_SHOWN = 10;
 /** One rendered transcript entry. */
 type ChatEntry =
   | { kind: "user"; text: string }
-  | { kind: "answer"; text: string | null; count: number; failed: boolean }
+  | {
+      kind: "answer";
+      text: string | null;
+      count: number;
+      failed: boolean;
+      facts?: AskFacts;
+      related?: AskRelatedMemory[];
+      followUps?: string[];
+    }
   | { kind: "results"; results: AskRetrievalResult[] };
 
 function yearLabel(memoryDate?: string | null): string {
   if (!memoryDate) return "";
   const year = new Date(memoryDate).getFullYear();
   return Number.isNaN(year) ? "" : ` (${year})`;
+}
+
+/** A compact factual summary of the memories behind an answer (all grounded, no inference). */
+function FactsStrip({ facts }: { facts: AskFacts }) {
+  const span =
+    facts.fromYear == null
+      ? null
+      : facts.toYear == null || facts.fromYear === facts.toYear
+        ? String(facts.fromYear)
+        : `${facts.fromYear}–${facts.toYear}`;
+
+  if (facts.people.length === 0 && facts.themes.length === 0 && !span) return null;
+
+  return (
+    <dl className="mt-2 space-y-0.5 text-xs text-charcoal-muted">
+      {facts.people.length > 0 && (
+        <div>
+          <dt className="inline font-semibold">People: </dt>
+          <dd className="inline">{facts.people.join(", ")}</dd>
+        </div>
+      )}
+      {span && (
+        <div>
+          <dt className="inline font-semibold">When: </dt>
+          <dd className="inline">{span}</dd>
+        </div>
+      )}
+      {facts.themes.length > 0 && (
+        <div>
+          <dt className="inline font-semibold">Themes: </dt>
+          <dd className="inline">{facts.themes.join(", ")}</dd>
+        </div>
+      )}
+    </dl>
+  );
+}
+
+/** The retrieved memories, openable directly. */
+function RelatedMemories({ related }: { related: AskRelatedMemory[] }) {
+  if (related.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+        Related memories
+      </p>
+      <ul className="mt-1 divide-y divide-sand-deep/30">
+        {related.map((memory) => (
+          <li key={memory.id}>
+            <Link
+              href={`/memories/${memory.id}`}
+              className="block py-1.5 text-sm text-sage-deep transition hover:text-sage"
+            >
+              {memory.title}
+              {yearLabel(memory.date)}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 /** Bounded prior turns for the prompt; assistant text is truncated server-side. */
@@ -49,16 +118,13 @@ function deriveHistory(entries: ChatEntry[]): RemyConversationTurn[] {
 }
 
 /**
- * RemyAsk — Remy's conversational entry point (Conversational Memory M1).
- *   - Memory query (extractAskQuery) → RETRIEVE lists candidates / QUESTION+SUMMARY
- *     grounded answer.
- *   - Follow-up (isFollowUp, e.g. "tell me more") → reuse the prior topic as the
- *     retrieval anchor; retrieval STILL runs this turn. History is passed only to
- *     interpret intent — never as a source of facts.
- *   - Otherwise navigation (resolveRemyIntent), else a fixed notice.
- * Conversation state is client-side only (no persistence, no server session).
- * All grounding invariants are preserved (workspace-scoped retrieval before
- * generation; no AI call when retrieval is empty).
+ * RemyAsk — Remy's conversational entry point (Conversational Memory M1 + Phase 4.1 richer
+ * responses). A memory turn RETRIEVES candidates or produces a grounded QUESTION/SUMMARY answer;
+ * a follow-up ("tell me more") or a contextual follow-up ("what about last year?") reuses the
+ * prior topic as the retrieval anchor; otherwise navigation or a fixed notice. Retrieval STILL
+ * runs every turn; history is passed only to interpret intent, never as a source of facts.
+ * The facts/related/follow-ups shown with an answer are derived from the retrieved memories
+ * (no extra AI). Conversation state is client-side only (no persistence).
  */
 export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
   const router = useRouter();
@@ -68,10 +134,9 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  async function runTurn(rawText: string) {
     if (loading) return; // guard double-submit (each answer is a paid LLM call)
-    const text = input.trim();
+    const text = rawText.trim();
     if (!text) return;
     void haptic("light"); // acknowledge the send
     setNotice(null);
@@ -112,15 +177,28 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
         });
         setEntries((prev) => [
           ...prev,
-          { kind: "answer", text: res.answer, count: res.count, failed: res.failed },
+          {
+            kind: "answer",
+            text: res.answer,
+            count: res.count,
+            failed: res.failed,
+            facts: res.facts,
+            related: res.related,
+            followUps: res.followUps,
+          },
         ]);
-        // Update the anchor only on a NEW topic that found memories — so chained
-        // follow-ups keep pointing at the original subject.
+        // Update the anchor only on a NEW topic that found memories — so chained follow-ups keep
+        // pointing at the original subject.
         if (!follow && res.count > 0) setAnchor({ text: retrievalText, query: retrievalQuery });
       }
     } finally {
       setLoading(false);
     }
+  }
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    void runTurn(input);
   }
 
   function newConversation() {
@@ -163,28 +241,62 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
               );
             }
             if (entry.kind === "answer") {
+              const followUps = entry.followUps ?? [];
               if (entry.text) {
                 return (
-                  <div key={index} className="w-fit max-w-[95%]">
-                    <p className="whitespace-pre-wrap rounded-2xl bg-sage/10 px-3 py-2 text-sm leading-relaxed text-charcoal">
+                  <div key={index} className="w-full max-w-[95%]">
+                    <p
+                      className="whitespace-pre-wrap rounded-2xl bg-sage/10 px-3 py-2 text-sm leading-relaxed text-charcoal"
+                      aria-live="polite"
+                    >
                       {entry.text}
                     </p>
+
+                    {entry.facts && <FactsStrip facts={entry.facts} />}
+                    {entry.related && <RelatedMemories related={entry.related} />}
+
                     {entry.count > 0 && (
                       <p className="mt-1 text-xs text-charcoal-muted">
-                        Based on {entry.count}{" "}
-                        {entry.count === 1 ? "memory" : "memories"} Remy found.
+                        Based on {entry.count} {entry.count === 1 ? "memory" : "memories"} Remy
+                        found.
                       </p>
                     )}
+
+                    {followUps.length > 0 && (
+                      <div
+                        className="mt-2 flex flex-wrap gap-2"
+                        role="group"
+                        aria-label="Suggested follow-up questions"
+                      >
+                        {followUps.map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            onClick={() => void runTurn(suggestion)}
+                            disabled={loading}
+                            className="rounded-full border border-sand-deep/70 bg-sand/40 px-3 py-1.5 text-xs text-charcoal-soft transition hover:bg-sand/70 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     <AIDisclaimer kind="memoryChat" variant="footnote" />
                   </div>
                 );
               }
+              // No answer text — a failure (with memories) or a genuine no-match. Still surface the
+              // related memories when Remy found some but couldn't phrase a reply.
               return (
-                <p key={index} className="text-sm text-charcoal-soft">
-                  {entry.failed
-                    ? "Remy had trouble answering just now. Please try again."
-                    : "I couldn’t find any memories about that."}
-                </p>
+                <div key={index}>
+                  <p className="text-sm text-charcoal-soft">
+                    {entry.failed
+                      ? "Remy had trouble answering just now. Please try again."
+                      : "I couldn’t find any memories about that."}
+                  </p>
+                  {entry.related && <RelatedMemories related={entry.related} />}
+                </div>
               );
             }
             // results
@@ -241,7 +353,9 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
               if (notice) setNotice(null);
             }}
             placeholder={
-              entries.length > 0 ? "Ask a follow-up, e.g. tell me more" : "e.g. what happened in 2020?"
+              entries.length > 0
+                ? "Ask a follow-up, e.g. tell me more"
+                : "e.g. what happened in 2020?"
             }
             className="h-11 w-full bg-transparent text-base text-charcoal outline-none placeholder:text-charcoal-muted"
           />

@@ -18,6 +18,11 @@ import {
   buildAskContext,
   contextSize,
 } from "@/lib/remy/ask-intelligence";
+import {
+  deriveAskInsights,
+  type AskFacts,
+  type AskRelatedMemory,
+} from "@/lib/remy/ask-insights";
 import type { AskIntent, RemyConversationTurn } from "@/lib/remy/ask-intent";
 import type { RetrievalQuery } from "@/lib/remy/retrieval";
 
@@ -28,9 +33,15 @@ export interface AskAnswer {
   answer: string | null;
   count: number;
   failed: boolean;
-  /** People resolved from the query (Phase C4). For logging/explainability/future use — NOT shown in UI yet. */
+  /** People resolved from the query (from the person graph). */
   matchedPersonIds: string[];
   matchedPersonNames: string[];
+  /** Structured facts derived from the retrieved memories (Phase 4.1) — never from the AI. */
+  facts?: AskFacts;
+  /** The retrieved memories, for direct opening ("memory connections"). */
+  related?: AskRelatedMemory[];
+  /** Grounded follow-up suggestions derived from the retrieved memories. */
+  followUps?: string[];
 }
 
 const EMPTY_ANSWER: AskAnswer = {
@@ -132,6 +143,10 @@ export async function answerAskRemy(
   let context = buildAskContext(records);
   const count = contextSize(records);
 
+  // Structure the grounded answer for a conversational reply (Phase 4.1). Pure/deterministic —
+  // derived ONLY from the memories already retrieved above; no extra AI or database call.
+  const insights = deriveAskInsights(records, matchedPersonNames, mode);
+
   // C5: a single-person relationship question ("tell me about my relationship with
   // Dad") gets its grounded context enriched with FACTUAL metrics (counts/dates/
   // co-occurrence only). Best-effort — never blocks the answer.
@@ -158,11 +173,19 @@ export async function answerAskRemy(
     total: records.length,
   });
 
+  const structured = {
+    matchedPersonIds,
+    matchedPersonNames,
+    facts: insights.facts,
+    related: insights.related,
+    followUps: insights.followUps,
+  };
+
   try {
     const answer = await answerAskQuestion(trimmed, context, mode, options?.history ?? []);
-    if (!answer) return { answer: null, count, failed: true, matchedPersonIds, matchedPersonNames };
-    return { answer, count, failed: false, matchedPersonIds, matchedPersonNames };
+    if (!answer) return { answer: null, count, failed: true, ...structured };
+    return { answer, count, failed: false, ...structured };
   } catch {
-    return { answer: null, count, failed: true, matchedPersonIds, matchedPersonNames };
+    return { answer: null, count, failed: true, ...structured };
   }
 }

@@ -73,6 +73,61 @@ export type ResolvedAskTurn =
   | { kind: "none" };
 
 /**
+ * Contextual follow-ups add a NEW qualifier but rely on the prior subject: "what about last
+ * year?" right after "tell me about Mary" means Mary + last year. Detected so the anchor's
+ * subject is preserved and only refined. Deliberately conservative — only clear
+ * "what about / how about / what of" leads (with an anchor) qualify; anything else is unchanged,
+ * so ordinary questions keep their own subject.
+ */
+const CONTEXTUAL_LEAD_RE = /^(?:what about|how about|and what about|what of)\s+/;
+
+/** Resolve relative-year phrases against the current year (client-time). Pure otherwise. */
+function resolveRelativeYears(text: string): string {
+  const now = new Date().getFullYear();
+  return text.replace(/\blast year\b/g, String(now - 1)).replace(/\bthis year\b/g, String(now));
+}
+
+export function resolveContextualFollowUp(
+  text: string,
+  anchor: AskAnchor | null,
+): ResolvedAskTurn | null {
+  if (!anchor) return null;
+  const normalized = text
+    .toLowerCase()
+    .replace(/[?.!,]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const lead = normalized.match(CONTEXTUAL_LEAD_RE);
+  if (!lead) return null;
+
+  const qualifier = resolveRelativeYears(normalized.slice(lead[0].length).trim());
+  if (!qualifier) return null;
+
+  // Only treat this as a contextual follow-up when the qualifier is a STRUCTURED refinement
+  // (year/decade/tag) of the prior subject — e.g. "what about last year?". A free-text qualifier
+  // ("what about my wedding day?") is a genuinely new subject and falls through to extraction, so
+  // the prior subject is never silently blended into an unrelated question.
+  const qualifierQuery = parseRetrievalQuery(qualifier);
+  const structured =
+    qualifierQuery != null &&
+    (qualifierQuery.year != null || qualifierQuery.decade != null || Boolean(qualifierQuery.tag));
+  if (!structured) return null;
+
+  const merged: RetrievalQuery = { ...anchor.query };
+  if (qualifierQuery.year != null) merged.year = qualifierQuery.year;
+  if (qualifierQuery.decade != null) merged.decade = qualifierQuery.decade;
+  if (qualifierQuery.tag) merged.tag = qualifierQuery.tag;
+
+  return {
+    kind: "memory",
+    retrievalText: `${anchor.text} ${qualifier}`.trim(),
+    query: merged,
+    mode: "QUESTION",
+    isFollowUp: true,
+  };
+}
+
+/**
  * Resolve one Ask turn deterministically (pure). Follow-up phrases are checked
  * FIRST (they have no subject of their own, so extraction would mis-handle them):
  * a follow-up reuses the anchor's retrieval query/text; otherwise the turn's own
@@ -91,6 +146,8 @@ export function resolveAskTurn(text: string, anchor: AskAnchor | null): Resolved
       isFollowUp: true,
     };
   }
+  const contextual = resolveContextualFollowUp(text, anchor);
+  if (contextual) return contextual;
   const own = extractAskQuery(text);
   if (own) {
     return {
