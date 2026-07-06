@@ -1,0 +1,195 @@
+/*
+ * Remy Platform (v2) — MOTION (the CSS animation backend).
+ *
+ * Platform-internal, presentation-only. Natural easing, no snapping. Idle breathing/float run
+ * continuously; a one-shot reaction (bounce/celebrate/wobble/tilt/pulse) or appear plays when
+ * the sprite key changes. All motion is disabled under prefers-reduced-motion.
+ */
+
+/* Continuous, very subtle "alive" breathing — applied to the sprite image. */
+.breathe {
+  animation: remyBreathe 4.5s ease-in-out infinite;
+  transform-origin: center 70%;
+  will-change: transform;
+}
+@keyframes remyBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+/* Gentle vertical bob for the floating presence — applied to the root. */
+.float {
+  animation: remyFloat 5.2s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes remyFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Smooth entrance / expression change (emotion blending, no snap). */
+.appear {
+  animation: remyAppear 460ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes remyAppear {
+  0% {
+    transform: scale(0.62);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Happy / general positive reaction. */
+.bounce {
+  animation: remyBounce 660ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes remyBounce {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-16%);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  72% {
+    transform: translateY(-6%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Milestone celebration. */
+.celebrate {
+  animation: remyCelebrate 920ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes remyCelebrate {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  20% {
+    transform: translateY(-22%) rotate(-6deg);
+  }
+  45% {
+    transform: translateY(0) rotate(5deg);
+  }
+  65% {
+    transform: translateY(-10%) rotate(-3deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+}
+
+/* Concerned / apologetic wobble. */
+.wobble {
+  animation: remyWobble 720ms ease-in-out;
+}
+@keyframes remyWobble {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-7deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Thinking head-tilt. */
+.tilt {
+  animation: remyTilt 900ms ease-in-out;
+}
+@keyframes remyTilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  45% {
+    transform: rotate(-8deg);
+  }
+}
+
+/* Attentive / listening pulse. */
+.pulse {
+  animation: remyPulse 900ms ease-in-out;
+}
+@keyframes remyPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+/* Resting sleep sway. */
+.sleep {
+  animation: remySleep 5s ease-in-out infinite;
+}
+@keyframes remySleep {
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2deg) translateY(2px);
+  }
+}
+
+/* Speech-bubble entrance. */
+.bubble {
+  animation: remyBubble 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes remyBubble {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe,
+  .float,
+  .appear,
+  .bounce,
+  .celebrate,
+  .wobble,
+  .tilt,
+  .pulse,
+  .sleep,
+  .bubble {
+    animation: none !important;
+  }
+}

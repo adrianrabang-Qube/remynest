@@ -33,6 +33,14 @@ const CONTEXT_TRANSITIONS: Partial<
   online: { exit: "offline" },
 };
 
+/** Lightweight session memory — THIS session only, never persisted (adaptive personality). */
+export interface RemySessionMemory {
+  created: number;
+  saved: number;
+  deleted: number;
+  searches: number;
+}
+
 /** The Brain's observable semantic state. Pure data — no presentation. */
 export interface RemyBrainState {
   /** Active sticky contexts, in insertion order. */
@@ -43,7 +51,11 @@ export interface RemyBrainState {
   transientEmotion: RemyEmotion | null;
   /** A monotonic token identifying the current transient moment (for host-driven expiry). */
   transientToken: number | null;
-  // FUTURE (additive): memoryContext, conversation, aiState, relationship, personality, trust,
+  /** The moment event that caused the current transient (for speech selection). */
+  transientEvent: RemyEventName | null;
+  /** Session memory: what the user has been doing this session (drives adaptive lines). */
+  session: RemySessionMemory;
+  // FUTURE (additive): memoryContext, conversation, aiState, relationship, trust,
   // longTermContext — read by a future Emotion/Policy model, never by features.
 }
 
@@ -51,8 +63,9 @@ export type RemyBrainListener = (state: RemyBrainState) => void;
 
 export class RemyBrain {
   private contexts: RemyContextKey[] = [];
-  private transient: { emotion: RemyEmotion; token: number } | null = null;
+  private transient: { emotion: RemyEmotion; token: number; event: RemyEventName } | null = null;
   private tokenSeq = 0;
+  private session: RemySessionMemory = { created: 0, saved: 0, deleted: 0, searches: 0 };
   private listeners = new Set<RemyBrainListener>();
 
   getState(): RemyBrainState {
@@ -61,6 +74,8 @@ export class RemyBrain {
       emotion: this.resolveEmotion(),
       transientEmotion: this.transient?.emotion ?? null,
       transientToken: this.transient?.token ?? null,
+      transientEvent: this.transient?.event ?? null,
+      session: { ...this.session },
     };
   }
 
@@ -73,7 +88,7 @@ export class RemyBrain {
 
   /** Interpret a single event. Context transitions and moment feelings are independent. */
   dispatch(event: RemyEvent): void {
-    let changed = false;
+    let changed = this.recordSession(event.name);
 
     if (event.name === "context.enter" && event.context) {
       changed = this.enter(event.context) || changed;
@@ -87,11 +102,37 @@ export class RemyBrain {
 
     const moment = emotionForMoment(event.name);
     if (moment) {
-      this.transient = { emotion: moment, token: ++this.tokenSeq };
+      // Session milestone: the FIRST memory of the session is a celebration, not just happy.
+      const milestone = event.name === "memory.created" && this.session.created === 1;
+      this.transient = {
+        emotion: milestone ? "celebrating" : moment,
+        token: ++this.tokenSeq,
+        event: event.name,
+      };
       changed = true;
     }
 
     if (changed) this.notify();
+  }
+
+  /** Update session counters (this session only). Returns whether anything changed. */
+  private recordSession(name: RemyEventName): boolean {
+    switch (name) {
+      case "memory.created":
+        this.session.created++;
+        return true;
+      case "memory.saved":
+        this.session.saved++;
+        return true;
+      case "memory.deleted":
+        this.session.deleted++;
+        return true;
+      case "search.started":
+        this.session.searches++;
+        return true;
+      default:
+        return false;
+    }
   }
 
   /** Clear a transient moment (called by the host after the policy duration). Token-guarded. */

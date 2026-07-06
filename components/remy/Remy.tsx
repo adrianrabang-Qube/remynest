@@ -5,6 +5,8 @@ import {
   type RemyAssetKey,
 } from "@/lib/remy/companion/asset-registry";
 import type { RemyExpression } from "@/lib/remy/core/presentation";
+import type { RemyEmotion } from "@/lib/remy/core/emotion";
+import styles from "./motion.module.css";
 
 /**
  * <Remy> — the SINGLE, centralized way to render the Remy companion character.
@@ -79,7 +81,29 @@ export interface RemyProps {
   decorative?: boolean;
   /** Preload hint for above-the-fold heroes (next/image priority). */
   priority?: boolean;
+  /**
+   * Living-companion motion (platform-set only). `emotion` selects a one-shot reaction; `float`
+   * adds the floating bob; `reactionKey` re-triggers the reaction when it changes (e.g. per
+   * moment). Omitting them yields a calm, breathing sprite (the default for in-place stages).
+   */
+  emotion?: RemyEmotion;
+  float?: boolean;
+  reactionKey?: string | number;
 }
+
+/** How a feeling MOVES (one-shot). Idle sprites (no emotion) just breathe + appear. */
+const MOTION_BY_EMOTION: Partial<Record<RemyEmotion, string>> = {
+  happy: styles.bounce,
+  celebrating: styles.celebrate,
+  concerned: styles.wobble,
+  confused: styles.wobble,
+  thinking: styles.tilt,
+  attentive: styles.pulse,
+  welcoming: styles.appear,
+  encouraging: styles.appear,
+  calm: styles.appear,
+  neutral: styles.appear,
+};
 
 export function Remy({
   state = "idle",
@@ -89,12 +113,25 @@ export function Remy({
   alt,
   decorative = false,
   priority = false,
+  emotion,
+  float = false,
+  reactionKey,
 }: RemyProps) {
   const asset = getRemyAsset(VARIANT_TO_KEY[state]);
   const label = decorative ? "" : alt ?? asset.label;
 
+  // The sprite plays exactly one animation at a time: sleep (resting), the feeling's reaction,
+  // or a gentle appear on any change. Re-triggered when `reactionKey` (or the expression) changes.
+  const reactionClass =
+    state === "sleeping"
+      ? styles.sleep
+      : emotion
+        ? MOTION_BY_EMOTION[emotion] ?? styles.appear
+        : styles.appear;
+
   const rootClass = [
     "remy relative inline-block shrink-0 select-none",
+    float ? styles.float : "",
     className,
   ]
     .filter(Boolean)
@@ -106,8 +143,12 @@ export function Remy({
       style={{ width: size, height: size }}
       data-remy-variant={state}
       data-remy-kind={asset.kind}
+      data-remy-emotion={emotion}
     >
-      <span className="remy__sprite absolute inset-0">
+      <span
+        key={reactionKey ?? state}
+        className={["remy__sprite absolute inset-0", reactionClass].filter(Boolean).join(" ")}
+      >
         <Image
           src={asset.src}
           alt={label}
@@ -116,7 +157,7 @@ export function Remy({
           priority={priority}
           draggable={false}
           aria-hidden={decorative || undefined}
-          className={fit === "cover" ? "object-cover" : "object-contain"}
+          className={`${styles.breathe} ${fit === "cover" ? "object-cover" : "object-contain"}`}
         />
       </span>
     </span>
