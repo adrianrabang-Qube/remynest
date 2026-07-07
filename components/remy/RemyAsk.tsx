@@ -14,7 +14,7 @@ import {
 } from "@/lib/remy/ask-intent";
 import type { AskRetrievalResult } from "@/lib/remy/ask-retrieval";
 import type { AskFacts, AskRelatedMemory } from "@/lib/remy/ask-insights";
-import { askRemyRetrieval, answerAskRemy } from "@/app/(app)/remy/ask-action";
+import { askRemyRetrieval, answerAskRemy, type AskGraph } from "@/app/(app)/remy/ask-action";
 import { haptic } from "@/lib/haptics";
 
 const MAX_SHOWN = 10;
@@ -30,6 +30,7 @@ type ChatEntry =
       facts?: AskFacts;
       related?: AskRelatedMemory[];
       followUps?: string[];
+      graph?: AskGraph;
     }
   | { kind: "results"; results: AskRetrievalResult[] };
 
@@ -72,6 +73,110 @@ function FactsStrip({ facts }: { facts: AskFacts }) {
       )}
     </dl>
   );
+}
+
+function yearPlain(date?: string | null): string {
+  if (!date) return "?";
+  const year = new Date(date).getFullYear();
+  return Number.isNaN(year) ? "?" : String(year);
+}
+
+/**
+ * Memory Intelligence Graph card (Milestone B) — a deterministic, computed summary of how
+ * memories connect (person / connection / aggregate). All figures are grounded counts/dates.
+ */
+function GraphCard({ graph }: { graph: AskGraph }) {
+  if (graph.kind === "person" && graph.person) {
+    const p = graph.person;
+    const span = p.fromDate || p.toDate ? `${yearPlain(p.fromDate)}–${yearPlain(p.toDate)}` : null;
+    return (
+      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+          {p.name} — connections
+        </p>
+        <dl className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-charcoal-soft">
+          <div>
+            <dt className="inline font-semibold">Memories: </dt>
+            <dd className="inline">{p.mentionCount}</dd>
+          </div>
+          {span && (
+            <div>
+              <dt className="inline font-semibold">Span: </dt>
+              <dd className="inline">{span}</dd>
+            </div>
+          )}
+          {p.periodCount >= 1 && (
+            <div>
+              <dt className="inline font-semibold">Decades: </dt>
+              <dd className="inline">{p.periodCount}</dd>
+            </div>
+          )}
+          {p.topThemes.length > 0 && (
+            <div className="col-span-2">
+              <dt className="inline font-semibold">Themes: </dt>
+              <dd className="inline">{p.topThemes.join(", ")}</dd>
+            </div>
+          )}
+          {p.coPeople.length > 0 && (
+            <div className="col-span-2">
+              <dt className="inline font-semibold">Often with: </dt>
+              <dd className="inline">{p.coPeople.map((c) => `${c.name} (${c.count})`).join(", ")}</dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    );
+  }
+
+  if (graph.kind === "connection" && graph.connection) {
+    const c = graph.connection;
+    return (
+      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+          Connection
+        </p>
+        <p className="mt-1 text-xs text-charcoal-soft">
+          {c.names.join(" & ")} — {c.count} shared {c.count === 1 ? "memory" : "memories"}
+        </p>
+      </div>
+    );
+  }
+
+  if (graph.kind === "aggregate" && ((graph.themes?.length ?? 0) > 0 || (graph.busiestYears?.length ?? 0) > 0)) {
+    return (
+      <div className="mt-2 space-y-1.5 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+        {graph.themes && graph.themes.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+              Top themes
+            </p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {graph.themes.slice(0, 8).map((t) => (
+                <span
+                  key={t.theme}
+                  className="rounded-full bg-sage/10 px-2 py-0.5 text-xs text-sage-deep"
+                >
+                  {t.theme} · {t.count}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {graph.busiestYears && graph.busiestYears.length > 0 && (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+              Busiest years
+            </p>
+            <p className="mt-1 text-xs text-charcoal-soft">
+              {graph.busiestYears.map((y) => `${y.year} (${y.count})`).join(", ")}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return null;
 }
 
 /** The retrieved memories, openable directly. */
@@ -185,6 +290,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
             facts: res.facts,
             related: res.related,
             followUps: res.followUps,
+            graph: res.graph,
           },
         ]);
         // Update the anchor only on a NEW topic that found memories — so chained follow-ups keep
@@ -252,7 +358,11 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                       {entry.text}
                     </p>
 
-                    {entry.facts && <FactsStrip facts={entry.facts} />}
+                    {entry.graph ? (
+                      <GraphCard graph={entry.graph} />
+                    ) : (
+                      entry.facts && <FactsStrip facts={entry.facts} />
+                    )}
                     {entry.related && <RelatedMemories related={entry.related} />}
 
                     {entry.count > 0 && (
@@ -287,7 +397,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                 );
               }
               // No answer text — a failure (with memories) or a genuine no-match. Still surface the
-              // related memories when Remy found some but couldn't phrase a reply.
+              // deterministic graph card + related memories when Remy has them but couldn't phrase one.
               return (
                 <div key={index}>
                   <p className="text-sm text-charcoal-soft">
@@ -295,6 +405,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                       ? "Remy had trouble answering just now. Please try again."
                       : "I couldn’t find any memories about that."}
                   </p>
+                  {entry.graph && <GraphCard graph={entry.graph} />}
                   {entry.related && <RelatedMemories related={entry.related} />}
                 </div>
               );

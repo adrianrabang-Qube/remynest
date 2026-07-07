@@ -12,7 +12,15 @@ import {
   answerAggregateRelationship,
   buildPersonRelationshipContext,
   formatPersonRelationshipFacts,
+  isConnectQuery,
+  answerConnectPeople,
 } from "@/lib/remy/relationship-intelligence";
+import {
+  detectMemoryGraphIntent,
+  answerMemoryGraph,
+  type ThemeCount,
+  type YearCount,
+} from "@/lib/remy/memory-graph";
 import {
   answerAskQuestion,
   buildAskContext,
@@ -42,6 +50,25 @@ export interface AskAnswer {
   related?: AskRelatedMemory[];
   /** Grounded follow-up suggestions derived from the retrieved memories. */
   followUps?: string[];
+  /** Structured Memory Intelligence Graph summary for a card (Milestone B). */
+  graph?: AskGraph;
+}
+
+/** A compact, deterministic Memory Intelligence Graph summary for the Ask UI cards. */
+export interface AskGraph {
+  kind: "person" | "connection" | "aggregate";
+  person?: {
+    name: string;
+    mentionCount: number;
+    fromDate: string | null;
+    toDate: string | null;
+    topThemes: string[];
+    periodCount: number;
+    coPeople: { name: string; count: number }[];
+  };
+  connection?: { names: string[]; count: number };
+  themes?: ThemeCount[];
+  busiestYears?: YearCount[];
 }
 
 const EMPTY_ANSWER: AskAnswer = {
@@ -135,6 +162,56 @@ export async function answerAskRemy(
     memoryProfileId,
   );
 
+  // PEOPLE CONNECTION (Milestone B): "which memories connect Mary and John" — deterministic
+  // shared-memory intelligence from the person graph (memory_person_links). Reuses the people
+  // the person-aware retrieval already resolved; no new AI, no new search.
+  if (matchedPersonIds.length >= 2 && isConnectQuery(retrievalText)) {
+    const connection = await answerConnectPeople(
+      supabase,
+      matchedPersonIds,
+      matchedPersonNames,
+      user.id,
+      memoryProfileId,
+    );
+    return {
+      answer: connection.text || null,
+      count: connection.count,
+      failed: false,
+      matchedPersonIds,
+      matchedPersonNames,
+      related: connection.memories.map((m) => ({
+        id: m.memoryId,
+        title: m.title ?? "Untitled memory",
+        date: m.memoryDate,
+      })),
+      graph: { kind: "connection", connection: { names: matchedPersonNames, count: connection.count } },
+    };
+  }
+
+  // AGGREGATE MEMORY GRAPH (Milestone B): "what themes appear most?", "what years were the
+  // busiest?", "what memories happened around Christmas?" — deterministic, grounded only in
+  // existing memory metadata (dates/categories/tags). Runs ONLY when NO specific person is named,
+  // so person-scoped temporal/theme questions defer to person-aware retrieval. No LLM, no new search.
+  const graphIntent = detectMemoryGraphIntent(retrievalText);
+  if (graphIntent && matchedPersonIds.length === 0) {
+    const g = await answerMemoryGraph(supabase, graphIntent, user.id, memoryProfileId);
+    return {
+      answer: g.text,
+      count: g.count,
+      failed: false,
+      matchedPersonIds,
+      matchedPersonNames,
+      related: g.memories.map((m) => ({
+        id: m.memoryId,
+        title: m.title ?? "Untitled memory",
+        date: m.memoryDate,
+      })),
+      graph: g.summary
+        ? { kind: "aggregate", themes: g.summary.themes.slice(0, 8), busiestYears: g.summary.busiest }
+        : undefined,
+    };
+  }
+
   // No memories retrieved → do NOT call the AI (no fabrication possible).
   if (records.length === 0) {
     return { ...EMPTY_ANSWER, matchedPersonIds, matchedPersonNames };
@@ -147,10 +224,12 @@ export async function answerAskRemy(
   // derived ONLY from the memories already retrieved above; no extra AI or database call.
   const insights = deriveAskInsights(records, matchedPersonNames, mode);
 
-  // C5: a single-person relationship question ("tell me about my relationship with
-  // Dad") gets its grounded context enriched with FACTUAL metrics (counts/dates/
-  // co-occurrence only). Best-effort — never blocks the answer.
-  if (relIntent?.kind === "person" && matchedPersonIds.length >= 1) {
+  // PERSON GRAPH (Milestone B): a single named person ("tell me about Mary") gets its grounded
+  // context enriched with FACTUAL graph metrics (mention count, date span, recurring themes,
+  // decades spanned, co-people) AND a structured card. Counts/dates only — no inference or
+  // profiling. Best-effort — never blocks the answer.
+  let graph: AskGraph | undefined;
+  if (matchedPersonIds.length === 1) {
     try {
       const relCtx = await buildPersonRelationshipContext(
         supabase,
@@ -160,8 +239,24 @@ export async function answerAskRemy(
       );
       const facts = formatPersonRelationshipFacts(relCtx);
       if (facts) context = `${context}\n\n${facts}`;
+      if (relCtx.metric && relCtx.metric.mentionCount > 0) {
+        graph = {
+          kind: "person",
+          person: {
+            name: matchedPersonNames[0] ?? relCtx.metric.displayName,
+            mentionCount: relCtx.metric.mentionCount,
+            fromDate: relCtx.timeline?.firstMentionDate ?? null,
+            toDate: relCtx.timeline?.latestMentionDate ?? null,
+            topThemes: relCtx.topThemes,
+            periodCount: relCtx.periodCount,
+            coPeople: relCtx.strongestCoOccurrences
+              .slice(0, 3)
+              .map((c) => ({ name: c.displayName, count: c.count })),
+          },
+        };
+      }
     } catch {
-      // relationship enrichment is best-effort; the grounded answer proceeds without it.
+      // graph enrichment is best-effort; the grounded answer proceeds without it.
     }
   }
 
@@ -179,6 +274,7 @@ export async function answerAskRemy(
     facts: insights.facts,
     related: insights.related,
     followUps: insights.followUps,
+    graph,
   };
 
   try {

@@ -45,6 +45,8 @@ export interface MemoryMeta {
   id: string;
   memoryDate: string | null;
   title: string | null;
+  category: string | null;
+  tags: string[];
 }
 export interface RelationshipDataset {
   people: Map<string, PersonInfo>;
@@ -83,6 +85,10 @@ export interface PersonRelationshipContext {
   timeline: PersonTimeline | null;
   strongestCoOccurrences: CoOccurrence[];
   recentMemories: { memoryId: string; title: string | null; memoryDate: string | null }[];
+  /** Recurring themes (categories/tags) across this person's memories. */
+  topThemes: string[];
+  /** Number of distinct decades this person's memories span ("life periods"). */
+  periodCount: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -125,7 +131,7 @@ export async function getRelationshipDataset(
 
   let mq = supabase
     .from("memories")
-    .select("id, memory_date, title, ai_title")
+    .select("id, memory_date, title, ai_title, ai_category, ai_tags")
     .eq("user_id", ownerAccountId)
     .in("id", memoryIds)
     .limit(MEMORY_CAP);
@@ -138,8 +144,16 @@ export async function getRelationshipDataset(
     memory_date: string | null;
     title: string | null;
     ai_title: string | null;
+    ai_category: string | null;
+    ai_tags: string[] | null;
   }[]) {
-    memories.set(r.id, { id: r.id, memoryDate: r.memory_date ?? null, title: r.ai_title || r.title || null });
+    memories.set(r.id, {
+      id: r.id,
+      memoryDate: r.memory_date ?? null,
+      title: r.ai_title || r.title || null,
+      category: r.ai_category ?? null,
+      tags: Array.isArray(r.ai_tags) ? r.ai_tags : [],
+    });
   }
 
   // DEFENSE: keep only links whose memory passed the owner+workspace memory fetch,
@@ -263,6 +277,82 @@ export function derivePersonMetrics(
   return metrics;
 }
 
+/** The distinct memory metas a person appears in (dataset-scoped). Pure. */
+export function personMemoryMetas(dataset: RelationshipDataset, personId: string): MemoryMeta[] {
+  const seen = new Set<string>();
+  const out: MemoryMeta[] = [];
+  for (const l of dataset.links) {
+    if (l.personId !== personId) continue;
+    const m = dataset.memories.get(l.memoryId);
+    if (m && !seen.has(m.id)) {
+      seen.add(m.id);
+      out.push(m);
+    }
+  }
+  return out;
+}
+
+/** Top recurring themes (categories + tags) across a set of memories. Pure. */
+export function topThemesOf(metas: MemoryMeta[], limit = 4): string[] {
+  const counts = new Map<string, number>();
+  for (const m of metas) {
+    const cat = (m.category ?? "").trim();
+    if (cat) counts.set(cat, (counts.get(cat) ?? 0) + 1);
+    for (const raw of m.tags) {
+      const t = (raw ?? "").trim();
+      if (t) counts.set(t, (counts.get(t) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([key]) => key);
+}
+
+/** Distinct decades a set of memories spans ("life periods"). Pure. */
+export function decadeCountOf(metas: MemoryMeta[]): number {
+  const decades = new Set<number>();
+  for (const m of metas) {
+    if (!m.memoryDate) continue;
+    const year = new Date(m.memoryDate).getFullYear();
+    if (!Number.isNaN(year)) decades.add(Math.floor(year / 10) * 10);
+  }
+  return decades.size;
+}
+
+/**
+ * The memories that CONNECT the given people — memories in which at least `minPeople` of them
+ * co-appear (default: all). Sorted by how many of the people appear, then most-recent. Pure.
+ * This is the deterministic "which memories connect Mary and John".
+ */
+export function connectMemories(
+  dataset: RelationshipDataset,
+  personIds: string[],
+  minPeople = personIds.length,
+): { memory: MemoryMeta; sharedCount: number }[] {
+  const ids = new Set(personIds);
+  const byMemory = new Map<string, Set<string>>();
+  for (const l of dataset.links) {
+    if (!ids.has(l.personId)) continue;
+    let set = byMemory.get(l.memoryId);
+    if (!set) byMemory.set(l.memoryId, (set = new Set()));
+    set.add(l.personId);
+  }
+  const out: { memory: MemoryMeta; sharedCount: number }[] = [];
+  for (const [memoryId, persons] of byMemory) {
+    if (persons.size < minPeople) continue;
+    const memory = dataset.memories.get(memoryId);
+    if (memory) out.push({ memory, sharedCount: persons.size });
+  }
+  out.sort(
+    (a, b) =>
+      b.sharedCount - a.sharedCount ||
+      (b.memory.memoryDate ?? "").localeCompare(a.memory.memoryDate ?? "") ||
+      a.memory.id.localeCompare(b.memory.id),
+  );
+  return out;
+}
+
 /** Deterministic comparator helpers (stable: tie-break by id) so ranking is stable. */
 function byMention(a: PersonMetric, b: PersonMetric): number {
   return b.mentionCount - a.mentionCount || a.personId.localeCompare(b.personId);
@@ -380,17 +470,48 @@ export async function buildPersonRelationshipContext(
   memoryProfileId: string | null,
   now: number = Date.now(),
 ): Promise<PersonRelationshipContext> {
-  const [metrics, timeline, coOcc] = await Promise.all([
-    getRelationshipMetrics(supabase, ownerAccountId, memoryProfileId, now),
-    getPersonTimeline(supabase, personId, ownerAccountId, memoryProfileId),
-    getPersonCoOccurrences(supabase, personId, ownerAccountId, memoryProfileId, { limit: 5 }),
-  ]);
-  const metric = metrics.find((m) => m.personId === personId) ?? null;
-  const recentMemories = (timeline?.memories ?? [])
-    .slice()
-    .reverse()
-    .slice(0, 5);
-  return { metric, timeline, strongestCoOccurrences: coOcc, recentMemories };
+  // ONE dataset fetch (previously three) → derive every signal purely from it.
+  const dataset = await getRelationshipDataset(supabase, ownerAccountId, memoryProfileId);
+  const metric = derivePersonMetrics(dataset, now).find((m) => m.personId === personId) ?? null;
+
+  const metas = personMemoryMetas(dataset, personId);
+  const chrono = [...metas].sort((a, b) => (a.memoryDate ?? "").localeCompare(b.memoryDate ?? ""));
+  const dated = chrono.map((m) => m.memoryDate).filter((d): d is string => Boolean(d));
+  const info = dataset.people.get(personId);
+  const timeline: PersonTimeline | null = info
+    ? {
+        personId,
+        displayName: info.displayName,
+        firstMentionDate: dated.length ? dated[0] : null,
+        latestMentionDate: dated.length ? dated[dated.length - 1] : null,
+        totalMentionCount: chrono.length,
+        memories: chrono.map((m) => ({ memoryId: m.id, title: m.title, memoryDate: m.memoryDate })),
+      }
+    : null;
+
+  const coPairs = deriveCoOccurrences(dataset.links);
+  const strongestCoOccurrences: CoOccurrence[] = [];
+  for (const [key, count] of coPairs) {
+    const [a, b] = key.split("|");
+    const other = a === personId ? b : b === personId ? a : null;
+    if (!other) continue;
+    const otherInfo = dataset.people.get(other);
+    if (otherInfo) {
+      strongestCoOccurrences.push({ personId: other, displayName: otherInfo.displayName, count });
+    }
+  }
+  strongestCoOccurrences.sort((x, y) => y.count - x.count || x.personId.localeCompare(y.personId));
+
+  const recentMemories = [...(timeline?.memories ?? [])].reverse().slice(0, 5);
+
+  return {
+    metric,
+    timeline,
+    strongestCoOccurrences: strongestCoOccurrences.slice(0, 5),
+    recentMemories,
+    topThemes: topThemesOf(metas),
+    periodCount: decadeCountOf(metas),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -538,5 +659,79 @@ export function formatPersonRelationshipFacts(ctx: PersonRelationshipContext): s
         .join(", ")}.`,
     );
   }
+  if (ctx.topThemes.length > 0) {
+    lines.push(`- Recurring themes in these memories: ${ctx.topThemes.join(", ")}.`);
+  }
+  if (ctx.periodCount >= 2) {
+    lines.push(`- These memories span ${ctx.periodCount} different decades.`);
+  }
   return lines.join("\n");
+}
+
+// ---------------------------------------------------------------------------
+// Milestone B — people-connection intelligence (deterministic; no AI).
+// ---------------------------------------------------------------------------
+const RE_CONNECT =
+  /\b(connect|connects|connection|connected|together|both of|link|linked|shared|in common|same memor)\b/;
+
+/** Does the query ask how people/memories are connected? Pure. */
+export function isConnectQuery(query: string): boolean {
+  return RE_CONNECT.test((query ?? "").toLowerCase());
+}
+
+export interface ConnectPeopleAnswer {
+  text: string;
+  count: number;
+  memories: { memoryId: string; title: string | null; memoryDate: string | null }[];
+}
+
+/**
+ * Deterministic "which memories connect these people". Prefers memories in which ALL named
+ * people co-appear; if none, falls back to any-two-of-them. Grounded in real links only.
+ */
+export async function answerConnectPeople(
+  supabase: RemySupabase,
+  personIds: string[],
+  personNames: string[],
+  ownerAccountId: string,
+  memoryProfileId: string | null,
+): Promise<ConnectPeopleAnswer> {
+  const names = personNames.length ? personNames.join(" and ") : "those people";
+  if (personIds.length < 2) return { text: "", count: 0, memories: [] };
+
+  const dataset = await getRelationshipDataset(supabase, ownerAccountId, memoryProfileId);
+  let connected = connectMemories(dataset, personIds, personIds.length);
+  // Fallback for 3+ people with no single shared memory: memories where at least TWO co-appear.
+  let allTogether = true;
+  if (connected.length === 0 && personIds.length > 2) {
+    connected = connectMemories(dataset, personIds, 2);
+    allTogether = false;
+  }
+
+  if (connected.length === 0) {
+    return {
+      text: `I don't have any recorded memories that connect ${names}.`,
+      count: 0,
+      memories: [],
+    };
+  }
+
+  const memories = connected.slice(0, 8).map((c) => ({
+    memoryId: c.memory.id,
+    title: c.memory.title,
+    memoryDate: c.memory.memoryDate,
+  }));
+  const examples = memories
+    .slice(0, 3)
+    .map((m) => `"${m.title ?? "Untitled memory"}"`)
+    .join(", ");
+  // Honest wording: only claim ALL appear together when they actually do (else "at least two").
+  const subject = allTogether ? `${names} appear together` : `At least two of ${names} appear together`;
+  return {
+    text: `${subject} in ${connected.length} of your recorded ${
+      connected.length === 1 ? "memory" : "memories"
+    } — for example ${examples}.`,
+    count: connected.length,
+    memories,
+  };
 }
