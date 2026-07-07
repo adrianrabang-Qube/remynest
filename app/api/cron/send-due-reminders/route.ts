@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { authorizeCronRequest } from "@/lib/cron-auth";
+import { nextOccurrence } from "@/lib/reminders/recurrence";
 
 const REMINDER_CRON_TAG =
   "reminder-cron-engine";
@@ -21,6 +22,22 @@ const ONESIGNAL_TIMEOUT_MS =
 // permanently-unresolvable target cannot loop/duplicate forever.
 const MAX_DELIVERY_RETRY_WINDOW_MS =
   10 * 60 * 1000;
+
+// Processing-lock LEASE. A row locked longer than this is treated as abandoned by a
+// dead/timed-out invocation and is reclaimable by a later tick. Comfortably longer than
+// a healthy send (~15s) and any single function duration, so a still-running tick is
+// never reclaimed out from under itself. Inert until the `processing_at` column exists
+// (probed at runtime) — see 20260707120000_reminder_processing_lease.sql.
+const PROCESSING_LEASE_MS =
+  5 * 60 * 1000;
+
+// Native-local delivery confirmations older than this are treated as stale, and the cron
+// resumes sending the push (so a device that stopped confirming can't silently lose
+// reminders). The native app refreshes confirmations whenever the reminders screen is
+// opened. Inert until the confirmations table exists (probed at runtime) — see
+// 20260707130000_reminder_local_confirmations.sql.
+const NATIVE_CONFIRM_TTL_MS =
+  2 * 24 * 60 * 60 * 1000;
 
 function logReminderStage(
   stage: string,
@@ -52,35 +69,6 @@ function createOneSignalAbortSignal() {
   );
 }
 
-function calculateNextReminderDate(
-  currentDate: string,
-  frequency: string
-) {
-  const nextDate = new Date(
-    currentDate
-  );
-
-  if (frequency === "daily") {
-    nextDate.setDate(
-      nextDate.getDate() + 1
-    );
-  }
-
-  if (frequency === "weekly") {
-    nextDate.setDate(
-      nextDate.getDate() + 7
-    );
-  }
-
-  if (frequency === "monthly") {
-    nextDate.setMonth(
-      nextDate.getMonth() + 1
-    );
-  }
-
-  return nextDate.toISOString();
-}
-
 async function unlockReminder(
   supabase: SupabaseClient,
   reminderId: string
@@ -104,6 +92,14 @@ async function completeReminder(
       processing: false,
     })
     .eq("id", reminderId);
+
+  // Clear any native-local confirmations so a later REOPEN of this one-time reminder can't
+  // be suppressed by a now-stale confirmation (no pending local would exist) — that would be
+  // a silent miss. Best-effort: errors (incl. pre-migration table absence) are ignored.
+  await supabase
+    .from("reminder_local_confirmations")
+    .delete()
+    .eq("reminder_id", reminderId);
 }
 
 async function rescheduleReminder(
@@ -291,18 +287,40 @@ export async function GET(req: Request) {
       }
     );
 
+    // Probe whether the processing-lease column exists (migration applied). If not,
+    // fall back to the legacy lock semantics with ZERO behavior change until applied.
+    const staleIso = new Date(
+      Date.now() - PROCESSING_LEASE_MS
+    ).toISOString();
+    const { error: leaseProbeError } = await supabase
+      .from("reminders")
+      .select("processing_at")
+      .limit(1);
+    const hasLease = !leaseProbeError;
+
     // =====================================
     // FIND DUE REMINDERS
     // =====================================
+    // With the lease, ALSO surface rows whose lock is older than the lease window (a
+    // stuck `processing=true` from a dead/timed-out invocation) so it can be reclaimed.
+
+    let dueQuery = supabase
+      .from("reminders")
+      .select("*")
+      .lte("remind_at", now);
+    dueQuery = hasLease
+      ? dueQuery.or(
+          // `processing_at.is.null` also reclaims a row that was already stuck
+          // `processing=true` BEFORE this migration (its new column is NULL, and
+          // `NULL < stale` is NULL/false — otherwise those exact rows stay stuck forever).
+          `processing.eq.false,processing_at.lt.${staleIso},processing_at.is.null`
+        )
+      : dueQuery.eq("processing", false);
 
     const {
       data: reminders,
       error,
-    } = await supabase
-      .from("reminders")
-      .select("*")
-      .lte("remind_at", now)
-      .eq("processing", false)
+    } = await dueQuery
       .or(
         "completed.is.null,completed.eq.false"
       )
@@ -354,6 +372,30 @@ export async function GET(req: Request) {
 
     let processedCount = 0;
 
+    // Load fresh native-local delivery confirmations for JUST this due batch (bounded to
+    // the batch size, so it can't be silently truncated by PostgREST's row cap). A reminder
+    // is "natively delivered" only when there is a fresh confirmation whose user_id matches
+    // the reminder's user_id — keyed `${reminder_id}|${user_id}`. If the table isn't migrated
+    // the query errors → the set stays empty → every reminder is pushed as before (inert).
+    const nativeConfirmCutoff = new Date(
+      Date.now() - NATIVE_CONFIRM_TTL_MS
+    ).toISOString();
+    const nativeConfirmed = new Set<string>();
+    const { data: confirmRows } = await supabase
+      .from("reminder_local_confirmations")
+      .select("reminder_id, user_id")
+      .in(
+        "reminder_id",
+        reminders.map((r) => r.id)
+      )
+      .gte("confirmed_at", nativeConfirmCutoff);
+    for (const c of (confirmRows ?? []) as {
+      reminder_id: string;
+      user_id: string;
+    }[]) {
+      nativeConfirmed.add(`${c.reminder_id}|${c.user_id}`);
+    }
+
     // =====================================
     // PROCESS LOOP
     // =====================================
@@ -373,18 +415,28 @@ export async function GET(req: Request) {
       // LOCK
       // =====================================
 
+      // Race-safe lock/reclaim: with the lease, the WHERE matches an unlocked row OR a
+      // stale-locked row, and the SET stamps `processing_at = now()`. Two concurrent
+      // ticks cannot both win — after the first sets processing_at=now, the second's
+      // `processing_at < stale` (and `processing=false`) are both false → 0 rows.
+      let lockQuery = supabase
+        .from("reminders")
+        .update(
+          hasLease
+            ? { processing: true, processing_at: new Date().toISOString() }
+            : { processing: true }
+        )
+        .eq("id", reminder.id);
+      lockQuery = hasLease
+        ? lockQuery.or(
+            `processing.eq.false,processing_at.lt.${staleIso},processing_at.is.null`
+          )
+        : lockQuery.eq("processing", false);
+
       const {
         data: lockedReminder,
         error: lockError,
-      } = await supabase
-        .from("reminders")
-        .update({
-          processing: true,
-        })
-        .eq("id", reminder.id)
-        .eq("processing", false)
-        .select()
-        .single();
+      } = await lockQuery.select().single();
 
       if (
         lockError ||
@@ -424,6 +476,39 @@ export async function GET(req: Request) {
           reminderId: reminder.id,
         });
         await unlockReminder(supabase, reminder.id);
+        continue;
+      }
+
+      // NATIVE LOCAL DELIVERY (iOS duplicate fix): if this device holds a fresh, matching
+      // pending local notification for this reminder, the on-device notification IS the
+      // delivery — skip the redundant OneSignal push but STILL advance the lifecycle so the
+      // DB stays correct. Guarded by user_id match (a foreign confirmation can't suppress
+      // someone else's push) and by the freshness TTL above; any miss/stale/mismatch falls
+      // through to the normal push below (fails toward delivery, never a silent miss).
+      if (nativeConfirmed.has(`${reminder.id}|${reminder.user_id}`)) {
+        if (reminder.recurring && reminder.frequency) {
+          const nextDate = nextOccurrence(
+            reminder.remind_at,
+            reminder.frequency
+          );
+          await rescheduleReminder(
+            supabase,
+            reminder.id,
+            nextDate
+          );
+          logReminderStage("reminder-native-local-rescheduled", {
+            requestId,
+            reminderId: reminder.id,
+            nextDate,
+          });
+        } else {
+          await completeReminder(supabase, reminder.id);
+          logReminderStage("reminder-native-local-completed", {
+            requestId,
+            reminderId: reminder.id,
+          });
+        }
+        processedCount += 1;
         continue;
       }
 
@@ -508,7 +593,7 @@ export async function GET(req: Request) {
           reminder.recurring &&
           reminder.frequency
         ) {
-          const nextDate = calculateNextReminderDate(
+          const nextDate = nextOccurrence(
             reminder.remind_at,
             reminder.frequency
           );
@@ -561,7 +646,7 @@ export async function GET(req: Request) {
             reminder.frequency
           ) {
             // Keep the recurring SERIES alive — skip only THIS occurrence.
-            const nextDate = calculateNextReminderDate(
+            const nextDate = nextOccurrence(
               reminder.remind_at,
               reminder.frequency
             );

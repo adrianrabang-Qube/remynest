@@ -7,10 +7,15 @@ import ReminderCenter, {
   type ReminderRecord,
 } from "@/components/reminders/ReminderCenter";
 import NativeReminderSync from "@/components/reminders/NativeReminderSync";
+import NativeReminderBeacon from "@/components/reminders/NativeReminderBeacon";
 import {
   logReminderEvent,
   REMINDER_STATUS,
 } from "@/lib/reminders/lifecycle";
+import {
+  KNOWN_FREQUENCIES,
+  nextOccurrenceAfter,
+} from "@/lib/reminders/recurrence";
 
 export const dynamic = "force-dynamic";
 
@@ -304,30 +309,105 @@ export default async function RemindersPage({
       "id"
     ) as string;
 
-    const completed =
-      formData.get(
-        "completed"
-      ) === "true";
+    // AUTHORITATIVE FETCH — read the reminder server-side (not from client fields) so
+    // authorization + the recurring decision use trusted data. Mirrors the [id] route:
+    // authorize in app code INDEPENDENT of RLS (a personal reminder is owned by user_id;
+    // a care reminder requires access to its memory_profile). This is the parity check
+    // the toggle previously lacked vs. create/[id].
+    const { data: row } = await supabase
+      .from("reminders")
+      .select(
+        "id, user_id, memory_profile_id, recurring, frequency, remind_at, completed"
+      )
+      .eq("id", id)
+      .maybeSingle();
 
-    const newCompleted = !completed;
+    if (!row) {
+      // Gone or not visible → nothing to do (never leak existence).
+      redirect(
+        isMyNestContext
+          ? "/reminders?context=my-nest"
+          : "/reminders"
+      );
+    }
 
-    // PRIMARY (backward-compatible) write — the source of truth today. Scope CARE
-    // by profile, PERSONAL ("My Nest") by null-profile + owner.
+    const authorized =
+      row.memory_profile_id == null
+        ? row.user_id === user.id
+        : await userCanAccessProfile(
+            user.id,
+            row.memory_profile_id
+          );
+
+    if (!authorized) {
+      throw new Error(
+        "You don't have access to this reminder."
+      );
+    }
+
+    // Scope every write by the reminder's OWN context (defense in depth on top of the
+    // authorization above), not the client-settable active-profile cookie.
+    const rowProfileId = row.memory_profile_id as string | null;
+    const isRowPersonal = rowProfileId == null;
+
+    const isRecurringSeries =
+      Boolean(row.recurring) &&
+      typeof row.frequency === "string" &&
+      KNOWN_FREQUENCIES.has(row.frequency);
+
+    // PER-OCCURRENCE COMPLETION (the confirmed defect fix): completing a still-active
+    // recurring reminder must NOT set completed=true (which permanently ends the series
+    // on both the native reconcile and the cron). Instead advance the series to the next
+    // future occurrence — the routine lives on. One-time reminders (and reopening a
+    // legacy-terminated series) keep the plain completed toggle.
+    if (isRecurringSeries && !row.completed) {
+      const nextAt = nextOccurrenceAfter(
+        row.remind_at,
+        row.frequency as string,
+        new Date()
+      );
+
+      const advanceWrite = supabase
+        .from("reminders")
+        .update({ remind_at: nextAt })
+        .eq("id", id);
+      const { error } = await (isRowPersonal
+        ? advanceWrite.is("memory_profile_id", null).eq("user_id", user.id)
+        : advanceWrite.eq("memory_profile_id", rowProfileId));
+
+      if (error) {
+        console.log("❌ ADVANCE OCCURRENCE ERROR:");
+        console.log(error);
+        throw new Error(error.message);
+      }
+
+      await logReminderEvent({
+        reminderId: id,
+        memoryProfileId: row.memory_profile_id,
+        eventType: "completed",
+        actorId: user.id,
+        actorRole: "caregiver",
+        occurrenceAt: row.remind_at,
+        metadata: { perOccurrence: true, nextOccurrenceAt: nextAt },
+      });
+
+      redirect(
+        isMyNestContext
+          ? "/reminders?context=my-nest"
+          : "/reminders"
+      );
+    }
+
+    const newCompleted = !row.completed;
+
+    // PRIMARY (backward-compatible) write — the source of truth today.
     const completedWrite = supabase
       .from("reminders")
-      .update({
-        completed: newCompleted,
-      })
+      .update({ completed: newCompleted })
       .eq("id", id);
-
-    const { error } = await (isPersonal
-      ? completedWrite
-          .is("memory_profile_id", null)
-          .eq("user_id", user.id)
-      : completedWrite.eq(
-          "memory_profile_id",
-          activeProfileId
-        ));
+    const { error } = await (isRowPersonal
+      ? completedWrite.is("memory_profile_id", null).eq("user_id", user.id)
+      : completedWrite.eq("memory_profile_id", rowProfileId));
 
     if (error) {
       console.log(
@@ -352,23 +432,15 @@ export default async function RemindersPage({
         completed_at: newCompleted
           ? new Date().toISOString()
           : null,
-        completed_by: newCompleted
-          ? user.id
-          : null,
+        completed_by: newCompleted ? user.id : null,
         actor_role: "caregiver",
       })
       .eq("id", id);
-
     const {
       error: lifecycleError,
-    } = await (isPersonal
-      ? lifecycleWrite
-          .is("memory_profile_id", null)
-          .eq("user_id", user.id)
-      : lifecycleWrite.eq(
-          "memory_profile_id",
-          activeProfileId
-        ));
+    } = await (isRowPersonal
+      ? lifecycleWrite.is("memory_profile_id", null).eq("user_id", user.id)
+      : lifecycleWrite.eq("memory_profile_id", rowProfileId));
 
     if (lifecycleError) {
       console.warn(
@@ -377,9 +449,18 @@ export default async function RemindersPage({
       );
     }
 
+    // Clear this reminder's native-local confirmation on complete/reopen so a stale
+    // confirmation can't later suppress its push (e.g. reopening a fired one-time whose
+    // remind_at is now in the past — the device can't reschedule a past one-time, so no
+    // local would fire). Best-effort; RLS confines the delete to the caller's own rows.
+    await supabase
+      .from("reminder_local_confirmations")
+      .delete()
+      .eq("reminder_id", id);
+
     await logReminderEvent({
       reminderId: id,
-      memoryProfileId: activeProfileId,
+      memoryProfileId: row.memory_profile_id,
       eventType: newCompleted
         ? "completed"
         : "reopened",
@@ -420,19 +501,52 @@ export default async function RemindersPage({
       "id"
     ) as string;
 
-    // Scope CARE by profile, PERSONAL ("My Nest") by null-profile + owner.
+    // AUTHORITATIVE FETCH + app-code authorization (parity with create/[id], independent
+    // of dashboard-managed RLS) BEFORE deleting. A personal reminder is owned by user_id;
+    // a care reminder requires access to its memory_profile.
+    const { data: row } = await supabase
+      .from("reminders")
+      .select("id, user_id, memory_profile_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (!row) {
+      redirect(
+        isMyNestContext
+          ? "/reminders?context=my-nest"
+          : "/reminders"
+      );
+    }
+
+    const authorized =
+      row.memory_profile_id == null
+        ? row.user_id === user.id
+        : await userCanAccessProfile(
+            user.id,
+            row.memory_profile_id
+          );
+
+    if (!authorized) {
+      throw new Error(
+        "You don't have access to this reminder."
+      );
+    }
+
+    const rowProfileId = row.memory_profile_id as string | null;
+
+    // Scope the delete by the reminder's OWN context (defense in depth), not the cookie.
     const deleteWrite = supabase
       .from("reminders")
       .delete()
       .eq("id", id);
 
-    const { error } = await (isPersonal
+    const { error } = await (rowProfileId == null
       ? deleteWrite
           .is("memory_profile_id", null)
           .eq("user_id", user.id)
       : deleteWrite.eq(
           "memory_profile_id",
-          activeProfileId
+          rowProfileId
         ));
 
     if (error) {
@@ -447,11 +561,18 @@ export default async function RemindersPage({
       );
     }
 
+    // Drop any native-local confirmations for the deleted reminder (hygiene; RLS confines
+    // the delete to the caller's own rows). Best-effort — never blocks the delete.
+    await supabase
+      .from("reminder_local_confirmations")
+      .delete()
+      .eq("reminder_id", id);
+
     // Best-effort audit event — survives reminder deletion (no FK on
     // reminder_events.reminder_id). NEVER blocks the delete.
     await logReminderEvent({
       reminderId: id,
-      memoryProfileId: activeProfileId,
+      memoryProfileId: rowProfileId,
       eventType: "deleted",
       actorId: user?.id ?? null,
       actorRole: "caregiver",
@@ -478,6 +599,9 @@ export default async function RemindersPage({
 
       {/* Mirror reminders into on-device iOS local notifications (no-op on web). */}
       <NativeReminderSync reminders={localReminders} />
+      {/* Report which reminders have a pending on-device local so the cron skips the
+          redundant push (iOS duplicate fix). No-op on web; inert until migrated. */}
+      <NativeReminderBeacon reminders={localReminders} />
 
       {/* Header */}
       <div className="mb-8">

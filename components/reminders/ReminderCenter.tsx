@@ -173,7 +173,11 @@ function ReminderCard({
                     : "bg-sage text-white hover:bg-sage-deep"
                 }`}
               >
-                {r.completed ? "Reopen" : "Mark complete"}
+                {r.completed
+                  ? "Reopen"
+                  : r.recurring && r.frequency
+                    ? "Done for today"
+                    : "Mark complete"}
               </button>
             </form>
             <form action={deleteAction}>

@@ -145,6 +145,28 @@ the form-reset implementation (`app/(app)/reminders/page.tsx` form `key`) — **
 future bug report explicitly proves a NEW defect**. Reminder work is now **bug-fix only**
 and **must begin with an investigation proving the defect** before any code change.
 
+**Reminder Sprint 1 — CONFIRMED-defect fixes applied (authoritative, 2026-07-07,
+supersedes the "no active defects" clause above):** a Verification Sprint PROVED (from
+code) four defects the Build-8 delivery validation did not cover, and — under the freeze's
+own "unless a NEW defect is proven" carve-out — Sprint 1 fixed them: **(1)** completing a
+**recurring** reminder no longer ends the series — it advances `remind_at` to the next
+occurrence (shared `lib/reminders/recurrence.ts`; UI button "Done for today"); Delete still
+ends a series. **(2)** the cron `processing` lock now has a **lease/reclaim** (`processing_at`
+col, `PROCESSING_LEASE_MS`) so a crashed/timed-out tick can't strand a reminder. **(3)**
+`toggle`/`delete` server actions now do an authoritative fetch + `userCanAccessProfile`
+(parity with create/`[id]`), scoped by the reminder's OWN owner/profile, not the cookie.
+**(4)** native iOS **duplicate** (local + cron push) is de-duped: the device reports pending
+locals (`<NativeReminderBeacon>` → `/api/reminders/native-active` → `reminder_local_confirmations`)
+and the cron skips the redundant push for a fresh, user_id-matched confirmation while still
+doing bookkeeping — **fails toward delivery** (never a silent miss). **The frozen native
+scheduler stayed UNTOUCHED** (`native-reminders.ts`/`NativeReminderSync`/`AppDelegate.swift`);
+the beacon only READS `getPending()`. All schema changes are **probe-gated (inert until the
+operator applies the migrations** `20260707120000` + `20260707130000`), so the deploy is a
+no-op until activated. **Still frozen/out-of-scope + unfixed:** the cron recurring-reschedule
+**DST/month-end drift** (a separate proven defect, NOT fixed), and true single-delivery
+certainty (needs an iOS Notification Service Extension — operator/native). Do **not** re-flag
+the four fixed items; a future reminder change still requires a proven defect first.
+
 **Active development focus (authoritative, 2026-06-21): Memory Media Experience
 Upgrade** — multi-media memories (reminders are done). **Phase 1: multiple photos per
 memory** — reuse `memories.attachments` (jsonb array of `{url, name, mimeType}`) +
