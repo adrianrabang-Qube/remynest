@@ -167,6 +167,22 @@ no-op until activated. **Still frozen/out-of-scope + unfixed:** the cron recurri
 certainty (needs an iOS Notification Service Extension — operator/native). Do **not** re-flag
 the four fixed items; a future reminder change still requires a proven defect first.
 
+**Two authoritative standards (Production Sprint 2, 2026-07-07):** **(A) The Stripe webhook
+MUST return non-2xx when a required DB write fails.** `app/api/stripe/webhook/route.ts`
+returns **HTTP 500** if any `profiles` write errors (so Stripe retries the whole event);
+a `!data` "no matching row" stays **200** (not retryable — don't loop). Writes are idempotent
+(`.eq(id|customer|subscription)`), so retries never duplicate state. Do **not** revert to
+acknowledging (200) an event whose write failed — that silently desyncs premium/entitlements/
+quota. **(B) Every write that accepts a workspace from the client-settable active-profile
+cookie MUST app-layer-authorize it** with `userCanAccessProfile(user.id, activeProfileId)`
+BEFORE the write — RLS alone is NOT sufficient (schema is dashboard-managed/unverifiable).
+`createReminder`, `toggle/deleteReminder`, and now **`POST /api/memories/create`** all do this;
+a null `activeProfileId` (My Nest) needs no check. **Known still-open (verify/fix later, per the
+audit):** the `memories` INSERT **RLS** must be confirmed in the Supabase SQL editor; the memory
+**edit** (`PUT /api/memories/[id]`) authorization was NOT part of this sprint — audit it before
+relying on it. **Not production-ready** — the full audit (a11y, performance, security sweep,
+PWA/offline, deep auth) was interrupted and is incomplete.
+
 **Active development focus (authoritative, 2026-06-21): Memory Media Experience
 Upgrade** — multi-media memories (reminders are done). **Phase 1: multiple photos per
 memory** — reuse `memories.attachments` (jsonb array of `{url, name, mimeType}`) +

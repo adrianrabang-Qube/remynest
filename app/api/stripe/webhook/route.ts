@@ -57,6 +57,14 @@ export async function POST(req: Request) {
     );
   }
 
+  // Tracks whether ANY required DB write failed with a genuine (retryable) error. If so
+  // we return 500 at the end so Stripe RETRIES the whole event rather than acknowledging a
+  // partially-processed one (which would permanently desync premium/entitlements/quota).
+  // A `!data` "no matching profile row" is NOT a write failure (missing metadata / already
+  // in that state) — retrying can't fix it, so it stays a 200 ack. All updates are
+  // idempotent (`.eq(id|customer|subscription)`), so a retry never duplicates state.
+  let writeFailed = false;
+
   // ✅ CHECKOUT SUCCESS
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
@@ -175,6 +183,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (error) {
+      writeFailed = true;
       console.error(
         "❌ FULL UPDATE FAILURE:",
         JSON.stringify(error, null, 2)
@@ -306,6 +315,7 @@ export async function POST(req: Request) {
         .maybeSingle();
 
     if (error) {
+      writeFailed = true;
       console.error(
         "❌ SUBSCRIPTION CREATED UPDATE FAILURE:",
         JSON.stringify(
@@ -415,6 +425,13 @@ export async function POST(req: Request) {
       "❌ DOWNGRADE ERROR:",
       error
     );
+
+    // A genuine DB error on the downgrade write → retry (leaving a cancelled user premium
+    // is an entitlement/quota leak). `!data && !error` = no matching profile (already
+    // downgraded / never existed) → not retryable, stays a 200 ack.
+    if (error) {
+      writeFailed = true;
+    }
 
     logSubscriptionCancelled({
       metadata: {
@@ -556,6 +573,7 @@ export async function POST(req: Request) {
     }
 
     if (error) {
+      writeFailed = true;
       console.error(
         "❌ SUBSCRIPTION UPDATE FAILURE:",
         JSON.stringify(error, null, 2)
@@ -631,6 +649,7 @@ export async function POST(req: Request) {
         .maybeSingle();
 
     if (error) {
+      writeFailed = true;
       console.error(
         "❌ PAYMENT FAILURE UPDATE ERROR:",
         JSON.stringify(
@@ -645,6 +664,15 @@ export async function POST(req: Request) {
         data
       );
     }
+  }
+
+  // Any required DB write failed → 500 so Stripe retries the whole event (idempotent
+  // updates make the retry safe). Otherwise acknowledge normally.
+  if (writeFailed) {
+    return NextResponse.json(
+      { error: "Webhook processing failed — will retry" },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({

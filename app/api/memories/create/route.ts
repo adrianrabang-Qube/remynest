@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { userCanAccessProfile } from "@/lib/profile-ownership";
 import {
   MemoryAttachmentValidationError,
   isAllowedAttachmentMime,
@@ -153,6 +154,29 @@ export async function POST(req: Request) {
         activeProfileId,
       }
     );
+
+    // AUTHORIZATION PARITY (matches reminder creation): the active-profile cookie is
+    // CLIENT-SETTABLE, so before inserting into a CARE workspace, verify the user actually
+    // owns / has caregiver access to that profile — application-layer authorization that
+    // MUST hold even if RLS also blocks it. Personal ("My Nest", activeProfileId null) is
+    // owned by user_id, so there is no profile to check.
+    if (
+      activeProfileId &&
+      !(await userCanAccessProfile(user.id, activeProfileId))
+    ) {
+      logPipelineStage("active-context-forbidden", {
+        activeProfileId,
+      });
+      return NextResponse.json(
+        {
+          error:
+            "You don't have access to this care profile.",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
 
     // My Nest personal workspace is supported for MVP.
     // In care workspace, activeProfileId is preserved.
