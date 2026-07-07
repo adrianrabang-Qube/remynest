@@ -33,6 +33,10 @@ export async function getMemoryStats(
     .select("id, memory_date, title, ai_title, ai_category, ai_tags")
     .eq("user_id", ownerAccountId)
     .order("memory_date", { ascending: false, nullsFirst: false })
+    // Deterministic secondary key so the capped subset is STABLE across identical calls even when
+    // many memories share the boundary date (otherwise Postgres may return a different LIMIT slice
+    // each run, making downstream graph/centrality results non-deterministic).
+    .order("id", { ascending: true })
     .limit(MEMORY_STATS_CAP);
   q = memoryProfileId ? q.eq("memory_profile_id", memoryProfileId) : q.is("memory_profile_id", null);
   const { data } = await q;

@@ -101,11 +101,15 @@ export async function getRelationshipDataset(
 ): Promise<RelationshipDataset> {
   const empty: RelationshipDataset = { people: new Map(), links: [], memories: new Map() };
 
+  // `.order("id")` before every `.limit()` gives each cap a deterministic subset across identical
+  // calls (Postgres may otherwise return a different LIMIT slice run-to-run), so downstream
+  // relationship + memory-centrality results are stable.
   let pq = supabase
     .from("people")
     .select("id, display_name, role")
     .eq("created_by_account_id", ownerAccountId)
     .eq("status", "active")
+    .order("id", { ascending: true })
     .limit(PEOPLE_CAP);
   pq = memoryProfileId ? pq.eq("memory_profile_id", memoryProfileId) : pq.is("memory_profile_id", null);
   const { data: peopleRows } = await pq;
@@ -121,6 +125,7 @@ export async function getRelationshipDataset(
     .from("memory_person_links")
     .select("person_id, memory_id")
     .in("person_id", personIds)
+    .order("memory_id", { ascending: true })
     .limit(LINK_CAP);
   const rawLinks = ((linkRows ?? []) as { person_id?: string; memory_id?: string }[])
     .filter((l) => l.person_id && l.memory_id)
@@ -134,6 +139,7 @@ export async function getRelationshipDataset(
     .select("id, memory_date, title, ai_title, ai_category, ai_tags")
     .eq("user_id", ownerAccountId)
     .in("id", memoryIds)
+    .order("id", { ascending: true })
     .limit(MEMORY_CAP);
   mq = memoryProfileId ? mq.eq("memory_profile_id", memoryProfileId) : mq.is("memory_profile_id", null);
   const { data: memRows } = await mq;

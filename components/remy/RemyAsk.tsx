@@ -142,6 +142,40 @@ function GraphCard({ graph }: { graph: AskGraph }) {
     );
   }
 
+  if (graph.kind === "importance" && graph.importance && graph.importance.items.length > 0) {
+    const heading =
+      graph.importance.kind === "isolated"
+        ? "Standalone memories"
+        : graph.importance.kind === "hub"
+          ? "Most connected memories"
+          : "Your key memories";
+    return (
+      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
+          {heading}
+        </p>
+        <ul className="mt-1 divide-y divide-sand-deep/30">
+          {graph.importance.items.map((item) => (
+            <li key={item.id}>
+              <Link
+                href={`/memories/${item.id}`}
+                className="flex items-baseline justify-between gap-3 py-1.5 text-xs text-sage-deep transition hover:text-sage"
+              >
+                <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                <span className="shrink-0 text-charcoal-muted">
+                  {item.date ? `${yearPlain(item.date)} · ` : ""}
+                  {item.centrality === "isolated"
+                    ? "standalone"
+                    : `${item.degree} ${item.degree === 1 ? "link" : "links"}`}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   if (graph.kind === "aggregate" && ((graph.themes?.length ?? 0) > 0 || (graph.busiestYears?.length ?? 0) > 0)) {
     return (
       <div className="mt-2 space-y-1.5 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">

@@ -22,6 +22,10 @@ import {
   type YearCount,
 } from "@/lib/remy/memory-graph";
 import {
+  detectMemoryIntelIntent,
+  answerMemoryIntel,
+} from "@/lib/remy/memory-connections";
+import {
   answerAskQuestion,
   buildAskContext,
   contextSize,
@@ -56,7 +60,7 @@ export interface AskAnswer {
 
 /** A compact, deterministic Memory Intelligence Graph summary for the Ask UI cards. */
 export interface AskGraph {
-  kind: "person" | "connection" | "aggregate";
+  kind: "person" | "connection" | "aggregate" | "importance";
   person?: {
     name: string;
     mentionCount: number;
@@ -69,6 +73,11 @@ export interface AskGraph {
   connection?: { names: string[]; count: number };
   themes?: ThemeCount[];
   busiestYears?: YearCount[];
+  /** Memory-centrality ranking for the "important/isolated/most-connected memories" card. */
+  importance?: {
+    kind: "important" | "isolated" | "hub";
+    items: { id: string; title: string; date: string | null; centrality: string; degree: number }[];
+  };
 }
 
 const EMPTY_ANSWER: AskAnswer = {
@@ -208,6 +217,41 @@ export async function answerAskRemy(
       })),
       graph: g.summary
         ? { kind: "aggregate", themes: g.summary.themes.slice(0, 8), busiestYears: g.summary.busiest }
+        : undefined,
+    };
+  }
+
+  // MEMORY CENTRALITY (Memory Intelligence): "show my most important / isolated / most-connected
+  // memories" — deterministic memory↔memory graph (shared people/themes/years/decades) built from
+  // the SAME workspace-scoped datasets (getMemoryStats + getRelationshipDataset). Degree/centrality
+  // only — no LLM, no embeddings, no new search. 0-people-gated so person-scoped queries defer to
+  // person-aware retrieval above.
+  const intelIntent = detectMemoryIntelIntent(retrievalText);
+  if (intelIntent && matchedPersonIds.length === 0) {
+    const m = await answerMemoryIntel(supabase, intelIntent, user.id, memoryProfileId);
+    // The importance card lists the ranked memories AS clickable links, so we do NOT also
+    // populate `related` — that would render the identical titles twice (once non-clickable
+    // in the card, once in the RelatedMemories list). The card is the single surface.
+    return {
+      answer: m.text,
+      count: m.memories.length,
+      failed: false,
+      matchedPersonIds,
+      matchedPersonNames,
+      graph: m.importance.length
+        ? {
+            kind: "importance",
+            importance: {
+              kind: intelIntent,
+              items: m.importance.map((i) => ({
+                id: i.id,
+                title: i.title ?? "Untitled memory",
+                date: i.date,
+                centrality: i.centrality,
+                degree: i.degree,
+              })),
+            },
+          }
         : undefined,
     };
   }
