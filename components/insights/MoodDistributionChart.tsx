@@ -51,7 +51,7 @@ const MoodDistributionChart = memo(
         </h2>
 
         <p className="text-gray-500 mt-2">
-          Distribution of cognitive memory types.
+          Distribution of your memory types.
         </p>
 
       </div>

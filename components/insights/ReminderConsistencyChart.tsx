@@ -36,7 +36,7 @@ const ReminderConsistencyChart = memo(
           </h2>
 
           <p className="text-gray-500 mt-2">
-            Weekly cognitive routine adherence.
+            Weekly routine consistency.
           </p>
 
         </div>

@@ -76,13 +76,18 @@ export async function getSearchHealth(
   supabase: RemySupabase,
   memoryProfileId: string | null,
 ): Promise<SearchHealth> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return buildSearchHealth([]);
+
   let query = supabase
     .from("memories")
     .select("title, content, memory_date, ai_category, ai_tags")
     .limit(SEARCH_HEALTH_CAP);
   query = memoryProfileId
     ? query.eq("memory_profile_id", memoryProfileId)
-    : query.is("memory_profile_id", null);
+    : query.is("memory_profile_id", null).eq("user_id", user.id);
 
   const { data } = await query;
   return buildSearchHealth((data ?? []) as SearchHealthRow[]);

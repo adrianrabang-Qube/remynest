@@ -426,12 +426,54 @@ export async function acceptInvite(
 export async function declineInvite(
   formData: FormData
 ) {
-  const { supabase } =
+  const { supabase, user } =
     await requireDashboardUser();
 
   const inviteId = formData.get(
     "invite_id"
   ) as string;
+
+  // Authorization (app-layer — do NOT rely on RLS alone): only the ADDRESSED recipient
+  // (by verified session email) or the INVITER may decline, and only while pending. Without
+  // this, a client-supplied invite_id lets any user decline anyone's invitation (IDOR).
+  const {
+    data: invite,
+    error: fetchError,
+  } = await supabase
+    .from("caregiver_invites")
+    .select(
+      "email, invited_by_account_id, status"
+    )
+    .eq("id", inviteId)
+    .single();
+
+  if (fetchError || !invite) {
+    throw new Error("Invite not found");
+  }
+
+  const inviteEmail = (
+    invite.email ?? ""
+  ).toLowerCase();
+  const userEmail = (
+    user.email ?? ""
+  ).toLowerCase();
+  const authorized =
+    (Boolean(inviteEmail) && inviteEmail === userEmail) ||
+    invite.invited_by_account_id === user.id;
+
+  if (!authorized || invite.status !== "pending") {
+    console.warn(
+      "[dashboard] decline_invite_forbidden",
+      {
+        userId: user.id,
+        inviteId,
+        status: invite.status,
+      }
+    );
+    throw new Error(
+      "This invitation is not addressed to you."
+    );
+  }
 
   const { error } = await supabase
     .from("caregiver_invites")

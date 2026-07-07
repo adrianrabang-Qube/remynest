@@ -66,22 +66,31 @@ export async function getReminiscence(
 ): Promise<ReminiscenceData> {
   let rows: ReminiscenceMemory[] = [];
   try {
-    let q = supabase
-      .from("memories")
-      .select(
-        "id, title, ai_title, ai_summary, content, cover_image_url, attachments, created_at, memory_date, memory_date_precision"
-      )
-      .not("memory_date", "is", null)
-      .order("memory_date", { ascending: true })
-      .limit(FETCH_LIMIT);
-    q = memoryProfileId
-      ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
-    const { data } = await q;
-    const signed = await signMemories(
-      (data as { cover_image_url?: string | null }[] | null) ?? []
-    );
-    rows = signed as unknown as ReminiscenceMemory[];
+    // PERSONAL reads are bound to the session user (app-layer enforcement — never rely on
+    // RLS alone); CARE reads use memoryProfileId, which the caller resolved through the
+    // validated active context (a forged/unauthorized care profile is already downgraded to
+    // PERSONAL upstream). Fail closed with no session.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      let q = supabase
+        .from("memories")
+        .select(
+          "id, title, ai_title, ai_summary, content, cover_image_url, attachments, created_at, memory_date, memory_date_precision"
+        )
+        .not("memory_date", "is", null)
+        .order("memory_date", { ascending: true })
+        .limit(FETCH_LIMIT);
+      q = memoryProfileId
+        ? q.eq("memory_profile_id", memoryProfileId)
+        : q.is("memory_profile_id", null).eq("user_id", user.id);
+      const { data } = await q;
+      const signed = await signMemories(
+        (data as { cover_image_url?: string | null }[] | null) ?? []
+      );
+      rows = signed as unknown as ReminiscenceMemory[];
+    }
   } catch {
     rows = [];
   }

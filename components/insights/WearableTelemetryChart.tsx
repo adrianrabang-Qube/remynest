@@ -34,7 +34,7 @@ const WearableTelemetryChart = memo(
         <div className="mb-8">
 
           <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-            Wearable Telemetry
+            Connected Devices
           </div>
 
           <h2 className="text-4xl font-bold text-[#243428]">
@@ -42,7 +42,7 @@ const WearableTelemetryChart = memo(
           </h2>
 
           <p className="text-gray-500 mt-2 text-lg">
-            Physiological telemetry from wearable cognitive monitoring systems.
+            Wellbeing signals from connected devices.
           </p>
 
         </div>

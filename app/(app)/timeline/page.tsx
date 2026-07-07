@@ -149,6 +149,7 @@ export default async function TimelinePage({
     category?: string;
     view?: string;
     context?: string;
+    show?: string;
   };
 }) {
   const supabase =
@@ -207,7 +208,32 @@ export default async function TimelinePage({
   }
 
   // =====================================
-  // FETCH MEMORIES
+  // URL QUERY STATE + PAGINATION
+  // =====================================
+
+  const searchQuery = normalizeSearchParam(searchParams?.search);
+  const selectedCategory = normalizeSearchParam(searchParams?.category);
+  const currentView: "timeline" | "chapters" =
+    searchParams?.view === "chapters" ? "chapters" : "timeline";
+
+  // Server-side pagination: the default feed loads ONE page and grows via a "Show more"
+  // link (?show=). A narrowed view (active search/category, or the chapters view — which
+  // needs the whole set to build chapters) loads the full MATCHING set up to a hard safety
+  // cap. So no view is ever unbounded, a filter naturally keeps the set small, and only the
+  // memories that actually render are signed (below).
+  const PAGE_SIZE = 60;
+  const SAFETY_CAP = 2000;
+  const isNarrowed =
+    Boolean(searchQuery || selectedCategory) || currentView === "chapters";
+  const requestedShow = Math.floor(Number(searchParams?.show));
+  const shown =
+    Number.isFinite(requestedShow) && requestedShow > 0
+      ? Math.min(Math.max(requestedShow, PAGE_SIZE), SAFETY_CAP)
+      : PAGE_SIZE;
+  const fetchLimit = isNarrowed ? SAFETY_CAP : shown + 1;
+
+  // =====================================
+  // FETCH MEMORIES (bounded)
   // =====================================
 
   const memoriesQuery = supabase
@@ -217,14 +243,17 @@ export default async function TimelinePage({
       ascending: false,
     })
     // Deterministic tiebreaker (created_at is not unique) for stable ordering.
-    .order("id", { ascending: false });
+    .order("id", { ascending: false })
+    .limit(fetchLimit);
 
+  // PERSONAL (My Nest) reads are bound to the session user so they can never return another
+  // user's memories; CARE reads use activeProfileId, which is validated at the source
+  // (getActiveContext → userCanAccessProfile). App-layer enforcement — not RLS-dependent.
   const query =
     isMyNestContext
-      ? memoriesQuery.is(
-          "memory_profile_id",
-          null
-        )
+      ? memoriesQuery
+          .is("memory_profile_id", null)
+          .eq("user_id", user.id)
       : memoriesQuery.eq(
           "memory_profile_id",
           activeProfileId
@@ -242,108 +271,87 @@ export default async function TimelinePage({
     );
   }
 
-  const allMemories: Memory[] =
-    await signMemories(
-      Array.isArray(memories) ? memories : [],
-      { variant: "thumb", maxImagesPerMemory: 4 }
-    );
+  // Normalize the RAW rows (UNSIGNED) — used for filtering, the category list, and the
+  // related-memory context, none of which need signed image URLs.
+  const normalizedMemories: NormalizedMemory[] = (
+    Array.isArray(memories) ? (memories as Memory[]) : []
+  ).map((memory) => ({
+    ...memory,
+    normalizedCategory: normalizeCategory(memory.ai_category),
+  }));
 
   // =====================================
-  // NORMALIZATION
-  // =====================================
-
-  const normalizedMemories: NormalizedMemory[] =
-    allMemories.map(
-      (memory: Memory) => ({
-        ...memory,
-        normalizedCategory:
-          normalizeCategory(
-            memory.ai_category
-          ),
-      })
-    );
-
-  // =====================================
-  // URL QUERY STATE
-  // =====================================
-
-  const searchQuery =
-    normalizeSearchParam(
-      searchParams?.search
-    );
-
-  const selectedCategory =
-    normalizeSearchParam(
-      searchParams?.category
-    );
-
-  const currentView:
-    | "timeline"
-    | "chapters" =
-      searchParams?.view ===
-      "chapters"
-        ? "chapters"
-        : "timeline";
-
-  // =====================================
-  // FILTERING
+  // FILTERING (in-memory, over the fetched set) — UNSIGNED
   // =====================================
 
   const filteredMemories: NormalizedMemory[] =
-    normalizedMemories.filter(
-      (
-        memory: NormalizedMemory
-      ) => {
-        const searchableValues =
-          buildSearchableValues(
-            memory
-          );
+    normalizedMemories.filter((memory) => {
+      const searchableValues = buildSearchableValues(memory);
+      const matchesSearch =
+        !searchQuery ||
+        searchableValues.some((value) => value.includes(searchQuery));
+      const matchesCategory =
+        !selectedCategory || memory.normalizedCategory === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
 
-        const matchesSearch =
-          !searchQuery ||
-          searchableValues.some(
-            (value) =>
-              value.includes(
-                searchQuery
-              )
-          );
-
-        const matchesCategory =
-          !selectedCategory ||
-          memory.normalizedCategory ===
-            selectedCategory;
-
-        return (
-          matchesSearch &&
-          matchesCategory
-        );
-      }
-    );
+  // Pagination: the default feed shows one page (grow via "Show more"); a narrowed view
+  // shows its whole matching set. Only these VISIBLE memories are signed.
+  const hasMore = !isNarrowed && filteredMemories.length > shown;
+  const visibleMemories: NormalizedMemory[] = isNarrowed
+    ? filteredMemories
+    : filteredMemories.slice(0, shown);
 
   // =====================================
-  // GROUPING
+  // SIGN ONLY THE VISIBLE (RENDERED) MEMORIES
   // =====================================
 
-  const groupedMemories =
-    groupMemoriesByDate(
-      filteredMemories
-    );
+  const signedVisible = await signMemories(visibleMemories, {
+    variant: "thumb",
+    maxImagesPerMemory: 4,
+  });
+
+  // =====================================
+  // GROUPING (signed, visible)
+  // =====================================
+
+  const groupedMemories = groupMemoriesByDate(signedVisible);
+
+  // "Show more" href — preserve the current params, grow the page by one PAGE_SIZE.
+  const showMoreParams = new URLSearchParams();
+  if (searchParams?.search) showMoreParams.set("search", searchParams.search);
+  if (searchParams?.category)
+    showMoreParams.set("category", searchParams.category);
+  if (searchParams?.view) showMoreParams.set("view", searchParams.view);
+  if (searchParams?.context) showMoreParams.set("context", searchParams.context);
+  showMoreParams.set("show", String(shown + PAGE_SIZE));
+  const showMoreHref = `/timeline?${showMoreParams.toString()}`;
 
   // =====================================
   // UNIQUE CATEGORIES
   // =====================================
 
-  const categories =
-    Array.from(
-      new Set(
-        normalizedMemories
-          .map(
-            (memory) =>
-              memory.normalizedCategory
-          )
-          .filter(Boolean)
+  // Category chips must reflect the WHOLE workspace (up to the safety cap), independent of
+  // the paginated feed — otherwise a category used only in OLDER memories would disappear
+  // from the filter bar in the default view (it isn't in the first page). A narrowed view
+  // already fetched the full matching set, so reuse it; the default view runs one
+  // lightweight single-column query.
+  let categoryValues: string[];
+  if (isNarrowed) {
+    categoryValues = normalizedMemories.map((memory) => memory.normalizedCategory);
+  } else {
+    const categoryQuery = supabase.from("memories").select("ai_category");
+    const { data: categoryRows } = await (isMyNestContext
+      ? categoryQuery.is("memory_profile_id", null).eq("user_id", user.id)
+      : categoryQuery.eq("memory_profile_id", activeProfileId)
+    ).limit(SAFETY_CAP);
+    categoryValues = (Array.isArray(categoryRows) ? categoryRows : []).map((row) =>
+      normalizeCategory(
+        (row as { ai_category?: string | null }).ai_category ?? undefined
       )
-    ).sort();
+    );
+  }
+  const categories = Array.from(new Set(categoryValues.filter(Boolean))).sort();
 
   const hasResults =
     filteredMemories.length > 0;
@@ -405,23 +413,30 @@ export default async function TimelinePage({
           }
         />
       ) : (
-        Object.entries(
-          groupedMemories
-        ).map(
-          ([date, memories]) => (
-            <TimelineDayGroup
-              key={date}
-              date={date}
-              memories={memories}
-              allMemories={
-                normalizedMemories
-              }
-              formatCategoryLabel={
-                formatCategoryLabel
-              }
-            />
-          )
-        )
+        <>
+          {Object.entries(groupedMemories).map(
+            ([date, memories]) => (
+              <TimelineDayGroup
+                key={date}
+                date={date}
+                memories={memories}
+                allMemories={normalizedMemories}
+                formatCategoryLabel={formatCategoryLabel}
+              />
+            )
+          )}
+
+          {hasMore && (
+            <div className="pt-2 text-center">
+              <Link
+                href={showMoreHref}
+                className="inline-flex items-center gap-1.5 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal-soft shadow-soft transition hover:bg-sand/60"
+              >
+                Show more
+              </Link>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

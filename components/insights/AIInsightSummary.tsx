@@ -20,7 +20,7 @@ const AIInsightSummary = memo(
       <div className="mb-8">
 
         <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-          AI Cognitive Interpretation
+          AI Memory Reflection
         </div>
 
         <h2 className="text-4xl font-bold text-[#243428]">
@@ -28,7 +28,7 @@ const AIInsightSummary = memo(
         </h2>
 
         <p className="text-gray-500 mt-2 text-lg">
-          Behavioral interpretation and longitudinal cognition observations generated from telemetry signals.
+          A supportive reflection drawn from the memories you&apos;ve recorded.
         </p>
 
       </div>

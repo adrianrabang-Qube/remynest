@@ -77,7 +77,11 @@ export const getAccessibleProfiles = cache(async () => {
     .eq(
       "caregiver_account_id",
       user.id
-    );
+    )
+    // Only an ACCEPTED relationship grants access — matches userCanAccessProfile + RLS +
+    // the delete/GDPR model. A pending/revoked-by-status row must NOT surface a profile as
+    // accessible (which would grant premature read access to its memories/stats).
+    .eq("invite_status", "accepted");
 
   if (relationshipError) {
     console.error(

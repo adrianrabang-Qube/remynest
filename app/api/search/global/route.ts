@@ -74,9 +74,13 @@ export async function POST(request: Request) {
       )
       .order("created_at", { ascending: false })
       .limit(MEMORY_LIMIT);
+    // CARE: activeProfileId is validated at the source (getActiveContext → userCanAccessProfile),
+    // so it can only ever be an accessible profile. PERSONAL: bind to the session user so a
+    // My Nest read can never return another user's memories (app-layer enforcement — do not
+    // rely on RLS alone).
     memoryQuery = activeProfileId
       ? memoryQuery.eq("memory_profile_id", activeProfileId)
-      : memoryQuery.is("memory_profile_id", null);
+      : memoryQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
     const [memoryResult, collections, connections, chapters, profiles] =
       await Promise.all([

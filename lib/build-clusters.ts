@@ -130,6 +130,18 @@ export async function buildClusters(
     // FETCH MEMORY
     // =====================================
 
+    // Owner-scope the fetch (defense-in-depth parity with buildRelationships): a memoryId
+    // the caller does not own returns nothing.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+
     const {
       data: memory,
       error: memoryError,
@@ -137,6 +149,7 @@ export async function buildClusters(
       .from("memories")
       .select("*")
       .eq("id", memoryId)
+      .eq("user_id", user.id)
       .single();
 
     if (
@@ -226,18 +239,41 @@ export async function buildClusters(
         matches || []
       );
 
+    // App-layer ownership backstop — do not trust match_memories output; keep only matched
+    // memories this owner actually owns before writing cluster-member rows (parity with
+    // buildRelationships).
+    const matchIds = normalizedMatches.map(
+      (m) => m.id
+    );
+    const { data: ownedMatchRows } =
+      matchIds.length > 0
+        ? await supabase
+            .from("memories")
+            .select("id")
+            .eq("user_id", memory.user_id)
+            .in("id", matchIds)
+        : { data: [] as { id: string }[] };
+    const ownedMatchIds = new Set(
+      (ownedMatchRows ?? []).map(
+        (r: { id: string }) => r.id
+      )
+    );
+    const scopedMatches = normalizedMatches.filter(
+      (m) => ownedMatchIds.has(m.id)
+    );
+
     logClusterStage(
       "cluster-matches-found",
       {
         requestId,
 
         totalMatches:
-          normalizedMatches.length,
+          scopedMatches.length,
       }
     );
 
     if (
-      normalizedMatches.length ===
+      scopedMatches.length ===
       0
     ) {
       return {
@@ -318,7 +354,7 @@ export async function buildClusters(
       buildClusterItems(
         cluster.id,
         memory.id,
-        normalizedMatches
+        scopedMatches
       );
 
     // =====================================

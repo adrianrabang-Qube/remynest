@@ -37,15 +37,15 @@ const AlzheimerRiskSignals = memo(
         <div className="mb-8">
 
           <div className="inline-flex items-center rounded-full bg-[#fff4f2] px-4 py-2 text-sm text-[#9f3a2f] mb-4">
-            Neurodegenerative Risk Telemetry
+            Memory Support Insights
           </div>
 
           <h2 className="text-4xl font-bold text-[#243428]">
-            Alzheimer Risk Signals
+            Memory Support Signals
           </h2>
 
           <p className="text-gray-500 mt-2 text-lg">
-            Longitudinal behavioral drift and cognitive anomaly detection analytics.
+            Gentle trends in daily routines and memory activity over time.
           </p>
 
         </div>
@@ -63,7 +63,7 @@ const AlzheimerRiskSignals = memo(
           <div className="rounded-2xl border bg-[#fff9f8] p-5">
 
             <p className="text-sm text-gray-500">
-              Drift Variability
+              Routine Variability
             </p>
 
             <h3 className="text-3xl font-bold text-[#9f3a2f] mt-2">
@@ -87,7 +87,7 @@ const AlzheimerRiskSignals = memo(
           <div className="rounded-2xl border bg-[#fff9f8] p-5">
 
             <p className="text-sm text-gray-500">
-              Cognitive Risk
+              Support Signal
             </p>
 
             <h3 className="text-3xl font-bold text-[#243428] mt-2">

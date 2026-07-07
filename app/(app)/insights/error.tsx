@@ -31,7 +31,7 @@ export default function InsightsErrorPage({
         {/* STATUS */}
 
         <div className="inline-flex items-center rounded-full bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700 mb-6">
-          Cognitive Telemetry Error
+          Insights Unavailable
         </div>
 
         {/* TITLE */}
@@ -43,7 +43,7 @@ export default function InsightsErrorPage({
         {/* DESCRIPTION */}
 
         <p className="text-gray-600 text-lg leading-relaxed mt-6">
-          The cognitive analytics system encountered an issue while processing telemetry data. No user memory data has been lost.
+          We couldn&apos;t load your insights just now. No memory data has been lost.
         </p>
 
         {/* ERROR */}
@@ -51,7 +51,7 @@ export default function InsightsErrorPage({
         <div className="mt-8 rounded-3xl border bg-[#f8faf7] p-6">
 
           <p className="text-sm text-gray-500 mb-2">
-            Diagnostic Information
+            Technical Details
           </p>
 
           <p className="font-mono text-sm text-red-700 break-all">

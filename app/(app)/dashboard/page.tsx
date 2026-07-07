@@ -365,10 +365,9 @@ export default async function DashboardPage() {
           "memory_profile_id",
           effectiveActiveProfileId
         )
-      : memoriesQuery.is(
-          "memory_profile_id",
-          null
-        );
+      : memoriesQuery
+          .is("memory_profile_id", null)
+          .eq("user_id", user.id);
 
     const {
       count,

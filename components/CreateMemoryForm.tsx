@@ -450,22 +450,34 @@ export default function CreateMemoryForm() {
         </p>
       </div>
 
+      <label htmlFor="memory-title" className="sr-only">
+        Memory title
+      </label>
       <input
+        id="memory-title"
         type="text"
         placeholder="Memory title"
         value={title}
         maxLength={MAX_TITLE_LENGTH}
+        aria-invalid={Boolean(validationError)}
+        aria-describedby={validationError ? "memory-validation-error" : undefined}
         onChange={(e) => {
           setTitle(e.target.value);
         }}
         className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none"
       />
 
+      <label htmlFor="memory-content" className="sr-only">
+        Write your memory
+      </label>
       <textarea
+        id="memory-content"
         placeholder="Write your memory..."
         value={content}
         rows={5}
         maxLength={MAX_CONTENT_LENGTH}
+        aria-invalid={Boolean(validationError)}
+        aria-describedby={validationError ? "memory-validation-error" : undefined}
         onChange={(e) => {
           setContent(e.target.value);
         }}
@@ -513,6 +525,7 @@ export default function CreateMemoryForm() {
         {dateMode === "custom" && (
           <input
             type="date"
+            aria-label="Exact date this happened"
             value={customDate}
             max={
               new Date()
@@ -532,6 +545,7 @@ export default function CreateMemoryForm() {
           <input
             type="number"
             inputMode="numeric"
+            aria-label="Year this happened"
             min={1900}
             max={CURRENT_YEAR}
             value={yearValue}
@@ -547,6 +561,7 @@ export default function CreateMemoryForm() {
 
         {dateMode === "decade" && (
           <select
+            aria-label="Decade this happened"
             value={decadeValue}
             onChange={(e) =>
               setDecadeValue(
@@ -588,14 +603,22 @@ export default function CreateMemoryForm() {
         </span>
 
         {validationError && (
-          <span className="text-red-500">
+          <span
+            id="memory-validation-error"
+            role="alert"
+            className="text-red-500"
+          >
             {validationError}
           </span>
         )}
       </div>
 
       {errorMessage && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
           {errorMessage}
         </div>
       )}

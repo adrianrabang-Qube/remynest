@@ -120,6 +120,19 @@ export async function buildRelationships(
     // FETCH MEMORY
     // =====================================
 
+    // Owner-scope the fetch (app-layer enforcement — never rely on RLS alone): a memoryId
+    // the caller does not own returns nothing, so no foreign memory / relationship graph
+    // can be read or written.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
+    }
+
     const {
       data: memory,
       error: memoryError,
@@ -127,6 +140,7 @@ export async function buildRelationships(
       .from("memories")
       .select("*")
       .eq("id", memoryId)
+      .eq("user_id", user.id)
       .single();
 
     if (
@@ -216,18 +230,40 @@ export async function buildRelationships(
         matches || []
       );
 
+    // App-layer ownership backstop — do not trust match_memories output; keep only matched
+    // memories this owner actually owns before creating relationship edges.
+    const matchIds = normalizedMatches.map(
+      (m) => m.id
+    );
+    const { data: ownedMatchRows } =
+      matchIds.length > 0
+        ? await supabase
+            .from("memories")
+            .select("id")
+            .eq("user_id", memory.user_id)
+            .in("id", matchIds)
+        : { data: [] as { id: string }[] };
+    const ownedMatchIds = new Set(
+      (ownedMatchRows ?? []).map(
+        (r: { id: string }) => r.id
+      )
+    );
+    const scopedMatches = normalizedMatches.filter(
+      (m) => ownedMatchIds.has(m.id)
+    );
+
     logRelationshipStage(
       "relationship-matches-found",
       {
         requestId,
 
         totalMatches:
-          normalizedMatches.length,
+          scopedMatches.length,
       }
     );
 
     if (
-      normalizedMatches.length ===
+      scopedMatches.length ===
       0
     ) {
       return {
@@ -244,7 +280,7 @@ export async function buildRelationships(
     const relationships =
       buildRelationshipPayload(
         memory.id,
-        normalizedMatches
+        scopedMatches
       );
 
     // =====================================

@@ -64,6 +64,12 @@ export async function getMemoriesMissingDates(
   limit = 100
 ): Promise<UndatedMemory[]> {
   try {
+    // PERSONAL reads bound to the session user (app-layer enforcement); CARE uses the
+    // caller's validated memoryProfileId. Fail closed with no session.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
     let q = supabase
       .from("memories")
       .select("id, title, ai_title, content, created_at")
@@ -72,7 +78,7 @@ export async function getMemoriesMissingDates(
       .limit(limit);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { data } = await q;
     return (data as UndatedMemory[] | null) ?? [];
   } catch {
@@ -86,13 +92,17 @@ async function countMemories(
   datedOnly: boolean
 ): Promise<number> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
     let q = supabase
       .from("memories")
       .select("id", { count: "exact", head: true });
     if (datedOnly) q = q.not("memory_date", "is", null);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { count } = await q;
     return count ?? 0;
   } catch {

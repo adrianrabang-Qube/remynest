@@ -30,6 +30,11 @@ export async function userCanAccessProfile(
     .select("memory_profile_id")
     .eq("memory_profile_id", profileId)
     .eq("caregiver_account_id", userId)
+    // Only an ACCEPTED relationship grants write access — matches the authoritative model
+    // used by RLS, the delete-account RPC, and GDPR (a pending/revoked-by-status row must
+    // NOT grant access). Without this, the sole app-layer gate for care-profile writes
+    // admits non-accepted rows.
+    .eq("invite_status", "accepted")
     .maybeSingle();
 
   return Boolean(shared);

@@ -52,7 +52,7 @@ const BehavioralAnalyticsCard = memo(
       <div className="mb-8">
 
         <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-          Behavioral Cognition Intelligence
+          Everyday Patterns
         </div>
 
         <h2 className="text-4xl font-bold text-[#243428]">
@@ -60,7 +60,7 @@ const BehavioralAnalyticsCard = memo(
         </h2>
 
         <p className="text-gray-500 mt-2 text-lg">
-          Longitudinal cognition behavior analysis generated from memory activity, emotional telemetry, adherence patterns, and inactivity detection systems.
+          A gentle overview of your routines and everyday activity, drawn from the memories you&apos;ve recorded.
         </p>
 
       </div>
@@ -188,7 +188,7 @@ const BehavioralAnalyticsCard = memo(
         <div className="rounded-3xl border bg-[#f8faf7] p-6">
 
           <p className="text-sm text-gray-500">
-            Cognitive Activity
+            Memory Activity
           </p>
 
           <h3 className="text-4xl font-bold text-[#243428] mt-3">
@@ -221,12 +221,12 @@ const BehavioralAnalyticsCard = memo(
 
         </div>
 
-        {/* DECLINE */}
+        {/* ROUTINE CHANGES */}
 
         <div className="rounded-3xl border bg-[#fff8f6] p-6">
 
           <p className="text-sm text-gray-500">
-            Decline Risk
+            Routine Changes
           </p>
 
           <h3 className="text-4xl font-bold text-[#9f3a2f] mt-3">
@@ -237,7 +237,7 @@ const BehavioralAnalyticsCard = memo(
 
             <div className="flex justify-between">
               <span>
-                Monitoring Level
+                Check-in Level
               </span>
 
               <span className="font-medium">
@@ -247,7 +247,7 @@ const BehavioralAnalyticsCard = memo(
 
             <div className="flex justify-between">
               <span>
-                Intervention
+                Extra Support
               </span>
 
               <span className="font-medium">

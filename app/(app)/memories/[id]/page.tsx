@@ -118,8 +118,29 @@ export default async function MemoryPage({
         }
       );
 
-    relatedMemories =
-      await signMemories(data || []);
+    // App-layer ownership backstop: never trust the match_memories RPC's own user
+    // filtering (dashboard-managed / unverifiable). Keep only rows this user owns before
+    // signing private media + rendering their content — mirrors the search route and
+    // semantic-retrieval, which re-scope match_memories output for the same reason.
+    const rpcRows = Array.isArray(data) ? data : [];
+    const ids = rpcRows
+      .map((r: { id?: string }) => r?.id)
+      .filter((v: unknown): v is string => typeof v === "string");
+    if (ids.length > 0) {
+      const { data: owned } = await supabase
+        .from("memories")
+        .select("id")
+        .eq("user_id", user.id)
+        .in("id", ids);
+      const ownedIds = new Set(
+        (owned ?? []).map((r: { id: string }) => r.id)
+      );
+      relatedMemories = await signMemories(
+        rpcRows.filter(
+          (r: { id?: string }) => r.id != null && ownedIds.has(r.id)
+        )
+      );
+    }
   }
 
   // 🎨 Confidence Width

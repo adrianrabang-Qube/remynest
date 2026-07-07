@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>RemyNest</string>
+	<string>RemyNest</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,6 +22,20 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>RemyNest uses your camera so you can capture photos and videos to add to your memories.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>RemyNest uses your microphone to record sound when you capture a video for your memories.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>RemyNest needs permission to save photos and videos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>RemyNest needs access to your photo library so you can add existing photos and videos to your memories.</string>
+	<key>ONESIGNAL_APP_ID</key>
+	<string>0783b302-cb5a-474a-9f28-79869c2c0e03</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -32,32 +46,12 @@
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>RemyNest uses your camera so you can capture photos and videos to add to your memories.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>RemyNest needs access to your photo library so you can add existing photos and videos to your memories.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>RemyNest needs permission to save photos and videos to your library.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>RemyNest uses your microphone to record sound when you capture a video for your memories.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
-	<key>ONESIGNAL_APP_ID</key>
-	<string>0783b302-cb5a-474a-9f28-79869c2c0e03</string>
 </dict>
 </plist>

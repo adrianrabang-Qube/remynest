@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import ProfileHub from "@/components/profile/ProfileHub";
+import { useFocusTrap } from "@/lib/a11y/use-focus-trap";
 import { MOBILE_DRAWER_NAV, isNavItemActive } from "./nav-config";
 import type { ProfileSummary } from "@/components/profile/types";
 
@@ -57,23 +58,19 @@ export default function MobileNavDrawer({
   onClose,
   profile,
 }: MobileNavDrawerProps) {
-  // Escape to close + lock background scroll while open.
+  // Focus trap + Escape-to-close + focus restore (shared a11y hook).
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, onClose, panelRef);
+
+  // Lock background scroll while open.
   useEffect(() => {
     if (!open) return;
-
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    document.addEventListener("keydown", onKey);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     return () => {
-      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -90,7 +87,11 @@ export default function MobileNavDrawer({
         aria-hidden="true"
       />
 
-      <div className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl"
+      >
         {/* Full-height drawer (top-0): pad the header for the status bar / notch
             so "Menu" + close never sit under it (env() is 0 on web → no-op there). */}
         <div className="flex items-center justify-between border-b border-sand-deep/60 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">

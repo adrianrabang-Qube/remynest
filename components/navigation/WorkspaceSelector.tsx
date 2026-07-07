@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useFocusTrap } from "@/lib/a11y/use-focus-trap";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   setActiveProfileCache,
@@ -55,16 +56,15 @@ export default function WorkspaceSelector({
     ? "My Nest"
     : activeProfileName ?? "Care workspace";
 
-  // Escape to close + lock background scroll while the sheet is open.
+  // Focus trap + Escape-to-close + focus restore (shared a11y hook).
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, () => setOpen(false), panelRef);
+
+  // Lock background scroll while the sheet is open.
   useEffect(() => {
     if (!open) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", onKey);
       // ALWAYS release to the unlocked default. The app sets no inline body
       // overflow except these mutually-exclusive overlays, so restoring "" can
       // never orphan a stale "hidden" (the previous capture-and-restore could,
@@ -141,7 +141,11 @@ export default function WorkspaceSelector({
             aria-hidden="true"
           />
 
-          <div className="absolute overflow-y-auto overscroll-contain bg-white shadow-2xl max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:rounded-t-3xl max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] lg:right-4 lg:top-16 lg:max-h-[80vh] lg:w-80 lg:rounded-2xl">
+          <div
+            ref={panelRef}
+            tabIndex={-1}
+            className="absolute overflow-y-auto overscroll-contain bg-white shadow-2xl max-lg:inset-x-0 max-lg:bottom-0 max-lg:max-h-[85vh] max-lg:rounded-t-3xl max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] lg:right-4 lg:top-16 lg:max-h-[80vh] lg:w-80 lg:rounded-2xl"
+          >
             <div className="sticky top-0 flex items-center justify-between border-b border-sand-deep/60 bg-white px-4 py-3">
               <span className="text-sm font-semibold text-charcoal">
                 Workspace

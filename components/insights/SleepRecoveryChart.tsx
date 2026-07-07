@@ -35,7 +35,7 @@ const SleepRecoveryChart = memo(
         <div className="mb-8">
 
           <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-            Sleep Recovery Telemetry
+            Rest &amp; Recovery
           </div>
 
           <h2 className="text-4xl font-bold text-[#243428]">
@@ -43,7 +43,7 @@ const SleepRecoveryChart = memo(
           </h2>
 
           <p className="text-gray-500 mt-2 text-lg">
-            Neurological recovery and restorative cognitive recovery analysis.
+            Rest and recovery patterns that support daily wellbeing.
           </p>
 
         </div>
@@ -79,7 +79,7 @@ const SleepRecoveryChart = memo(
           <div className="rounded-2xl border bg-[#f8faf7] p-5">
 
             <p className="text-sm text-gray-500">
-              Cognitive Recovery
+              Restful Recovery
             </p>
 
             <h3 className="text-3xl font-bold text-[#243428] mt-2">

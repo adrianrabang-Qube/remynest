@@ -170,6 +170,10 @@ async function fetchRecentMemories(
   memoryProfileId: string | null
 ): Promise<ActivityMemory[]> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
     let q = supabase
       .from("memories")
       .select(
@@ -179,7 +183,7 @@ async function fetchRecentMemories(
       .limit(15);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { data } = await q;
     return (data as ActivityMemory[] | null) ?? [];
   } catch {

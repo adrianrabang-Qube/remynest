@@ -178,13 +178,17 @@ async function countHistoricalMemories(
   memoryProfileId: string | null
 ): Promise<number> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
     let q = supabase
       .from("memories")
       .select("id", { count: "exact", head: true })
       .not("memory_date", "is", null);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { count } = await q;
     return count ?? 0;
   } catch {
@@ -197,6 +201,10 @@ async function earliestMemoryYear(
   memoryProfileId: string | null
 ): Promise<number | null> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
     let q = supabase
       .from("memories")
       .select("memory_date")
@@ -205,7 +213,7 @@ async function earliestMemoryYear(
       .limit(1);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { data } = await q.maybeSingle();
     const iso = (data as { memory_date?: string } | null)?.memory_date;
     if (!iso) return null;
@@ -242,6 +250,10 @@ async function sampleRecentMemories(
   memoryProfileId: string | null
 ): Promise<SampleRow[]> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
     let q = supabase
       .from("memories")
       .select("ai_category, created_at, memory_date")
@@ -249,7 +261,7 @@ async function sampleRecentMemories(
       .limit(250);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { data } = await q;
     return (data as SampleRow[] | null) ?? [];
   } catch {
@@ -264,6 +276,10 @@ async function countMemories(
   lt?: string
 ): Promise<number> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return 0;
     let q = supabase
       .from("memories")
       .select("id", { count: "exact", head: true })
@@ -271,7 +287,7 @@ async function countMemories(
     if (lt) q = q.lt("created_at", lt);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { count } = await q;
     return count ?? 0;
   } catch {
@@ -358,6 +374,10 @@ async function latestMemoryAt(
   memoryProfileId: string | null
 ): Promise<string | null> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
     let q = supabase
       .from("memories")
       .select("created_at")
@@ -365,7 +385,7 @@ async function latestMemoryAt(
       .limit(1);
     q = memoryProfileId
       ? q.eq("memory_profile_id", memoryProfileId)
-      : q.is("memory_profile_id", null);
+      : q.is("memory_profile_id", null).eq("user_id", user.id);
     const { data } = await q.maybeSingle();
     return (data as { created_at?: string } | null)?.created_at ?? null;
   } catch {

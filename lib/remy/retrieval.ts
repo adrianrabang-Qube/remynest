@@ -410,6 +410,14 @@ export async function retrieveMemoryRecords(
 ): Promise<MemoryRecord[]> {
   if (!hasAnyFilter(query)) return [];
 
+  // PERSONAL reads bound to the session user (app-layer enforcement — these records flow
+  // into the grounded LLM context and the AskAnswer.related response); CARE uses the
+  // caller's validated memoryProfileId. Fail closed with no session.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
   let dbQuery = supabase
     .from("memories")
     .select(MEMORY_SELECT_FIELDS)
@@ -417,7 +425,7 @@ export async function retrieveMemoryRecords(
     .limit(RETRIEVAL_CAP);
   dbQuery = memoryProfileId
     ? dbQuery.eq("memory_profile_id", memoryProfileId)
-    : dbQuery.is("memory_profile_id", null);
+    : dbQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   const { data } = await dbQuery;
   return ((data ?? []) as MemoryRecord[]).filter((row) => matchesQuery(row, query));
@@ -452,6 +460,11 @@ export async function getRetrievalHealth(
   supabase: RemySupabase,
   memoryProfileId: string | null,
 ): Promise<RetrievalHealth> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return buildRetrievalHealth([]);
+
   let dbQuery = supabase
     .from("memories")
     .select("title, content, memory_date, ai_category, ai_tags")
@@ -459,7 +472,7 @@ export async function getRetrievalHealth(
     .limit(RETRIEVAL_CAP);
   dbQuery = memoryProfileId
     ? dbQuery.eq("memory_profile_id", memoryProfileId)
-    : dbQuery.is("memory_profile_id", null);
+    : dbQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   const { data } = await dbQuery;
   return buildRetrievalHealth((data ?? []) as SearchHealthRow[]);

@@ -82,11 +82,35 @@ export async function retrieveMemoryContext(
     }
 
     // =====================================
+    // APP-LAYER OWNERSHIP BACKSTOP
+    // =====================================
+    // Never trust the match_memories RPC's own user filtering (dashboard-managed /
+    // unverifiable). Re-scope its output to rows this user owns BEFORE any content is read
+    // into the chat context — mirrors /api/memories/search + lib/remy/semantic-retrieval.
+    const rpcIds = (matches as MemoryMatch[])
+      .map((m) => m.id)
+      .filter((v): v is string => typeof v === "string");
+    const { data: ownedRows } = await supabase
+      .from("memories")
+      .select("id")
+      .eq("user_id", userId)
+      .in("id", rpcIds);
+    const ownedIds = new Set(
+      (ownedRows ?? []).map((r: { id: string }) => r.id)
+    );
+    const scopedMatches = (matches as MemoryMatch[]).filter((m) =>
+      ownedIds.has(m.id)
+    );
+    if (scopedMatches.length === 0) {
+      return [];
+    }
+
+    // =====================================
     // GET MEMORY IDS
     // =====================================
 
     const memoryIds =
-      matches.map(
+      scopedMatches.map(
         (memory: MemoryMatch) =>
           memory.id
       );
@@ -171,7 +195,7 @@ export async function retrieveMemoryContext(
     // =====================================
 
     const context =
-      matches.map(
+      scopedMatches.map(
         (memory: MemoryMatch) => {
 
           return `
@@ -202,7 +226,7 @@ ${memory.similarity}
 
     console.log(context);
 
-    return matches;
+    return scopedMatches;
 
   } catch (error) {
 

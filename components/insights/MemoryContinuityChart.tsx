@@ -33,7 +33,7 @@ const MemoryContinuityChart = memo(
         <div className="mb-8">
 
           <div className="inline-flex items-center rounded-full bg-[#eef2ea] px-4 py-2 text-sm text-[#243428] mb-4">
-            Memory Continuity Telemetry
+            Memory Consistency
           </div>
 
           <h2 className="text-4xl font-bold text-[#243428]">
@@ -41,7 +41,7 @@ const MemoryContinuityChart = memo(
           </h2>
 
           <p className="text-gray-500 mt-2 text-lg">
-            Longitudinal continuity retention across cognitive interactions.
+            How consistently your memories are kept over time.
           </p>
 
         </div>

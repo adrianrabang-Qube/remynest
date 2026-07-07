@@ -64,7 +64,7 @@ export default async function ProfilePage() {
     .select("*", { count: "exact", head: true });
   totalQuery = activeProfileId
     ? totalQuery.eq("memory_profile_id", activeProfileId)
-    : totalQuery.is("memory_profile_id", null);
+    : totalQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   let datedQuery = supabase
     .from("memories")
@@ -72,17 +72,17 @@ export default async function ProfilePage() {
     .not("memory_date", "is", null);
   datedQuery = activeProfileId
     ? datedQuery.eq("memory_profile_id", activeProfileId)
-    : datedQuery.is("memory_profile_id", null);
+    : datedQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   let firstQuery = supabase.from("memories").select("created_at");
   firstQuery = activeProfileId
     ? firstQuery.eq("memory_profile_id", activeProfileId)
-    : firstQuery.is("memory_profile_id", null);
+    : firstQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   let latestQuery = supabase.from("memories").select("created_at");
   latestQuery = activeProfileId
     ? latestQuery.eq("memory_profile_id", activeProfileId)
-    : latestQuery.is("memory_profile_id", null);
+    : latestQuery.is("memory_profile_id", null).eq("user_id", user.id);
 
   const [{ count: total }, { count: dated }, firstResult, latestResult] =
     await Promise.all([

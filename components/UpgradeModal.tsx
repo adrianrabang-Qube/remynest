@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { BILLING_PLANS, getPlanPriceLabel } from "@/lib/billing/plans";
 import { isNativePlatform, useIsNativePlatform } from "@/lib/platform";
+import { useFocusTrap } from "@/lib/a11y/use-focus-trap";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -42,6 +43,8 @@ export default function UpgradeModal({
   const [error, setError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] =
     useState<BillingPlan>("PREMIUM");
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, onClose, panelRef);
 
   if (!open) return null;
 
@@ -61,7 +64,11 @@ export default function UpgradeModal({
         aria-modal="true"
         aria-label={nativeHeadline}
       >
-        <div className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+        <div
+          ref={panelRef}
+          tabIndex={-1}
+          className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl"
+        >
           <h2 className="text-xl font-bold mb-2">{nativeHeadline}</h2>
           <p className="text-gray-600 mb-6">
             This feature is part of a higher RemyNest plan.
@@ -141,7 +148,11 @@ export default function UpgradeModal({
       aria-modal="true"
       aria-label={headline}
     >
-      <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl"
+      >
         <h2 className="text-2xl font-bold mb-2">{headline}</h2>
 
         <p className="text-gray-600 mb-6">

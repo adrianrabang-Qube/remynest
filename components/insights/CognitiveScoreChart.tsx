@@ -35,11 +35,11 @@ const CognitiveScoreChart = memo(
         <div className="mb-8">
 
           <h2 className="text-4xl font-bold text-[#243428]">
-            Cognitive Score
+            Memory Activity Score
           </h2>
 
           <p className="text-gray-500 mt-2">
-            Real-time cognition continuity telemetry.
+            How consistently you&apos;ve been adding memories.
           </p>
 
         </div>
@@ -78,7 +78,7 @@ const CognitiveScoreChart = memo(
             </span>
 
             <span className="text-gray-500 mt-2">
-              Cognitive Stability
+              Consistency
             </span>
 
           </div>
