@@ -647,6 +647,37 @@ platform** — distinct from the separate `lib/remy/*.ts` AI-intelligence layer 
 `components/remy/avatar/*` sprite.) See `docs/architecture/REMY_PLATFORM_V2.md` (the single
 source of truth; v1 `REMY_PLATFORM_ARCHITECTURE.md` is historical).
 
+**The Nest — bottom-nav center interaction hub (authoritative, 2026-07-08 — supersedes the Pass-1
+`RemyActionButton` action-sheet):** the mobile center slot is **"The Nest"** — Remy's interaction
+hub, an evolution of the Pass-1 sheet (NOT a new FAB; the "+" stays retired). Remy **rests in the
+nest** (idle: `<Remy state="idle" float>` + soft gold glow via `nest.module.css`); on tap Remy
+**wakes → peeks → pops out → presents the menu** (a calm timed sequence), then **settles back** on
+close. The menu routes to **five EXISTING surfaces** — Ask Remy (`/remy`), Add a memory
+(`/memories/new` via `MOBILE_NEW_ACTION.href`), Add a reminder (`/reminders`), Search (`/search`),
+Insights (`/insights`) — each threaded through `withContext()` (care routing unchanged). Search +
+Insights are **also** kept in the "More" drawer (both surfaces, by design). **Architecture (lives in
+`components/navigation/nest/`):** a **pure interaction FSM** `nest-state-machine.ts`
+(`NestPhase` idle/peek/popout/menuOpen/returnHome + reserved listening/thinking/processing/celebrate;
+`NEST_VISUALS` = the single phase→**existing**-`RemyExpression` map; pure `nestTransition`), timing in
+`nest-animations.ts`, keyframes in `nest.module.css`, the React binding `use-nest-interaction.ts`
+(timed advances, **reduced-motion-safe** on both axes, leak-proof `onPhaseChange` seam — **not** wired
+to the platform), and the components `Nest.tsx` (trigger + idle pedestal) + `NestMenu.tsx` (the
+portaled sheet). **This FSM is UI/interaction state, NOT a second Remy brain** — Remy is drawn ONLY
+through the single `<Remy state>` renderer (no hardcoded `<img>`), the overlay is
+`createPortal(document.body)` (backdrop-blur containing-block invariant), and **no second
+renderer/provider/registry/public-API/event-bus/brain/policy** was created (platform one-of-each
+preserved). **Presentation + routing ONLY** — no backend/auth/billing/reminder/memory/search change;
+verified tsc/lint/build green + independent adversarial review CLEAN (all 16 verdicts YES). **Deferred
+still deferred** (see next note): no Rive/Lottie, real emotional reactions, voice, conversation, or AI
+were built — reserved FSM states are defined+mapped but NOT reachable from the tap flow. **Known
+constraints (flagged):** the referenced "Remy Design Bible" is **not in the repo** (external — visuals
+scoped to existing approved assets + CSS), and the Remy PNGs have **opaque backgrounds** so the clean
+white `variant="nest"` pedestal is the nest vessel (true "Remy-inside-a-nest" compositing + `nestOpen/
+nestClosed` art await transparent assets — a future registry-only drop, no code change). **Do NOT**
+reintroduce the "+" FAB, route the center straight to `/memories/new`, fork a second Remy
+renderer/provider/registry, un-portal the sheet, drop `withContext` on any destination, or build the
+deferred live/AI content here.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

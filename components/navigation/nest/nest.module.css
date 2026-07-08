@@ -1,0 +1,57 @@
+/*
+ * The Nest — idle glow + wake motion for the bottom-nav center hub.
+ *
+ * Additive to <Remy>'s own breathe/float (motion.module.css): this file only adds the soft
+ * "nest" glow around the pedestal and the one-shot wake lift as Remy peeks/pops out. On-brand
+ * warm gold glow (the Companion/Remy accent), never sage. All motion is reduced-motion-safe.
+ */
+
+/* Soft, slow gold glow around the white nest pedestal while Remy rests. Applied to the pedestal
+ * button itself (via className) so it tracks the button's -translate-y lift with no misalignment.
+ * The keyframe carries a base drop shadow so it reads as the button's resting shadow too. */
+.glow {
+  animation: nestGlow 4.8s ease-in-out infinite;
+}
+
+@keyframes nestGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(201, 168, 106, 0),
+      0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 16px 4px rgba(201, 168, 106, 0.45),
+      0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* One-shot wake: a gentle rise + scale as Remy peeks then pops from the nest. Re-triggered by the
+ * component re-keying this element per phase. */
+.wake {
+  display: inline-block;
+  animation: nestWake 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes nestWake {
+  0% {
+    transform: translateY(2px) scale(0.9);
+  }
+  60% {
+    transform: translateY(-3px) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow {
+    animation: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+  .wake {
+    animation: none;
+  }
+}

@@ -7,7 +7,7 @@ import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { haptic } from "@/lib/haptics";
-import RemyActionButton from "@/components/navigation/RemyActionButton";
+import Nest from "@/components/navigation/nest/Nest";
 
 import {
   MOBILE_PRIMARY_NAV,
@@ -80,15 +80,18 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
         />
       </li>
 
-      {/* Center action — Remy, the central interaction point (Project Polaris). Tapping the
-          Remy avatar opens a calm help sheet (Ask Remy / Add a memory / Add a reminder) instead
-          of the old "+". Every destination is preserved (memory creation route unchanged); the
+      {/* Center action — the Nest: Remy's interaction hub (replaces the "+" FAB / static speed
+          dial). Remy rests inside the nest and, on tap, wakes → peeks → pops out → presents a
+          calm menu of EXISTING destinations (Ask Remy / Add a memory / Add a reminder / Search /
+          Insights). Every destination is preserved (memory creation route unchanged) and the
           context query-param is threaded through so care-workspace routing is identical. */}
       <li className="flex flex-1 items-center justify-center">
-        <RemyActionButton
+        <Nest
+          remyHref={withContext("/remy")}
           memoryHref={withContext(MOBILE_NEW_ACTION.href)}
           reminderHref={withContext("/reminders")}
-          remyHref={withContext("/remy")}
+          searchHref={withContext("/search")}
+          insightsHref={withContext("/insights")}
         />
       </li>
 
