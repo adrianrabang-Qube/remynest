@@ -281,8 +281,27 @@ the `return` JSX changed and **every widget is preserved** (nothing removed — 
 **Do NOT re-stack all dashboard widgets** into one flat scroll or re-flag the analytics
 overload as an open issue. **Deferred to later Polaris passes:** the reminders page is
 **presentation-only when reached** (its FROZEN scheduling/sync/delivery/form-reset stay
-untouched); Home, Memories, People, Insights, Search, Timeline, Library, and Settings remain
-to be redesigned.
+untouched); People, Insights, Search, Timeline, Library, and Settings remain to be redesigned.
+
+**Project Polaris — Pass 2 shipped (authoritative, 2026-07-08): Home + Memories.**
+Presentation-only (no data/logic/query/mutation change). **Memories**
+(`app/(app)/memories/page.tsx`, presentation region only — the React-Query feed
+[paginated→flat aggregation], optimistic create/edit/delete, `handleSearch` debounce, and
+sort/grouping are byte-unchanged): the off-brand chrome was retired — the `bg-black` search
+button, the `bg-yellow-50` workspace banner, and the `text-gray` "Loading…/Updating…/Searching…"
+text are **gone**. The page now has a serif header + a single **brand search field** (leading
+magnifier, sage focus ring, a **clear ×** button; live-debounced + Enter search preserved;
+**`text-base`/16px so focusing it never triggers iOS zoom** — do not drop it below 16px), calm
+reduced-motion-safe **skeleton** loading (`FeedSkeleton`), an `aria-live` status region, and an
+explicit `htmlFor` label. `components/memories/MemorySection.tsx` (sticky section headers) and
+`components/MemoryCard.tsx` were rebranded to brand tokens (no raw gray/stone), with a cleaner
+memory-date row (icon + `sr-only` "Memory date:") and a sage focus ring; **sticky offsets
+unchanged**. **Home** (`app/(app)/home/page.tsx`): serif h1, ≥44px touch targets + sage focus
+rings on all CTAs, calmer `max-w-2xl` column, new `app/(app)/home/loading.tsx` skeleton.
+Verified: tsc/lint/build green + independent adversarial review (BEHAVIOR PRESERVED: yes; its
+two findings — iOS focus-zoom + a screen-reader date label — were fixed). **Do NOT** reintroduce
+the black search button / yellow banner / gray text loaders, drop the search input below 16px,
+or change the memories feed's data/query/mutation layer.
 
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained

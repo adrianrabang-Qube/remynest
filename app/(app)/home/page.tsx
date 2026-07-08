@@ -46,10 +46,12 @@ export default async function RemyHomePage() {
   const careProfiles = await getAccessibleProfiles();
 
   return (
-    <div className="space-y-4 p-4 md:space-y-5 md:p-6">
+    <div className="mx-auto max-w-2xl space-y-4 p-4 md:space-y-5 md:p-6">
       <header>
-        <h1 className="text-xl font-semibold text-charcoal md:text-2xl">Home</h1>
-        <p className="mt-0.5 text-sm text-charcoal-muted">
+        <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+          Home
+        </h1>
+        <p className="mt-1 text-sm text-charcoal-muted">
           Your memory companion — what Remy understands, and what to do next.
         </p>
       </header>
@@ -68,7 +70,7 @@ export default async function RemyHomePage() {
             </p>
             <Link
               href="/memories/new"
-              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
             >
               Add your first memory
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -83,7 +85,7 @@ export default async function RemyHomePage() {
       {/* Entry point into the dedicated companion experience */}
       <Link
         href="/remy"
-        className="flex items-center justify-between gap-3 rounded-2xl border border-sage/30 bg-sage/[0.06] px-4 py-3 text-sm font-semibold text-sage-deep transition hover:bg-sage/10"
+        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-sage/30 bg-sage/[0.06] px-4 py-3.5 text-[15px] font-semibold text-sage-deep transition hover:bg-sage/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
       >
         <span className="inline-flex items-center gap-2">
           <MessageCircle className="h-4 w-4" aria-hidden />
@@ -126,7 +128,7 @@ export default async function RemyHomePage() {
           <p className="mt-1 text-sm text-charcoal">{nextAction.text}</p>
           <Link
             href={nextAction.cta.href}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
           >
             {nextAction.cta.label}
             <ArrowRight className="h-4 w-4" aria-hidden />

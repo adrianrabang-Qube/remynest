@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CalendarClock } from "lucide-react";
 import {
   formatMemoryDateLabel,
   formatAddedDate,
@@ -52,8 +53,11 @@ export default function MemoryCard({
   const addedDate = formatAddedDate(memory.created_at);
 
   return (
-    <Link href={`/memories/${memory.id}`}>
-      <div className="rounded-3xl border border-sand-deep/70 p-5 mb-4 bg-white shadow-soft hover:shadow-soft-lg hover:-translate-y-0.5 transition overflow-hidden cursor-pointer">
+    <Link
+      href={`/memories/${memory.id}`}
+      className="block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+    >
+      <div className="rounded-3xl border border-sand-deep/70 p-5 mb-4 bg-white shadow-soft transition hover:shadow-soft-lg hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 overflow-hidden cursor-pointer">
         {/* Title */}
         <h3 className="font-semibold text-lg text-charcoal break-words whitespace-pre-wrap">
           {memory.ai_title || memory.title}
@@ -61,8 +65,10 @@ export default function MemoryCard({
 
         {/* Primary date — when the memory happened */}
         {memoryDateLabel && (
-          <p className="mt-0.5 text-sm font-medium text-sage-deep">
-            🕰 Memory Date: {memoryDateLabel}
+          <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-sage-deep">
+            <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="sr-only">Memory date: </span>
+            {memoryDateLabel}
           </p>
         )}
 
@@ -80,7 +86,7 @@ export default function MemoryCard({
 
         {/* AI Summary */}
         {memory.ai_summary && (
-          <p className="text-xs text-gray-500 italic mb-2 break-words whitespace-pre-wrap">
+          <p className="text-xs text-charcoal-muted italic mb-2 break-words whitespace-pre-wrap">
             {memory.ai_summary}
           </p>
         )}

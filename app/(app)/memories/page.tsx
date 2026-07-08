@@ -15,6 +15,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import { Plus, Search, X } from "lucide-react";
+
 import MemorySection from "@/components/memories/MemorySection";
 import { Remy, RemyStage } from "@/lib/remy";
 import { useIsNativePlatform } from "@/lib/platform";
@@ -92,6 +94,24 @@ function normalizeMemoryArray(
   }
 
   return [];
+}
+
+/**
+ * Calm feed skeleton (Project Polaris Pass 2) — replaces the raw "Loading memories…" text and
+ * the yellow workspace-loading banner. Decorative (aria-hidden); the live status is announced
+ * via a sibling role="status" region. Honors prefers-reduced-motion.
+ */
+function FeedSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="space-y-3" aria-hidden="true">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          key={i}
+          className="h-20 animate-pulse rounded-2xl bg-sand-deep/25 motion-reduce:animate-none"
+        />
+      ))}
+    </div>
+  );
 }
 
 function MemoriesPageContent() {
@@ -764,78 +784,90 @@ const sortedMemories = [
   );
 
   return (
-    <div className="p-4 md:p-6 space-y-5 md:space-y-6">
-      <h1 className="text-2xl font-semibold">
-        Your Memories
-      </h1>
-
-      {activeProfileId === undefined && (
-        <div className="rounded-xl border p-4 bg-yellow-50">
-          <p className="text-sm text-yellow-700">
-            Loading workspace context...
+    <div className="mx-auto max-w-3xl space-y-5 p-4 md:space-y-6 md:p-6">
+      {/* Header */}
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+            Your memories
+          </h1>
+          <p className="mt-0.5 text-sm text-charcoal-muted">
+            Your saved moments, newest first.
           </p>
         </div>
-      )}
-
-      {/* Loading */}
-      {isLoading && (
-        <p className="text-sm text-gray-500">
-          Loading memories...
-        </p>
-      )}
-
-      {/* Background Refresh */}
-      {isFetching &&
-        !isLoading && (
-          <p className="text-xs text-gray-400">
-            Updating...
-          </p>
-        )}
-
-      {/* Create Button */}
-      <button
-        onClick={() =>
-          setShowCreate(true)
-        }
-        className="inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
-      >
-        + New Memory
-      </button>
-
-      {/* Semantic Search — compact, and sticky on mobile so it stays reachable
-          while scrolling the feed. Desktop layout unchanged. */}
-      <div className="flex gap-2 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
-        <input
-          type="text"
-          placeholder="Search memories..."
-          value={searchQuery}
-          onChange={(e) =>
-            setSearchQuery(
-              e.target.value
-            )
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
-            }
-          }}
-          className="border rounded-lg px-3 py-2 w-full"
-        />
 
         <button
-          onClick={handleSearch}
-          className="bg-black text-white px-4 py-2 rounded-lg"
+          type="button"
+          onClick={() => setShowCreate(true)}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
         >
-          Search
+          <Plus className="h-4 w-4" aria-hidden />
+          New memory
         </button>
-      </div>
+      </header>
 
-      {/* Searching */}
-      {isSearching && (
-        <p className="text-sm text-gray-500">
-          Searching memories...
+      {/* Workspace context loading — calm, replaces the raw yellow banner */}
+      {activeProfileId === undefined && (
+        <p
+          role="status"
+          className="rounded-2xl border border-sand-deep/60 bg-sand/40 px-4 py-3 text-sm text-charcoal-muted"
+        >
+          Loading your workspace…
         </p>
       )}
+
+      {/* Semantic search — brand field with a live clear affordance; sticky on mobile so it
+          stays reachable while scrolling. Debounced live search + Enter-to-search preserved. */}
+      <div className="max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-sand/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+        <div className="relative">
+          <label htmlFor="memory-search" className="sr-only">
+            Search memories
+          </label>
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal-muted"
+            aria-hidden
+          />
+          <input
+            id="memory-search"
+            type="text"
+            inputMode="search"
+            placeholder="Search memories"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+            // text-base (16px): never drop below iOS's 16px focus-zoom threshold on the sticky
+            // mobile search (the old field inherited the 16px base — 15px would zoom on tap).
+            className="w-full rounded-full border border-sand-deep/70 bg-white py-2 pl-11 pr-11 text-base text-charcoal placeholder:text-charcoal-muted transition focus:border-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          />
+          {isSearchActive && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            >
+              <X className="h-4 w-4" aria-hidden />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Live status — screen-reader announced; quiet visible text only while active */}
+      <div role="status" aria-live="polite">
+        {isFetching && !isLoading && (
+          <p className="text-xs text-charcoal-muted">Updating…</p>
+        )}
+        {isSearching && (
+          <p className="text-sm text-charcoal-muted">Searching…</p>
+        )}
+      </div>
+
+      {/* Feed loading — calm skeleton (replaces the raw "Loading memories…" text) */}
+      {isLoading && <FeedSkeleton />}
 
       {/* Search Results */}
       {isSearchActive &&
@@ -862,13 +894,10 @@ const sortedMemories = [
         !isSearching &&
         !searchNotice &&
         searchResults.length === 0 && (
-          <div className="rounded-xl border border-gray-200 p-6 text-center">
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
             <RemyStage context="search.empty" size={96} className="mx-auto mb-1" />
-            <p className="text-sm text-gray-500">
-              No memories found.
-            </p>
-
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-charcoal-soft">No memories found.</p>
+            <p className="mt-1 text-sm text-charcoal-muted">
               Try different keywords or phrases.
             </p>
           </div>
