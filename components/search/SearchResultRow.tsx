@@ -15,23 +15,13 @@ const TYPE_META: Record<
   SearchHitType,
   { icon: LucideIcon; badge: string; tint: string }
 > = {
+  // Type is conveyed by the distinct ICON + badge text; the chip tint stays a single calm
+  // brand sage (Polaris: brand tokens only, hierarchy over colour — no amber/sky/violet/rose).
   memory: { icon: FileText, badge: "Memory", tint: "bg-sage/10 text-sage" },
-  collection: {
-    icon: FolderHeart,
-    badge: "Collection",
-    tint: "bg-amber-100 text-amber-700",
-  },
-  connection: {
-    icon: Link2,
-    badge: "Connection",
-    tint: "bg-sky-100 text-sky-700",
-  },
-  chapter: {
-    icon: BookMarked,
-    badge: "Chapter",
-    tint: "bg-violet-100 text-violet-700",
-  },
-  person: { icon: Users, badge: "Person", tint: "bg-rose-100 text-rose-700" },
+  collection: { icon: FolderHeart, badge: "Collection", tint: "bg-sage/10 text-sage" },
+  connection: { icon: Link2, badge: "Connection", tint: "bg-sage/10 text-sage" },
+  chapter: { icon: BookMarked, badge: "Chapter", tint: "bg-sage/10 text-sage" },
+  person: { icon: Users, badge: "Person", tint: "bg-sage/10 text-sage" },
 };
 
 /**
@@ -47,7 +37,7 @@ export default function SearchResultRow({ hit }: { hit: SearchHit }) {
     <li>
       <Link
         href={hit.href}
-        className="flex min-h-[44px] items-center gap-3 px-2 py-2.5 transition hover:bg-sand/40 active:bg-sand/50"
+        className="flex min-h-[44px] items-center gap-3 px-3 py-2.5 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
       >
         <div
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tint}`}

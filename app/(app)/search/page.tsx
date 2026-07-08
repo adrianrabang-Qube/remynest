@@ -28,9 +28,18 @@ export default async function SearchPage() {
 
   return (
     <>
-      <h1 className="sr-only">Search</h1>
-      <div className="mx-auto mb-4 w-full max-w-3xl">
-        <RemySearchInsights health={health} />
+      <div className="mx-auto w-full max-w-3xl">
+        <header className="mb-4">
+          <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+            Search
+          </h1>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            Find a memory, a person, or a moment — just start typing.
+          </p>
+        </header>
+        <div className="mb-4">
+          <RemySearchInsights health={health} />
+        </div>
       </div>
       <SearchView />
     </>

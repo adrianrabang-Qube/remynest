@@ -322,8 +322,26 @@ re-measures on open). The off-brand `ChartSkeleton` + route skeleton + the `bg-[
 bg were rebranded to tokens; container narrowed `max-w-7xl`→`max-w-4xl`. Verified: tsc/lint/build
 green + independent adversarial review (BEHAVIOR PRESERVED: yes). **Do NOT** re-expand all
 Insights charts into one flat scroll, restore the `text-5xl`/raw-hex header, or re-flag the
-Insights analytics-overload as an open issue. **Polaris roadmap remaining:** Search, Timeline,
+Insights analytics-overload as an open issue. **Polaris roadmap remaining:** Timeline,
 Library, Settings, reminders-presentation.
+
+**Project Polaris — Pass 4 shipped (authoritative, 2026-07-08): Search.** Presentation-only
+(no search logic/query/embeddings/ranking/filter/pagination/debounce/keyboard change).
+**`app/(app)/search/page.tsx`**: the `sr-only` h1 became a **visible serif title + inviting
+subtitle**; `RemySearchInsights` + `SearchView` unchanged. **`components/search/SearchView.tsx`**
+(presentation only): the field is now an inviting **rounded-full pill** with a leading icon +
+sage `focus-within` ring (`text-base`/no-iOS-zoom, clear button, 250 ms debounce,
+`AbortController` cancel, `Remy.emit`, `/api/search/global` fetch, localStorage recents — all
+byte-unchanged); filter/recent/suggestion chips got sage focus rings + roomier `px-4 py-2`; a
+**calm discovery hero** (`RemyStage context="welcome"` + a plain-language invitation) leads the
+empty state; group-collapse buttons got focus rings + a reduced-motion chevron.
+**`components/search/SearchResultRow.tsx`**: the off-palette amber/sky/violet/rose type tints
+were neutralized to a single brand **sage** (type still shown by icon + badge text — hierarchy
+over colour) + a sage focus ring. **`app/(app)/search/loading.tsx`** rewritten to mirror the new
+layout (brand tokens, reduced-motion-safe). Verified: tsc/lint/build green + independent
+adversarial review (SEARCH LOGIC UNCHANGED: yes). **Do NOT** reintroduce the rainbow result
+tints, revert the field below `text-base`, or alter the search debounce/abort/fetch/ranking.
+**Polaris roadmap remaining:** Timeline, Library, Settings, reminders-presentation.
 
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained

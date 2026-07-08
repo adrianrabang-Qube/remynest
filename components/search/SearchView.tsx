@@ -11,7 +11,7 @@ import {
   type SearchHit,
   type SearchResults,
 } from "./types";
-import { Remy } from "@/lib/remy";
+import { Remy, RemyStage } from "@/lib/remy";
 
 const RECENT_KEY = "remynest:recent-searches";
 const RECENT_MAX = 6;
@@ -165,7 +165,7 @@ export default function SearchView() {
           <label htmlFor="global-search" className="sr-only">
             Search memories, collections, people and more
           </label>
-          <div className="flex items-center gap-2 rounded-2xl border border-sand-deep/70 bg-white px-3 shadow-soft focus-within:border-sage">
+          <div className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 shadow-soft transition focus-within:border-sage focus-within:ring-2 focus-within:ring-sage">
             <Search className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
             <input
               id="global-search"
@@ -188,7 +188,7 @@ export default function SearchView() {
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-charcoal-muted hover:bg-sand/60"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                 >
                   <X className="h-4 w-4" aria-hidden />
                 </button>
@@ -201,7 +201,7 @@ export default function SearchView() {
           <div
             role="tablist"
             aria-label="Filter results"
-            className="mt-2 flex gap-2 overflow-x-auto pb-0.5"
+            className="mt-2 flex gap-2 overflow-x-auto px-0.5 py-0.5"
           >
             {FILTERS.map((f) => {
               const active = filter === f.key;
@@ -212,7 +212,7 @@ export default function SearchView() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setFilter(f.key)}
-                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
                     active
                       ? "border-sage bg-sage text-white"
                       : "border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand/40"
@@ -228,7 +228,19 @@ export default function SearchView() {
 
       {/* Empty / discovery state */}
       {!hasQuery && (
-        <div className="mt-4 space-y-6">
+        <div className="mt-6 space-y-6">
+          {/* Calm discovery hero — Remy + a plain-language invitation */}
+          <div className="flex flex-col items-center rounded-3xl border border-sand-deep/70 bg-white px-6 py-8 text-center shadow-soft">
+            <RemyStage context="welcome" size={112} className="mb-3" />
+            <h2 className="font-serif text-xl font-semibold text-charcoal">
+              What are you looking for?
+            </h2>
+            <p className="mx-auto mt-1.5 max-w-sm text-sm text-charcoal-soft">
+              Search across your memories, people, and collections — try a name, a
+              place, a year, or a feeling.
+            </p>
+          </div>
+
           {recent.length > 0 && (
             <section aria-label="Recent searches">
               <div className="mb-2 flex items-center justify-between px-1">
@@ -238,7 +250,7 @@ export default function SearchView() {
                 <button
                   type="button"
                   onClick={clearRecent}
-                  className="text-xs font-medium text-charcoal-muted hover:text-charcoal"
+                  className="rounded-full px-2 py-1 text-xs font-medium text-charcoal-muted transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                 >
                   Clear
                 </button>
@@ -249,7 +261,7 @@ export default function SearchView() {
                     key={r}
                     type="button"
                     onClick={() => setQuery(r)}
-                    className="rounded-full border border-sand-deep/70 bg-white px-3.5 py-1.5 text-sm text-charcoal-soft hover:bg-sand/40"
+                    className="rounded-full border border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                   >
                     {r}
                   </button>
@@ -268,7 +280,7 @@ export default function SearchView() {
                   key={s}
                   type="button"
                   onClick={() => setQuery(s.replace(/^A\s+/, ""))}
-                  className="rounded-full border border-dashed border-sand-deep/70 bg-white px-3.5 py-1.5 text-sm text-charcoal-soft hover:bg-sand/40"
+                  className="rounded-full border border-dashed border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                 >
                   {s}
                 </button>
@@ -304,7 +316,7 @@ export default function SearchView() {
                   onClick={() =>
                     setCollapsed((p) => ({ ...p, [group.key]: !p[group.key] }))
                   }
-                  className="flex w-full items-center justify-between px-1 py-2"
+                  className="flex w-full items-center justify-between rounded-xl px-2 py-2 transition hover:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
                 >
                   <span className="text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
                     {group.title}{" "}
@@ -313,7 +325,7 @@ export default function SearchView() {
                     </span>
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-charcoal-muted transition-transform ${
+                    className={`h-4 w-4 text-charcoal-muted transition-transform motion-reduce:transition-none ${
                       isCollapsed ? "-rotate-90" : ""
                     }`}
                     aria-hidden
