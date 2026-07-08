@@ -85,7 +85,7 @@ const PRIORITY_META: Record<
 function StateChip({ state }: { state: LifecycleState }) {
   const map = {
     completed: "bg-sage-soft/25 text-sage-deep",
-    awaiting: "bg-gold/15 text-[#9c7e3f]",
+    awaiting: "bg-gold/15 text-gold-ink",
     scheduled: "bg-sand-deep/60 text-charcoal-soft",
   } as const;
   const label = {
@@ -123,7 +123,7 @@ function ReminderCard({
       : null;
 
   return (
-    <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft transition hover:shadow-soft-lg">
+    <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft transition hover:shadow-soft-lg motion-reduce:transition-none">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -167,7 +167,7 @@ function ReminderCard({
               />
               <button
                 type="submit"
-                className={`text-xs px-3 py-1 rounded-full transition ${
+                className={`text-xs px-3 py-1 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
                   r.completed
                     ? "border border-sand-deep text-charcoal-soft hover:bg-sand-deep/40"
                     : "bg-sage text-white hover:bg-sage-deep"
@@ -184,7 +184,7 @@ function ReminderCard({
               <input type="hidden" name="id" value={r.id} />
               <button
                 type="submit"
-                className="text-xs px-3 py-1 rounded-full bg-rose-50 text-rose-600/90 hover:bg-rose-100 transition"
+                className="text-xs px-3 py-1 rounded-full bg-rose-50 text-rose-600/90 hover:bg-rose-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
                 aria-label="Delete reminder"
               >
                 Delete
@@ -309,7 +309,7 @@ export default function ReminderCenter({
   return (
     <div>
       {/* SECTION 1 — TODAY'S FOCUS (hero) */}
-      <section className="rounded-[28px] border border-sand-deep/70 bg-gradient-to-b from-sage/[0.06] to-white p-7 shadow-soft">
+      <section className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-sage/[0.06] to-white p-7 shadow-soft">
         <div className="flex items-center justify-between">
           <div className="text-xs font-medium uppercase tracking-wider text-charcoal-muted">
             Today&apos;s Focus
@@ -327,7 +327,7 @@ export default function ReminderCenter({
         {groups.nextUp ? (
           <div className="mt-3">
             <p className="text-sm text-charcoal-muted">Next up</p>
-            <h2 className="text-3xl font-semibold text-charcoal mt-1">
+            <h2 className="mt-1 font-serif text-3xl font-semibold text-charcoal">
               {groups.nextUp.title}
             </h2>
             <p className="text-lg text-sage-deep mt-1">
@@ -434,7 +434,7 @@ export default function ReminderCenter({
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="text-sm font-medium text-sage hover:text-sage-deep"
+                className="rounded text-sm font-medium text-sage transition hover:text-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 {showCompleted
                   ? "Show less"

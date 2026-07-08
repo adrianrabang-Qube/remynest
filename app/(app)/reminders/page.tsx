@@ -595,7 +595,7 @@ export default async function RemindersPage({
   }));
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 md:px-6 md:py-10">
+    <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-10">
 
       {/* Mirror reminders into on-device iOS local notifications (no-op on web). */}
       <NativeReminderSync reminders={localReminders} />
@@ -605,7 +605,7 @@ export default async function RemindersPage({
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-semibold text-charcoal mb-2">
+        <h1 className="mb-2 font-serif text-2xl font-semibold text-charcoal md:text-3xl">
           Reminder Center
         </h1>
 
@@ -616,11 +616,11 @@ export default async function RemindersPage({
 
       {/* Create Reminder */}
       <details className="group bg-white border border-sand-deep/70 rounded-3xl p-6 shadow-soft mb-2">
-      <summary className="cursor-pointer list-none flex items-center justify-between">
+      <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage">
         <h2 className="text-xl font-semibold text-charcoal">
           Add a reminder
         </h2>
-        <span className="text-charcoal-muted text-sm group-open:rotate-180 transition">▾</span>
+        <span className="text-sm text-charcoal-muted transition group-open:rotate-180 motion-reduce:transition-none">▾</span>
       </summary>
       {/* `key` forces a remount (clearing the uncontrolled fields incl. the date
           input's client state) after a successful create — which adds a reminder, so
@@ -641,13 +641,13 @@ export default async function RemindersPage({
             defaultValue=""
             placeholder="Take medicine every Tuesday at 2PM..."
             required
-            className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
+            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
 
           {/* Date (timezone-correct: converts local → UTC in the browser) */}
           <ReminderDateTimeField
             required
-            className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
+            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
 
           {/* Recurring */}
@@ -666,7 +666,7 @@ export default async function RemindersPage({
             <select
               name="frequency"
               defaultValue="daily"
-              className="w-full border border-sand-deep rounded-xl px-4 py-3 outline-none transition focus:ring-2 focus:ring-sage/40 focus:border-sage"
+              className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
             >
               <option value="daily">
                 Daily
@@ -684,7 +684,7 @@ export default async function RemindersPage({
 
           <button
             type="submit"
-            className="bg-sage text-white px-6 py-3 rounded-full font-semibold shadow-soft hover:bg-sage-deep transition"
+            className="rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             Create Reminder
           </button>

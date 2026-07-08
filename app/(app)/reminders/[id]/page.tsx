@@ -37,9 +37,13 @@ export default async function ReminderPage({ params }: { params: { id: string } 
   }
 
   return (
-    <div>
-      <h1>Reminder</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+    <div className="mx-auto max-w-3xl px-4 py-8 md:px-6 md:py-10">
+      <h1 className="mb-4 font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+        Reminder
+      </h1>
+      <pre className="overflow-x-auto rounded-2xl border border-sand-deep/60 bg-white p-4 text-xs text-charcoal-soft shadow-soft">
+        {JSON.stringify(data, null, 2)}
+      </pre>
     </div>
   );
 }

@@ -416,6 +416,36 @@ DELETE/REAUTH/AUTH/ROUTING all UNCHANGED). **Do NOT** revert the delete/reauth l
 focus-trap without lifting the freeze, or touch the `StorageUsageCard`/`ProfileHeader`/
 `ProfileSection` black boxes here. **Polaris roadmap remaining:** Reminders (presentation only).
 
+**Project Polaris — Pass 8 shipped (authoritative, 2026-07-08): Reminders — FINAL PASS.**
+Presentation-only refinement of the **CRITICAL FROZEN** reminder surface (adversarially verified
+— all 16 flows UNCHANGED: reminder logic/creation/editing/deletion/completion/delivery/OneSignal/
+NativeReminderSync/AppDelegate/timezone/background-tasks/API/Supabase-mutations/auth/routing/
+**form-reset `key`**). The reminder system remains **SECURITY/PRODUCTION FROZEN** — only visual
+presentation changed. Already brand-aligned, so a light **4-file** refinement. **Black boxes
+(untouched):** `NativeReminderSync`, `NativeReminderBeacon`, `ReminderDateTimeField` (timezone
+logic — only its parent-passed className got `text-base`), `lib/native-reminders.ts`,
+`lib/reminders/*`, `app/api/reminders/*`. **`app/(app)/reminders/page.tsx`** (return only; the
+`createReminder`/`toggle`/`delete` server actions, the **form `key`**, the `NativeReminderSync`/
+`NativeReminderBeacon` mounts, and every input `name` are **byte-identical**): `max-w-3xl`, **serif
+h1** (`text-4xl`→`text-2xl md:text-3xl`), summary focus ring + reduced-motion chevron, **`text-base`
+inputs** (title/date/frequency — no iOS zoom), submit focus ring. **`ReminderCenter.tsx`** (frozen
+`useMemo`/`useState`/toggle+delete forms + hidden `id`/`completed`): raw hex `text-[#9c7e3f]` →
+`text-gold-ink`, hero `rounded-3xl` + serif "Next up" title, card + button reduced-motion +
+additive sage/rose focus rings (`rose`/`gold` = approved urgency/destructive). **`reminders/[id]/
+page.tsx`**: existing debug view restyled (container + serif h1 + brand `<pre>`; no new nav;
+auth/fetch frozen). New **`app/(app)/reminders/loading.tsx`** skeleton. **Do NOT** modify reminder
+scheduling/delivery/native/OneSignal/AppDelegate/mutation/form-reset logic (freeze reaffirmed).
+
+**PROJECT POLARIS COMPLETE (authoritative, 2026-07-08):** the app-wide **presentation-only** UX
+redesign is FINISHED across all 8 passes — **(1)** Dashboard + shell (Remy FAB) · **(2)** Home +
+Memories · **(3)** People + Insights · **(4)** Search · **(5)** Timeline · **(6)** Library ·
+**(7)** Settings · **(8)** Reminders. Every pass was presentation-only over frozen logic,
+brand-swept clean, tsc/lint/build green, and independently adversarially verified (behaviour
+byte-preserved). The whole app now shares the Polaris design language (serif titles, sage/sand/
+charcoal + gold/rose accents, `max-w` reading columns, `rounded-2xl/3xl` + `shadow-soft`, sage
+focus rings, `text-base` inputs, ≥44px controls, reduced-motion-safe skeletons, progressive
+disclosure). **No Polaris passes remain** — future UI work is FEATURE work, not this redesign.
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires
