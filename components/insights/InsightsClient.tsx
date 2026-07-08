@@ -2,11 +2,12 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import { ChevronDown } from "lucide-react";
 
 const ChartSkeleton = () => (
-  <div className="rounded-[32px] border bg-white p-8 shadow-sm animate-pulse">
-    <div className="h-8 w-64 rounded bg-gray-200 mb-6" />
-    <div className="h-[320px] rounded-3xl bg-gray-100" />
+  <div className="animate-pulse rounded-3xl border border-sand-deep/70 bg-white p-8 shadow-soft motion-reduce:animate-none">
+    <div className="mb-6 h-8 w-64 max-w-full rounded bg-sand-deep/30" />
+    <div className="h-[320px] rounded-2xl bg-sand-deep/20" />
   </div>
 );
 
@@ -532,120 +533,73 @@ export default function InsightsClient({
 
   return (
 
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="space-y-6">
 
       {/* HEADER */}
-
-      <div>
-
-        <div className="inline-flex items-center rounded-full bg-white border px-4 py-2 text-sm text-gray-600 mb-6">
+      <header>
+        <span className="inline-flex items-center rounded-full border border-sand-deep/70 bg-white px-4 py-1.5 text-sm font-medium text-sage-deep">
           Remy Insights Center
-        </div>
-
-        <h1 className="text-5xl font-bold tracking-tight text-[#243428]">
+        </span>
+        <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-charcoal md:text-4xl">
           How things are going
         </h1>
-
-        <p className="text-gray-500 text-xl mt-4">
-          A calm, companion view of memories, routines, and the days ahead —
-          with the full analytics preserved below.
+        <p className="mt-2 text-base text-charcoal-muted md:text-lg">
+          A calm, companion view of memories, routines, and the days ahead — with the
+          full analytics a tap away.
         </p>
-
-      </div>
+      </header>
 
       {/* AI SAFETY DISCLAIMER */}
+      <AIDisclaimer variant="banner" kind="insights" />
 
-      <AIDisclaimer
-        variant="banner"
-        kind="insights"
-      />
+      {/* REMY INSIGHTS CENTER — companion experience (the calm summary layer) */}
+      <RemyInsightsCenter model={remyInsights} />
 
-      {/* REMY INSIGHTS CENTER — companion experience */}
+      {/* AI INTERPRETATION — plain-language summary, kept immediately visible */}
+      <AIInsightSummary insights={insights} />
 
-      <RemyInsightsCenter
-        model={remyInsights}
-      />
+      {/* DETAILED ANALYTICS — the full telemetry, preserved behind progressive disclosure so
+          the page opens calm (Apple Health, not an analytics dashboard). Nothing removed;
+          every chart still mounts when the section is expanded. */}
+      <details className="group [&_summary::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white px-5 py-4 shadow-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:px-6">
+          <span className="min-w-0">
+            <span className="block font-serif text-lg font-semibold text-charcoal">
+              Detailed analytics
+            </span>
+            <span className="mt-0.5 block text-sm text-charcoal-muted">
+              Charts and telemetry — open for the full picture.
+            </span>
+          </span>
+          <ChevronDown
+            aria-hidden
+            className="h-5 w-5 shrink-0 text-charcoal-muted transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none"
+          />
+        </summary>
 
-      {/* DETAILED ANALYTICS — full telemetry preserved */}
+        <div className="mt-4 space-y-6">
+          {/* BEHAVIORAL ANALYTICS */}
+          <BehavioralAnalyticsCard
+            behavioralPatterns={behavioralPatterns}
+            streakAnalysis={streakAnalysis}
+            emotionalVolatility={emotionalVolatility}
+            inactivityDetection={inactivityDetection}
+            declineSignals={declineSignals}
+          />
 
-      <div className="pt-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-          Detailed analytics
-        </h2>
-        <div className="mt-1 h-px w-full bg-gray-200" />
-      </div>
-
-      {/* AI INTERPRETATION */}
-
-      <AIInsightSummary
-        insights={insights}
-      />
-
-      {/* BEHAVIORAL ANALYTICS */}
-
-      <BehavioralAnalyticsCard
-        behavioralPatterns={
-          behavioralPatterns
-        }
-
-        streakAnalysis={
-          streakAnalysis
-        }
-
-        emotionalVolatility={
-          emotionalVolatility
-        }
-
-        inactivityDetection={
-          inactivityDetection
-        }
-
-        declineSignals={
-          declineSignals
-        }
-      />
-
-      {/* TELEMETRY */}
-
-      <CognitiveScoreChart
-        cognitionScore={cognitionScore}
-      />
-
-      <CognitiveDriftChart
-        driftData={driftData}
-      />
-
-      <EmotionalTrendsChart
-        moodData={moodData}
-      />
-
-      <MoodDistributionChart
-        categoryData={categoryData}
-      />
-
-      <ReminderConsistencyChart
-        reminderData={reminderData}
-      />
-
-      <MemoryContinuityChart
-        continuityData={continuityData}
-      />
-
-      <AttentionAnalytics
-        attentionData={attentionData}
-      />
-
-      <SleepRecoveryChart
-        sleepData={sleepData}
-      />
-
-      <WearableTelemetryChart
-        wearableData={wearableData}
-      />
-
-      <AlzheimerRiskSignals
-        riskData={riskData}
-      />
+          {/* TELEMETRY */}
+          <CognitiveScoreChart cognitionScore={cognitionScore} />
+          <CognitiveDriftChart driftData={driftData} />
+          <EmotionalTrendsChart moodData={moodData} />
+          <MoodDistributionChart categoryData={categoryData} />
+          <ReminderConsistencyChart reminderData={reminderData} />
+          <MemoryContinuityChart continuityData={continuityData} />
+          <AttentionAnalytics attentionData={attentionData} />
+          <SleepRecoveryChart sleepData={sleepData} />
+          <WearableTelemetryChart wearableData={wearableData} />
+          <AlzheimerRiskSignals riskData={riskData} />
+        </div>
+      </details>
 
     </div>
   );

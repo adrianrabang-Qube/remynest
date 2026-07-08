@@ -31,7 +31,7 @@ export default function PersonRow({
     <li>
       <Link
         href={`/profiles/${person.id}`}
-        className="flex min-h-[44px] items-center gap-3 px-2 py-2.5 transition hover:bg-sand/40 active:bg-sand/50"
+        className="flex min-h-[44px] items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
       >
         {person.photo ? (
           <Image

@@ -281,7 +281,7 @@ the `return` JSX changed and **every widget is preserved** (nothing removed — 
 **Do NOT re-stack all dashboard widgets** into one flat scroll or re-flag the analytics
 overload as an open issue. **Deferred to later Polaris passes:** the reminders page is
 **presentation-only when reached** (its FROZEN scheduling/sync/delivery/form-reset stay
-untouched); People, Insights, Search, Timeline, Library, and Settings remain to be redesigned.
+untouched); Search, Timeline, Library, and Settings remain to be redesigned.
 
 **Project Polaris — Pass 2 shipped (authoritative, 2026-07-08): Home + Memories.**
 Presentation-only (no data/logic/query/mutation change). **Memories**
@@ -302,6 +302,28 @@ Verified: tsc/lint/build green + independent adversarial review (BEHAVIOR PRESER
 two findings — iOS focus-zoom + a screen-reader date label — were fixed). **Do NOT** reintroduce
 the black search button / yellow banner / gray text loaders, drop the search input below 16px,
 or change the memories feed's data/query/mutation layer.
+
+**Project Polaris — Pass 3 shipped (authoritative, 2026-07-08): People + Insights.**
+Presentation-only (no data/query/logic change). **People** (`app/(app)/profiles/page.tsx`,
+return JSX only): serif header, calm `max-w-2xl` column, `rounded-3xl` list with subtle
+`divide-y` separators, polished empty state; `PersonRow` gained a sage focus ring + roomier
+`px-3 py-3` (still ≥44px); **`AddPersonButton`** got a bigger touch target + focus ring and its
+modal now **traps focus + Escape-closes + restores focus + locks scroll** (shared `useFocusTrap`;
+`role="dialog"` on the panel; `bg-charcoal/40` scrim) — the `CreateProfileForm` flow is
+unchanged; new `app/(app)/profiles/loading.tsx` skeleton. **Insights**
+(`components/insights/InsightsClient.tsx` + `app/(app)/insights/page.tsx` + `loading.tsx`) —
+goal was **calm, not analytical**: the page now opens with the narrative layer VISIBLE (serif
+header [was `text-5xl`/`#243428`/`text-gray`], `AIDisclaimer`, `RemyInsightsCenter` companion
+summary, `AIInsightSummary`) and the **11 detailed charts collapsed into a native-`<details>`
+"Detailed analytics"** progressive disclosure. **Nothing removed** — every chart + all
+`useMemo`/cognition-engine/analytics computation is byte-unchanged (verified: compute region 0
+diff hunks); charts still mount and render when expanded (recharts `ResponsiveContainer`
+re-measures on open). The off-brand `ChartSkeleton` + route skeleton + the `bg-[#f5f1e8]` page
+bg were rebranded to tokens; container narrowed `max-w-7xl`→`max-w-4xl`. Verified: tsc/lint/build
+green + independent adversarial review (BEHAVIOR PRESERVED: yes). **Do NOT** re-expand all
+Insights charts into one flat scroll, restore the `text-5xl`/raw-hex header, or re-flag the
+Insights analytics-overload as an open issue. **Polaris roadmap remaining:** Search, Timeline,
+Library, Settings, reminders-presentation.
 
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained

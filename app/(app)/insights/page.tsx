@@ -230,8 +230,8 @@ export default async function InsightsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#f5f1e8]">
-      <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-sand">
+      <section className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
         <InsightsClient
           memories={telemetryPayload.memories}
           reminders={telemetryPayload.reminders}

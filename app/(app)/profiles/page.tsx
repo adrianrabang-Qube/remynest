@@ -91,11 +91,13 @@ export default async function ProfilesPage() {
   });
 
   return (
-    <div className="space-y-4 p-4 md:space-y-5 md:p-6">
+    <div className="mx-auto max-w-2xl space-y-4 p-4 md:space-y-5 md:p-6">
       <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-charcoal md:text-2xl">People</h1>
-          <p className="mt-0.5 text-sm text-charcoal-muted">
+        <div className="min-w-0">
+          <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+            People
+          </h1>
+          <p className="mt-1 text-sm text-charcoal-muted">
             Everyone in your care network
           </p>
         </div>
@@ -103,10 +105,10 @@ export default async function ProfilesPage() {
       </header>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-sand-deep/70 bg-white p-6 text-center">
+        <div className="rounded-3xl border border-dashed border-sand-deep/70 bg-white p-8 text-center shadow-soft">
           <RemyStage context="people.empty" size={112} className="mx-auto mb-2" />
-          <p className="text-sm text-charcoal-soft">No people yet.</p>
-          <p className="mt-1 text-sm text-charcoal-muted">
+          <p className="text-charcoal-soft">No people yet.</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-charcoal-muted">
             Add a person you care for to keep their memories organised — or they&apos;ll
             appear here when shared with you.
           </p>
@@ -115,7 +117,7 @@ export default async function ProfilesPage() {
           </div>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white shadow-soft">
+        <ul className="divide-y divide-sand-deep/40 overflow-hidden rounded-3xl border border-sand-deep/60 bg-white shadow-soft">
           {rows.map(({ person, understanding }) => (
             <PersonRow
               key={person.id}
