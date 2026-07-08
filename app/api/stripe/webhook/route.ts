@@ -16,6 +16,7 @@ import {
 } from "@/lib/billing/billing-telemetry";
 
 import { supabaseAdmin } from "@/utils/supabase/admin";
+import { reconcileEntitlementsForUser } from "@/lib/billing/reconcile-entitlements";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -433,6 +434,26 @@ export async function POST(req: Request) {
       writeFailed = true;
     }
 
+    // Cancellation downgrades the plan to FREE, which removes the caregiver-collaboration
+    // entitlement — reconcile any accepted caregiver access on this owner's profiles. Only on
+    // a matched profile (data.id) with no write error. Idempotent; a reconciliation failure
+    // flags writeFailed so Stripe retries the (idempotent) event until access is withdrawn.
+    const cancelledUserId =
+      typeof data?.id === "string" ? (data.id as string) : null;
+    if (!error && cancelledUserId) {
+      const reconcile = await reconcileEntitlementsForUser(
+        cancelledUserId,
+        "FREE"
+      );
+      if ("error" in reconcile) {
+        writeFailed = true;
+        console.error(
+          "❌ ENTITLEMENT RECONCILE FAILURE (subscription.deleted):",
+          reconcile.error
+        );
+      }
+    }
+
     logSubscriptionCancelled({
       metadata: {
         stripeSubscriptionId:
@@ -591,6 +612,30 @@ export async function POST(req: Request) {
         "✅ SUBSCRIPTION UPDATED:",
         data
       );
+    }
+
+    // Reconcile entitlements when this update REDUCES the plan below caregiver collaboration.
+    // The effective new plan mirrors the write above: inactive → FREE; active + known price →
+    // derivedPlan; active + unknown price → plan preserved (nothing to reconcile). Only a
+    // matched profile (data.id) with no write error is reconciled; the helper is a no-op when
+    // the new plan still grants collaboration (e.g. a FAMILY renewal). Idempotent → retry-safe.
+    const reconciledPlan: BillingPlan | null = !isActive
+      ? "FREE"
+      : derivedPlan ?? null;
+    const updatedUserId =
+      typeof data?.id === "string" ? (data.id as string) : null;
+    if (!error && updatedUserId && reconciledPlan) {
+      const reconcile = await reconcileEntitlementsForUser(
+        updatedUserId,
+        reconciledPlan
+      );
+      if ("error" in reconcile) {
+        writeFailed = true;
+        console.error(
+          "❌ ENTITLEMENT RECONCILE FAILURE (subscription.updated):",
+          reconcile.error
+        );
+      }
     }
 
     logSubscriptionChanged({

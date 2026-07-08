@@ -468,6 +468,32 @@ downgrade path does not auto-revoke caregivers (manual revoke now exists); `acce
 stored/displayed but not enforced (any accepted relationship grants full write). Do NOT remove the
 owner-only/self-revoke guards or entitlement-gate revocation.
 
+**Subscription downgrade entitlement reconciliation (authoritative, 2026-07-08):** the
+audit-identified gap (a FAMILY→PREMIUM/FREE downgrade or cancellation left accepted caregivers
+with access) is CLOSED — complementing the manual owner-only revoke above.
+**`reconcileEntitlementsForUser(userId, plan)`** (`lib/billing/reconcile-entitlements.ts`,
+service-role, **structured result, never throws, idempotent**) runs from the Stripe **webhook**
+downgrade paths (`customer.subscription.deleted` → FREE; `customer.subscription.updated` →
+`!isActive ? "FREE" : derivedPlan ?? null` — null = unknown price = skip) AFTER the existing
+profile write. When the NEW plan lacks caregiver collaboration (`getUsageLimits(plan).
+caregiverCollaborationEnabled` — the single source of truth `BILLING_PLANS[plan].
+caregiverCollaboration`; only FAMILY/ENTERPRISE grant it), it bulk-DELETEs accepted, non-owner
+`profile_relationships` rows on the profiles the user OWNS (`created_by_account_id`), preserving
+the owner's own row. **Non-destructive** (only access grants — never a care profile/memory/
+reminder), **no escalation** (only deletes access; never grants/upgrades/writes plan/is_premium),
+**no IDOR** (`userId` derived from the webhook's own write result `data.id`, never request input;
+scoped to owned profiles). A reconciliation error sets the existing `writeFailed` flag → the
+webhook's existing HTTP-500 retry (safe: idempotent). **All OTHER premium capabilities** (semantic
+search, storage quota, care-profile creation limit, voice memories) are read-time-derived from the
+persisted plan (`resolveSubscription`/`getUsageLimits`) → auto-reconciled by the plan write;
+**existing over-limit care profiles are intentionally NOT deleted** (the repo enforces the limit at
+CREATION time only — deleting existing profiles/memories would be destructive data loss, not a repo
+rule). The webhook's existing writes / `writeFailed` semantics / 200-500 responses / checkout /
+portal / payment-failed grace are **byte-unchanged (additive only)**. Do NOT make reconciliation
+grant access, write plan/is_premium, gate it behind anything other than the entitlement check, or
+delete care profiles/memories. **Still open:** `access_level` is stored/displayed but not enforced
+(any accepted relationship grants full write).
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires
