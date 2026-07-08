@@ -390,6 +390,32 @@ CLEAN · tsc/lint/build green · adversarial review (LIBRARY LOGIC UNCHANGED: ye
 rebrand the shared `Remy*` renderers under Library or drop the hub search below `text-base`.
 **Polaris roadmap remaining:** Settings, reminders-presentation.
 
+**Project Polaris — Pass 7 shipped (authoritative, 2026-07-08): Settings.** Presentation-only
+(no profile-update/GDPR-export/account-delete/reauth/auth/routing/state change; adversarially
+verified — every flow UNCHANGED). Scope-locked to **7 files**; **`StorageUsageCard`,
+`ProfileHeader`, `ProfileSection` are BLACK BOXES** (shared / purchase-adjacent — untouched).
+**`app/(app)/settings/page.tsx`**: fixed a **nested `<main>`** (→`<div>`; the `(app)` layout
+already renders the outer `<main>`), added semantic `<header>` + **serif h1** + subtitle, storage
+wrapper `rounded-3xl`; `resolveAccountIdentity`/`redirect`/composition unchanged.
+**`AccountInformationSection`** (frozen `handleSave`/`PATCH /api/profile`), **`ExportDataSection`**
+(frozen `handleExport`/`GET /api/gdpr/export`/blob), **`PrivacyLinksSection`** (frozen hrefs),
+**`DeleteAccountSection`** (frozen modal trigger): `neutral/gray`→`charcoal`, `rounded-2xl` cards,
+**`text-base` inputs + sage focus rings**, `bg-black` buttons → sage (≥44px), `green`→`sage-deep`.
+**Destructive UI uses the brand `rose` palette** (approved — the app's delete convention: danger
+zone + delete buttons). **`DeleteAccountModal`** (CRITICAL — presentation-only): `bg-black/50`
+scrim → `bg-charcoal/40`, `red`→`rose`, `neutral/gray`→`charcoal`, `rounded-3xl`, **`text-base`
+password/typed inputs + sage focus rings**, ≥44px Cancel/Delete, and additive **`role="dialog"` +
+`aria-label`** on the panel (**deliberately NO `aria-modal`** — since a focus-trap could not be
+added under the freeze, we do not assert unenforced modality; **NO focus-trap/Escape/keyboard
+handler added** — keyboard behaviour byte-identical). **Every** `useState`/`useEffect`/`canSubmit`/
+`reauthOAuth`/`handleDelete`/`GET`+`DELETE /api/gdpr/delete-account`/`signOut`/`window.location`/
+typed-confirmation/`password`/`deleteContributed` binding is **byte-identical** (verified
+line-by-line). New **`app/(app)/settings/loading.tsx`** brand skeleton (reduced-motion-safe).
+Verified: brand sweep CLEAN · tsc/lint/build green · adversarial review (SETTINGS/PROFILE/EXPORT/
+DELETE/REAUTH/AUTH/ROUTING all UNCHANGED). **Do NOT** revert the delete/reauth logic, add a
+focus-trap without lifting the freeze, or touch the `StorageUsageCard`/`ProfileHeader`/
+`ProfileSection` black boxes here. **Polaris roadmap remaining:** Reminders (presentation only).
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires

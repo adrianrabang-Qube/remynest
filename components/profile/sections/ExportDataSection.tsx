@@ -48,10 +48,10 @@ export default function ExportDataSection() {
   }
 
   return (
-    <div className="rounded-lg border p-3 text-sm">
-      <h5 className="font-medium">Export your data</h5>
+    <div className="rounded-2xl border border-sand-deep/60 p-4 text-sm">
+      <h5 className="font-medium text-charcoal">Export your data</h5>
 
-      <p className="mt-1 text-neutral-500">
+      <p className="mt-1 text-charcoal-soft">
         Download a copy of your RemyNest data — profile, memories, reminders,
         caregiver relationships, and media references — as a JSON file.
       </p>
@@ -60,13 +60,13 @@ export default function ExportDataSection() {
         type="button"
         onClick={handleExport}
         disabled={loading}
-        className="mt-3 rounded-lg bg-black px-4 py-2 text-white disabled:opacity-60"
+        className="mt-3 inline-flex min-h-11 items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sage-deep disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
       >
         {loading ? "Preparing export..." : "Download my data"}
       </button>
 
       {error && (
-        <p className="mt-2 text-red-600" role="alert">
+        <p className="mt-2 text-rose-600" role="alert">
           {error}
         </p>
       )}

@@ -60,21 +60,21 @@ export default function AccountInformationSection({
 
   return (
     <div className="space-y-4 text-sm">
-      <div className="rounded-lg border p-3">
-        <label className="block text-xs font-medium text-neutral-500">
+      <div className="rounded-2xl border border-sand-deep/60 p-4">
+        <label className="block text-xs font-medium text-charcoal-muted">
           Email
         </label>
-        <p className="mt-1 break-all">{email || "—"}</p>
-        <p className="mt-1 text-xs text-neutral-400">
+        <p className="mt-1 break-all text-charcoal">{email || "—"}</p>
+        <p className="mt-1 text-xs text-charcoal-muted">
           Your email is used to sign in and cannot be changed here.
         </p>
       </div>
 
-      <div className="rounded-lg border p-3 space-y-3">
+      <div className="space-y-3 rounded-2xl border border-sand-deep/60 p-4">
         <div>
           <label
             htmlFor="account-first-name"
-            className="block text-xs font-medium text-neutral-500"
+            className="block text-xs font-medium text-charcoal-muted"
           >
             First name
           </label>
@@ -83,7 +83,7 @@ export default function AccountInformationSection({
             type="text"
             value={first}
             onChange={(e) => setFirst(e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
             autoComplete="given-name"
           />
         </div>
@@ -91,7 +91,7 @@ export default function AccountInformationSection({
         <div>
           <label
             htmlFor="account-preferred-name"
-            className="block text-xs font-medium text-neutral-500"
+            className="block text-xs font-medium text-charcoal-muted"
           >
             Preferred name
           </label>
@@ -100,7 +100,7 @@ export default function AccountInformationSection({
             type="text"
             value={preferred}
             onChange={(e) => setPreferred(e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
             autoComplete="nickname"
           />
         </div>
@@ -109,7 +109,7 @@ export default function AccountInformationSection({
           type="button"
           onClick={handleSave}
           disabled={saving || !dirty}
-          className="rounded-lg bg-black px-4 py-2 text-white disabled:opacity-50"
+          className="inline-flex min-h-11 items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sage-deep disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
         >
           {saving ? "Saving..." : "Save changes"}
         </button>
@@ -117,7 +117,7 @@ export default function AccountInformationSection({
         {status !== "idle" && (
           <p
             className={
-              status === "saved" ? "text-green-600" : "text-red-600"
+              status === "saved" ? "text-sage-deep" : "text-rose-600"
             }
             role={status === "error" ? "alert" : undefined}
           >

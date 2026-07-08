@@ -97,33 +97,37 @@ export default function DeleteAccountModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 p-4">
+      <div
+        role="dialog"
+        aria-label="Delete account"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-soft-lg"
+      >
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-red-700">Delete Account</h3>
+          <h3 className="text-lg font-semibold text-rose-700">Delete Account</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
             aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <p className="mt-2 text-sm text-neutral-600">
+        <p className="mt-2 text-sm text-charcoal-soft">
           This permanently removes your account and personal data. This action
           cannot be undone.
         </p>
 
         {/* Summary */}
-        <div className="mt-4 rounded-lg border p-3 text-sm">
+        <div className="mt-4 rounded-2xl border border-sand-deep/60 p-4 text-sm">
           {loadingPlan ? (
-            <p className="text-neutral-500">Calculating what will be deleted…</p>
+            <p className="text-charcoal-muted">Calculating what will be deleted…</p>
           ) : plan ? (
             <>
-              <p className="font-medium">You own:</p>
-              <ul className="mt-1 list-disc pl-5 text-neutral-600">
+              <p className="font-medium text-charcoal">You own:</p>
+              <ul className="mt-1 list-disc pl-5 text-charcoal-soft">
                 <li>{countFor(plan, "memory_profiles")} memory profiles</li>
                 <li>{countFor(plan, "memories")} memories</li>
                 <li>{countFor(plan, "reminders")} reminders</li>
@@ -133,26 +137,26 @@ export default function DeleteAccountModal({
                 <li>{plan.totals.mediaFiles} uploaded files</li>
               </ul>
               {plan.ownership.sharedOwnedProfiles.length > 0 && (
-                <p className="mt-2 text-neutral-600">
+                <p className="mt-2 text-charcoal-soft">
                   Shared profiles requiring transfer:{" "}
                   <strong>{plan.ownership.sharedOwnedProfiles.length}</strong>
                 </p>
               )}
               {plan.ownership.crossAuthoredMemories > 0 && (
-                <p className="mt-1 text-neutral-600">
+                <p className="mt-1 text-charcoal-soft">
                   Memories contributed to other profiles:{" "}
                   <strong>{plan.ownership.crossAuthoredMemories}</strong>
                 </p>
               )}
             </>
           ) : (
-            <p className="text-red-600">Could not load your deletion summary.</p>
+            <p className="text-rose-600">Could not load your deletion summary.</p>
           )}
         </div>
 
         {/* Cross-contributed choice (default = retain) */}
         {plan && plan.ownership.crossAuthoredMemories > 0 && (
-          <fieldset className="mt-4 rounded-lg border p-3 text-sm">
+          <fieldset className="mt-4 rounded-2xl border border-sand-deep/60 p-4 text-sm">
             <legend className="px-1 font-medium">
               Memories you contributed to other people&apos;s profiles
             </legend>
@@ -191,7 +195,7 @@ export default function DeleteAccountModal({
             <>
               <label
                 htmlFor="delete-password"
-                className="block font-medium text-neutral-700"
+                className="block font-medium text-charcoal"
               >
                 Confirm your password
               </label>
@@ -200,12 +204,12 @@ export default function DeleteAccountModal({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full rounded-lg border px-3 py-2"
+                className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
                 autoComplete="current-password"
               />
             </>
           ) : (
-            <p className="text-neutral-600">
+            <p className="text-charcoal-soft">
               You may be asked to sign in again to confirm this action.
             </p>
           )}
@@ -213,7 +217,7 @@ export default function DeleteAccountModal({
 
         {/* Typed confirmation + acknowledgement */}
         <div className="mt-4 text-sm">
-          <label htmlFor="delete-typed" className="block text-neutral-700">
+          <label htmlFor="delete-typed" className="block text-charcoal">
             Type <span className="font-mono font-semibold">DELETE</span> to
             confirm
           </label>
@@ -222,7 +226,7 @@ export default function DeleteAccountModal({
             type="text"
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
             autoComplete="off"
           />
           <label className="mt-3 flex items-start gap-2">
@@ -237,7 +241,7 @@ export default function DeleteAccountModal({
         </div>
 
         {error && (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-rose-600" role="alert">
             {error}
           </p>
         )}
@@ -246,7 +250,7 @@ export default function DeleteAccountModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border px-4 py-2 text-sm"
+            className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 py-2.5 text-sm font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-50"
             disabled={submitting}
           >
             Cancel
@@ -255,7 +259,7 @@ export default function DeleteAccountModal({
             type="button"
             onClick={handleDelete}
             disabled={!canSubmit}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+            className="inline-flex min-h-11 items-center rounded-full bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           >
             {submitting ? "Deleting…" : "Delete Account"}
           </button>

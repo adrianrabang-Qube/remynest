@@ -29,8 +29,15 @@ export default async function SettingsPage() {
   const { summary, firstName, preferredName } = identity;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Settings</h1>
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <header className="mb-6">
+        <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-charcoal-muted">
+          Manage your account, storage, privacy, and data.
+        </p>
+      </header>
 
       <ProfileHeader profile={summary} />
 
@@ -44,7 +51,7 @@ export default async function SettingsPage() {
         </ProfileSection>
 
         <ProfileSection id="storage" title="Storage">
-          <div className="rounded-2xl border border-sand-deep/70 bg-white p-5 shadow-soft">
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft">
             <StorageUsageCard variant="full" />
           </div>
         </ProfileSection>
@@ -61,6 +68,6 @@ export default async function SettingsPage() {
           <DeleteAccountSection />
         </ProfileSection>
       </div>
-    </main>
+    </div>
   );
 }
