@@ -38,18 +38,22 @@ export default async function LibraryBiographyPage() {
     <div className="space-y-4 p-4 md:p-6">
       <Link
         href="/library"
-        className="inline-flex items-center gap-1 text-sm font-medium text-sage-deep hover:underline"
+        className="inline-flex items-center gap-1 rounded py-1 text-sm font-medium text-sage-deep transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
       >
         <ChevronLeft className="h-4 w-4" aria-hidden /> Library
       </Link>
 
+      <h1 className="sr-only">Biography</h1>
+
       {biography ? (
         <RemyBiography biography={biography} />
       ) : (
-        <p className="rounded-2xl border border-sand-deep/60 bg-white p-6 text-sm text-charcoal-soft">
-          Remy hasn&apos;t written your biography yet. Add more dated memories
-          and it will appear here.
-        </p>
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
+          <p className="text-sm text-charcoal-soft">
+            Remy hasn&apos;t written your biography yet. Add more dated memories
+            and it will appear here.
+          </p>
+        </div>
       )}
     </div>
   );

@@ -370,6 +370,26 @@ control-bar height and would break the calibrated day-header sticky offset. **Do
 raw gray/black/#f5f1e8 on Timeline or restore the `text-4xl/5xl` titles. **Polaris roadmap
 remaining:** Library, Settings, reminders-presentation.
 
+**Project Polaris — Pass 6 shipped (authoritative, 2026-07-08): Library.** Presentation-only
+(no queries/filtering/routing/hrefs/data-loading/auth/state change). The Library was already
+~90% brand-aligned, so this was a light refinement (**6 files**; the shared `Remy*` renderers —
+`RemyStoryMode`/`RemyBiography`/`RemyMemoryBook` — were treated as **black boxes** and left
+untouched). **`components/library/LibraryView.tsx`** is a **pure client-side filter over a
+static 6-destination `SECTIONS` list** (no data logic): the one off-brand `bg-stone-50` →
+`bg-sand`; the search input `text-sm`→**`text-base`** (no iOS zoom) as a rounded-full pill with
+a sage `focus-within` ring; filter chips + sage focus rings + ring-clearance; the destination
+list → `rounded-3xl`/`shadow-soft` with a sage focus ring per row `<Link>`; the bare empty-state
+`<p>` → a calm card — `SECTIONS`/`CHIPS`/hrefs/`useState`/filter predicate **byte-identical**.
+**`app/(app)/library/page.tsx`** → semantic `<header>` + **serif h1** + `max-w-2xl` column +
+warmer "personal archive" subtitle. **`story`/`biography`/`memory-book` `page.tsx`** (server;
+auth + `Promise.all(getRemy…)` + `derive*Signals` + the `Remy*` renderer calls **byte-unchanged**):
+back-link focus ring + an additive **`sr-only` `<h1>`** (each renderer tops out at `<h2>`, so this
+gives one valid document `<h1>` without duplication) + a calm empty card. New
+**`app/(app)/library/loading.tsx`** brand skeleton (reduced-motion-safe). Verified: brand sweep
+CLEAN · tsc/lint/build green · adversarial review (LIBRARY LOGIC UNCHANGED: yes). **Do NOT**
+rebrand the shared `Remy*` renderers under Library or drop the hub search below `text-base`.
+**Polaris roadmap remaining:** Settings, reminders-presentation.
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires

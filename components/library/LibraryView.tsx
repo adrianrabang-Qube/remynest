@@ -60,8 +60,8 @@ export default function LibraryView() {
   return (
     <div className="space-y-4">
       {/* Sticky search + filter chips on mobile */}
-      <div className="space-y-3 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-stone-50/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
-        <label className="flex items-center gap-2 rounded-2xl border border-sand-deep/70 bg-white px-3 py-2">
+      <div className="space-y-3 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-sand/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+        <label className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 py-2.5 transition focus-within:border-sage focus-within:ring-2 focus-within:ring-sage">
           <Search className="h-4 w-4 shrink-0 text-charcoal-muted" aria-hidden />
           <input
             type="text"
@@ -69,14 +69,14 @@ export default function LibraryView() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search your library…"
             aria-label="Search the library"
-            className="w-full bg-transparent text-sm text-charcoal outline-none"
+            className="w-full bg-transparent text-base text-charcoal outline-none placeholder:text-charcoal-muted"
           />
         </label>
 
         <div
           role="tablist"
           aria-label="Library filters"
-          className="flex gap-2 overflow-x-auto pb-1 max-md:flex-nowrap md:flex-wrap"
+          className="flex gap-2 overflow-x-auto px-1 py-1 max-md:flex-nowrap md:flex-wrap"
         >
           {CHIPS.map((chip) => {
             const active = filter === chip.key;
@@ -87,7 +87,7 @@ export default function LibraryView() {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setFilter(chip.key)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-sm transition ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
                   active
                     ? "bg-sage text-white"
                     : "border border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand/50"
@@ -102,14 +102,14 @@ export default function LibraryView() {
 
       {/* Destination rows */}
       {visible.length > 0 ? (
-        <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white divide-y divide-sand-deep/40">
+        <ul className="divide-y divide-sand-deep/40 overflow-hidden rounded-3xl border border-sand-deep/60 bg-white shadow-soft">
           {visible.map((section) => {
             const Icon = section.icon;
             return (
               <li key={section.key}>
                 <Link
                   href={section.href}
-                  className="flex items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50"
+                  className="flex items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
                 >
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
                     <Icon className="h-5 w-5" aria-hidden />
@@ -132,9 +132,11 @@ export default function LibraryView() {
           })}
         </ul>
       ) : (
-        <p className="px-1 py-8 text-center text-sm text-charcoal-muted">
-          No library sections match your search.
-        </p>
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
+          <p className="text-sm text-charcoal-muted">
+            No library sections match your search.
+          </p>
+        </div>
       )}
     </div>
   );
