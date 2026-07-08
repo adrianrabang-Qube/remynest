@@ -63,7 +63,7 @@ export default function TimelineViewToggle({
   ];
 
   return (
-    <div className="inline-flex items-center bg-white border border-gray-200 rounded-2xl p-1 shadow-sm">
+    <div className="inline-flex items-center rounded-2xl border border-sand-deep/60 bg-white p-1 shadow-soft">
       {views.map((view) => {
         const isActive =
           currentView ===
@@ -77,10 +77,11 @@ export default function TimelineViewToggle({
               searchQuery,
               selectedCategory,
             })}
-            className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 max-md:px-3 max-md:py-1.5 ${
+            aria-current={isActive ? "page" : undefined}
+            className={`rounded-xl px-5 py-2 text-sm font-medium transition max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
               isActive
-                ? "bg-black text-white shadow-sm"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                ? "bg-sage text-white shadow-soft"
+                : "text-charcoal-soft hover:bg-sand/40 hover:text-charcoal"
             }`}
           >
             {view.label}

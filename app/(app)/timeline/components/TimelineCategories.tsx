@@ -41,6 +41,12 @@ function buildTimelineHref({
     : "/timeline";
 }
 
+const CHIP_BASE =
+  "rounded-full px-4 py-2 text-sm transition max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage";
+const CHIP_ACTIVE = "bg-sage text-white";
+const CHIP_INACTIVE =
+  "border border-sand-deep/60 bg-white text-charcoal-soft hover:bg-sand/40";
+
 export default function TimelineCategories({
   categories,
   selectedCategory,
@@ -55,15 +61,14 @@ export default function TimelineCategories({
     ).sort();
 
   return (
-    <div className="flex flex-wrap gap-3 max-md:flex-nowrap max-md:gap-2 max-md:overflow-x-auto max-md:pb-1">
+    <div className="flex flex-wrap gap-2 max-md:flex-nowrap max-md:overflow-x-auto max-md:px-0.5 max-md:py-0.5">
       <Link
         href={buildTimelineHref({
           search: searchQuery,
         })}
-        className={`px-5 py-2 rounded-full text-sm max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 transition-colors ${
-          !selectedCategory
-            ? "bg-black text-white"
-            : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+        aria-current={!selectedCategory ? "page" : undefined}
+        className={`${CHIP_BASE} ${
+          !selectedCategory ? CHIP_ACTIVE : CHIP_INACTIVE
         }`}
       >
         All
@@ -82,10 +87,9 @@ export default function TimelineCategories({
                 category,
                 search: searchQuery,
               })}
-              className={`px-5 py-2 rounded-full text-sm max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 transition-all ${
-                isActive
-                  ? "bg-black text-white shadow-sm"
-                  : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+              aria-current={isActive ? "page" : undefined}
+              className={`${CHIP_BASE} ${
+                isActive ? CHIP_ACTIVE : CHIP_INACTIVE
               }`}
             >
               {formatCategoryLabel(

@@ -31,7 +31,7 @@ export default function TimelineAttachmentImage({
           IMAGE_ATTACHMENT_FALLBACK
         );
       }}
-      className="h-12 w-12 rounded-2xl object-cover border border-gray-200"
+      className="h-12 w-12 rounded-2xl border border-sand-deep/50 object-cover"
     />
   );
 }

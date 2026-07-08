@@ -118,8 +118,8 @@ export default function ChaptersView({ memories }: ChaptersViewProps) {
 
   if (chapters.length === 0) {
     return (
-      <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6">
-        <p className="text-gray-500">
+      <div className="rounded-3xl border border-sand-deep/70 bg-white p-10 text-center shadow-soft max-md:p-8">
+        <p className="text-charcoal-soft">
           No life chapters available yet.
         </p>
       </div>

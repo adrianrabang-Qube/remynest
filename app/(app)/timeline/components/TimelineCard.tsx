@@ -1,3 +1,5 @@
+import { CalendarClock } from "lucide-react";
+
 import IntelligenceStrip from "./IntelligenceStrip";
 import RelatedMemories from "./RelatedMemories";
 import TimelineAttachmentImage from "./TimelineAttachmentImage";
@@ -110,21 +112,23 @@ export default function TimelineCard({
   );
 
   return (
-    <details className="group bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md open:shadow-md">
-      <summary className="list-none cursor-pointer p-7 transition-colors group-open:bg-gray-50/40">
+    <details className="group overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft transition hover:shadow-soft-lg open:shadow-soft-lg motion-reduce:transition-none">
+      <summary className="cursor-pointer list-none p-6 transition-colors group-open:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:p-7">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <h3 className="text-4xl font-bold text-gray-900 leading-tight group-hover:text-black transition-colors break-words">
+            <h3 className="break-words font-serif text-2xl font-semibold leading-tight text-charcoal transition-colors group-hover:text-sage-deep md:text-3xl">
               {displayTitle}
             </h3>
 
-            <p className="mt-3 text-lg font-medium text-sage-deep">
-              🕰 Memory Date: {memoryDateLabel}
+            <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-sage-deep">
+              <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="sr-only">Memory date: </span>
+              {memoryDateLabel}
             </p>
           </div>
 
           {memory.normalizedCategory && (
-            <span className="text-sm px-4 py-2 rounded-full bg-gray-100 text-gray-700 whitespace-nowrap shrink-0">
+            <span className="shrink-0 whitespace-nowrap rounded-full bg-sand px-4 py-2 text-sm text-charcoal-soft">
               {formatCategoryLabel(
                 memory.normalizedCategory
               )}
@@ -132,7 +136,7 @@ export default function TimelineCard({
           )}
         </div>
 
-        <p className="text-gray-700 mt-8 text-2xl leading-relaxed break-words">
+        <p className="mt-6 break-words text-base leading-relaxed text-charcoal-soft md:text-lg">
           {preview}
         </p>
 
@@ -164,7 +168,7 @@ export default function TimelineCard({
               return (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600"
+                  className="inline-flex items-center gap-2 rounded-full border border-sand-deep/60 bg-sand/40 px-3 py-2 text-xs text-charcoal-soft"
                 >
                   <span>{icon}</span>
                   <span>{name}</span>
@@ -191,13 +195,13 @@ export default function TimelineCard({
         />
       </summary>
 
-      <div className="px-7 pb-7 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50/30">
+      <div className="border-t border-sand-deep/60 bg-gradient-to-b from-white to-sand/30 px-6 pb-6 md:px-7 md:pb-7">
         <div className="mt-6">
-          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-charcoal-muted">
             Original Memory
           </h4>
 
-          <p className="text-gray-800 whitespace-pre-wrap leading-relaxed break-words">
+          <p className="whitespace-pre-wrap break-words leading-relaxed text-charcoal-soft">
             {memory.content ||
               "No memory content available."}
           </p>
@@ -209,7 +213,7 @@ export default function TimelineCard({
               (tag: string) => (
                 <span
                   key={tag}
-                  className="text-xs px-3 py-1 rounded-full bg-black text-white"
+                  className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
                 >
                   #{tag}
                 </span>
@@ -224,7 +228,7 @@ export default function TimelineCard({
 
         {/* Added/recorded date — secondary metadata */}
         {addedDate && (
-          <p className="mt-6 text-xs text-gray-400">
+          <p className="mt-6 text-xs text-charcoal-muted">
             Added to RemyNest on {addedDate}
           </p>
         )}

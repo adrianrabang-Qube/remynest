@@ -50,12 +50,12 @@ export default function RelatedMemories({
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-charcoal-muted">
           Related Memories
         </h4>
 
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-charcoal-muted">
           {
             normalizedMemories.length
           }{" "}
@@ -80,21 +80,21 @@ export default function RelatedMemories({
               <Link
                 href={`/memories/${memory.id}`}
                 key={memory.id}
-                className="group block bg-gray-50 rounded-2xl p-4 border border-gray-100 hover:bg-gray-100 hover:scale-[1.01] hover:border-gray-200 transition-all duration-200"
+                className="group block rounded-2xl border border-sand-deep/60 bg-sand/30 p-4 transition hover:border-sand-deep hover:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage motion-reduce:transition-none"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-900 break-words group-hover:text-black transition-colors">
+                    <p className="break-words font-semibold text-charcoal transition-colors group-hover:text-sage-deep">
                       {displayTitle}
                     </p>
 
-                    <p className="text-sm text-sage-deep font-medium mt-1">
-                      🕰 {memoryDateLabel}
+                    <p className="mt-1 text-sm font-medium text-sage-deep">
+                      {memoryDateLabel}
                     </p>
                   </div>
 
                   {memory.ai_importance && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-black text-white whitespace-nowrap shrink-0">
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-sage/10 px-2 py-1 text-xs text-sage">
                       {
                         memory.ai_importance
                       }
@@ -104,7 +104,7 @@ export default function RelatedMemories({
 
                 {memory.ai_category && (
                   <div className="mt-3">
-                    <span className="text-xs text-gray-400 uppercase tracking-wide">
+                    <span className="text-xs uppercase tracking-wide text-charcoal-muted">
                       {
                         memory.ai_category
                       }

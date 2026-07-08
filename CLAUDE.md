@@ -341,7 +341,34 @@ over colour) + a sage focus ring. **`app/(app)/search/loading.tsx`** rewritten t
 layout (brand tokens, reduced-motion-safe). Verified: tsc/lint/build green + independent
 adversarial review (SEARCH LOGIC UNCHANGED: yes). **Do NOT** reintroduce the rainbow result
 tints, revert the field below `text-base`, or alter the search debounce/abort/fetch/ranking.
-**Polaris roadmap remaining:** Timeline, Library, Settings, reminders-presentation.
+**Polaris roadmap remaining:** Library, Settings, reminders-presentation.
+
+**Project Polaris — Pass 5 shipped (authoritative, 2026-07-08): Timeline.** Presentation-only
+(no timeline logic/query/sorting/date-grouping/chronology/pagination/`signMemories`/AI-enrichment/
+navigation/routing change). Timeline was built pre-brand-system, so this was the **largest rebrand
+yet — 13 files** taken from raw `gray/black/yellow/#f5f1e8` + oversized `text-4xl/5xl` titles →
+the Polaris system. **`app/(app)/timeline/page.tsx`** (server; the auth/`getActiveContext`/
+pagination [PAGE_SIZE/SAFETY_CAP/isNarrowed/shown/fetchLimit]/memories query/filtering/
+`signMemories`/`groupMemoriesByDate`/categories query are **byte-unchanged** — presentation region
+only): `max-w-3xl` reading column; the `bg-yellow-50` no-profile notice, `bg-[#f5f1e8]` sticky bar,
+`border-gray-100`/`shadow-sm` empty state, and `text-gray-800` auth fallback rebranded; the empty
+state is now a calm serif **"Your story starts here"** + CTA. **`TimelineHeader`** → serif +
+warmer copy ("AI Timeline" → "Timeline"). **`TimelineDayGroup`** sticky date headers → `bg-sand` +
+`charcoal-muted` (sticky `12.5rem`/`3.5rem` offsets **unchanged** — mobile control-bar heights were
+preserved, so do not alter them without re-checking the day-header offset). **`TimelineCard`**
+(desktop `<details>`): rebrand, serif title (`text-4xl`→`text-2xl md:text-3xl`), `🕰 Memory Date:`
+→ `CalendarClock` + `sr-only`, summary focus ring, reduced-motion; native expand untouched.
+**Control bar** (`TimelineViewToggle`/`TimelineCategories`/`TimelineSearch`): `bg-black` active →
+`bg-sage`, `text-base` search input, sage focus rings, `aria-current`; every href/URL-builder +
+the `GET`-form search preserved. **Chapters view** (`ChaptersView`/`LifeChapterCard`/
+`RelatedMemories`) + `TimelineRow`/`TimelineAttachmentImage` rebranded; hrefs/dedup preserved.
+`loading.tsx` rewritten (brand, reduced-motion-safe). (`IntelligenceStrip` + `CompactChapterRow`
+were already clean.) Verified: brand sweep CLEAN · tsc/lint/build green · adversarial review
+(TIMELINE LOGIC UNCHANGED: yes). **Known pre-existing (NOT introduced):** the in-bar Search/Clear/
+toggle/chip touch targets are `<44px` — left as-is because enlarging them grows the mobile
+control-bar height and would break the calibrated day-header sticky offset. **Do NOT** reintroduce
+raw gray/black/#f5f1e8 on Timeline or restore the `text-4xl/5xl` titles. **Polaris roadmap
+remaining:** Library, Settings, reminders-presentation.
 
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained

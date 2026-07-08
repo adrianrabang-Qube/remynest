@@ -165,8 +165,8 @@ export default async function TimelinePage({
 
   if (!user) {
     return (
-      <div className="space-y-6 p-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
+      <div className="mx-auto max-w-3xl space-y-6 p-6">
+        <h1 className="font-serif text-2xl font-semibold text-charcoal">
           Please log in
         </h1>
       </div>
@@ -195,11 +195,11 @@ export default async function TimelinePage({
 
   if (!isMyNestContext && !activeProfileId) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="mx-auto max-w-3xl space-y-6 p-6">
         <TimelineHeader />
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-          <p className="text-yellow-700">
+        <div className="rounded-2xl border border-sand-deep/60 bg-sand/40 p-6">
+          <p className="text-charcoal-soft">
             No active profile selected.
           </p>
         </div>
@@ -361,13 +361,13 @@ export default async function TimelinePage({
   // =====================================
 
   return (
-    <div className="space-y-6 p-6 max-md:space-y-4 max-md:p-4">
+    <div className="mx-auto max-w-3xl space-y-6 p-6 max-md:space-y-4 max-md:p-4">
       <TimelineHeader />
 
       {/* Compact control bar — sticky on mobile so the toggle, search and
           filters stay reachable while scrolling the feed. The wrapper keeps the
           original `space-y-6` on desktop, so desktop layout is unchanged. */}
-      <div className="space-y-6 max-md:space-y-2 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:border-b max-md:border-sand-deep/40 max-md:bg-[#f5f1e8]/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+      <div className="space-y-6 max-md:space-y-2 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:border-b max-md:border-sand-deep/40 max-md:bg-sand/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
         <TimelineViewToggle
           currentView={currentView}
           searchQuery={searchQuery}
@@ -389,15 +389,18 @@ export default async function TimelinePage({
 
       {/* Empty State */}
       {!hasResults && (
-        <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm max-md:p-6 text-center">
-          <RemyStage context="timeline.empty" size={128} className="mx-auto mb-2" />
-          <p className="text-charcoal-soft">No memories to show yet.</p>
-          <p className="mt-1 text-sm text-charcoal-muted">
-            Add a memory to see it on your timeline.
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-10 text-center shadow-soft max-md:p-8">
+          <RemyStage context="timeline.empty" size={128} className="mx-auto mb-3" />
+          <h2 className="font-serif text-xl font-semibold text-charcoal">
+            Your story starts here
+          </h2>
+          <p className="mx-auto mt-1.5 max-w-sm text-sm text-charcoal-soft">
+            As you add memories, they&apos;ll gather here into a calm, chronological
+            story of your life — newest moments first.
           </p>
           <Link
             href="/memories/new"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
           >
             Add a memory
           </Link>
@@ -430,7 +433,7 @@ export default async function TimelinePage({
             <div className="pt-2 text-center">
               <Link
                 href={showMoreHref}
-                className="inline-flex items-center gap-1.5 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal-soft shadow-soft transition hover:bg-sand/60"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-[15px] font-semibold text-charcoal-soft shadow-soft transition hover:bg-sand/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
                 Show more
               </Link>

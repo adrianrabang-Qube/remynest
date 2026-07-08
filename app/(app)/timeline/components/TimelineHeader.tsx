@@ -4,18 +4,18 @@ type TimelineHeaderProps = {
 };
 
 export default function TimelineHeader({
-  title = "AI Timeline",
-  subtitle = "Your memories organized intelligently.",
+  title = "Timeline",
+  subtitle = "The story of your memories — newest first.",
 }: TimelineHeaderProps) {
   return (
-    <div>
-      <h1 className="text-5xl font-bold text-gray-900 max-md:text-2xl">
+    <header>
+      <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
         {title}
       </h1>
 
-      <p className="text-gray-500 mt-3 text-lg max-md:mt-1 max-md:text-sm">
+      <p className="mt-1.5 text-sm text-charcoal-muted md:text-base">
         {subtitle}
       </p>
-    </div>
+    </header>
   );
 }
