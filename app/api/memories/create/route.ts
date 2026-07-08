@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { userCanAccessProfile } from "@/lib/profile-ownership";
+import { userCanWriteProfile } from "@/lib/profile-ownership";
 import {
   MemoryAttachmentValidationError,
   isAllowedAttachmentMime,
@@ -162,7 +162,7 @@ export async function POST(req: Request) {
     // owned by user_id, so there is no profile to check.
     if (
       activeProfileId &&
-      !(await userCanAccessProfile(user.id, activeProfileId))
+      !(await userCanWriteProfile(user.id, activeProfileId))
     ) {
       logPipelineStage("active-context-forbidden", {
         activeProfileId,

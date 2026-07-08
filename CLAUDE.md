@@ -491,8 +491,37 @@ CREATION time only — deleting existing profiles/memories would be destructive 
 rule). The webhook's existing writes / `writeFailed` semantics / 200-500 responses / checkout /
 portal / payment-failed grace are **byte-unchanged (additive only)**. Do NOT make reconciliation
 grant access, write plan/is_premium, gate it behind anything other than the entitlement check, or
-delete care profiles/memories. **Still open:** `access_level` is stored/displayed but not enforced
-(any accepted relationship grants full write).
+delete care profiles/memories. (The former "`access_level` not enforced" gap is now CLOSED — see
+the next note.)
+
+**Caregiver `access_level` enforcement (authoritative, 2026-07-08 — closes the final V1 caregiver
+access-control gap):** an accepted caregiver's write permission is now determined ONLY by their
+`access_level` (`read` | `full` | `admin`, from the invite UI; default `full`) — previously EVERY
+accepted caregiver had full write. **The authorization model:** Owner → full write always; accepted
+caregiver → write ONLY per `access_level`; read-only caregivers keep ENTER + READ. **Single source
+of truth in `lib/profile-ownership.ts`** (no duplicated authz logic): a private
+**`resolveProfileRole(userId, profileId)`** is the ONE query path (owner via
+`created_by_account_id`, else an ACCEPTED `profile_relationships` row + its `access_level`, else
+none); **`accessLevelCanWrite(level)`** is the ONE permission rule — **only `read` restricts**
+(`level !== "read"`), so `full`/`admin`/**null/legacy** rows stay write-capable (**no-regression** —
+the invite default has always been `full`). Both **`userCanAccessProfile`** (access/enter/read —
+external behavior BYTE-IDENTICAL to before: owner OR accepted → true) and the new
+**`userCanWriteProfile`** (owner OR caregiver-with-write-level) derive from `resolveProfileRole`.
+**Enforcement = 5 WRITE sites swapped `userCanAccessProfile` → `userCanWriteProfile`** (authorization
+call only): `createReminder` + reminder toggle/complete + reminder delete
+(`app/(app)/reminders/page.tsx`), `POST /api/create-reminder`, and `POST /api/memories/create`.
+**READ/ENTER paths keep `userCanAccessProfile` UNCHANGED** (`getActiveContext` in
+`lib/active-profile.ts`, the `reminders/[id]` view, `getAccessibleProfiles`) so a read-only
+caregiver can still enter + view a care workspace. **Memory edit/delete** (`PUT`/`DELETE
+/api/memories/[id]`) is `user_id`-scoped (owner-of-content) — NOT access-level-gated, unchanged.
+**Caregiver management** (invite/list/revoke, `dashboard/actions.ts`) stays `userOwnsProfile`
+owner-only. **The FROZEN reminder scheduling/delivery/native-sync/OneSignal/recurrence/form-reset
+logic is byte-unchanged** — this was an authorization-only swap (operator-approved under the freeze's
+authorization-hardening carve-out; adversarially verified: reminder behavior byte-preserved). `userId`
+is session-derived at every site; `access_level` is read server-side (service-role) — never client
+input (no IDOR/escalation). Validation: tsc clean · lint 0 errors · build ✓ · independent adversarial
+review CLEAN (all 12 verdicts YES). Do NOT gate READ/enter on `userCanWriteProfile`, add a second
+authz query path, or change the `accessLevelCanWrite` rule without updating this single source.
 
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained

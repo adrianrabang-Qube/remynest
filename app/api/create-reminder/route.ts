@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
-import { userCanAccessProfile } from "@/lib/profile-ownership";
+import { userCanWriteProfile } from "@/lib/profile-ownership";
 
 export async function POST(req: Request) {
   try {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     // Ownership: a care-profile target must be owned by, or shared with, the
     // user. A null memory_profile_id is a personal (My Nest) reminder for self.
     if (memory_profile_id) {
-      const allowed = await userCanAccessProfile(
+      const allowed = await userCanWriteProfile(
         user.id,
         memory_profile_id
       );

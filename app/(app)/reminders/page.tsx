@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { userCanAccessProfile } from "@/lib/profile-ownership";
+import { userCanWriteProfile } from "@/lib/profile-ownership";
 import { redirect } from "next/navigation";
 import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField";
 import ReminderCenter, {
@@ -130,7 +130,7 @@ export default async function RemindersPage({
     // the profile. Personal reminders are owned by user_id (no profile to check).
     if (
       activeProfileId &&
-      !(await userCanAccessProfile(
+      !(await userCanWriteProfile(
         user.id,
         activeProfileId
       ))
@@ -334,7 +334,7 @@ export default async function RemindersPage({
     const authorized =
       row.memory_profile_id == null
         ? row.user_id === user.id
-        : await userCanAccessProfile(
+        : await userCanWriteProfile(
             user.id,
             row.memory_profile_id
           );
@@ -521,7 +521,7 @@ export default async function RemindersPage({
     const authorized =
       row.memory_profile_id == null
         ? row.user_id === user.id
-        : await userCanAccessProfile(
+        : await userCanWriteProfile(
             user.id,
             row.memory_profile_id
           );
