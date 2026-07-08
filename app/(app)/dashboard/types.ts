@@ -3,7 +3,8 @@ export type DashboardTelemetryEvent =
   | "profile_switched"
   | "memory_created"
   | "profile_created"
-  | "invite_sent";
+  | "invite_sent"
+  | "caregiver_revoked";
 
 export interface DashboardTelemetryPayload {
   requestId?: string;

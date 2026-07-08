@@ -446,6 +446,28 @@ charcoal + gold/rose accents, `max-w` reading columns, `rounded-2xl/3xl` + `shad
 focus rings, `text-base` inputs, ≥44px controls, reduced-motion-safe skeletons, progressive
 disclosure). **No Polaris passes remain** — future UI work is FEATURE work, not this redesign.
 
+**Caregiver revoke — owner-only access removal (authoritative, 2026-07-08):** the audit-identified
+access-control gap (an owner could invite/accept caregivers but never REMOVE their access to a care
+profile's PHI) is CLOSED. **`revokeCaregiver({memoryProfileId, caregiverAccountId})`** +
+**`listProfileCaregivers(memoryProfileId)`** (`app/(app)/dashboard/actions.ts`) are **OWNER-ONLY**
+(`userOwnsProfile`, session-derived user id — never trust a client-supplied id), return
+**structured results (never throw)**, and use the **service-role client scoped to the owned
+profile**. Revoke DELETEs the accepted `profile_relationships` row (scoped `memory_profile_id +
+caregiver_account_id`, `.neq('relationship_type','owner')`), which immediately withdraws access —
+`getAccessibleProfiles`/`userCanAccessProfile` require an ACCEPTED row and `getActiveContext`
+re-validates the active-workspace cookie on read (a revoked caregiver falls back to My Nest on
+their next request). Guards: **self-revoke blocked** (`caregiverId === user.id`), **owner row never
+deletable**, **non-owner blocked before any write** (no IDOR — the scoped delete can only affect the
+OWNED profile's row). **Deliberately NOT entitlement-gated** — revocation must work post-downgrade
+(the owner's manual remedy for the FAMILY→FREE "downgrade doesn't auto-revoke" gap). UI:
+**`components/CaregiverManager.tsx`** (caregiver list + Remove with inline confirm +
+loading/success/error, Polaris design) in the `WorkspaceSelector` "Manage care profiles" panel;
+renders nothing for non-owners. Invite/accept/decline/createProfile/workspace-switching are
+byte-unchanged (additive only). **Still open (separate audit items, NOT done here):** the Stripe
+downgrade path does not auto-revoke caregivers (manual revoke now exists); `access_level` is
+stored/displayed but not enforced (any accepted relationship grants full write). Do NOT remove the
+owner-only/self-revoke guards or entitlement-gate revocation.
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires

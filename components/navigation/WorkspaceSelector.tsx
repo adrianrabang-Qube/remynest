@@ -12,6 +12,7 @@ import {
 
 import { setActiveProfile } from "@/app/(app)/dashboard/profile-actions";
 import InviteCaregiverForm from "@/components/InviteCaregiverForm";
+import CaregiverManager from "@/components/CaregiverManager";
 import CreateProfileForm from "@/components/CreateProfileForm";
 import { haptic } from "@/lib/haptics";
 
@@ -208,12 +209,18 @@ export default function WorkspaceSelector({
               {manageOpen && (
                 <div className="space-y-5 px-1 py-3">
                   {!isMyNest && activeProfileId && (
-                    <div>
-                      <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
-                        Invite to {activeProfileName}
-                      </p>
-                      <InviteCaregiverForm memoryProfileId={activeProfileId} />
-                    </div>
+                    <>
+                      <CaregiverManager
+                        memoryProfileId={activeProfileId}
+                        profileName={activeProfileName}
+                      />
+                      <div>
+                        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
+                          Invite to {activeProfileName}
+                        </p>
+                        <InviteCaregiverForm memoryProfileId={activeProfileId} />
+                      </div>
+                    </>
                   )}
                   <div>
                     <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-charcoal-muted">

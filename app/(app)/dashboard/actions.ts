@@ -13,6 +13,7 @@ import {
 import {
   userOwnsProfile,
 } from "@/lib/profile-ownership";
+import { supabaseAdmin } from "@/utils/supabase/admin";
 
 import {
   normalizeFormValue,
@@ -319,6 +320,222 @@ export async function inviteCaregiver({
   return {
     success: true,
   };
+}
+
+// =====================================
+// CAREGIVER MANAGEMENT — list + revoke (owner-only)
+// =====================================
+
+/** One accepted caregiver on an owned care profile (for the management UI). */
+export type CaregiverSummary = {
+  caregiverAccountId: string;
+  name: string;
+  email: string;
+  accessLevel: string | null;
+  relationshipType: string | null;
+};
+
+export type ListCaregiversResult =
+  | { success: true; caregivers: CaregiverSummary[] }
+  | { error: string };
+
+/**
+ * List the accepted caregivers on a care profile — OWNER ONLY. Returns a structured
+ * result (never throws). Uses the service-role client so it can read other users'
+ * account rows for the name/email join, but ONLY after `userOwnsProfile` proves the
+ * caller owns this profile, and scoped strictly to that profile's accepted, non-owner
+ * relationships. A non-owner (e.g. a caregiver viewing a shared profile) gets `{ error }`
+ * and the UI renders nothing.
+ */
+export async function listProfileCaregivers(
+  memoryProfileId: string
+): Promise<ListCaregiversResult> {
+  const { user } = await requireDashboardUser();
+
+  const profileId = (memoryProfileId ?? "").trim();
+  if (!profileId) {
+    return { error: "Profile is required." };
+  }
+
+  if (!(await userOwnsProfile(user.id, profileId))) {
+    return {
+      error:
+        "You don't have permission to manage this profile's caregivers.",
+    };
+  }
+
+  const { data: rows, error: relError } = await supabaseAdmin
+    .from("profile_relationships")
+    .select("caregiver_account_id, access_level, relationship_type")
+    .eq("memory_profile_id", profileId)
+    .eq("invite_status", "accepted");
+
+  if (relError) {
+    console.error("[dashboard] list_caregivers_error", relError);
+    return { error: "We couldn't load caregivers. Please try again." };
+  }
+
+  // Exclude the owner's own relationship row (relationship_type 'owner') and any row that
+  // points back at the acting owner — those are never "caregivers" to remove.
+  const caregiverRows = (rows ?? []).filter(
+    (r) =>
+      r.relationship_type !== "owner" &&
+      typeof r.caregiver_account_id === "string" &&
+      r.caregiver_account_id &&
+      r.caregiver_account_id !== user.id
+  );
+
+  if (caregiverRows.length === 0) {
+    return { success: true, caregivers: [] };
+  }
+
+  const ids = caregiverRows.map(
+    (r) => r.caregiver_account_id as string
+  );
+
+  const { data: accounts } = await supabaseAdmin
+    .from("profiles")
+    .select("*")
+    .in("id", ids);
+
+  const byId = new Map(
+    (accounts ?? []).map((a: Record<string, unknown>) => [
+      a.id as string,
+      a,
+    ])
+  );
+
+  const caregivers: CaregiverSummary[] = caregiverRows.map((r) => {
+    const acc = byId.get(r.caregiver_account_id as string) as
+      | Record<string, unknown>
+      | undefined;
+    const email =
+      typeof acc?.email === "string" ? (acc.email as string) : "";
+    const pick = (key: string) =>
+      typeof acc?.[key] === "string" && (acc[key] as string).trim()
+        ? (acc[key] as string).trim()
+        : "";
+    const name =
+      pick("preferred_name") ||
+      pick("full_name") ||
+      pick("first_name") ||
+      pick("name") ||
+      pick("profile_name") ||
+      (email ? email.split("@")[0] : "Caregiver");
+
+    return {
+      caregiverAccountId: r.caregiver_account_id as string,
+      name,
+      email,
+      accessLevel:
+        typeof r.access_level === "string" ? r.access_level : null,
+      relationshipType:
+        typeof r.relationship_type === "string"
+          ? r.relationship_type
+          : null,
+    };
+  });
+
+  return { success: true, caregivers };
+}
+
+export type RevokeCaregiverResult =
+  | { success: true }
+  | { error: string };
+
+/**
+ * Revoke a caregiver's access to a care profile — OWNER ONLY. Deleting the accepted
+ * `profile_relationships` row immediately removes access: `getAccessibleProfiles` and
+ * `userCanAccessProfile` both require an ACCEPTED relationship, and `getActiveContext`
+ * re-validates the active-workspace cookie on every read (a revoked caregiver falls back
+ * to My Nest on their next request). Returns a structured result and NEVER throws.
+ *
+ * Deliberately NOT entitlement-gated: revoking access must always work, including after a
+ * FAMILY->FREE downgrade (this is how an owner reclaims access from caregivers who
+ * retained it). Authorization is `userOwnsProfile` only; the client-supplied ids are never
+ * trusted for the authorization decision.
+ */
+export async function revokeCaregiver({
+  memoryProfileId,
+  caregiverAccountId,
+}: {
+  memoryProfileId: string;
+  caregiverAccountId: string;
+}): Promise<RevokeCaregiverResult> {
+  const { user } = await requireDashboardUser();
+
+  const profileId = (memoryProfileId ?? "").trim();
+  const caregiverId = (caregiverAccountId ?? "").trim();
+
+  if (!profileId || !caregiverId) {
+    return { error: "Missing profile or caregiver." };
+  }
+
+  // A user can never remove themselves via the owner action (protects the owner's own
+  // relationship row from being deleted through this path).
+  if (caregiverId === user.id) {
+    return {
+      error: "You can't remove yourself from a profile you own.",
+    };
+  }
+
+  // OWNER-ONLY. Non-owners (including accepted caregivers) can never revoke.
+  if (!(await userOwnsProfile(user.id, profileId))) {
+    console.warn("[dashboard] revoke_forbidden_not_owner", {
+      userId: user.id,
+      memoryProfileId: profileId,
+    });
+    return {
+      error:
+        "You don't have permission to manage this profile's caregivers.",
+    };
+  }
+
+  // Verify the relationship exists and is not the owner row (never remove the owner).
+  const { data: rel, error: relError } = await supabaseAdmin
+    .from("profile_relationships")
+    .select("relationship_type")
+    .eq("memory_profile_id", profileId)
+    .eq("caregiver_account_id", caregiverId)
+    .maybeSingle();
+
+  if (relError) {
+    console.error("[dashboard] revoke_lookup_error", relError);
+    return { error: "We couldn't remove this caregiver. Please try again." };
+  }
+
+  if (!rel) {
+    return {
+      error: "This caregiver no longer has access to this profile.",
+    };
+  }
+
+  if (rel.relationship_type === "owner") {
+    return { error: "The profile owner can't be removed." };
+  }
+
+  // Remove the access grant — scoped to this owned profile + this caregiver, and never the
+  // owner row (defense in depth on top of the checks above).
+  const { error: deleteError } = await supabaseAdmin
+    .from("profile_relationships")
+    .delete()
+    .eq("memory_profile_id", profileId)
+    .eq("caregiver_account_id", caregiverId)
+    .neq("relationship_type", "owner");
+
+  if (deleteError) {
+    console.error("[dashboard] revoke_delete_error", deleteError);
+    return { error: "We couldn't remove this caregiver. Please try again." };
+  }
+
+  logDashboardEvent("caregiver_revoked", {
+    userId: user.id,
+    profileId,
+  });
+
+  revalidatePath(DASHBOARD_PATH);
+
+  return { success: true };
 }
 
 export async function acceptInvite(
