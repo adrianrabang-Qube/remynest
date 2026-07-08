@@ -7,7 +7,7 @@ import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { haptic } from "@/lib/haptics";
-import FloatingCompanionButton from "@/components/navigation/FloatingCompanionButton";
+import RemyActionButton from "@/components/navigation/RemyActionButton";
 
 import {
   MOBILE_PRIMARY_NAV,
@@ -55,7 +55,6 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
     context ? `${path}?context=${context}` : path;
 
   const [home, dashboard, memories] = MOBILE_PRIMARY_NAV;
-  const NewIcon = MOBILE_NEW_ACTION.icon;
 
   // "More" reflects the active state of any drawer-hosted route.
   const moreActive = MOBILE_DRAWER_NAV.some((i) =>
@@ -81,17 +80,16 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
         />
       </li>
 
-      {/* Center "New" action — now the generic Floating Companion Button. The future
-          Nest Button takes over this exact slot by swapping href → onActivate={toggleRemy};
-          today it stays a Link to /memories/new (memory creation unchanged). */}
+      {/* Center action — Remy, the central interaction point (Project Polaris). Tapping the
+          Remy avatar opens a calm help sheet (Ask Remy / Add a memory / Add a reminder) instead
+          of the old "+". Every destination is preserved (memory creation route unchanged); the
+          context query-param is threaded through so care-workspace routing is identical. */}
       <li className="flex flex-1 items-center justify-center">
-        <FloatingCompanionButton
-          href={withContext(MOBILE_NEW_ACTION.href)}
-          label="New memory"
-          isActive={isNavItemActive(pathname, MOBILE_NEW_ACTION.href)}
-        >
-          <NewIcon className="h-6 w-6" aria-hidden />
-        </FloatingCompanionButton>
+        <RemyActionButton
+          memoryHref={withContext(MOBILE_NEW_ACTION.href)}
+          reminderHref={withContext("/reminders")}
+          remyHref={withContext("/remy")}
+        />
       </li>
 
       <li className="flex flex-1">

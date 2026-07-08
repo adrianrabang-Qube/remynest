@@ -72,6 +72,8 @@ import { remyVoice } from "@/lib/remy/persona";
 import RemyHomeSummary from "@/components/remy/RemyHomeSummary";
 import RemyVoicePreview from "@/components/remy/RemyVoicePreview";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 
 import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
 
@@ -88,6 +90,52 @@ type Profile = {
 };
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Progressive-disclosure section (Project Polaris). A native <details> — zero-JS, fully
+ * keyboard-accessible, Dynamic-Type-safe. Children stay MOUNTED while collapsed (they are
+ * only visually hidden), so any telemetry/beacon effects inside still run exactly as before;
+ * this reorganizes presentation only. Used to keep the heavy analytics off the first screen
+ * without removing a single feature.
+ */
+function CollapsibleSection({
+  title,
+  subtitle,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      {...(defaultOpen ? { open: true } : {})}
+      className="group overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:px-6">
+        <span className="min-w-0">
+          <span className="block font-serif text-lg font-semibold text-charcoal">
+            {title}
+          </span>
+          {subtitle ? (
+            <span className="mt-0.5 block text-sm text-charcoal-muted">
+              {subtitle}
+            </span>
+          ) : null}
+        </span>
+        <ChevronDown
+          aria-hidden
+          className="h-5 w-5 shrink-0 text-charcoal-muted transition-transform duration-200 group-open:rotate-180"
+        />
+      </summary>
+      <div className="space-y-4 border-t border-sand-deep/60 px-4 py-5 md:px-5">
+        {children}
+      </div>
+    </details>
+  );
+}
 
 export default async function DashboardPage() {
 
@@ -693,14 +741,15 @@ export default async function DashboardPage() {
   return (
     <WorkspaceShell>
 
-      {/* Mobile (< md): drop the inner horizontal padding (the app shell already
-          gutters px-4) to recover ~48px of width, and tighten the vertical rhythm
-          to cut scroll length. md+ keeps the original px-6 / py-10 / space-y-8. */}
-      <main className="max-w-6xl mx-auto px-0 py-6 space-y-4 md:px-6 md:py-10 md:space-y-8">
+      {/* Calm, single reading column (Project Polaris). Mobile keeps px-0 (the app shell
+          already gutters px-4); a narrower max-width + generous vertical rhythm cut the
+          scanning cost. Every widget below is preserved — only regrouped into a natural
+          progression (Greeting → Today → Jump back in → People → Insights → Account), with
+          the heavy analytics tucked into progressive-disclosure sections so the first screen
+          stays quiet. */}
+      <main className="mx-auto max-w-2xl space-y-6 px-0 py-6 md:max-w-3xl md:space-y-8 md:px-6 md:py-10">
 
-        
-
-        {/* DASHBOARD ENTRY */}
+        {/* GREETING */}
         <DashboardHeader
           greeting={greeting}
           displayName={displayName}
@@ -708,179 +757,190 @@ export default async function DashboardPage() {
           remyMood={remyHeaderMood}
         />
 
-        {/* Proactive storage near-limit alert (≥80%) */}
+        {/* ATTENTION — safety + actionable alerts stay above the fold when present. */}
         <StorageWarningBanner />
-
-        {/* REMY HOME SUMMARY — workspace/family "what Remy understands" (the Remy
-            Home foundation). Additive: everything below continues unchanged. */}
-        <RemyHomeSummary understanding={workspaceUnderstanding} />
-
-        {/* REMY VOICE — the presentation end of the pipeline (Observations →
-            Voice → UI). Additive validation; RemyCompanion stays below. */}
-        <RemyVoicePreview lines={remyVoiceLines} />
-
-        {/* REMY COMPANION — AI companion layer above the command center */}
-        <RemyCompanion
-          observations={remyObservations}
-          subjectName={
-            !isMyNestWorkspace
-              ? remySubjectName
-              : null
-          }
-        />
-
-        {/* MEMORY DATE ADOPTION — nudge when coverage is low */}
-        {remyDateCoverage.total > 0 &&
-          remyDateCoverage.percentage < 50 && (
-            <DateCompletionCard
-              coverage={remyDateCoverage}
-            />
-        )}
-
-        {/* REMINISCENCE — invite to revisit the past when dated memories exist */}
-        {remyDateCoverage.dated > 0 && (
-          <ReminisceDashboardCard
-            datedCount={remyDateCoverage.dated}
-          />
-        )}
-
-        {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
-        <RemyActivityFeed
-          activities={remyActivities}
-        />
-
-        {/* REMY UPDATES — synthesized intelligence notifications */}
-        <RemyNotifications
-          notifications={remyNotifications}
-        />
-
-        {/* REMY TIMELINE — visual narrative above the drill-down layers */}
-        <RemyTimeline events={remyTimeline} />
-
-        {/* EXPLORE YOUR STORY — one compact preview of the Library (Collections,
-            Connections, Chapters, Story, Biography, Memory Book). The full
-            destinations now live in /library; the dashboard only previews them.
-            All underlying data is still generated above — only the six full
-            widget renders were removed. */}
-        <DashboardStoryPreview
-          collectionCount={remyCollections.length}
-          connectionCount={remyConnections.length}
-          chapterCount={remyLifeChapters.length}
-          continueReading={
-            remyStories[0]
-              ? {
-                  label: remyStories[0].title,
-                  href: remyStories[0].href ?? "/library/story",
-                }
-              : null
-          }
-          narratives={{
-            story: remyStories.length > 0,
-            biography: Boolean(remyBiography),
-            memoryBook: Boolean(remyMemoryBook),
-          }}
-        />
-
-        {/* FAMILY WORKSPACE INTELLIGENCE — family-level layer (>= 2 profiles) */}
-        {familyIntelligence &&
-          familyIntelligence.profiles.length >= 2 &&
-          familyIntelligence.totalMemories > 0 && (
-            <>
-              <FamilyOverview
-                profiles={
-                  familyIntelligence.profiles
-                }
-                observations={
-                  familyIntelligence.observations
-                }
-              />
-              <FamilyThemes
-                themes={
-                  familyIntelligence.themes
-                }
-              />
-            </>
-        )}
-
-        {/* PRIMARY COMMAND CENTER — reminder-driven focus */}
-        <DashboardFocus
-          reminders={focusReminders}
-          careProfileName={
-            activeProfile?.preferred_name ||
-            activeProfile?.profile_name ||
-            null
-          }
-          isMyNest={isMyNestWorkspace}
-        />
-
-        <div className="rounded-3xl border border-sand-deep/70 bg-white p-6 shadow-soft">
-          <h2 className="text-lg font-semibold text-charcoal">Quick Resume</h2>
-          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
-            {recentMemories.map((item) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="text-sm font-medium text-sage-deep underline-offset-2 hover:underline"
-              >
-                {item.title}
-              </Link>
-            ))}
-          </div>
-        </div>
 
         {!isMyNestContext && !activeProfile && (
           <DashboardActiveProfileWarning />
         )}
 
-        {/* WORKSPACE SUMMARY — compact row only. Workspace switching AND
-            care-profile management (switch, invite caregiver, add a person) now
-            live in the global top-bar Workspace Selector, available on every
-            authenticated screen — no longer scattered across the dashboard. */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border border-sand-deep/70 bg-white px-4 py-3 text-sm shadow-soft">
-          <span className="font-semibold text-charcoal">
-            Workspace:{" "}
-            {isMyNestContext
-              ? "My Nest"
-              : activeProfile?.profile_name ?? "Care"}
-          </span>
-          <span className="text-charcoal-muted">{memoryCount} memories</span>
-          <span className="text-charcoal-muted">
-            {accessibleProfiles.length}{" "}
-            {accessibleProfiles.length === 1 ? "profile" : "profiles"}
-          </span>
-        </div>
+        <PendingInvites invites={pendingInvites || []} />
 
-        <DashboardStats
-          memoryCount={memoryCount}
-          currentPlan={resolvedSubscription.plan}
-          isPremium={resolvedSubscription.isPremium}
-        />
+        {/* TODAY — the reminder-driven focus, a calm one-line summary of what Remy
+            understands, and gentle date nudges. The single most "now" surface. */}
+        <section aria-label="Today" className="space-y-4">
+          <DashboardFocus
+            reminders={focusReminders}
+            careProfileName={
+              activeProfile?.preferred_name ||
+              activeProfile?.profile_name ||
+              null
+            }
+            isMyNest={isMyNestWorkspace}
+          />
 
-        {/* PENDING INVITES */}
-        <PendingInvites
-          invites={
-            pendingInvites || []
-          }
-        />
+          <RemyHomeSummary understanding={workspaceUnderstanding} />
 
-        <DashboardTelemetry
-          memoryCount={memoryCount}
-          activeProfileName={
-            activeProfile?.profile_name
-          }
-        />
+          {/* MEMORY DATE ADOPTION — nudge when coverage is low */}
+          {remyDateCoverage.total > 0 &&
+            remyDateCoverage.percentage < 50 && (
+              <DateCompletionCard coverage={remyDateCoverage} />
+          )}
 
-        {/* STORAGE USAGE — compact widget */}
-        <StorageUsageCard variant="compact" />
+          {/* REMINISCENCE — invite to revisit the past when dated memories exist */}
+          {remyDateCoverage.dated > 0 && (
+            <ReminisceDashboardCard datedCount={remyDateCoverage.dated} />
+          )}
+        </section>
 
-        {/* ACCOUNT STATUS */}
-        <DashboardAccountStatus
-          currentPlan={resolvedSubscription.plan}
-          isPremium={resolvedSubscription.isPremium}
-        />
+        {/* JUMP BACK IN — quick resume links + the create-memory entry. */}
+        <section aria-label="Jump back in" className="space-y-4">
+          <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft md:p-6">
+            <h2 className="font-serif text-lg font-semibold text-charcoal">
+              Jump back in
+            </h2>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+              {recentMemories.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className="text-sm font-medium text-sage-deep underline-offset-2 hover:underline"
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-        {/* CREATE MEMORY */}
-        <DashboardCreateMemory />
+          <DashboardCreateMemory />
+        </section>
+
+        {/* PEOPLE & WORKSPACE — who this nest is for. Workspace switching AND care-profile
+            management live in the global top-bar Workspace Selector; this is a compact
+            summary + any family-level intelligence. */}
+        <section aria-label="People and workspace" className="space-y-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-3xl border border-sand-deep/70 bg-white px-5 py-4 text-sm shadow-soft">
+            <span className="font-semibold text-charcoal">
+              Workspace:{" "}
+              {isMyNestContext
+                ? "My Nest"
+                : activeProfile?.profile_name ?? "Care"}
+            </span>
+            <span className="text-charcoal-muted">{memoryCount} memories</span>
+            <span className="text-charcoal-muted">
+              {accessibleProfiles.length}{" "}
+              {accessibleProfiles.length === 1 ? "profile" : "profiles"}
+            </span>
+          </div>
+
+          {/* FAMILY WORKSPACE INTELLIGENCE — family-level layer (>= 2 profiles) */}
+          {familyIntelligence &&
+            familyIntelligence.profiles.length >= 2 &&
+            familyIntelligence.totalMemories > 0 && (
+              <>
+                <FamilyOverview
+                  profiles={familyIntelligence.profiles}
+                  observations={familyIntelligence.observations}
+                />
+                <FamilyThemes themes={familyIntelligence.themes} />
+              </>
+          )}
+        </section>
+
+        {/* INSIGHTS — a calm summary tile that drills into the full analytics at /insights;
+            the detailed Remy narrative layers collapse into progressive disclosure so the
+            first screen stays quiet. Nothing is removed — only tucked away. */}
+        <section aria-label="Insights" className="space-y-3">
+          <Link
+            href="/insights"
+            className="flex items-center justify-between gap-4 rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft transition hover:bg-sand/40 md:p-6"
+          >
+            <span className="min-w-0">
+              <span className="block font-serif text-lg font-semibold text-charcoal">
+                Insights
+              </span>
+              <span className="mt-0.5 block text-sm text-charcoal-muted">
+                {memoryCount} {memoryCount === 1 ? "memory" : "memories"}
+                {remyDateCoverage.dated > 0
+                  ? ` · ${remyDateCoverage.dated} with dates`
+                  : ""}
+              </span>
+            </span>
+            <span className="shrink-0 text-sm font-medium text-sage-deep">
+              View insights →
+            </span>
+          </Link>
+
+          <CollapsibleSection
+            title="More from Remy"
+            subtitle="Activity, updates, and your story"
+          >
+            {/* REMY COMPANION — supportive observations */}
+            <RemyCompanion
+              observations={remyObservations}
+              subjectName={!isMyNestWorkspace ? remySubjectName : null}
+            />
+
+            {/* REMY VOICE — the presentation end of the pipeline */}
+            <RemyVoicePreview lines={remyVoiceLines} />
+
+            {/* REMY ACTIVITY — the evidence layer: "what Remy noticed" */}
+            <RemyActivityFeed activities={remyActivities} />
+
+            {/* REMY UPDATES — synthesized intelligence notifications */}
+            <RemyNotifications notifications={remyNotifications} />
+
+            {/* REMY TIMELINE — visual narrative */}
+            <RemyTimeline events={remyTimeline} />
+
+            {/* EXPLORE YOUR STORY — Library preview (full destinations live in /library) */}
+            <DashboardStoryPreview
+              collectionCount={remyCollections.length}
+              connectionCount={remyConnections.length}
+              chapterCount={remyLifeChapters.length}
+              continueReading={
+                remyStories[0]
+                  ? {
+                      label: remyStories[0].title,
+                      href: remyStories[0].href ?? "/library/story",
+                    }
+                  : null
+              }
+              narratives={{
+                story: remyStories.length > 0,
+                biography: Boolean(remyBiography),
+                memoryBook: Boolean(remyMemoryBook),
+              }}
+            />
+          </CollapsibleSection>
+        </section>
+
+        {/* ACCOUNT & STORAGE — plan, usage, cognitive detail; collapsed by default so it
+            never competes with today's essentials. Children still mount (telemetry fires). */}
+        <CollapsibleSection
+          title="Account & storage"
+          subtitle="Plan, storage usage, and cognitive detail"
+        >
+          <DashboardStats
+            memoryCount={memoryCount}
+            currentPlan={resolvedSubscription.plan}
+            isPremium={resolvedSubscription.isPremium}
+          />
+
+          {/* STORAGE USAGE — compact widget */}
+          <StorageUsageCard variant="compact" />
+
+          {/* ACCOUNT STATUS */}
+          <DashboardAccountStatus
+            currentPlan={resolvedSubscription.plan}
+            isPremium={resolvedSubscription.isPremium}
+          />
+
+          <DashboardTelemetry
+            memoryCount={memoryCount}
+            activeProfileName={activeProfile?.profile_name}
+          />
+        </CollapsibleSection>
       </main>
     </WorkspaceShell>
   );

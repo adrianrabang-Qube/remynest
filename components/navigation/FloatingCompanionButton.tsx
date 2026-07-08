@@ -9,14 +9,27 @@ import { haptic } from "@/lib/haptics";
  * Generic Floating Companion Button — the abstraction the future "Nest Button" plugs into.
  *
  * Dual-mode so the slot can be handed over with NO structural change:
- *  - `href`        → renders a Link (TODAY: the "+" → /memories/new — preserves navigation,
- *                    prefetch, and memory creation exactly).
- *  - `onActivate`  → renders a button (LATER: the Nest tap → `toggleRemy()`).
- * Same prominent circular styling either way; the icon/children are replaced by the asset
- * registry when artwork lands. Deliberately has NO Remy dependency in Phase 1.
+ *  - `href`        → renders a Link (preserves navigation, prefetch, memory creation exactly).
+ *  - `onActivate`  → renders a button (the Remy tap → opens the help sheet / `toggleRemy()`).
+ *
+ * `variant` controls the tone WITHOUT touching geometry, so the slot can be handed over with no
+ * layout shift:
+ *  - "solid" → the original sage pill (the legacy "+").
+ *  - "nest"  → a clean nest-tone pedestal so the purple Companion/Remy avatar reads cleanly
+ *              (never purple-on-sage). Geometry, lift, and ring width are identical.
+ * The background is set here (not via an appended class) because Tailwind can't reliably
+ * override `bg-sage` from the caller's `className`.
  */
-const BASE =
-  "flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full bg-sage text-white shadow-lg ring-4 ring-sand transition hover:bg-sage-deep active:scale-95";
+// Geometry + a clearly-visible, on-brand keyboard focus ring. The resting ring is `ring-sand`
+// (set per-tone); on `:focus-visible` it turns sage so the indicator is obvious against the
+// sand nav (brand rule: focus rings are sage, never gold). Both variants inherit this.
+const GEOMETRY =
+  "flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full ring-4 shadow-lg transition active:scale-95 focus-visible:outline-none focus-visible:ring-sage";
+
+const TONE: Record<"solid" | "nest", string> = {
+  solid: "bg-sage text-white ring-sand hover:bg-sage-deep",
+  nest: "bg-white text-sage ring-sand hover:bg-sand",
+};
 
 export default function FloatingCompanionButton({
   href,
@@ -24,6 +37,7 @@ export default function FloatingCompanionButton({
   label,
   children,
   isActive,
+  variant = "solid",
   className = "",
 }: {
   href?: string;
@@ -31,9 +45,10 @@ export default function FloatingCompanionButton({
   label: string;
   children: ReactNode;
   isActive?: boolean;
+  variant?: "solid" | "nest";
   className?: string;
 }) {
-  const cls = `${BASE} ${className}`.trim();
+  const cls = `${GEOMETRY} ${TONE[variant]} ${className}`.trim();
 
   if (href) {
     return (

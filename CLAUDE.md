@@ -254,6 +254,36 @@ keep the touch nav. `AppNavbar` `hidden lg:flex`; `MobileTopBar`/`MobileBottomNa
 `MobileNavDrawer` `lg:hidden`; `WorkspaceSelector` drawer `max-lg:`/`lg:`; `<main>` `pb-24
 lg:pb-6`. Do not revert these to `md`.
 
+**Project Polaris — UX refactor, Pass 1 shipped (authoritative, 2026-07-08):** an app-wide
+"calmer, simpler, Apple-quality, lower-cognitive-load" redesign; **presentation ONLY** — no
+backend/auth/schema/API/business-logic changes, every feature preserved. Cadence:
+**flagship-first, then page-by-page** (each page audited → implemented → validated). **Pass 1
+(done): Dashboard + shell.** **(1) The bottom-nav center action is now Remy, not "+".** The
+green "+" FAB was retired: the center slot renders the **Remy avatar** (`<Remy state="welcome">`
+via the asset registry) and tapping it opens a **calm, portaled bottom action-sheet**
+(`components/navigation/RemyActionButton.tsx`) with **existing routes only** — Ask Remy
+(`/remy`), Add a memory (`/memories/new`), Add a reminder (`/reminders`). **No deferred
+AI/conversation was built** — it only routes to surfaces that already exist. The sheet is
+`createPortal(document.body)` (**required** — the host `MobileBottomNav` has `backdrop-blur`,
+so a non-portaled `fixed` overlay would re-root on WebKit/iOS; same invariant as the
+`WorkspaceSelector` drawer), focus-trapped (shared `useFocusTrap`), scroll-locked,
+Escape-to-close, and threads the `context` query-param (care routing unchanged).
+`FloatingCompanionButton` gained `variant "solid"|"nest"` (default `solid` = the old look,
+unchanged) so the purple Companion/Remy avatar reads on a clean **nest** pedestal (never
+purple-on-sage). **Do NOT reintroduce the "+" center FAB** or route the center button straight
+to `/memories/new`. **(2) Dashboard IA** (`app/(app)/dashboard/page.tsx`): the ~20 stacked
+widgets are regrouped into a calm progression — Greeting → Attention alerts → **Today** →
+**Jump back in** → **People** → **Insights** (a summary tile → `/insights`) → **Account &
+storage** — with the heavy Remy analytics + account cards collapsed into a zero-JS,
+keyboard-accessible native-`<details>` `CollapsibleSection` (**children stay MOUNTED when
+collapsed**, so telemetry effects still run). The **async data body is byte-unchanged**; only
+the `return` JSX changed and **every widget is preserved** (nothing removed — only relocated).
+**Do NOT re-stack all dashboard widgets** into one flat scroll or re-flag the analytics
+overload as an open issue. **Deferred to later Polaris passes:** the reminders page is
+**presentation-only when reached** (its FROZEN scheduling/sync/delivery/form-reset stay
+untouched); Home, Memories, People, Insights, Search, Timeline, Library, and Settings remain
+to be redesigned.
+
 **Storage Ledger Foundation (authoritative, 2026-06-23):** per-attachment storage
 **accounting** (bytes) is implemented as a `storage_ledger` table maintained
 **incrementally by a trigger on `memories`** (`sync_storage_ledger()`, fires
