@@ -1033,6 +1033,128 @@ export interface ConversationRender {
   context: ConversationRenderContext;
 }
 
+/**
+ * CONVERSATION COMPOSITION — the FIRST natural-language-PLANNING layer. It consumes ONLY the already-
+ * approved `ConversationRender` (+ the `AnswerAssembly` it renders) and produces a deterministic PLAN of
+ * how a future LLM/API call would compose the answer: composition sections, paragraph plans, sentence
+ * plans (structural roles only), and reference plans (pointers to real entities). It is NOT language: it
+ * generates NO sentences, paragraphs, prose, or prompts — every field is a structured id, enum, or
+ * number. It performs NO retrieval / ranking / reasoning / chronology / fact decisions. Internal only.
+ */
+export type ConversationStyle =
+  | "conversational"
+  | "narrative"
+  | "concise"
+  | "reflective"
+  | "formal";
+export type ConversationAudience =
+  | "family"
+  | "caregiver"
+  | "patient"
+  | "clinician"
+  | "general";
+export type ConversationIntent =
+  | "inform"
+  | "reminisce"
+  | "reassure"
+  | "summarize"
+  | "answer";
+
+/** A pointer to a REAL entity the composition would reference (kind reused from AnswerEvidenceKind). */
+export interface ConversationReferencePlan {
+  id: string;
+  kind: AnswerEvidenceKind;
+  refId: string;
+  /** The sentence plan that would mention it, or null. */
+  sentencePlanId: string | null;
+}
+
+/** A structural plan for one sentence — its role + which reference plans it draws on. Never text. */
+export interface ConversationSentencePlan {
+  id: string;
+  paragraphId: string;
+  order: number;
+  kind: "opening" | "topic" | "evidence" | "transition" | "closing";
+  referenceIds: string[];
+}
+
+/** A structural plan for one paragraph — the sentence + reference plans it groups. Never text. */
+export interface ConversationParagraph {
+  id: string;
+  sectionId: string;
+  order: number;
+  sentencePlanIds: string[];
+  referenceIds: string[];
+}
+
+/** A composed section (maps a render section to its paragraph plans). Structured only. */
+export interface ConversationCompositionSection {
+  id: string;
+  renderSectionId: string;
+  order: number;
+  /** A structural composition-role hint (never language). */
+  role: "lead" | "body" | "aside" | "summary";
+  importance: number;
+  paragraphIds: string[];
+}
+
+/** The overall composition flow — structural ordering + transition pointers only (never language). */
+export interface ConversationFlow {
+  openingSectionId: string | null;
+  closingSectionId: string | null;
+  transitionIds: string[];
+  sectionOrder: string[];
+}
+
+/** Structured composition metadata (no prose). */
+export interface ConversationCompositionMetadata {
+  style: ConversationStyle;
+  audience: ConversationAudience;
+  intent: ConversationIntent;
+  openingSectionId: string | null;
+  closingSectionId: string | null;
+  emphasis: string[];
+  /** Carried from the render context (deterministic — never language). */
+  tone: ConversationTone;
+  continuity: number;
+  confidence: number;
+}
+
+/** Structured composition controls + counts (no prose). */
+export interface ConversationCompositionContext {
+  style: ConversationStyle;
+  audience: ConversationAudience;
+  intent: ConversationIntent;
+  /** Carried from the render context. */
+  verbosity: ConversationVerbosity;
+  paragraphCount: number;
+  sentenceCount: number;
+  referenceCount: number;
+  depth: number;
+}
+
+/** Structured composition summary (no prose). */
+export interface ConversationCompositionSummary {
+  sectionCount: number;
+  paragraphCount: number;
+  sentenceCount: number;
+  referenceCount: number;
+  confidence: number;
+  complexity: number;
+}
+
+/** The Conversation Composer Engine's complete output — a composition PLAN only, never language. */
+export interface ConversationComposition {
+  sections: ConversationCompositionSection[];
+  paragraphs: ConversationParagraph[];
+  sentencePlans: ConversationSentencePlan[];
+  referencePlans: ConversationReferencePlan[];
+  flow: ConversationFlow;
+  metadata: ConversationCompositionMetadata;
+  context: ConversationCompositionContext;
+  summary: ConversationCompositionSummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

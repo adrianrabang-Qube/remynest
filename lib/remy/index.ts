@@ -125,6 +125,11 @@ export {
   buildConversationRender,
   type ConversationRenderInput,
 } from "@/lib/remy/core/conversation-rendering-engine";
+// Conversation Composer — the FIRST natural-language-planning layer: deterministic composition plan (Phase 17).
+export {
+  buildConversationComposition,
+  type ConversationComposerInput,
+} from "@/lib/remy/core/conversation-composer-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -222,6 +227,18 @@ export type {
   ConversationRenderContext,
   ConversationRenderSummary,
   ConversationRender,
+  ConversationStyle,
+  ConversationAudience,
+  ConversationIntent,
+  ConversationReferencePlan,
+  ConversationSentencePlan,
+  ConversationParagraph,
+  ConversationCompositionSection,
+  ConversationFlow,
+  ConversationCompositionMetadata,
+  ConversationCompositionContext,
+  ConversationCompositionSummary,
+  ConversationComposition,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

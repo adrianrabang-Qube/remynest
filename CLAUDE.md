@@ -1177,6 +1177,43 @@ randomness in it, or make output non-deterministic. The next Remy layer would be
 LLM layer that CONSUMES this render + the AnswerAssembly — a separate approved phase, NOT to be built without
 explicit approval.
 
+**Remy — Conversation Composer Engine (authoritative, 2026-07-09 — extends the ONE platform; the FIRST
+natural-language-PLANNING layer):** a PURE core engine (`lib/remy/core/conversation-composer-engine.ts`,
+`buildConversationComposition({ conversationRender, answerAssembly, style?, audience?, intent? }) →
+ConversationComposition`) that adds NO intelligence. It consumes **ONLY** the already-approved
+`ConversationRender` + the `AnswerAssembly` it renders (+ optional deterministic style/audience/intent
+controls) and prepares a deterministic COMPOSITION PLAN of how a FUTURE LLM/API provider would compose the
+answer. **It generates NO language** (no sentences/paragraphs/prose/prompts/LLM calls — NOT chat, NOT GPT,
+NOT an LLM) and performs **NO** retrieval / search / ranking / reasoning / chronology-construction /
+significance / evidence-scoring / factual decisions. **Composition sections** map each render section → a
+structural role hint (lead/body/aside/summary) + paragraph plans; **paragraph plans** group **sentence
+plans** whose `kind` is a structural ROLE (opening/topic/evidence/transition/closing — **never text**);
+**reference plans** point at real entity ids (the kind is looked up from the real answer section via a
+`kindMapOf` JOIN — not retrieval/ranking); **flow** = opening/closing section-id POINTERS + transition ids +
+section order; metadata/context carry the render's tone/verbosity + counts. **No prose, no narration, no
+generated text, no prompts, no invented ids** — every field is a structured id, enum, or number; empty
+render → empty composition. Deterministic (iterates render sections in their existing renderOrder; structural
+ids `compose-<renderId>`/`<sectionId>-p<i>`/`-s<i>`/`-r<i>`; Maps/Sets query-only; no clock/randomness →
+byte-identical output). **CRITICAL: this presentation-side engine deliberately feeds NOTHING** — there is
+**NO `significance-engine` change and NO prior deterministic engine changed** (among `lib/remy/core/*.ts`
+only `family-types.ts` [additive] changed); in `RemyRelationship` it is computed immediately after the render
+and `void`-ed (its consumer is the FUTURE LLM/API conversational layer). INTERNAL — **not shown in the UI**
+(render path byte-unchanged; exactly one `RemyMomentChip`). **REQUIRED inputs = `ConversationRender` +
+`AnswerAssembly` ONLY**; style/audience/intent are OPTIONAL controls. **FIXED pipeline order:** …
+answer-assembly → conversation-rendering → conversation-composer → story → favourite → … → priority → one
+`<Remy>` renderer. Types (`ConversationComposition`/`ConversationCompositionSection`/
+`ConversationCompositionMetadata`/`ConversationCompositionContext`/`ConversationCompositionSummary`/
+`ConversationStyle`/`ConversationAudience`/`ConversationIntent`/`ConversationFlow`/`ConversationParagraph`/
+`ConversationSentencePlan`/`ConversationReferencePlan`) additive in `family-types.ts`; exported from
+`@/lib/remy` for the future LLM/API provider. Verified tsc/lint/build + independent MULTI-AGENT adversarial
+review CLEAN (7 lenses — purity / determinism / consumes-only-render / no-language-generation /
+platform-integrity / pipeline-integrity / regressions — 0 findings). **Do NOT** make this engine
+retrieve/rank/reason/build-chronology/generate language, feed it into significance/ranking, import any other
+engine, surface it in the UI, invent ids, reference a non-real entity, put a clock/DB/randomness in it, or
+make output non-deterministic. The next Remy layer would be the actual conversational/LLM PROVIDER that
+verbalizes this composition + the AnswerAssembly — a separate approved phase, NOT to be built without
+explicit approval.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -19,6 +19,7 @@ import { buildQuestionUnderstanding } from "@/lib/remy/core/question-understandi
 import { buildAnswerPlan } from "@/lib/remy/core/answer-planning-engine";
 import { buildAnswerAssembly } from "@/lib/remy/core/answer-assembly-engine";
 import { buildConversationRender } from "@/lib/remy/core/conversation-rendering-engine";
+import { buildConversationComposition } from "@/lib/remy/core/conversation-composer-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -301,6 +302,18 @@ export default function RemyRelationship() {
         // is intentionally no current consumer; it is exported from @/lib/remy for that future layer.
         const conversationRender = buildConversationRender({ answerAssembly });
         void conversationRender;
+
+        // Conversation Composer — the FIRST natural-language-planning layer. It consumes ONLY the
+        // ConversationRender + AnswerAssembly and prepares a deterministic composition PLAN (paragraph /
+        // sentence / reference plans) for a FUTURE LLM/API provider. It generates NO language, performs
+        // NO retrieval / reasoning / ranking, and — like the rendering layer — deliberately feeds NOTHING
+        // (no significance). Its consumer is the future conversational layer; it is exported from
+        // @/lib/remy for that layer, so there is intentionally no current consumer.
+        const conversationComposition = buildConversationComposition({
+          conversationRender,
+          answerAssembly,
+        });
+        void conversationComposition;
 
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
