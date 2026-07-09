@@ -78,5 +78,12 @@ export {
   NEST_GREETING_BEHAVIOR,
   NEST_STAGES,
   resolveNestStage,
+  nestStageLabel,
 } from "@/lib/remy/core/nest";
 export type { NestStep, NestStage, NestStageInfo } from "@/lib/remy/core/nest";
+export {
+  resolveTimeOfDay,
+  isNightTime,
+  greetingForTimeOfDay,
+} from "@/lib/remy/core/time-of-day";
+export type { TimeOfDay } from "@/lib/remy/core/time-of-day";

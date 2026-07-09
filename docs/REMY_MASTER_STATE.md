@@ -8,8 +8,8 @@
 > (10-agent, file:line-cited). Items are re-verified against code before being trusted, not from memory.
 
 Last Updated: 2026-07-09
-Branch: main — 4 commits ahead of `origin/main` (`f53694b`); **unpushed**: `e73dc7e`, `a97dfac`, `7f65178`, `94088c3` (+ this sync-pass commit)
-Commit: 94088c3 `docs(sync): conform REMY_MASTER_STATE header` (HEAD at the start of this sync pass; this pass commits on top)
+Branch: main — **unpushed**, ahead of `origin/main` (`f53694b`); latest = the living Nest companion increment (on top of the Nest hub + doc-sync commits)
+Commit: living Nest companion increment (on top of `ce0feb5` doc-sync — see git log)
 Repository Verified: **YES** — 2026-07-09. Basis: the 10-agent file:line-cited source audit, plus a targeted source re-verification this sync pass (access_level enforcement, AI stack, Nest, audio/PDF-UI, reminder-edit, security-headers/rate-limiting all reconfirmed against actual code). **Source code is authoritative over all documentation** (this file, CLAUDE.md, HANDOFF, architecture docs); reconcile docs forward when they diverge.
 
 ==================================================
@@ -48,7 +48,10 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 
 **The Nest** (bottom-nav center)
 - ✔ Persistent living nest · Wake choreography (resting→waking→peeking→emerging→greeting→returningHome, behaviour-driven, **no menuOpen state**) · Behaviour player (`use-nest-interaction.ts`) · Portaled menu · a11y · reduced-motion
-- ✔ Nest choreography + evolution **model** in the platform (`lib/remy/core/nest.ts`)
+- ✔ Nest choreography + evolution model in the platform (`lib/remy/core/nest.ts`)
+- ✔ **Living ambient presence** — glow + drifting motes + breathing; **time-of-day lighting** (moonlight at night, `lib/remy/core/time-of-day.ts`) + night→sleeping resting look + time-appropriate greeting
+- ✔ **Nest evolution wired to REAL memory counts** — 6 stages Tiny→Cozy→Family→Golden→Memory Tree→Sanctuary; app-shell count → `AppNavbar` → `MobileBottomNav` → `Nest` (no placeholder)
+- ✔ **framer-motion motion primitives** (`components/remy/motion/primitives.tsx`) — the NestMenu "Remy offers actions" staggered reveal (de-menu-ified); ambient loops stay CSS
 
 **AI (all live on OpenAI — NOT deferred)**
 - ✔ Ask Remy (conversational, gpt-4o-mini, retrieval-grounded) · Semantic search (premium-gated) · Embeddings (text-embedding-3-small) · Vector search (`match_memories`, 6 consumers) · AI summaries + tagging (gpt-4.1-mini) · Hybrid AI memory retrieval · Multi-turn conversational memory
@@ -126,7 +129,7 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 - Voice engine (TTS) · Animated Remy (Rive/Lottie backend behind the AnimationController seam) · live emotional reactions
 - Voice-recording memories · Audio & Document/PDF upload **UI** (backend already allowlists them — only the picker is missing) · Speech-to-text transcription
 - Semantic Search V2 · advanced AI memory intelligence
-- Golden Feather · Nest evolution wired to live memory count + dedicated per-stage artwork · seasonal themes · accessory system · emotion system
+- Golden Feather · dedicated per-stage nest ARTWORK (evolution is wired to real counts; only the per-stage art remains) · animated Remy character (wings / blink / emerge via Rive/Lottie) · celebration character effects (feather/heart) · achievements celebration art · seasonal themes · accessory system · emotion-specific artwork
 - Apple Watch · Widgets · CarPlay · physical companion
 - Dark-theme UI rollout (mechanism-only today) · PITR (daily backups baseline) · staging env · schema-as-migrations · DST-aware cron recurrence · iOS Notification Service Extension (exactly-once delivery) · Android as a shipping product · npm audit remediation · orphan-object storage sweeper
 
@@ -154,6 +157,9 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 - **Decision:** Any fixed/full-screen overlay under a `backdrop-filter`/`transform`/`filter` ancestor MUST `createPortal(document.body)`. **Status:** LOCKED.
 - **Decision:** Responsive nav swap is gated at `lg` (1024px), not `md`. **Status:** LOCKED.
 - **Decision:** All AI is OpenAI (gpt-4o-mini / gpt-4.1-mini / text-embedding-3-small); the AI-intelligence layer is SHIPPED (only the companion's animation/voice content is deferred). **Status:** LOCKED.
+- **Decision:** Time-of-day is a platform layer (`lib/remy/core/time-of-day.ts`); the Nest's ambient lighting, resting look (night→sleeping), and greeting derive from it. **Status:** LOCKED.
+- **Decision:** Nest interaction MOTION uses framer-motion, centralized in `components/remy/motion/primitives.tsx` (no duplicated animation logic); cheap infinite AMBIENT loops (glow / motes / breathing) stay in CSS. **Status:** LOCKED.
+- **Decision:** Nest evolution = 6 stages (Tiny→Cozy→Family→Golden→Memory Tree→Sanctuary) driven by REAL memory counts threaded from the app shell; dedicated per-stage nest ARTWORK is a future registry-only drop. **Status:** LOCKED.
 
 ==================================================
 ## KNOWN OPEN ITEMS
@@ -167,7 +173,6 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 - HTTP security headers + API rate limiting (both absent).
 - Memory EDIT/DELETE authorization is `user_id`-scoped only (fails safe/restrictive) — does not apply the `userCanWriteProfile` access_level model like create. Decide whether caregiver-edit parity is intended.
 - Ask Remy's semantic retrieval is NOT premium-gated (the standalone `/api/memories/search` endpoint is).
-- Wire Nest evolution to a live memory count (`memoryCount` currently defaults to 0 → always "small").
 - Remove dead code: orphan `/api/create-reminder`, legacy `/api/send-reminders`, orphan `/api/search`.
 - Fix `.env.local` local formatting bug (CRON_SECRET missing a trailing newline before TOMBSTONE_USER_ID) — local only.
 
@@ -181,13 +186,13 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 ## LAST COMPLETED TASK
 ==================================================
 
-Summary: **Documentation synchronization pass** — made the three docs fully self-consistent with the current HEAD and source. Rebuilt `HANDOFF_CURRENT.md` as a lightweight continuation doc (removed the stale "memory-media public" / "11–14 unpushed commits" / obsolete-roadmap + Recent-commits lines; full history preserved in git). Set the CLAUDE.md startup READ ORDER to exactly master → CLAUDE.md → HANDOFF → arch docs → source, and expanded the mandatory 6-step maintenance protocol. Marked CLAUDE.md's Pass-1 `RemyActionButton` reference SUPERSEDED and banner-superseded `launch-roadmap.md`. Updated this file's header/status to HEAD. Re-verified every VERIFIED COMPLETE / DO NOT REBUILD / LOCKED item against source — all still accurate. **No application code changed.**
+Summary: **Living Nest companion increment** — extended the Remy platform (NOT a redesign; backwards-compatible; single `<Remy>` renderer + one platform preserved) to make the Nest feel alive. New platform **time-of-day** layer (`lib/remy/core/time-of-day.ts`) drives the Nest's ambient lighting (moonlight at night), Remy's resting look (asleep at night, calm by day), and a time-appropriate greeting. **Nest evolution now uses REAL memory counts** (6 stages Tiny→Sanctuary, threaded app-shell → `AppNavbar` → `MobileBottomNav` → `Nest`; no placeholder). Centralized **framer-motion** motion primitives (`components/remy/motion/primitives.tsx`) drive the NestMenu "Remy offers actions" staggered reveal (de-menu-ified — reads as Remy presenting options, not a system sheet). Ambient CSS life (drifting motes + glow + breathing), all reduced-motion-safe. Portal / focus-trap / scroll-lock / routing unchanged.
 
-Files Changed: `docs/REMY_MASTER_STATE.md`, `CLAUDE.md`, `docs/handoffs/HANDOFF_CURRENT.md`, `docs/roadmap/launch-roadmap.md` (SUPERSEDED banner).
+Files Changed: `lib/remy/core/time-of-day.ts` (new), `lib/remy/core/nest.ts`, `lib/remy/index.ts`, `components/remy/motion/primitives.tsx` (new), `components/navigation/nest/{Nest.tsx, NestMenu.tsx, nest.module.css}`, `components/navigation/MobileBottomNav.tsx`, `components/navigation/AppNavbar.tsx`, `app/(app)/layout.tsx`.
 
-Commit: *(this sync-pass commit — see git log; prior HEAD 94088c3)*
+Commit: *(this increment — see git log; prior HEAD ce0feb5)*
 
-Validation: `npx tsc --noEmit` clean (documentation-only; zero application code touched — verified via `git diff`).
+Validation: `npx tsc --noEmit` clean · `npm run lint` 0 errors (2 pre-existing warnings) · `npm run build` ✓.
 
 ==================================================
 ## NEXT RECOMMENDED TASK

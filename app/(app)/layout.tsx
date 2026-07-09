@@ -83,6 +83,23 @@ export default async function AppLayout({
     workspaceProfiles = [];
   }
 
+  // REAL memory count for the active workspace — drives the Nest's evolution stage (Tiny →
+  // Sanctuary). Cheap indexed head-count (no rows fetched), RLS-scoped; degrades to 0 on any error
+  // so a failed count never breaks the nav. My Nest = null-profile owned by user_id; care = profile.
+  let memoryCount = 0;
+  try {
+    const countQuery = supabase
+      .from("memories")
+      .select("id", { count: "exact", head: true });
+    const scoped = activeProfileId
+      ? countQuery.eq("memory_profile_id", activeProfileId)
+      : countQuery.is("memory_profile_id", null).eq("user_id", user.id);
+    const { count } = await scoped;
+    memoryCount = count ?? 0;
+  } catch {
+    memoryCount = 0;
+  }
+
   return (
     // Remy companion provider (foundation). Wraps the shell so the Floating layer + future
     // Nest button have context. `children` is a stable prop, so opening/closing Remy
@@ -101,6 +118,7 @@ export default async function AppLayout({
           workspace={workspace}
           workspaceProfiles={workspaceProfiles}
           activeProfileId={activeProfileId}
+          memoryCount={memoryCount}
         />
 
         {!workspace.isMyNest && activeProfileName && (

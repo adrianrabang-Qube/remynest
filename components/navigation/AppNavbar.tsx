@@ -16,6 +16,8 @@ interface AppNavbarProps {
   workspace: WorkspaceNavState;
   workspaceProfiles: WorkspaceOption[];
   activeProfileId: string | null;
+  /** REAL memory count for the active workspace — drives the Nest's evolution stage. */
+  memoryCount?: number;
 }
 
 export default function AppNavbar({
@@ -23,6 +25,7 @@ export default function AppNavbar({
   workspace,
   workspaceProfiles,
   activeProfileId,
+  memoryCount,
 }: AppNavbarProps) {
   const [open, setOpen] = useState(false);
   // Mobile (< md) nav/profile drawer — opened by the top-bar avatar and the
@@ -115,7 +118,10 @@ export default function AppNavbar({
         isMyNest={workspace.isMyNest}
         activeProfileName={workspace.activeProfileName}
       />
-      <MobileBottomNav onOpenMore={() => setMobileNavOpen(true)} />
+      <MobileBottomNav
+        onOpenMore={() => setMobileNavOpen(true)}
+        memoryCount={memoryCount}
+      />
       <MobileNavDrawer
         open={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}

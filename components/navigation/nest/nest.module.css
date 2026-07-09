@@ -1,16 +1,20 @@
 /*
- * The Nest — the physical presence of Remy's home in the bottom-nav center.
+ * The Nest — the LIVING presence of Remy's home in the bottom-nav center.
  *
- * Additive to <Remy>'s own breathe/float (motion.module.css): this file adds the persistent "nest"
- * glow, the evolution-stage accent behind Remy, and the one-shot wake lift as Remy peeks/climbs
- * out. On-brand warm gold (the Companion/Remy accent), never sage. All motion is reduced-motion-safe.
+ * Ambient life (glow · drifting motes · breathing) + time-of-day lighting (warm by day, cool
+ * moonlight at night) + 6-stage evolution accents (tiny → sanctuary). On-brand gold accent; night
+ * shifts cool. Additive to <Remy>'s own breathe/float. All motion is reduced-motion-safe.
+ * Framer-motion drives the interaction transitions; these are the cheap infinite ambient loops.
  */
 
-/* Soft, slow gold glow around the white nest pedestal while Remy rests. Applied to the pedestal
- * button itself (via className) so it tracks the button's -translate-y lift with no misalignment.
- * The keyframe carries a base drop shadow so it reads as the button's resting shadow too. */
+/* Soft, slow gold glow around the white nest pedestal while Remy rests (day). */
 .glow {
   animation: nestGlow 4.8s ease-in-out infinite;
+}
+
+/* Cool moonlight glow at night. */
+.glowNight {
+  animation: nestGlowNight 6s ease-in-out infinite;
 }
 
 @keyframes nestGlow {
@@ -27,10 +31,23 @@
   }
 }
 
+@keyframes nestGlowNight {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(138, 155, 208, 0),
+      0 8px 20px rgba(0, 0, 0, 0.16);
+  }
+  50% {
+    box-shadow:
+      0 0 18px 5px rgba(138, 155, 208, 0.4),
+      0 8px 20px rgba(0, 0, 0, 0.16);
+  }
+}
+
 /* The nest vessel around Remy. `::after` is the evolution accent — a warm halo behind Remy that
- * deepens as the Nest grows (Small → Legendary), so the persistent Nest visibly evolves without
- * needing new artwork. Dedicated per-stage nest art can later replace this accent via the registry
- * with no change to consumers. */
+ * deepens and shifts hue as the Nest grows (Tiny → Sanctuary); its base tint also tracks the time
+ * of day. Dedicated per-stage nest art can later replace this accent via the registry. */
 .nest {
   position: relative;
   z-index: 0;
@@ -49,40 +66,115 @@
     rgba(201, 168, 106, 0) 70%
   );
   opacity: 0.6;
-  transition: opacity 400ms ease;
+  transition: opacity 400ms ease, background 600ms ease;
   pointer-events: none;
 }
 
-.nest[data-nest-stage="growing"]::after {
-  opacity: 0.78;
-}
-
-.nest[data-nest-stage="blooming"]::after {
-  opacity: 0.9;
+/* ---- Time-of-day lighting (halo tint) ---- */
+.nest[data-time-of-day="evening"]::after {
   background: radial-gradient(
     circle,
-    rgba(201, 168, 106, 0.26) 0%,
+    rgba(214, 148, 92, 0.22) 0%,
+    rgba(214, 148, 92, 0) 72%
+  );
+}
+.nest[data-time-of-day="night"]::after {
+  background: radial-gradient(
+    circle,
+    rgba(138, 155, 208, 0.22) 0%,
+    rgba(138, 155, 208, 0) 74%
+  );
+  opacity: 0.5;
+}
+
+/* ---- 6-stage evolution accents (intensity + hue) ---- */
+.nest[data-nest-stage="cozy"]::after {
+  opacity: 0.72;
+}
+.nest[data-nest-stage="family"]::after {
+  opacity: 0.85;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 106, 0.24) 0%,
     rgba(201, 168, 106, 0) 72%
   );
 }
-
-.nest[data-nest-stage="family"]::after {
+.nest[data-nest-stage="golden"]::after {
   opacity: 1;
   background: radial-gradient(
     circle,
-    rgba(201, 168, 106, 0.32) 0%,
+    rgba(201, 168, 106, 0.34) 0%,
     rgba(201, 168, 106, 0) 74%
   );
 }
-
-.nest[data-nest-stage="legendary"]::after {
+.nest[data-nest-stage="memoryTree"]::after {
+  opacity: 1;
+  background: radial-gradient(
+    circle,
+    rgba(122, 160, 110, 0.3) 0%,
+    rgba(201, 168, 106, 0.14) 52%,
+    rgba(201, 168, 106, 0) 78%
+  );
+}
+.nest[data-nest-stage="sanctuary"]::after {
   opacity: 1;
   background: radial-gradient(
     circle,
     rgba(201, 168, 106, 0.4) 0%,
-    rgba(138, 107, 208, 0.16) 55%,
-    rgba(201, 168, 106, 0) 78%
+    rgba(138, 107, 208, 0.18) 55%,
+    rgba(201, 168, 106, 0) 80%
   );
+}
+
+/* ---- Ambient motes: a few translucent flecks drifting up around the resting Nest ---- */
+.particles {
+  position: absolute;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  bottom: 20%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(201, 168, 106, 0.55);
+  opacity: 0;
+  animation: nestMote 6.5s ease-in-out infinite;
+}
+.particle:nth-child(1) {
+  left: 24%;
+  animation-delay: 0s;
+}
+.particle:nth-child(2) {
+  left: 46%;
+  animation-delay: 1.6s;
+}
+.particle:nth-child(3) {
+  left: 66%;
+  animation-delay: 3.1s;
+}
+.particle:nth-child(4) {
+  left: 82%;
+  animation-delay: 4.4s;
+}
+.nest[data-time-of-day="night"] .particle {
+  background: rgba(138, 155, 208, 0.55);
+}
+
+@keyframes nestMote {
+  0% {
+    transform: translateY(4px) scale(0.7);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-22px) scale(1);
+    opacity: 0;
+  }
 }
 
 /* One-shot wake: a gentle rise + scale as Remy stirs, peeks, then climbs out of the nest.
@@ -104,12 +196,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .glow {
+  .glow,
+  .glowNight {
     animation: none;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   }
   .wake {
     animation: none;
+  }
+  .particle {
+    animation: none;
+    opacity: 0;
   }
   .nest::after {
     transition: none;

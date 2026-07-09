@@ -44,12 +44,19 @@ export const NEST_RESTING_BEHAVIOR: RemyBehavior = "resting";
 export const NEST_GREETING_BEHAVIOR: RemyBehavior = "greeting";
 
 /**
- * Nest EVOLUTION — the Nest grows as the user builds their story. Stages are ordered; the Home
- * Nest resolves its stage from a memory-milestone count. Progression need not be wired to live
- * data yet — passing a count is enough to swap stages — and dedicated per-stage artwork plugs in
- * later (map a stage → a nest asset KEY in the registry) with no consumer change.
+ * Nest EVOLUTION — the Nest grows as the user builds their story. Six ordered stages; the Home
+ * Nest resolves its stage from a REAL memory-milestone count (threaded from the app shell — never
+ * a placeholder). The visual differentiation per stage is a CSS accent today (deepening warmth →
+ * a memory-tree green → a sanctuary gold+violet); dedicated per-stage artwork plugs in later (map
+ * a stage → a nest asset KEY in the registry) with no consumer change.
  */
-export type NestStage = "small" | "growing" | "blooming" | "family" | "legendary";
+export type NestStage =
+  | "tiny"
+  | "cozy"
+  | "family"
+  | "golden"
+  | "memoryTree"
+  | "sanctuary";
 
 export interface NestStageInfo {
   stage: NestStage;
@@ -59,18 +66,24 @@ export interface NestStageInfo {
 }
 
 export const NEST_STAGES: readonly NestStageInfo[] = [
-  { stage: "small", label: "Small Nest", minMemories: 0 },
-  { stage: "growing", label: "Growing Nest", minMemories: 10 },
-  { stage: "blooming", label: "Blooming Nest", minMemories: 50 },
-  { stage: "family", label: "Family Nest", minMemories: 150 },
-  { stage: "legendary", label: "Legendary Nest", minMemories: 500 },
+  { stage: "tiny", label: "Tiny Nest", minMemories: 0 },
+  { stage: "cozy", label: "Cozy Nest", minMemories: 10 },
+  { stage: "family", label: "Family Nest", minMemories: 50 },
+  { stage: "golden", label: "Golden Nest", minMemories: 150 },
+  { stage: "memoryTree", label: "Memory Tree", minMemories: 500 },
+  { stage: "sanctuary", label: "Sanctuary", minMemories: 1000 },
 ];
 
 /** Pure: the highest stage whose threshold the memory count has reached. */
 export function resolveNestStage(memoryCount: number): NestStage {
-  let resolved: NestStage = "small";
+  let resolved: NestStage = "tiny";
   for (const info of NEST_STAGES) {
     if (memoryCount >= info.minMemories) resolved = info.stage;
   }
   return resolved;
+}
+
+/** The stage's human label (for a11y / future UI). */
+export function nestStageLabel(stage: NestStage): string {
+  return NEST_STAGES.find((s) => s.stage === stage)?.label ?? "Nest";
 }

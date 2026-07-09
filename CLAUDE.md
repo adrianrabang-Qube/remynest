@@ -710,6 +710,30 @@ behaviour's `presentsActions`), fork a second renderer/provider/registry/brain/p
 a second state machine in the nav layer, add a Remy expression/behaviour that isn't drawn through the
 single `<Remy>` renderer, un-portal the sheet, drop `withContext`, or build the deferred live/AI content.
 
+**The Nest — living-companion increment (authoritative, 2026-07-09 — extends the behaviour-driven
+Nest; operator-approved override of the pre-launch companion deferral for THIS surface):** the Nest
+was made to feel alive by EXTENDING the platform (not a redesign; backwards-compatible; single
+`<Remy>` renderer + one platform preserved). **(1) Time-of-day is a platform layer**
+(`lib/remy/core/time-of-day.ts`, exported via `@/lib/remy`: `TimeOfDay` morning/afternoon/evening/
+night + `resolveTimeOfDay`/`isNightTime`/`greetingForTimeOfDay`) — computed **client-side after
+mount** (SSR/hydration-safe) and refreshed every 10 min. It drives the Nest's ambient lighting
+(warm by day, **moonlight cool at night**), Remy's resting look (**night→sleeping**, day→calm idle),
+and a time-appropriate greeting. **(2) Nest evolution uses REAL memory counts** — 6 stages
+**Tiny→Cozy→Family→Golden→Memory Tree→Sanctuary** (`lib/remy/core/nest.ts`); the count is a cheap
+RLS-scoped head-count in the `(app)` layout (My Nest = null-profile/`user_id`; care = profile),
+threaded `AppNavbar → MobileBottomNav → Nest` (degrades to 0 on error — never breaks the nav). **No
+placeholder count.** **(3) Motion:** interaction motion uses **framer-motion**, centralized in
+`components/remy/motion/primitives.tsx` (**no duplicated animation logic**) — the NestMenu now reads
+as **Remy OFFERING actions** (backdrop fade → sheet spring-rise → Remy emerge → actions stagger in),
+de-menu-ified; cheap infinite AMBIENT loops (glow / drifting motes / breathing) stay in **CSS**
+(`nest.module.css`). All motion is **reduced-motion-safe** (framer-motion `useReducedMotion` +
+CSS `@media`). Portal(document.body)/focus-trap/scroll-lock/routing/`?context=` all unchanged.
+Verified: tsc/lint/build green. **STILL DEFERRED (blocked on assets NOT present in the repo):**
+animated Remy character art (wings/blink/emerge via Rive/Lottie), dedicated per-stage nest artwork,
+celebration character effects (feather/heart), achievements celebration art, emotion-specific
+artwork, and real voice — do NOT fabricate these. **Do NOT** make `time-of-day` impure/SSR-time-read,
+add a second renderer/state-machine, or move ambient infinite loops into framer-motion.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -15,11 +15,15 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the documentation-synchronization
-system. `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the living Nest companion increment.
+`main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Living Nest companion increment** — new time-of-day platform layer (ambient lighting + moonlight at
+  night + night→sleeping + time greeting), Nest evolution wired to **REAL memory counts** (6 stages
+  Tiny→Sanctuary), centralized **framer-motion** "Remy offers actions" reveal (de-menu-ified) + ambient
+  CSS life. Platform extended (not redesigned); single `<Remy>` renderer preserved. tsc/lint/build green.
 - **Documentation synchronization system** — `docs/REMY_MASTER_STATE.md` established as the single
   source of truth; this HANDOFF slimmed to a continuation doc; CLAUDE.md startup read-order + 6-step
   maintenance protocol formalized.
@@ -35,8 +39,8 @@ Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (n
 Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none block the web app):
 - IMPORTANT (post-launch-soon): HTTP security headers + rate limiting (absent); memory edit/delete
   authz is `user_id`-scoped (fails safe, not `access_level`-parity); Ask Remy semantic retrieval is
-  not premium-gated; Nest evolution not wired to a live memory count; remove dead routes
-  (`/api/create-reminder`, `/api/send-reminders`, `/api/search`); `.env.local` CRON_SECRET newline.
+  not premium-gated; remove dead routes (`/api/create-reminder`, `/api/send-reminders`,
+  `/api/search`); `.env.local` CRON_SECRET newline.
 - RLS applied-state (memories INSERT + relationship/cluster tables) is **dashboard-managed** — confirm
   in the Supabase SQL editor (not repo-verifiable).
 - **Resolved — do NOT re-flag:** `memory-media` bucket is **PRIVATE** (PHI via signed URLs only; the
@@ -45,10 +49,10 @@ Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none bloc
   `/api/stripe/cancel` exists; the `save-onesignal`/`save-subscription` endpoints were removed.
 
 ## Active branch
-`main` (production; auto-deploys on push) — **ahead of `origin/main` (`f53694b`) by 4 unpushed
-commits**: `e73dc7e`, `a97dfac`, `7f65178`, `94088c3` (the Nest hub + the documentation-sync system),
-plus the 2026-07-09 sync-pass commit on top. **Not pushed** — pushing auto-deploys to prod, so it is
-an operator decision. tsc/lint/build green.
+`main` (production; auto-deploys on push) — **unpushed, ahead of `origin/main` (`f53694b`)**: the Nest
+hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), and the
+living Nest companion increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an
+operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -63,6 +67,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
+- *(HEAD)* feat(remy): living Nest companion — time-of-day, real-count evolution, framer-motion reveal
+- `ce0feb5` docs(sync): reconcile all docs to HEAD — lightweight HANDOFF, exact startup order
 - `94088c3` docs(sync): conform REMY_MASTER_STATE header to finalized workflow spec
 - `7f65178` docs(sync): establish REMY_MASTER_STATE.md single source of truth
 - `a97dfac` fix(remy): make the Nest a behaviour-driven companion, not a prettier FAB

@@ -19,6 +19,8 @@ import {
 interface MobileBottomNavProps {
   /** Opens the "More" drawer. */
   onOpenMore: () => void;
+  /** REAL memory-milestone count for the Nest's evolution stage (from the app shell). */
+  memoryCount?: number;
 }
 
 function Tab({
@@ -47,7 +49,7 @@ function Tab({
   );
 }
 
-function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
+function BottomNavContent({ onOpenMore, memoryCount }: MobileBottomNavProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const context = searchParams.get("context");
@@ -92,6 +94,7 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
           reminderHref={withContext("/reminders")}
           searchHref={withContext("/search")}
           insightsHref={withContext("/insights")}
+          memoryCount={memoryCount}
         />
       </li>
 
@@ -134,14 +137,17 @@ function BottomNavContent({ onOpenMore }: MobileBottomNavProps) {
  * (Home, Dashboard, Memories) + the center "New" action + a "More" entry that
  * opens the drawer. iOS safe-area inset keeps it clear of the home indicator.
  */
-export default function MobileBottomNav({ onOpenMore }: MobileBottomNavProps) {
+export default function MobileBottomNav({
+  onOpenMore,
+  memoryCount,
+}: MobileBottomNavProps) {
   return (
     <nav
       aria-label="Primary"
       className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-sand-deep/60 bg-sand/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
     >
       <Suspense fallback={<div className="h-14" />}>
-        <BottomNavContent onOpenMore={onOpenMore} />
+        <BottomNavContent onOpenMore={onOpenMore} memoryCount={memoryCount} />
       </Suspense>
     </nav>
   );
