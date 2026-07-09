@@ -753,6 +753,99 @@ export interface QuestionUnderstanding {
   summary: QuestionSummary;
 }
 
+/**
+ * ANSWER PLAN — the deterministic EXECUTION PLAN a FUTURE conversational layer will run after Question
+ * Understanding. It is NOT chat, NOT GPT, NOT an LLM, and produces NO answers: it is an ordered list of
+ * structured RETRIEVAL STEPS (each pointing only at real ids) plus the real source pool they draw from
+ * and structured coverage metrics. No prose, no generated answers, no invented ids. Internal only.
+ */
+export type AnswerPlanStepKind =
+  | "memory"
+  | "journey"
+  | "chapter"
+  | "theme"
+  | "anchor"
+  | "person"
+  | "timeline"
+  | "relationship"
+  | "event"
+  | "summary"
+  | "comparison"
+  | "reference";
+
+/** One deterministic retrieval step — structured ids only, no prose, no generated answer. */
+export interface AnswerPlanStep {
+  id: string;
+  kind: AnswerPlanStepKind;
+  /** The question intent this step executes, or null for a structural step. */
+  intentId: string | null;
+  /** Execution order (0-based). */
+  order: number;
+  memoryIds: string[];
+  journeyIds: string[];
+  chapterIds: string[];
+  anchorIds: string[];
+  themeIds: MemoryTheme[];
+  personIds: string[];
+  /** 0–100 execution priority. */
+  weight: number;
+  /** 0–100 how well-backed by real signal. */
+  confidence: number;
+}
+
+export type AnswerPlanSourceKind =
+  | "memory"
+  | "journey"
+  | "chapter"
+  | "theme"
+  | "anchor"
+  | "person"
+  | "milestone";
+
+/** A pointer to a REAL source entity the plan draws from, and the step that first uses it (if any). */
+export interface AnswerPlanSource {
+  kind: AnswerPlanSourceKind;
+  refId: string;
+  stepId: string | null;
+}
+
+/** Structured answer-plan metrics (no prose). */
+export interface AnswerPlanContext {
+  coverage: number;
+  confidence: number;
+  candidateCount: number;
+  sourceCount: number;
+  executionDepth: number;
+}
+
+/** Structured answer-plan coverage metrics (no prose). */
+export interface AnswerPlanCoverage {
+  memoryCoverage: number;
+  journeyCoverage: number;
+  themeCoverage: number;
+  personCoverage: number;
+  timelineCoverage: number;
+}
+
+/** Structured answer-plan metadata (no prose). */
+export interface AnswerPlanSummary {
+  primaryIntent: AnswerPlanStepKind | null;
+  primaryTheme: MemoryTheme;
+  primaryAnchor: string | null;
+  coverage: number;
+  confidence: number;
+  planDepth: number;
+}
+
+/** The Answer Planning Engine's complete output. */
+export interface AnswerPlan {
+  steps: AnswerPlanStep[];
+  sources: AnswerPlanSource[];
+  context: AnswerPlanContext;
+  coverage: AnswerPlanCoverage;
+  summary: AnswerPlanSummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

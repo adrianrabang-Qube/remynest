@@ -16,6 +16,7 @@ import { buildReasoning } from "@/lib/remy/core/reasoning-engine";
 import { buildBiography } from "@/lib/remy/core/biography-engine";
 import { buildConversationFoundation } from "@/lib/remy/core/conversation-foundation-engine";
 import { buildQuestionUnderstanding } from "@/lib/remy/core/question-understanding-engine";
+import { buildAnswerPlan } from "@/lib/remy/core/answer-planning-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -241,6 +242,30 @@ export default function RemyRelationship() {
           }
         }
 
+        // Answer Planning — the deterministic execution plan a FUTURE conversational layer will run
+        // after Question Understanding: ordered structured retrieval steps + the real source pool
+        // (internal, never shown; NOT chat/GPT/LLM, produces no answers). A memory targeted by a strong
+        // retrieval step feeds the significance engine.
+        const answerPlan = buildAnswerPlan({
+          questionUnderstanding,
+          conversationFoundation,
+          biography: biographyAnalysis,
+          reasoning: reasoningAnalysis,
+          lifeStory,
+          journeyAnalysis,
+          graph: memoryGraph,
+          understandings,
+        });
+        const answerPlanStrengthByMemoryId = new Map<string, number>();
+        for (const step of answerPlan.steps) {
+          for (const id of step.memoryIds) {
+            answerPlanStrengthByMemoryId.set(
+              id,
+              Math.max(answerPlanStrengthByMemoryId.get(id) ?? 0, step.weight),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -262,6 +287,7 @@ export default function RemyRelationship() {
           biographyCoverageByMemoryId,
           conversationStrengthByMemoryId,
           questionStrengthByMemoryId,
+          answerPlanStrengthByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 

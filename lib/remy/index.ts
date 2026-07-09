@@ -110,6 +110,11 @@ export {
   buildQuestionUnderstanding,
   type QuestionUnderstandingInput,
 } from "@/lib/remy/core/question-understanding-engine";
+// Answer Planning — deterministic execution plan a future conversational layer runs after QU (Phase 14).
+export {
+  buildAnswerPlan,
+  type AnswerPlanInput,
+} from "@/lib/remy/core/answer-planning-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -182,6 +187,14 @@ export type {
   QuestionContext,
   QuestionSummary,
   QuestionUnderstanding,
+  AnswerPlanStep,
+  AnswerPlanStepKind,
+  AnswerPlanSource,
+  AnswerPlanSourceKind,
+  AnswerPlanContext,
+  AnswerPlanCoverage,
+  AnswerPlanSummary,
+  AnswerPlan,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

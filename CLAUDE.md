@@ -1061,6 +1061,44 @@ this without a separate approved phase, produce a fabricated `place` (or any no-
 in the UI, invent ids, reference a non-real entity, put a clock/DB/randomness in it, reorder the downstream
 pipeline, make output non-deterministic, or duplicate the significance engine.
 
+**Remy — Answer Planning Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core
+engine (`lib/remy/core/answer-planning-engine.ts`, `buildAnswerPlan({ questionUnderstanding,
+conversationFoundation, biography, reasoning, lifeStory, journeyAnalysis, graph, understandings, …optional })
+→ AnswerPlan`) that builds the deterministic EXECUTION PLAN a FUTURE conversational layer will run AFTER
+Question Understanding. **This is EXPLICITLY NOT chat, NOT GPT, NOT an LLM, and it produces NO answers — no
+deferred AI/chat was built.** **Steps** = an ordered list of structured retrieval steps (kinds memory /
+journey / chapter / theme / anchor / person / timeline / relationship / event / summary / comparison /
+**reference**), each EXECUTES a real question intent via the fixed `STEP_KIND_OF_INTENT` map (the `place`
+intent maps to NO step; the `reference` step kind is reserved and never produced) and points **only** at
+real ids copied from the intent focus; steps are sorted by weight and `order`-numbered (capped `MAX_STEPS`).
+**Sources** = the real entity pool the steps draw from — journey/chapter/anchor/theme/person from the steps,
+each memory's real biography chapter, **memory sources ranked by real graph connectivity** (capped
+`MAX_MEMORY_SOURCES`), plus lifeStory milestones and optional significant memories / favourite people.
+**Coverage** = memory/journey/theme/person/timeline coverage; **Context**/**Summary** = structured metrics.
+**No prose, no generated answers, no prompts, no invented ids** — every step/source/metric is a structured
+id, enum, or number (the only string literals are structural id templates + kind/enum tags). Deterministic
+(steps from ordered intents + fixed map + sort/slice + order-index; sources from ordered steps +
+graph-ranked memories; structural ids `step-<kind>-<slug>`; no clock/randomness → byte-identical output).
+**ALL 8 required inputs are genuinely consumed** (QU→steps, biography→chapters, graph→memory ranking,
+reasoning→summary/themes, life-story→milestones/continuity, journey→totals, conversation-foundation→
+confidence blend, understandings→totals/people). INTERNAL — **not shown in the UI** (no JSX/chip/
+observation); it sits after the question-understanding engine, and its per-memory step weight feeds the
+significance engine (a memory targeted by a strong retrieval step = more significant) via a CLEAN optional
+`SignificanceContext.answerPlanStrengthByMemoryId` extension (additive → adds 0 when absent; existing callers
+unaffected). **REQUIRED inputs = question-understanding + conversation-foundation + biography + reasoning +
+life-story + journey + graph + understanding** (passed live); favourite/relationship/significant/emotional
+are OPTIONAL refinements (forward-compatible; do NOT reorder the downstream pipeline to feed them). No
+snapshot/DB change. **FIXED pipeline order:** snapshot → memory-understanding → memory-graph → journey →
+life-story → reasoning → biography → conversation-foundation → question-understanding → answer-planning →
+story → favourite → anniversary → significance → emotional → personality → relationship → priority → one
+`<Remy>` renderer. Types (`AnswerPlan`/`AnswerPlanStep`/`AnswerPlanStepKind`/`AnswerPlanSource`/
+`AnswerPlanSourceKind`/`AnswerPlanContext`/`AnswerPlanCoverage`/`AnswerPlanSummary`) additive in
+`family-types.ts`. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7 lenses —
+purity / determinism / no-fabrication / platform-integrity / pipeline-order / consumption / regressions — 0
+findings). **Do NOT** build chat/GPT/LLM/generated answers on top of this without a separate approved phase,
+surface it in the UI, invent ids/steps, reference a non-real entity, put a clock/DB/randomness in it, reorder
+the downstream pipeline, make output non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
