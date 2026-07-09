@@ -734,6 +734,30 @@ celebration character effects (feather/heart), achievements celebration art, emo
 artwork, and real voice — do NOT fabricate these. **Do NOT** make `time-of-day` impure/SSR-time-read,
 add a second renderer/state-machine, or move ambient infinite loops into framer-motion.
 
+**Remy — app-wide companion presence (authoritative, 2026-07-09 — extends the ONE platform):** Remy
+now reacts across the whole app via THREE surfaces mounted ONCE in the `(app)` shell (all render
+`null` until Remy reacts; single `<Remy>` renderer + one event bus + one brain preserved — no second
+AI/renderer/provider). **(1) `RemyScreenAwareness`** (`components/remy/platform/`) publishes a brief
+arrival reaction per screen using a pure route→event map (`lib/remy/core/screen-behavior.ts`); new
+`screen.*` events were added to the vocabulary (`events.ts` `RemyEventName` + `emotion-engine.ts`
+`MOMENT_EMOTION`, mapping to EXISTING emotions — the documented extension recipe). Screens that emit
+their own events (memories/search/remy/home) are omitted so Remy never double-reacts. **(2)
+`RemyMilestones`** (`components/remy/companion/`) takes the REAL workspace `memoryCount` (already
+computed in the `(app)` layout), compares it to a persisted last-count
+(`lib/remy/companion/persistence.ts`), and emits `milestone.reached` on crossings
+(`lib/remy/core/achievements.ts` — first/10/50/100/500/1000 + Nest stage-ups). **First-ever load only
+BASELINES the count — never a retroactive celebration.** **(3) `RemyCelebration`** subscribes to the
+bus and plays a centre-stage feather-burst + sparkles + heart through the single `<Remy>` renderer,
+using the **real `goldenFeather` asset** — portaled, `pointer-events-none`, aria-live,
+reduced-motion-safe. Reusable effects are centralized in `components/remy/effects/RemyEffects.tsx`
+(framer-motion). **Event-bus invariant (authoritative):** the initial-mount replay buffer belongs to
+the **Brain** (the first `{replay:true}` subscriber, via `RemyProvider`); ANY secondary bus listener
+(e.g. `RemyCelebration`) MUST call `remyEventBus.subscribe(fn, { replay: false })` or it steals the
+Brain's buffer and breaks cold-load context reactions (this was a real regression, caught by
+adversarial review and fixed). **STILL DEFERRED (missing assets — do NOT fabricate):** animated Remy
+character frames, per-stage nest artwork, real voice. **Do NOT** add a raw-bus subscriber without
+`{ replay: false }`, fabricate celebrations for a not-real count, or fire milestones retroactively.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

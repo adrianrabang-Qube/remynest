@@ -56,6 +56,15 @@ export {
 export { RemyStage, type RemyStageProps } from "@/components/remy/platform/RemyStage";
 /** The floating presence surface — mount once inside <RemyProvider> (the app shell does this). */
 export { default as RemyFloatingPresence } from "@/components/remy/companion/FloatingCompanionLayer";
+/**
+ * App-wide companion surfaces — each mounted ONCE inside <RemyProvider> by the app shell:
+ *  - RemyScreenAwareness: publishes a brief reaction as the user moves between screens.
+ *  - RemyCelebration: centre-stage feather-burst celebration on milestones / big successes.
+ *  - RemyMilestones: detects real memory-count milestone crossings (takes `memoryCount`).
+ */
+export { default as RemyScreenAwareness } from "@/components/remy/platform/RemyScreenAwareness";
+export { default as RemyCelebration } from "@/components/remy/companion/RemyCelebration";
+export { default as RemyMilestones } from "@/components/remy/companion/RemyMilestones";
 
 // Public types (semantic only — never renderer/asset internals).
 export type { RemyEvent, RemyEventName, RemyContextKey } from "@/lib/remy/core/events";

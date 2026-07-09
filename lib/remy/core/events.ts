@@ -49,6 +49,16 @@ export type RemyEventName =
   // generic outcomes
   | "success"
   | "failure"
+  // screen arrival — Remy notices where you are (a brief, non-intrusive reaction)
+  | "screen.dashboard"
+  | "screen.timeline"
+  | "screen.people"
+  | "screen.library"
+  | "screen.reminders"
+  | "screen.settings"
+  | "screen.dates"
+  // achievement — a memory milestone was crossed (drives the celebration surface)
+  | "milestone.reached"
   // declarative context lifecycle (emitted by <RemyStage>/useRemyContext)
   | "context.enter"
   | "context.exit";

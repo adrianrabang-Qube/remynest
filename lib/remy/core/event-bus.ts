@@ -36,13 +36,29 @@ export class RemyEventBus {
     this.deliver(event);
   }
 
-  subscribe(listener: RemyEventListener): () => void {
-    const wasEmpty = this.listeners.size === 0;
+  subscribe(
+    listener: RemyEventListener,
+    options?: { replay?: boolean },
+  ): () => void {
+    const wantsReplay = options?.replay !== false;
     this.listeners.add(listener);
-    if (wasEmpty && this.pending.length > 0) {
+    // Flush the buffered initial-mount events to the FIRST subscriber that wants replay (the
+    // Brain, via the provider) — regardless of subscription ORDER. A SECONDARY listener (e.g. a
+    // celebration surface, whose child effect can run before the provider's parent effect) must
+    // subscribe with `{ replay: false }` so it never steals the buffer the Brain relies on for a
+    // context declared at initial mount. The buffered events go only to the replay-wanting listener.
+    if (wantsReplay && this.pending.length > 0) {
       const queued = this.pending;
       this.pending = [];
-      for (const event of queued) this.deliver(event);
+      for (const event of queued) {
+        try {
+          listener(event);
+        } catch (err) {
+          if (process.env.NODE_ENV !== "production") {
+            console.error("[remy:bus] listener error", err);
+          }
+        }
+      }
     }
     return () => {
       this.listeners.delete(listener);

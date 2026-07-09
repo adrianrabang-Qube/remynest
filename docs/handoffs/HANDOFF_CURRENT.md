@@ -15,11 +15,18 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the living Nest companion increment.
+Readiness**. No implementation task is active — the last work was the app-wide Remy companion layer.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **App-wide Remy companion layer** — Remy now reacts across the whole app via 3 shell-mounted surfaces
+  (all render null until Remy reacts): `RemyScreenAwareness` (per-screen arrival reactions),
+  `RemyMilestones` (milestone celebrations from REAL memory counts, persisted, no retroactive spam), and
+  `RemyCelebration` (centre-stage feather-burst + sparkles + heart via the single `<Remy>` renderer +
+  the real `goldenFeather` asset). Extended the ONE platform vocabulary (`screen.*`/`milestone.reached`)
+  + centralized effects. Adversarial review caught + fixed one regression (celebration surface draining
+  the Brain's replay buffer → event-bus `{replay:false}` option). tsc/lint/build green.
 - **Living Nest companion increment** — new time-of-day platform layer (ambient lighting + moonlight at
   night + night→sleeping + time greeting), Nest evolution wired to **REAL memory counts** (6 stages
   Tiny→Sanctuary), centralized **framer-motion** "Remy offers actions" reveal (de-menu-ified) + ambient
@@ -50,9 +57,9 @@ Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none bloc
 
 ## Active branch
 `main` (production; auto-deploys on push) — **unpushed, ahead of `origin/main` (`f53694b`)**: the Nest
-hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), and the
-living Nest companion increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an
-operator decision. tsc/lint/build green.
+hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), the living
+Nest companion increment (`a818fb0`), and the app-wide Remy companion layer on top. **Not pushed** —
+pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -67,7 +74,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): living Nest companion — time-of-day, real-count evolution, framer-motion reveal
+- *(HEAD)* feat(remy): app-wide companion — screen awareness, milestone celebrations, effects
+- `a818fb0` feat(remy): living Nest companion — time-of-day, real-count evolution, framer-motion
 - `ce0feb5` docs(sync): reconcile all docs to HEAD — lightweight HANDOFF, exact startup order
 - `94088c3` docs(sync): conform REMY_MASTER_STATE header to finalized workflow spec
 - `7f65178` docs(sync): establish REMY_MASTER_STATE.md single source of truth

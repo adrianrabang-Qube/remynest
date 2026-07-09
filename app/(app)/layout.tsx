@@ -10,7 +10,13 @@ import { resolveAccountIdentity } from "@/lib/account-identity";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { getAccessibleProfiles } from "@/lib/profile-access";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { RemyProvider, RemyFloatingPresence } from "@/lib/remy";
+import {
+  RemyProvider,
+  RemyFloatingPresence,
+  RemyScreenAwareness,
+  RemyCelebration,
+  RemyMilestones,
+} from "@/lib/remy";
 import RemyConnectivityBridge from "@/components/RemyConnectivityBridge";
 
 // The navbar renders per-user, subscription-sensitive identity here — never
@@ -133,6 +139,12 @@ export default async function AppLayout({
 
         {/* Remy's home — portaled, above content, below modals, safe-area aware. */}
         <RemyFloatingPresence />
+
+        {/* App-wide companion presence (all render nothing until Remy reacts): a centre-stage
+            celebration on milestones, screen-arrival reactions, and real-count milestone detection. */}
+        <RemyCelebration />
+        <RemyScreenAwareness />
+        <RemyMilestones memoryCount={memoryCount} />
 
         {/* Bridges browser online/offline into Remy semantic events (no UI). */}
         <RemyConnectivityBridge />

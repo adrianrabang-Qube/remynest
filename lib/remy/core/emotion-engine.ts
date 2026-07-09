@@ -38,6 +38,16 @@ const MOMENT_EMOTION: Partial<Record<RemyEventName, RemyEmotion>> = {
   online: "calm",
   success: "celebrating",
   failure: "confused",
+  // Screen-arrival reactions — Remy briefly reflects the screen you just opened.
+  "screen.dashboard": "welcoming",
+  "screen.timeline": "attentive",
+  "screen.people": "happy",
+  "screen.library": "calm",
+  "screen.reminders": "attentive",
+  "screen.settings": "calm",
+  "screen.dates": "thinking",
+  // A crossed memory milestone — a celebration.
+  "milestone.reached": "celebrating",
 };
 
 export function emotionForContext(key: RemyContextKey): RemyEmotion {

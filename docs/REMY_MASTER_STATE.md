@@ -8,8 +8,8 @@
 > (10-agent, file:line-cited). Items are re-verified against code before being trusted, not from memory.
 
 Last Updated: 2026-07-09
-Branch: main — **unpushed**, ahead of `origin/main` (`f53694b`); latest = the living Nest companion increment (on top of the Nest hub + doc-sync commits)
-Commit: living Nest companion increment (on top of `ce0feb5` doc-sync — see git log)
+Branch: main — **unpushed**, ahead of `origin/main` (`f53694b`); latest = the app-wide Remy companion layer (on top of the living-Nest + Nest-hub + doc-sync commits)
+Commit: app-wide Remy companion layer (on top of `a818fb0` living-Nest — see git log)
 Repository Verified: **YES** — 2026-07-09. Basis: the 10-agent file:line-cited source audit, plus a targeted source re-verification this sync pass (access_level enforcement, AI stack, Nest, audio/PDF-UI, reminder-edit, security-headers/rate-limiting all reconfirmed against actual code). **Source code is authoritative over all documentation** (this file, CLAUDE.md, HANDOFF, architecture docs); reconcile docs forward when they diverge.
 
 ==================================================
@@ -52,6 +52,13 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 - ✔ **Living ambient presence** — glow + drifting motes + breathing; **time-of-day lighting** (moonlight at night, `lib/remy/core/time-of-day.ts`) + night→sleeping resting look + time-appropriate greeting
 - ✔ **Nest evolution wired to REAL memory counts** — 6 stages Tiny→Cozy→Family→Golden→Memory Tree→Sanctuary; app-shell count → `AppNavbar` → `MobileBottomNav` → `Nest` (no placeholder)
 - ✔ **framer-motion motion primitives** (`components/remy/motion/primitives.tsx`) — the NestMenu "Remy offers actions" staggered reveal (de-menu-ified); ambient loops stay CSS
+
+**Companion presence (app-wide)**
+- ✔ **Screen awareness** — Remy reacts as you move between screens (`RemyScreenAwareness` + `lib/remy/core/screen-behavior.ts`; timeline/people/library/reminders/settings/dates/dashboard → brief fitting reaction; memories/search/remy/home omitted so Remy never double-reacts)
+- ✔ **Milestone celebrations from REAL memory counts** (`RemyMilestones` + `lib/remy/core/achievements.ts` + `lib/remy/companion/persistence.ts`; first/10/50/100/500/1000 + Nest stage-ups; baselines on first load → no retroactive spam)
+- ✔ **Celebration surface** (`RemyCelebration`) — centre-stage feather-burst + sparkles + heart via the single `<Remy>` renderer + the **real `goldenFeather` asset**; portaled, `pointer-events-none`, aria-live, reduced-motion-safe
+- ✔ **Reusable companion effects** (`components/remy/effects/RemyEffects.tsx`) — FeatherBurst / Sparkles / HeartPulse (framer-motion, centralized, reduced-motion-safe)
+- ✔ Event-bus **`{ replay: false }` subscribe option** — a secondary listener never steals the Brain's initial-mount replay buffer (order-independent)
 
 **AI (all live on OpenAI — NOT deferred)**
 - ✔ Ask Remy (conversational, gpt-4o-mini, retrieval-grounded) · Semantic search (premium-gated) · Embeddings (text-embedding-3-small) · Vector search (`match_memories`, 6 consumers) · AI summaries + tagging (gpt-4.1-mini) · Hybrid AI memory retrieval · Multi-turn conversational memory
@@ -160,6 +167,9 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 - **Decision:** Time-of-day is a platform layer (`lib/remy/core/time-of-day.ts`); the Nest's ambient lighting, resting look (night→sleeping), and greeting derive from it. **Status:** LOCKED.
 - **Decision:** Nest interaction MOTION uses framer-motion, centralized in `components/remy/motion/primitives.tsx` (no duplicated animation logic); cheap infinite AMBIENT loops (glow / motes / breathing) stay in CSS. **Status:** LOCKED.
 - **Decision:** Nest evolution = 6 stages (Tiny→Cozy→Family→Golden→Memory Tree→Sanctuary) driven by REAL memory counts threaded from the app shell; dedicated per-stage nest ARTWORK is a future registry-only drop. **Status:** LOCKED.
+- **Decision:** App-wide companion presence = three surfaces mounted ONCE in the shell (RemyScreenAwareness, RemyCelebration, RemyMilestones), driven by the ONE event bus + single `<Remy>` renderer; each renders null until Remy reacts. **Status:** LOCKED.
+- **Decision:** Milestone celebrations derive from REAL memory counts (persisted last-count; no retroactive celebration on first load). Companion effects (feather/sparkle/heart) are centralized in `components/remy/effects/RemyEffects.tsx`; the feather uses the real `goldenFeather` asset. **Status:** LOCKED.
+- **Decision:** The event bus's initial-mount replay buffer belongs to the Brain (the first `{replay:true}` subscriber); any SECONDARY bus listener MUST subscribe with `{ replay: false }`. **Status:** LOCKED.
 
 ==================================================
 ## KNOWN OPEN ITEMS
@@ -186,13 +196,13 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 ## LAST COMPLETED TASK
 ==================================================
 
-Summary: **Living Nest companion increment** — extended the Remy platform (NOT a redesign; backwards-compatible; single `<Remy>` renderer + one platform preserved) to make the Nest feel alive. New platform **time-of-day** layer (`lib/remy/core/time-of-day.ts`) drives the Nest's ambient lighting (moonlight at night), Remy's resting look (asleep at night, calm by day), and a time-appropriate greeting. **Nest evolution now uses REAL memory counts** (6 stages Tiny→Sanctuary, threaded app-shell → `AppNavbar` → `MobileBottomNav` → `Nest`; no placeholder). Centralized **framer-motion** motion primitives (`components/remy/motion/primitives.tsx`) drive the NestMenu "Remy offers actions" staggered reveal (de-menu-ified — reads as Remy presenting options, not a system sheet). Ambient CSS life (drifting motes + glow + breathing), all reduced-motion-safe. Portal / focus-trap / scroll-lock / routing unchanged.
+Summary: **App-wide Remy companion layer** — extended the ONE Remy platform (no second AI/renderer/provider/bus/brain; backwards-compatible) to make Remy a presence across the whole app. **(1) Screen awareness:** `RemyScreenAwareness` (mounted once) publishes a brief arrival reaction per screen via a pure route→event map (`lib/remy/core/screen-behavior.ts`); new `screen.*` events added to the vocabulary (`events.ts` + `emotion-engine.ts`). **(2) Milestone celebrations from REAL counts:** `RemyMilestones` compares the real workspace `memoryCount` against a persisted last-count (`lib/remy/companion/persistence.ts`) and emits `milestone.reached` on crossings (`lib/remy/core/achievements.ts` — first/10/50/100/500/1000 + Nest stage-ups; baselines on first load, no retroactive spam). **(3) Celebration surface:** `RemyCelebration` (mounted once) subscribes to the bus and plays a centre-stage feather-burst + sparkles + heart through the single `<Remy>` renderer using the **real `goldenFeather` asset**; portaled, pointer-events-none, aria-live, reduced-motion-safe. **(4) Reusable effects:** `components/remy/effects/RemyEffects.tsx` (framer-motion, centralized). **Regression found + fixed by adversarial review:** the celebration surface (a provider child) subscribing to the raw bus was draining the initial-mount replay buffer meant for the Brain → added a backwards-compatible **`{ replay: false }`** subscribe option (`event-bus.ts`) so the Brain (default replay) always gets the buffer regardless of order.
 
-Files Changed: `lib/remy/core/time-of-day.ts` (new), `lib/remy/core/nest.ts`, `lib/remy/index.ts`, `components/remy/motion/primitives.tsx` (new), `components/navigation/nest/{Nest.tsx, NestMenu.tsx, nest.module.css}`, `components/navigation/MobileBottomNav.tsx`, `components/navigation/AppNavbar.tsx`, `app/(app)/layout.tsx`.
+Files Changed: `lib/remy/core/{events.ts, emotion-engine.ts, screen-behavior.ts (new), achievements.ts (new), event-bus.ts}`, `lib/remy/companion/persistence.ts` (new), `lib/remy/index.ts`, `components/remy/effects/RemyEffects.tsx` (new), `components/remy/platform/RemyScreenAwareness.tsx` (new), `components/remy/companion/{RemyCelebration.tsx (new), RemyMilestones.tsx (new)}`, `app/(app)/layout.tsx`.
 
-Commit: *(this increment — see git log; prior HEAD ce0feb5)*
+Commit: *(this increment — see git log; prior HEAD a818fb0)*
 
-Validation: `npx tsc --noEmit` clean · `npm run lint` 0 errors (2 pre-existing warnings) · `npm run build` ✓.
+Validation: `npx tsc --noEmit` clean · `npm run lint` 0 errors (2 pre-existing warnings) · `npm run build` ✓ · independent adversarial review (11/12 CLEAN; the 1 regression found was fixed + re-validated).
 
 ==================================================
 ## NEXT RECOMMENDED TASK
