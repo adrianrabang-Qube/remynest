@@ -869,6 +869,33 @@ related-memories / journeys / semantic-search / reasoning. (Distinct from the se
 (12/12). **Do NOT** surface the graph in the UI, fabricate/guess links, put a clock/DB/randomness in
 it, make edges non-deterministic, or duplicate the significance engine.
 
+**Remy — Journey Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core engine
+(`lib/remy/core/journey-engine.ts`, `buildJourneys({ understandings, graph, … }) → JourneyAnalysis`)
+that understands COMPLETE LIFE JOURNEYS — a Journey is a structured collection of connected memories
+representing ONE continuous part of a life (Childhood / School Years / University / Career / Family
+Holidays / Medical Journey / Care Journey / Retirement / …). Journeys **emerge from REAL signals only**
+(dominant theme + life stage + shared people + chronological continuity + graph connectivity): memories
+are grouped by dominant theme, split into continuous segments by real year gaps (`> MAX_GAP_YEARS`, or a
+chapter change with a smaller gap when chapters are supplied), and a segment below `MIN_JOURNEY_SIZE` (or
+otherwise unconfident) is **left separate — never force-merged**. Each journey carries deterministic
+`significance`/`continuity`/`importance` + a real `JourneyTimeline`; journeys link by real shared people/
+theme (`JourneyConnection`). **Undated memories never fabricate a year** (`startYear/endYear = 0`); **NO
+GPT, NO fabricated journeys/years/transitions/links** — deterministic (fixed weights, stable sorts, no
+clock/randomness). INTERNAL — **not shown in the UI** (no JSX/chip/observation); it sits after
+memory-graph in the pipeline, and its per-memory journey significance feeds the significance engine (more
+journey-anchored = more significant) via a CLEAN optional `SignificanceContext.journeyImportanceByMemoryId`
+extension (additive; existing callers unaffected → adds 0 when absent). **REQUIRED inputs = understanding +
+graph** (the only outputs computed at its pipeline position); chapters/significant/emotional/favourites are
+OPTIONAL refinements (no-op today, forward-compatible — do NOT reorder the downstream pipeline to feed
+them). No snapshot/DB change. **FIXED pipeline order:** snapshot → memory-understanding → memory-graph →
+journey → story → favourite → anniversary → significance → emotional → personality → relationship →
+priority → one `<Remy>` renderer. Types (`Journey`/`JourneyStage`/`JourneyTimeline`/`JourneyImportance`/
+`JourneyConnection`/`JourneySummary`/`JourneyAnalysis`) additive in `family-types.ts`; foundation for
+FUTURE timeline / journeys / life-story / reasoning surfaces. Verified tsc/lint/build + adversarial review
+CLEAN (12/12, no blocking issues). **Do NOT** surface journeys in the UI, fabricate/guess journeys/years/
+transitions/links, put a clock/DB/randomness in it, reorder the downstream pipeline, make output
+non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -92,6 +92,8 @@ export {
 } from "@/lib/remy/core/memory-understanding-engine";
 // Memory Graph — the internal semantic web of how memories connect (Phase 7).
 export { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
+// Journey Engine — complete life journeys built from the understanding + graph layers (Phase 8).
+export { buildJourneys, type JourneyInput } from "@/lib/remy/core/journey-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -117,6 +119,13 @@ export type {
   MemoryEdgeType,
   ConnectionStrength,
   MemoryCluster,
+  Journey,
+  JourneyStage,
+  JourneyTimeline,
+  JourneyImportance,
+  JourneyConnection,
+  JourneySummary,
+  JourneyAnalysis,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

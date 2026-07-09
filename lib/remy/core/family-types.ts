@@ -247,6 +247,71 @@ export interface MemoryGraph {
   clusters: MemoryCluster[];
 }
 
+/**
+ * JOURNEYS — a Journey is a structured collection of connected memories representing ONE continuous
+ * part of a life (School Years, Career, Family Holidays, Medical Journey, …). Built deterministically
+ * from the understanding + graph layers (real shared theme / life-stage / people / chronology only —
+ * no GPT, no fabricated years or transitions). Internal; the foundation for future intelligence.
+ */
+export type JourneyImportance = "minor" | "notable" | "major" | "defining";
+
+/** A chronological point on a journey's timeline — the memories that fall in one year. */
+export interface JourneyStage {
+  year: number;
+  memoryIds: string[];
+}
+
+/** The chronological structure of a journey (real years only; `0` when a memory is undated). */
+export interface JourneyTimeline {
+  startYear: number;
+  endYear: number;
+  stages: JourneyStage[];
+}
+
+export interface Journey {
+  id: string;
+  title: string;
+  memoryIds: string[];
+  dominantTheme: MemoryTheme;
+  /** Person ids most present across the journey (most-frequent first, max 3). */
+  dominantPeople: string[];
+  lifeStage: LifeStage;
+  startYear: number;
+  endYear: number;
+  /** 0–100 emotional weight of the journey (INTERNAL — never shown raw). */
+  significance: number;
+  /** 0–100 how chronologically continuous the journey is (fewer/smaller year gaps = higher). */
+  continuity: number;
+  importance: JourneyImportance;
+  timeline: JourneyTimeline;
+}
+
+/** A real link between two journeys (shared people and/or the same dominant theme). */
+export interface JourneyConnection {
+  source: string;
+  target: string;
+  sharedPeople: string[];
+  sharedTheme: boolean;
+  /** Deterministic connection weight (shared people + shared theme). */
+  strength: number;
+}
+
+/** A structured overview of all journeys (no prose). */
+export interface JourneySummary {
+  journeyCount: number;
+  totalJourneyMemories: number;
+  /** The highest-significance journey id, or null when none formed. */
+  dominantJourneyId: string | null;
+  themes: MemoryTheme[];
+}
+
+/** The Journey Engine's complete output. */
+export interface JourneyAnalysis {
+  journeys: Journey[];
+  connections: JourneyConnection[];
+  summary: JourneySummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

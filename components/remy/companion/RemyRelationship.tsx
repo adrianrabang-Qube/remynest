@@ -10,6 +10,7 @@ import {
 import { selectMoment } from "@/lib/remy/core/priority-engine";
 import { buildMemoryUnderstanding } from "@/lib/remy/core/memory-understanding-engine";
 import { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
+import { buildJourneys } from "@/lib/remy/core/journey-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -120,6 +121,19 @@ export default function RemyRelationship() {
           );
         }
 
+        // Journey Engine — complete life journeys from the understanding + graph layers (internal,
+        // never shown). A memory that belongs to a meaningful journey feeds the significance engine.
+        const journeyAnalysis = buildJourneys({ understandings, graph: memoryGraph });
+        const journeyImportanceByMemoryId = new Map<string, number>();
+        for (const journey of journeyAnalysis.journeys) {
+          for (const id of journey.memoryIds) {
+            journeyImportanceByMemoryId.set(
+              id,
+              Math.max(journeyImportanceByMemoryId.get(id) ?? 0, journey.significance),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -135,6 +149,7 @@ export default function RemyRelationship() {
           revisitedMemoryIds,
           chapterSizeByMemoryId,
           connectionCountByMemoryId,
+          journeyImportanceByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 
