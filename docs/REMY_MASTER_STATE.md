@@ -8,8 +8,9 @@
 > (10-agent, file:line-cited). Items are re-verified against code before being trusted, not from memory.
 
 Last Updated: 2026-07-09
-Current Commit: a97dfac (`fix(remy): make the Nest a behaviour-driven companion`) — the code state this file reflects; this doc is committed on top.
-Current Branch: main (2 commits ahead of origin/main: e73dc7e, a97dfac — the Nest hub; **unpushed**)
+Branch: main (ahead of origin/main; **unpushed** — Nest hub + master-state doc commits)
+Commit: 7f65178 `docs(sync): establish REMY_MASTER_STATE.md` (baseline; later doc-sync commits build on top)
+Repository Verified: **YES** — 2026-07-09, via a 10-agent file:line-cited source audit. **Source code is authoritative over all documentation** (this file, CLAUDE.md, HANDOFF, architecture docs); reconcile docs forward when they diverge.
 
 ==================================================
 ## PROJECT STATUS
