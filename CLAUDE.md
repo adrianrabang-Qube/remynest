@@ -758,6 +758,27 @@ adversarial review and fixed). **STILL DEFERRED (missing assets — do NOT fabri
 character frames, per-stage nest artwork, real voice. **Do NOT** add a raw-bus subscriber without
 `{ replay: false }`, fabricate celebrations for a not-real count, or fire milestones retroactively.
 
+**Remy — Companion Intelligence (authoritative, 2026-07-09 — extends the ONE platform):** Remy now
+notices meaningful things PROACTIVELY — behavioural intelligence, explicitly **NOT AI chat, NOT
+notifications, NOT a poll/background job**. Two PURE core engines: **`lib/remy/core/insights-engine.ts`**
+maps a `CompanionSnapshot` → behavioural `Observation[]` (greetings, first-visit-today, returning/
+inactivity, reminders-due/all-completed/completed-count, memories-this-week/none-today, nest-evolved;
+a birthday-tomorrow rule exists, data-wired when a source lands). **`lib/remy/core/priority-engine.ts`**
+dedupes, drops observations still within cooldown, ranks (urgency→importance), and returns **AT MOST
+ONE** — "one proactive behaviour at a time, no spam". BOTH engines are pure (no React/DOM/DB/timers/
+clock — the caller supplies `now`). **`components/remy/companion/RemyMoments.tsx`** (mounted once in
+the shell) runs the intelligence **exactly ONCE per app-open** (a `ran` ref guard; the shell persists
+across navigations): a SINGLE read of the read-only, auth-gated, workspace-scoped snapshot loader
+**`app/api/remy/companion-snapshot`** (memory/reminder head-counts; degrades to zeros; **never
+polled**), then briefly shows one moment through the single `<Remy>` renderer (portaled,
+`pointer-events-none` container + tap-to-dismiss chip, aria-live, reduced-motion-safe). **Behavioural
+memory** lives in `lib/remy/companion/persistence.ts` (`CompanionMemory`: last-visit day → greeting
+once/day + inactivity; acknowledged Nest stage → detect a fresh evolution; per-kind cooldowns → no
+repeats). Extends the ONE platform only (single renderer + persistence + core engines + behaviour
+vocabulary) — no second provider/bus/brain, no chat. Verified tsc/lint/build + adversarial review
+CLEAN (12/12). **Do NOT** put a clock/DB call inside the engines, poll or cron the snapshot, add a
+notifications/chat path, fabricate observations for absent data, or exceed one moment at a time.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

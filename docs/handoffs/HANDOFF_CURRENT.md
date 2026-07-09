@@ -15,11 +15,17 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the app-wide Remy companion layer.
+Readiness**. No implementation task is active — the last work was the Companion Intelligence layer.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Companion Intelligence layer** — Remy notices meaningful things proactively (behavioural, NOT chat/
+  notifications/polling). Two PURE core engines (`insights-engine` → observations, `priority-engine` →
+  at most one), a once-per-app-open surface (`RemyMoments`) over a read-only workspace-scoped snapshot
+  loader (`/api/remy/companion-snapshot`), and behavioural memory (last-visit/ack-stage/cooldowns) in
+  the persistence layer. Extends the ONE platform (single renderer + persistence + core). Adversarial
+  review CLEAN (12/12). tsc/lint/build green.
 - **App-wide Remy companion layer** — Remy now reacts across the whole app via 3 shell-mounted surfaces
   (all render null until Remy reacts): `RemyScreenAwareness` (per-screen arrival reactions),
   `RemyMilestones` (milestone celebrations from REAL memory counts, persisted, no retroactive spam), and
@@ -58,8 +64,9 @@ Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none bloc
 ## Active branch
 `main` (production; auto-deploys on push) — **unpushed, ahead of `origin/main` (`f53694b`)**: the Nest
 hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), the living
-Nest companion increment (`a818fb0`), and the app-wide Remy companion layer on top. **Not pushed** —
-pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Nest companion increment (`a818fb0`), the app-wide Remy companion layer (`5598641`), and the Companion
+Intelligence layer on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator
+decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -74,7 +81,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): app-wide companion — screen awareness, milestone celebrations, effects
+- *(HEAD)* feat(remy): Companion Intelligence — insights + priority engines, proactive moments
+- `5598641` feat(remy): app-wide companion — screen awareness, milestone celebrations, effects
 - `a818fb0` feat(remy): living Nest companion — time-of-day, real-count evolution, framer-motion
 - `ce0feb5` docs(sync): reconcile all docs to HEAD — lightweight HANDOFF, exact startup order
 - `94088c3` docs(sync): conform REMY_MASTER_STATE header to finalized workflow spec

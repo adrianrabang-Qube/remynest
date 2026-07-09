@@ -16,6 +16,7 @@ import {
   RemyScreenAwareness,
   RemyCelebration,
   RemyMilestones,
+  RemyMoments,
 } from "@/lib/remy";
 import RemyConnectivityBridge from "@/components/RemyConnectivityBridge";
 
@@ -145,6 +146,8 @@ export default async function AppLayout({
         <RemyCelebration />
         <RemyScreenAwareness />
         <RemyMilestones memoryCount={memoryCount} />
+        {/* Companion Intelligence — proactive behavioural moments (once per app-open, not polled). */}
+        <RemyMoments />
 
         {/* Bridges browser online/offline into Remy semantic events (no UI). */}
         <RemyConnectivityBridge />

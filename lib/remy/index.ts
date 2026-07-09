@@ -65,6 +65,8 @@ export { default as RemyFloatingPresence } from "@/components/remy/companion/Flo
 export { default as RemyScreenAwareness } from "@/components/remy/platform/RemyScreenAwareness";
 export { default as RemyCelebration } from "@/components/remy/companion/RemyCelebration";
 export { default as RemyMilestones } from "@/components/remy/companion/RemyMilestones";
+/** Companion Intelligence: proactive, once-per-app-open behavioural moments (mounted once). */
+export { default as RemyMoments } from "@/components/remy/companion/RemyMoments";
 
 // Public types (semantic only — never renderer/asset internals).
 export type { RemyEvent, RemyEventName, RemyContextKey } from "@/lib/remy/core/events";
