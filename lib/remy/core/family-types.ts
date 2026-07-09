@@ -138,6 +138,66 @@ export interface PersonalitySignals {
   lifeContinuity: number;
 }
 
+/**
+ * MEMORY UNDERSTANDING — the internal semantic understanding of a single memory, derived
+ * deterministically from REAL stored data (no GPT, no prose, no fabrication). Structured data only;
+ * this layer is not shown in the UI — it is the input for current + future engines.
+ */
+export type LifeStage =
+  | "childhood"
+  | "teen-years"
+  | "early-adult"
+  | "family-life"
+  | "later-years"
+  | "unknown";
+
+export type MemoryImportance = "ordinary" | "important" | "major" | "legacy";
+
+export type MemoryTheme =
+  | "family"
+  | "travel"
+  | "celebration"
+  | "achievement"
+  | "health"
+  | "pets"
+  | "home"
+  | "work"
+  | "education"
+  | "friendship"
+  | "care"
+  | "relationships"
+  | "other";
+
+export interface MemoryRelationship {
+  /** The most corpus-significant person in the memory (else the first), or null. */
+  primaryPerson: string | null;
+  secondaryPeople: string[];
+  participants: number;
+  isFamilyMemory: boolean;
+  isIndividualMemory: boolean;
+}
+
+export interface MemoryUnderstanding {
+  id: string;
+  timeSpan: { dateIso: string; year: number; precision: DatePrecision };
+  /** True when the memory carries a real historical date. */
+  historical: boolean;
+  lifeStage: LifeStage;
+  themes: MemoryTheme[];
+  dominantCategories: string[];
+  eventType: string | null;
+  importance: MemoryImportance;
+  /** Media richness (attachment count). */
+  attachmentRichness: number;
+  /** Emotional richness (0–100, from the AI importance signal). */
+  emotionalRichness: number;
+  /** Relationship richness (0–100, from the number of people involved). */
+  relationshipRichness: number;
+  relationship: MemoryRelationship;
+  /** How much REAL signal backed this understanding (0–100). */
+  confidence: number;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

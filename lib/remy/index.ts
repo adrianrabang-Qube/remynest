@@ -85,6 +85,11 @@ export {
 } from "@/lib/remy/core/significance-engine";
 export { buildEmotionalProfile, type EmotionalInput } from "@/lib/remy/core/emotional-engine";
 export { derivePersonalityTraits } from "@/lib/remy/core/personality-engine";
+// Memory Understanding — the internal semantic layer at the front of the pipeline (Phase 6).
+export {
+  buildMemoryUnderstanding,
+  type UnderstandingContext,
+} from "@/lib/remy/core/memory-understanding-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -99,6 +104,11 @@ export type {
   EmotionalProfile,
   PersonalityTrait,
   PersonalitySignals,
+  MemoryUnderstanding,
+  MemoryTheme,
+  LifeStage,
+  MemoryImportance,
+  MemoryRelationship,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

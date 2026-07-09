@@ -8,6 +8,7 @@ import {
   type RelationshipSnapshot,
 } from "@/lib/remy/core/relationship-engine";
 import { selectMoment } from "@/lib/remy/core/priority-engine";
+import { buildMemoryUnderstanding } from "@/lib/remy/core/memory-understanding-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -95,7 +96,14 @@ export default function RemyRelationship() {
         const daysSinceLastVisit =
           companion.lastVisitDate != null ? daysBetween(companion.lastVisitDate, today) : null;
 
-        // Pipeline: story → favourite → anniversary → significance → emotional → personality.
+        // Pipeline: memory understanding → story → favourite → anniversary → significance →
+        // emotional → personality. The understanding layer is INTERNAL (not shown) — it turns each
+        // real memory into structured semantics that feed the downstream richness ratios today and
+        // are available for future engines.
+        const understandings = buildMemoryUnderstanding(datedMemories, {
+          personImportance: new Map(people.map((p) => [p.id, p.memoryCount] as const)),
+        });
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -113,13 +121,16 @@ export default function RemyRelationship() {
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 
+        // Richness ratios derived from the understanding layer (single source of truth), feeding the
+        // emotional + personality engines.
+        const understandingCount = understandings.length;
         const attachmentRatio =
-          datedMemories.length > 0
-            ? datedMemories.filter((m) => (m.attachmentCount ?? 0) > 0).length / datedMemories.length
+          understandingCount > 0
+            ? understandings.filter((u) => u.attachmentRichness > 0).length / understandingCount
             : 0;
         const datedRatio =
-          datedMemories.length > 0
-            ? datedMemories.filter((m) => m.historical).length / datedMemories.length
+          understandingCount > 0
+            ? understandings.filter((u) => u.historical).length / understandingCount
             : 0;
 
         const summary = buildLifeSummary({ memories: datedMemories, people, memoryCount });

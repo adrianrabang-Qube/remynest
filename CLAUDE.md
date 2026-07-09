@@ -828,6 +828,26 @@ snapshot loader (`app/api/remy/relationship-snapshot`) was enriched with REAL si
 adversarial review CLEAN (12/12). **Do NOT** render a raw score, rank memories by recency, put a
 clock/DB in these engines, or fabricate significance/traits from absent data.
 
+**Remy — Memory Understanding Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE
+core engine (`lib/remy/core/memory-understanding-engine.ts`, `buildMemoryUnderstanding(DatedMemory[])
+→ MemoryUnderstanding[]`) at the FRONT of the relationship pipeline (right after the snapshot). It
+turns each REAL memory into a STRUCTURED semantic understanding — themes, life stage, importance
+(ordinary/important/major/legacy), attachment/emotional/relationship richness, event type, time span,
+a structured `MemoryRelationship` (primary/secondary people, participants, family-vs-individual), and
+a 0–100 confidence — **deterministically, from the memory's own real fields only** (category, date,
+`peopleIds`, `attachmentCount`, `importance`, `historical`). **NO GPT, NO prose/paragraphs, NO
+fabricated facts.** Life stage + themes are inferred from real `ai_category` keywords with
+`"unknown"`/`"other"` fallbacks (NOT age-mapped from a nonexistent birth date). It is **INTERNAL — not
+shown in the UI**; it feeds the emotional/personality richness ratios today (`RemyRelationship`
+derives `attachmentRatio`/`datedRatio` from it) and is exported from `@/lib/remy` as the input for
+future engines. No snapshot/DB change (it reads the Phase-5-enriched `DatedMemory`). **FIXED pipeline
+order:** snapshot → memory-understanding → story → favourite → anniversary → significance → emotional
+→ personality → relationship → priority → one `<Remy>` renderer. Types
+(`MemoryUnderstanding`/`MemoryTheme`/`LifeStage`/`MemoryImportance`/`MemoryRelationship`) are additive
+in `family-types.ts`. Verified tsc/lint/build + adversarial review CLEAN (12/12). **Do NOT** surface
+the understanding in the UI, generate prose from it, put a clock/DB in the engine, duplicate the
+significance engine, or fabricate a life stage/theme/person from absent data.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
