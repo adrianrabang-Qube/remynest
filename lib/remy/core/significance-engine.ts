@@ -30,6 +30,8 @@ export interface SignificanceContext {
   questionStrengthByMemoryId?: ReadonlyMap<string, number>;
   /** Answer-plan strength (0–100) — how strongly the memory is targeted by a real retrieval step. Optional. */
   answerPlanStrengthByMemoryId?: ReadonlyMap<string, number>;
+  /** Answer-assembly strength (0–100) — how strongly the memory backs a real assembled answer section. Optional. */
+  answerAssemblyStrengthByMemoryId?: ReadonlyMap<string, number>;
   /** Future-compatible — empty today (a manual "pin" feature / conversation references). */
   pinnedMemoryIds?: ReadonlySet<string>;
   conversationMemoryIds?: ReadonlySet<string>;
@@ -54,6 +56,7 @@ export function scoreMemorySignificance(m: DatedMemory, ctx: SignificanceContext
   score += Math.min(5, (ctx.conversationStrengthByMemoryId?.get(m.id) ?? 0) / 20); // a real conversation topic
   score += Math.min(4, (ctx.questionStrengthByMemoryId?.get(m.id) ?? 0) / 25); // in a real retrieval-intent focus
   score += Math.min(3, (ctx.answerPlanStrengthByMemoryId?.get(m.id) ?? 0) / 34); // targeted by a real retrieval step
+  score += Math.min(2, (ctx.answerAssemblyStrengthByMemoryId?.get(m.id) ?? 0) / 50); // backs a real assembled answer section
   score += ctx.pinnedMemoryIds?.has(m.id) ? 25 : 0; // manually pinned (future)
   score += ctx.conversationMemoryIds?.has(m.id) ? 8 : 0; // referenced in conversation (future)
   return score;

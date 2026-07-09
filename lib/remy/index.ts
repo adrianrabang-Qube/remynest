@@ -115,6 +115,11 @@ export {
   buildAnswerPlan,
   type AnswerPlanInput,
 } from "@/lib/remy/core/answer-planning-engine";
+// Answer Assembly — the final deterministic layer: the factual answer package a future layer speaks (Phase 15).
+export {
+  buildAnswerAssembly,
+  type AnswerAssemblyInput,
+} from "@/lib/remy/core/answer-assembly-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -195,6 +200,15 @@ export type {
   AnswerPlanCoverage,
   AnswerPlanSummary,
   AnswerPlan,
+  AnswerSection,
+  AnswerSectionKind,
+  AnswerEvidence,
+  AnswerEvidenceKind,
+  AnswerChronology,
+  AnswerAssemblyContext,
+  AnswerAssemblyCoverage,
+  AnswerAssemblySummary,
+  AnswerAssembly,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

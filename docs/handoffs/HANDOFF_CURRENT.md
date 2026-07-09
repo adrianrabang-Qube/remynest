@@ -15,11 +15,24 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Answer Planning Engine.
-`main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the Answer Assembly Engine (which
+completes the deterministic intelligence stack). `main` auto-deploys to production on push. Authoritative
+detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Answer Assembly Engine** (the FINAL deterministic intelligence layer) — PURE engine assembling ONLY
+  the structured, FACTUAL answer package a FUTURE conversational layer will VERBALIZE (`AnswerAssembly`:
+  sections/chronology/evidence/entity-lists/coverage/context/summary). **NOT chat, NOT GPT, NOT an LLM,
+  generates NO answers.** Sections = answer-plan steps as structured sections (fixed map); chronology =
+  real life-story chapters ordered (ids/order/confidence); evidence/references = real entities aggregated/
+  deduped/ranked/bounded (+ each memory's real biography chapter, memories graph-ranked); coverage =
+  structured 0–100 metrics. No prose/answers, no invented ids, zero output when data absent; all 9
+  required inputs genuinely consumed. INTERNAL (not shown); sits after answer-planning; its per-memory
+  section weight feeds significance (final clean optional context extension). No snapshot/DB/UI change;
+  downstream pipeline order preserved. Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0
+  findings). tsc/lint/build green. **Completes the deterministic intelligence stack** — the next Remy
+  layer would be the conversational/LLM rendering layer (separate approved phase).
 - **Answer Planning Engine** — PURE engine building the deterministic EXECUTION PLAN a FUTURE
   conversational layer will run after Question Understanding (`AnswerPlan`: steps/sources/context/coverage/
   summary). **NOT chat, NOT GPT, NOT an LLM, produces NO answers.** Steps = ordered structured retrieval
@@ -161,8 +174,8 @@ Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), the 
 Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Graph Engine (`d6cfb9c`),
 the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), the
 Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), the Question
-Understanding Engine (`3489d40`), and the Answer Planning Engine on top. **Not pushed** — pushing
-auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), and the Answer Assembly Engine
+on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -177,7 +190,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Answer Planning Engine — deterministic execution plan (no generated answers)
+- *(HEAD)* feat(remy): Answer Assembly Engine — final deterministic factual answer package (no answers)
+- `45f9314` feat(remy): Answer Planning Engine — deterministic execution plan (no generated answers)
 - `3489d40` feat(remy): Question Understanding Engine — deterministic retrieval-intent layer (no free-text)
 - `96ee7b7` feat(remy): Conversation Foundation Engine — deterministic groundwork for a future chat layer
 - `984f4b6` feat(remy): Biography Engine — pure structured (non-prose) representation of a life

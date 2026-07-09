@@ -846,6 +846,118 @@ export interface AnswerPlan {
   summary: AnswerPlanSummary;
 }
 
+/**
+ * ANSWER ASSEMBLY — the final deterministic intelligence layer. It assembles ONLY the structured,
+ * FACTUAL answer package (sections / chronology / evidence / real entity lists / coverage) that a FUTURE
+ * conversational layer will verbalize. It is NOT chat, NOT GPT, NOT an LLM, and generates NO answers:
+ * every field is a structured id, enum, or number. No prose, no narration, no prompts, no fabricated
+ * data — everything traces to real upstream entities. Internal only.
+ */
+export type AnswerSectionKind =
+  | "memory"
+  | "journey"
+  | "chapter"
+  | "timeline"
+  | "relationship"
+  | "theme"
+  | "anchor"
+  | "comparison"
+  | "summary";
+
+/** One structured answer section (real ids + metrics only — no text). */
+export interface AnswerSection {
+  id: string;
+  kind: AnswerSectionKind;
+  /** The answer-plan step this section renders, or null. */
+  stepId: string | null;
+  order: number;
+  memoryIds: string[];
+  journeyIds: string[];
+  chapterIds: string[];
+  anchorIds: string[];
+  themeIds: MemoryTheme[];
+  personIds: string[];
+  weight: number;
+  confidence: number;
+}
+
+export type AnswerEvidenceKind = "memory" | "journey" | "chapter" | "anchor" | "theme" | "person";
+
+/** A pointer to a REAL supporting entity (never fabricated). */
+export interface AnswerEvidence {
+  kind: AnswerEvidenceKind;
+  refId: string;
+  weight: number;
+  confidence: number;
+}
+
+/** Deterministic chronology built from real life-story chapters / journeys — ids + order only. */
+export interface AnswerChronology {
+  entries: {
+    chapterId: string;
+    journeyIds: string[];
+    startYear: number;
+    endYear: number;
+    order: number;
+    confidence: number;
+  }[];
+  startYear: number;
+  endYear: number;
+}
+
+/** Structured answer-assembly metrics (no prose). */
+export interface AnswerAssemblyContext {
+  sectionCount: number;
+  evidenceCount: number;
+  memoryCount: number;
+  coverage: number;
+  confidence: number;
+  contextDepth: number;
+}
+
+/** Structured answer-assembly coverage metrics, all bounded 0–100 (no prose). */
+export interface AnswerAssemblyCoverage {
+  memoryCoverage: number;
+  journeyCoverage: number;
+  chapterCoverage: number;
+  themeCoverage: number;
+  anchorCoverage: number;
+  personCoverage: number;
+  timelineCompleteness: number;
+  answerCompleteness: number;
+  confidence: number;
+  contextDepth: number;
+}
+
+/** Structured answer-assembly metadata (no prose). */
+export interface AnswerAssemblySummary {
+  dominantTheme: MemoryTheme;
+  dominantAnchor: string | null;
+  primaryJourney: string | null;
+  primaryPerson: string | null;
+  sectionCount: number;
+  evidenceCount: number;
+  coverage: number;
+  confidence: number;
+}
+
+/** The Answer Assembly Engine's complete output — the factual package a future layer verbalizes. */
+export interface AnswerAssembly {
+  sections: AnswerSection[];
+  chronology: AnswerChronology;
+  evidence: AnswerEvidence[];
+  memories: string[];
+  people: string[];
+  journeys: string[];
+  chapters: string[];
+  anchors: string[];
+  themes: MemoryTheme[];
+  references: AnswerEvidence[];
+  coverage: AnswerAssemblyCoverage;
+  context: AnswerAssemblyContext;
+  summary: AnswerAssemblySummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

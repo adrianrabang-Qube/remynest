@@ -1099,6 +1099,47 @@ findings). **Do NOT** build chat/GPT/LLM/generated answers on top of this withou
 surface it in the UI, invent ids/steps, reference a non-real entity, put a clock/DB/randomness in it, reorder
 the downstream pipeline, make output non-deterministic, or duplicate the significance engine.
 
+**Remy — Answer Assembly Engine (authoritative, 2026-07-09 — extends the ONE platform; the FINAL
+deterministic intelligence layer):** a PURE core engine (`lib/remy/core/answer-assembly-engine.ts`,
+`buildAnswerAssembly({ answerPlan, questionUnderstanding, conversationFoundation, biography, reasoning,
+lifeStory, journeyAnalysis, graph, understandings, …optional }) → AnswerAssembly`) that assembles ONLY the
+structured, FACTUAL answer PACKAGE a FUTURE conversational layer will VERBALIZE. **This is EXPLICITLY NOT
+chat, NOT GPT, NOT an LLM, and it generates NO answers — no deferred AI/chat was built.** **Sections** = the
+answer-plan steps rendered as structured sections (fixed `SECTION_KIND_OF_STEP` map; kinds memory / journey /
+chapter / timeline / relationship / theme / anchor / comparison / summary), real ids + weight/confidence/
+order only. **Chronology** = deterministic order from the real life-story chapters (ids/order/confidence
+only — no generated timeline text). **Evidence** + **references** = real supporting entities (memory /
+journey / chapter / anchor / theme / person) aggregated + deduped + weight-ranked + bounded (each memory's
+real biography chapter added; memories additionally ranked by real graph connectivity). **Coverage** =
+memory/journey/chapter/theme/anchor/person coverage + timeline/answer completeness + confidence + context
+depth (all clamped 0–100). **No prose, no narration, no generated answers, no prompts, no invented ids** —
+every field is a structured id, enum, or number; **if data doesn't exist it produces ZERO output, never
+fabricated.** Deterministic (sections from ordered steps + fixed map + sort/slice + order-index; evidence Map
+drained by `sort(weight desc, kind asc, refId asc)`; graph-ranked memories; structural ids `assembly-<slug>`;
+no clock/randomness → byte-identical output). **ALL 9 required inputs are genuinely consumed** (answerPlan→
+sections, QU→confidence, conversation-foundation→confidence, biography→memory-chapters, reasoning→summary/
+themes/anchors, life-story→chronology/continuity, journey→totals, graph→memory ranking, understandings→
+totals/people). INTERNAL — **not shown in the UI** (no JSX/chip/observation); it sits after the
+answer-planning engine, and its per-memory section weight feeds the significance engine (a memory backing a
+strong assembled section = more significant) via the FINAL CLEAN optional
+`SignificanceContext.answerAssemblyStrengthByMemoryId` extension (`Math.min(2, x/50)`; additive → adds 0 when
+absent). **REQUIRED inputs = answer-plan + question-understanding + conversation-foundation + biography +
+reasoning + life-story + journey + graph + understanding** (passed live); favourite/significant/relationship/
+emotional are OPTIONAL refinements (forward-compatible; do NOT reorder the downstream pipeline to feed them).
+No snapshot/DB change. **FIXED pipeline order:** snapshot → memory-understanding → memory-graph → journey →
+life-story → reasoning → biography → conversation-foundation → question-understanding → answer-planning →
+answer-assembly → story → favourite → anniversary → significance → emotional → personality → relationship →
+priority → one `<Remy>` renderer. Types (`AnswerAssembly`/`AnswerSection`/`AnswerSectionKind`/`AnswerEvidence`/
+`AnswerEvidenceKind`/`AnswerChronology`/`AnswerAssemblyContext`/`AnswerAssemblyCoverage`/`AnswerAssemblySummary`)
+additive in `family-types.ts`. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7
+lenses — purity / determinism / no-fabrication / platform-integrity / pipeline-order / consumption /
+regressions — 0 findings). **This COMPLETES the deterministic intelligence stack** (memory-understanding →
+… → answer-assembly). The next Remy layer would be the conversational/LLM RENDERING layer that CONSUMES this
+package — a separate approved phase, NOT to be built without explicit approval. **Do NOT** build chat/GPT/LLM/
+generated answers on top of this without that separate approved phase, surface it in the UI, invent
+ids/sections, reference a non-real entity, put a clock/DB/randomness in it, reorder the downstream pipeline,
+make output non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

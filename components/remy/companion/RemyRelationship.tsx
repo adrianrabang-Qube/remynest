@@ -17,6 +17,7 @@ import { buildBiography } from "@/lib/remy/core/biography-engine";
 import { buildConversationFoundation } from "@/lib/remy/core/conversation-foundation-engine";
 import { buildQuestionUnderstanding } from "@/lib/remy/core/question-understanding-engine";
 import { buildAnswerPlan } from "@/lib/remy/core/answer-planning-engine";
+import { buildAnswerAssembly } from "@/lib/remy/core/answer-assembly-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -266,6 +267,31 @@ export default function RemyRelationship() {
           }
         }
 
+        // Answer Assembly — the FINAL deterministic intelligence layer: assembles the factual answer
+        // package (sections/chronology/evidence/coverage) a FUTURE conversational layer will verbalize
+        // (internal, never shown; NOT chat/GPT/LLM, generates no answers). A memory backing a strong
+        // assembled section feeds the significance engine.
+        const answerAssembly = buildAnswerAssembly({
+          answerPlan,
+          questionUnderstanding,
+          conversationFoundation,
+          biography: biographyAnalysis,
+          reasoning: reasoningAnalysis,
+          lifeStory,
+          journeyAnalysis,
+          graph: memoryGraph,
+          understandings,
+        });
+        const answerAssemblyStrengthByMemoryId = new Map<string, number>();
+        for (const section of answerAssembly.sections) {
+          for (const id of section.memoryIds) {
+            answerAssemblyStrengthByMemoryId.set(
+              id,
+              Math.max(answerAssemblyStrengthByMemoryId.get(id) ?? 0, section.weight),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -288,6 +314,7 @@ export default function RemyRelationship() {
           conversationStrengthByMemoryId,
           questionStrengthByMemoryId,
           answerPlanStrengthByMemoryId,
+          answerAssemblyStrengthByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 
