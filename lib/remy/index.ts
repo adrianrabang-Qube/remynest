@@ -100,6 +100,11 @@ export { buildLifeStory, type LifeStoryInput } from "@/lib/remy/core/life-story-
 export { buildReasoning, type ReasoningInput } from "@/lib/remy/core/reasoning-engine";
 // Biography Engine — a structured (non-prose) representation of a life, over the real layers (Phase 11).
 export { buildBiography, type BiographyInput } from "@/lib/remy/core/biography-engine";
+// Conversation Foundation — deterministic groundwork (topics/threads) a future chat layer consumes (Phase 12).
+export {
+  buildConversationFoundation,
+  type ConversationFoundationInput,
+} from "@/lib/remy/core/conversation-foundation-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -154,6 +159,14 @@ export type {
   BiographyCoverage,
   BiographySummary,
   BiographyAnalysis,
+  ConversationTopic,
+  ConversationTopicKind,
+  ConversationThread,
+  ConversationReference,
+  ConversationReferenceKind,
+  ConversationContext,
+  ConversationSummary,
+  ConversationFoundation,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

@@ -566,6 +566,84 @@ export interface BiographyAnalysis {
   summary: BiographySummary;
 }
 
+/**
+ * CONVERSATION FOUNDATION — the deterministic, structured groundwork a FUTURE conversational layer
+ * will consume. This is NOT chat, NOT GPT, NOT generated text: it derives the REAL recurring subjects
+ * (topics), the real memory collections behind them (threads), and pointers to real entities — all from
+ * the journey / life-story / reasoning / biography / graph / understanding layers. No prompts, no
+ * narration, no fabricated topics. Internal only.
+ */
+export type ConversationTopicKind = "theme" | "anchor" | "person" | "life-stage";
+
+/** A REAL recurring subject, derived from a real theme / anchor / person / life stage. */
+export interface ConversationTopic {
+  id: string;
+  kind: ConversationTopicKind;
+  /** The underlying real entity id (theme name / anchor id / person id / life stage). */
+  refId: string;
+  memoryIds: string[];
+  journeyIds: string[];
+  /** 0–100 how recurring / significant the subject is. */
+  weight: number;
+  /** 0–100 how well-backed by real signal it is. */
+  confidence: number;
+}
+
+/** A structured collection of related memories for a topic within one real chapter (no narration). */
+export interface ConversationThread {
+  id: string;
+  topicId: string;
+  memoryIds: string[];
+  journeyIds: string[];
+  chapterIds: string[];
+  lifeStage: LifeStage;
+  confidence: number;
+  coverage: number;
+}
+
+export type ConversationReferenceKind =
+  | "memory"
+  | "journey"
+  | "chapter"
+  | "anchor"
+  | "theme"
+  | "person";
+
+/** A pointer to a REAL referenced entity, and the topic it belongs to (if any). */
+export interface ConversationReference {
+  kind: ConversationReferenceKind;
+  refId: string;
+  topicId: string | null;
+}
+
+/** Structured conversation-foundation metrics (no prose). */
+export interface ConversationContext {
+  topicCount: number;
+  threadCount: number;
+  memoryCoverage: number;
+  journeyCoverage: number;
+  conversationDepth: number;
+  confidence: number;
+}
+
+/** Structured conversation-foundation metadata (no prose). */
+export interface ConversationSummary {
+  dominantTopic: string | null;
+  dominantAnchor: string | null;
+  dominantTheme: MemoryTheme;
+  coverage: number;
+  confidence: number;
+}
+
+/** The Conversation Foundation Engine's complete output. */
+export interface ConversationFoundation {
+  topics: ConversationTopic[];
+  threads: ConversationThread[];
+  references: ConversationReference[];
+  context: ConversationContext;
+  summary: ConversationSummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

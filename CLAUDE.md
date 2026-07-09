@@ -989,6 +989,40 @@ generate prose/paragraphs/narration, fabricate memories/people/dates/chronology,
 entity, put a clock/DB/randomness in it, reorder the downstream pipeline, make output non-deterministic, or
 duplicate the significance engine.
 
+**Remy — Conversation Foundation Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE
+core engine (`lib/remy/core/conversation-foundation-engine.ts`, `buildConversationFoundation({
+journeyAnalysis, lifeStory, reasoning, biography, graph, understandings, …optional }) →
+ConversationFoundation`) that builds the deterministic groundwork a FUTURE conversational layer will
+consume. **This is EXPLICITLY NOT chat, NOT GPT, NOT an LLM, NOT prompts, NOT AI responses, NOT generated
+text — no deferred AI/conversation UI was built.** **Topics** = REAL recurring subjects (kind anchor /
+theme / person / life-stage; each `≥ MIN_TOPIC_MEMORIES` real memories — `"other"` is excluded, a theme
+already an anchor is not duplicated as a theme topic; people from real `understandings` + `reasoning.
+influences`/favourites, capped `MAX_PEOPLE_TOPICS`); **Threads** = a topic's memories grouped by the real
+biography chapter they live in (`≥ MIN_THREAD_MEMORIES`); **References** = pointers **ONLY** to real
+memory / journey / chapter / anchor / theme / person ids (bounded); **Context**/**Summary** = structured
+metrics only. **No invented topics/threads/memories/people/dates, no narration/prompts/generated
+sentences** — every output is a structured number or a real id/enum (the only string literals are
+structural id templates + kind/enum tags). Deterministic (sorted topics/threads with total-order
+tiebreakers + fixed life-stage order + structural ids `topic-<kind>-<refId>`/`thread-<topicId>-<sectionId>`;
+no clock/randomness → byte-identical output). INTERNAL — **not shown in the UI** (no JSX/chip/observation);
+it sits after the biography engine, and its per-memory topic weight feeds the significance engine (a memory
+in a strong conversation topic = more significant) via a CLEAN optional
+`SignificanceContext.conversationStrengthByMemoryId` extension (additive → adds 0 when absent; existing
+callers unaffected). **REQUIRED inputs = journey + life-story + reasoning + biography + graph +
+understanding** (passed live); favourite/relationship/significant/emotional are OPTIONAL refinements
+(forward-compatible; do NOT reorder the downstream pipeline to feed them). No snapshot/DB change. **FIXED
+pipeline order:** snapshot → memory-understanding → memory-graph → journey → life-story → reasoning →
+biography → conversation-foundation → story → favourite → anniversary → significance → emotional →
+personality → relationship → priority → one `<Remy>` renderer. Types (`ConversationFoundation`/
+`ConversationTopic`/`ConversationTopicKind`/`ConversationThread`/`ConversationReference`/
+`ConversationReferenceKind`/`ConversationContext`/`ConversationSummary`) additive in `family-types.ts`.
+Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7 lenses — purity / determinism
+/ no-fabrication / platform-integrity / pipeline-order / consumption / regressions — 0 findings). **Do
+NOT** build chat/GPT/LLM/prompts/AI responses/generated text on top of this without a separate approved
+phase, surface it in the UI, invent topics/threads/memories/people/dates, reference a non-real entity, put
+a clock/DB/randomness in it, reorder the downstream pipeline, make output non-deterministic, or duplicate
+the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

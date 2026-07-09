@@ -24,6 +24,8 @@ export interface SignificanceContext {
   reasoningStrengthByMemoryId?: ReadonlyMap<string, number>;
   /** Biography coverage (0–100) — how much of the documented life the memory's biography section covers. Optional. */
   biographyCoverageByMemoryId?: ReadonlyMap<string, number>;
+  /** Conversation strength (0–100) — how strongly the memory belongs to a real recurring conversation topic. Optional. */
+  conversationStrengthByMemoryId?: ReadonlyMap<string, number>;
   /** Future-compatible — empty today (a manual "pin" feature / conversation references). */
   pinnedMemoryIds?: ReadonlySet<string>;
   conversationMemoryIds?: ReadonlySet<string>;
@@ -45,6 +47,7 @@ export function scoreMemorySignificance(m: DatedMemory, ctx: SignificanceContext
   score += Math.min(10, (ctx.lifeStoryCentralityByMemoryId?.get(m.id) ?? 0) / 10); // central to the life story
   score += Math.min(8, (ctx.reasoningStrengthByMemoryId?.get(m.id) ?? 0) / 12); // anchors Remy's reasoning
   score += Math.min(6, (ctx.biographyCoverageByMemoryId?.get(m.id) ?? 0) / 16); // covered by the biography
+  score += Math.min(5, (ctx.conversationStrengthByMemoryId?.get(m.id) ?? 0) / 20); // a real conversation topic
   score += ctx.pinnedMemoryIds?.has(m.id) ? 25 : 0; // manually pinned (future)
   score += ctx.conversationMemoryIds?.has(m.id) ? 8 : 0; // referenced in conversation (future)
   return score;
