@@ -18,6 +18,7 @@ import { buildConversationFoundation } from "@/lib/remy/core/conversation-founda
 import { buildQuestionUnderstanding } from "@/lib/remy/core/question-understanding-engine";
 import { buildAnswerPlan } from "@/lib/remy/core/answer-planning-engine";
 import { buildAnswerAssembly } from "@/lib/remy/core/answer-assembly-engine";
+import { buildConversationRender } from "@/lib/remy/core/conversation-rendering-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -291,6 +292,15 @@ export default function RemyRelationship() {
             );
           }
         }
+
+        // Conversation Rendering — the FIRST presentation-layer engine. It consumes ONLY the
+        // AnswerAssembly and prepares deterministic render instructions for a FUTURE conversational /
+        // LLM layer. It performs NO retrieval / reasoning / ranking and — unlike every intelligence
+        // engine above — deliberately does NOT feed the significance pipeline (this is presentation
+        // preparation, not a memory signal). Its consumer is the future conversational layer, so there
+        // is intentionally no current consumer; it is exported from @/lib/remy for that future layer.
+        const conversationRender = buildConversationRender({ answerAssembly });
+        void conversationRender;
 
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);

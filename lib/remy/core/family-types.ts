@@ -958,6 +958,81 @@ export interface AnswerAssembly {
   summary: AnswerAssemblySummary;
 }
 
+/**
+ * CONVERSATION RENDER — the FIRST presentation-layer output. It carries ONLY deterministic rendering
+ * INSTRUCTIONS (structured metadata) that a FUTURE conversational / LLM layer will use to speak the
+ * already-assembled factual package (`AnswerAssembly`). It is NOT language, NOT prose, NOT a generated
+ * answer — every field is a structured id, enum, or number. This layer performs NO retrieval /
+ * reasoning / ranking; it only prepares render metadata. Internal only.
+ */
+export type ConversationTone =
+  | "neutral"
+  | "warm"
+  | "gentle"
+  | "clinical"
+  | "encouraging"
+  | "professional";
+export type ConversationVerbosity = "brief" | "normal" | "detailed";
+export type ConversationPerspective = "assistant" | "caregiver" | "family" | "patient";
+
+/** A deterministic render instruction for one answer section (ids + structured hints only — no text). */
+export interface ConversationRenderSection {
+  id: string;
+  /** The AnswerSection this renders. */
+  sectionId: string;
+  renderOrder: number;
+  /** A structured render-style hint (never language). */
+  style: "highlight" | "standard" | "supporting" | "summary";
+  /** 0–100 render importance, carried from the section weight. */
+  importance: number;
+  /** Real supporting entity ids for this section (bounded). */
+  evidenceIds: string[];
+}
+
+/** Deterministic render metadata — structured hints only, never language. */
+export interface ConversationRenderMetadata {
+  /** The render section id to lead with, or null. A structural POINTER — never opening text. */
+  preferredOpening: string | null;
+  /** The render section id to close with, or null. A structural POINTER — never closing text. */
+  preferredClosing: string | null;
+  /** Render section ids to emphasise. */
+  emphasis: string[];
+  /** 0–100 chronological continuity carried from the assembly. */
+  continuity: number;
+  /** 0–100 confidence carried from the assembly. */
+  confidence: number;
+}
+
+/** The resolved deterministic rendering controls — structured metadata only; they generate NO language. */
+export interface ConversationRenderContext {
+  tone: ConversationTone;
+  verbosity: ConversationVerbosity;
+  perspective: ConversationPerspective;
+  /** Deterministic section budget derived from verbosity. */
+  maxSections: number;
+  /** Whether the render includes the chronology (derived from verbosity + real data). */
+  includeChronology: boolean;
+  /** 0–100 depth carried from the assembly. */
+  depth: number;
+}
+
+/** Structured render summary (no prose). */
+export interface ConversationRenderSummary {
+  sectionCount: number;
+  evidenceCount: number;
+  confidence: number;
+  /** 0–100 how complex the render is. */
+  renderComplexity: number;
+}
+
+/** The Conversation Rendering Engine's complete output — render INSTRUCTIONS only, never language. */
+export interface ConversationRender {
+  sections: ConversationRenderSection[];
+  metadata: ConversationRenderMetadata;
+  summary: ConversationRenderSummary;
+  context: ConversationRenderContext;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

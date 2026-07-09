@@ -1140,6 +1140,43 @@ generated answers on top of this without that separate approved phase, surface i
 ids/sections, reference a non-real entity, put a clock/DB/randomness in it, reorder the downstream pipeline,
 make output non-deterministic, or duplicate the significance engine.
 
+**Remy — Conversation Rendering Engine (authoritative, 2026-07-09 — extends the ONE platform; the FIRST
+PRESENTATION-LAYER engine):** a PURE core engine (`lib/remy/core/conversation-rendering-engine.ts`,
+`buildConversationRender({ answerAssembly, tone?, verbosity?, perspective? }) → ConversationRender`) that
+adds NO intelligence. The deterministic intelligence stack is COMPLETE; this is the FIRST presentation
+layer. It consumes **ONLY** the already-complete `AnswerAssembly` (+ optional deterministic tone/verbosity/
+perspective controls) and prepares deterministic RENDER INSTRUCTIONS (`ConversationRender`: sections/
+metadata/summary/context) for a FUTURE conversational/LLM layer. **It does NOT retrieve / search / rank /
+reason / infer / compare / evaluate-evidence / build-or-change-chronology / generate-facts, and it generates
+NO natural language — NOT chat, NOT GPT, NOT an LLM.** **Sections** = the top-`maxSections` (per verbosity:
+brief 4 / normal 8 / detailed 16) assembly sections as render instructions (structural `render-<sectionId>`
+id + `style` hint [highlight/standard/supporting/summary, from the section's own kind + weight] + importance
++ the section's own real `evidenceIds`; no text). **Metadata** = `preferredOpening`/`preferredClosing` are
+structural render-section-id **POINTERS** (never opening/closing TEXT) + `emphasis` (ids) + continuity +
+confidence (carried from the assembly coverage). **Context** = the resolved tone/verbosity/perspective
+controls + section budget + includeChronology flag + depth (the controls are deterministic metadata that
+generate NO language). **Summary** = section/evidence counts + confidence + renderComplexity. **No prose, no
+narration, no generated answers, no prompts, no invented ids** — every field is a structured id, enum, or
+number; empty assembly → empty render. Deterministic (assembly sections arrive already sorted → slice + map
+with `renderOrder` index; evidence Set drained by sort; structural ids; no clock/randomness → byte-identical
+output). **CRITICAL: this presentation engine deliberately does NOT feed the significance pipeline** (it must
+never rank memories; it is presentation prep, not a memory signal) — so there is **NO `significance-engine`
+change and NO prior deterministic engine changed this phase**; in `RemyRelationship` it is computed
+immediately after answer-assembly and `void`-ed (its consumer is the FUTURE conversational layer). INTERNAL —
+**not shown in the UI** (render path byte-unchanged; exactly one `RemyMomentChip`). **REQUIRED input =
+`AnswerAssembly` ONLY**; tone/verbosity/perspective are OPTIONAL controls. **FIXED pipeline order:** …
+answer-assembly → conversation-rendering → story → favourite → … → priority → one `<Remy>` renderer. Types
+(`ConversationRender`/`ConversationRenderSection`/`ConversationRenderMetadata`/`ConversationRenderContext`/
+`ConversationRenderSummary`/`ConversationTone`/`ConversationVerbosity`/`ConversationPerspective`) additive in
+`family-types.ts`; exported from `@/lib/remy` for the future conversational layer. Verified tsc/lint/build +
+independent MULTI-AGENT adversarial review CLEAN (7 lenses — purity / no-language-generation /
+consumes-only-assembly / determinism / platform-integrity+pipeline / consumption-intent / regressions — 0
+findings). **Do NOT** make this engine retrieve/rank/reason/build-chronology/generate language, feed it into
+significance/ranking, surface it in the UI, invent ids/sections, reference a non-real entity, put a clock/DB/
+randomness in it, or make output non-deterministic. The next Remy layer would be the actual conversational/
+LLM layer that CONSUMES this render + the AnswerAssembly — a separate approved phase, NOT to be built without
+explicit approval.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

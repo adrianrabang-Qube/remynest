@@ -120,6 +120,11 @@ export {
   buildAnswerAssembly,
   type AnswerAssemblyInput,
 } from "@/lib/remy/core/answer-assembly-engine";
+// Conversation Rendering — the FIRST presentation layer: deterministic render instructions only (Phase 16).
+export {
+  buildConversationRender,
+  type ConversationRenderInput,
+} from "@/lib/remy/core/conversation-rendering-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -209,6 +214,14 @@ export type {
   AnswerAssemblyCoverage,
   AnswerAssemblySummary,
   AnswerAssembly,
+  ConversationTone,
+  ConversationVerbosity,
+  ConversationPerspective,
+  ConversationRenderSection,
+  ConversationRenderMetadata,
+  ConversationRenderContext,
+  ConversationRenderSummary,
+  ConversationRender,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

@@ -15,12 +15,24 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Answer Assembly Engine (which
-completes the deterministic intelligence stack). `main` auto-deploys to production on push. Authoritative
-detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the Conversation Rendering Engine (the
+FIRST presentation-layer engine; the deterministic intelligence stack was completed by the prior Answer
+Assembly Engine). `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT
+STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Conversation Rendering Engine** (the FIRST presentation-layer engine) — PURE engine that adds NO
+  intelligence: it consumes ONLY the `AnswerAssembly` (+ optional tone/verbosity/perspective controls) and
+  prepares deterministic RENDER INSTRUCTIONS (`ConversationRender`: sections/metadata/summary/context) for a
+  FUTURE conversational/LLM layer. It does NOT retrieve/reason/rank/build-chronology/generate language —
+  **NOT chat/GPT/LLM.** Sections = top-maxSections assembly sections as render instructions (structural
+  `render-<sectionId>` id + style hint + importance + real evidence ids); metadata opening/closing are
+  structural section-id pointers (never text); every field is a structured id/enum/number; empty assembly →
+  empty render. **Deliberately does NOT feed significance** (presentation, not a memory signal) — NO
+  significance-engine change; computed then `void`-ed in RemyRelationship (consumer = future layer). No UI
+  change (one RemyMomentChip); NO prior deterministic engine changed. Independent MULTI-AGENT adversarial
+  review CLEAN (7 lenses, 0 findings). tsc/lint/build green.
 - **Answer Assembly Engine** (the FINAL deterministic intelligence layer) — PURE engine assembling ONLY
   the structured, FACTUAL answer package a FUTURE conversational layer will VERBALIZE (`AnswerAssembly`:
   sections/chronology/evidence/entity-lists/coverage/context/summary). **NOT chat, NOT GPT, NOT an LLM,
@@ -174,8 +186,9 @@ Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), the 
 Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Graph Engine (`d6cfb9c`),
 the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), the
 Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), the Question
-Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), and the Answer Assembly Engine
-on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
+(`c46a4f2`), and the Conversation Rendering Engine on top. **Not pushed** — pushing auto-deploys to prod, so
+it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -190,7 +203,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Answer Assembly Engine — final deterministic factual answer package (no answers)
+- *(HEAD)* feat(remy): Conversation Rendering Engine — first presentation layer, deterministic render metadata
+- `c46a4f2` feat(remy): Answer Assembly Engine — final deterministic factual answer package (no answers)
 - `45f9314` feat(remy): Answer Planning Engine — deterministic execution plan (no generated answers)
 - `3489d40` feat(remy): Question Understanding Engine — deterministic retrieval-intent layer (no free-text)
 - `96ee7b7` feat(remy): Conversation Foundation Engine — deterministic groundwork for a future chat layer
