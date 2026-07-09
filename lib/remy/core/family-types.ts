@@ -198,6 +198,55 @@ export interface MemoryUnderstanding {
   confidence: number;
 }
 
+/**
+ * MEMORY GRAPH — the semantic web of how memories connect. Built deterministically from the
+ * `MemoryUnderstanding` layer (real shared attributes only — no GPT, no fabricated links). Internal;
+ * the foundation for future related-memories / journeys / semantic-search / reasoning.
+ */
+export type MemoryEdgeType =
+  | "same-person"
+  | "same-family"
+  | "same-theme"
+  | "same-chapter"
+  | "same-year"
+  | "same-category"
+  | "same-event"
+  | "same-life-stage";
+
+export type ConnectionStrength = "weak" | "moderate" | "strong";
+
+export interface MemoryNode {
+  id: string;
+  year: number;
+  primaryPerson: string | null;
+  themes: MemoryTheme[];
+  importance: MemoryImportance;
+  lifeStage: LifeStage;
+}
+
+export interface MemoryEdge {
+  source: string;
+  target: string;
+  /** Which real shared attributes connect the two memories. */
+  types: MemoryEdgeType[];
+  /** Deterministic connection weight (sum of shared-attribute weights). */
+  weight: number;
+  strength: ConnectionStrength;
+}
+
+export interface MemoryCluster {
+  id: string;
+  label: string;
+  theme: MemoryTheme;
+  memoryIds: string[];
+}
+
+export interface MemoryGraph {
+  nodes: MemoryNode[];
+  edges: MemoryEdge[];
+  clusters: MemoryCluster[];
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

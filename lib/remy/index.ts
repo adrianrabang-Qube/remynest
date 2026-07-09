@@ -90,6 +90,8 @@ export {
   buildMemoryUnderstanding,
   type UnderstandingContext,
 } from "@/lib/remy/core/memory-understanding-engine";
+// Memory Graph — the internal semantic web of how memories connect (Phase 7).
+export { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -109,6 +111,12 @@ export type {
   LifeStage,
   MemoryImportance,
   MemoryRelationship,
+  MemoryGraph,
+  MemoryNode,
+  MemoryEdge,
+  MemoryEdgeType,
+  ConnectionStrength,
+  MemoryCluster,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

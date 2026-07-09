@@ -848,6 +848,27 @@ in `family-types.ts`. Verified tsc/lint/build + adversarial review CLEAN (12/12)
 the understanding in the UI, generate prose from it, put a clock/DB in the engine, duplicate the
 significance engine, or fabricate a life stage/theme/person from absent data.
 
+**Remy — Memory Graph Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core
+engine (`lib/remy/core/memory-graph-engine.ts`, `buildMemoryGraph(MemoryUnderstanding[]) →
+MemoryGraph`) that understands how memories CONNECT — a deterministic semantic graph of nodes (one
+per memory), edges (two memories that share a REAL attribute: `same-person`/`same-family`/
+`same-theme`/`same-chapter`/`same-year`/`same-category`/`same-event`/`same-life-stage`, weighted by
+fixed shared-attribute weights → `weak|moderate|strong`), and theme clusters (Family Memories /
+Travel / School Years / Work Life / Medical Journey / Pet Memories / …). **Deterministic** (fixed
+weights, stable sort by weight then id, `MIN_EDGE_WEIGHT` prune + `MAX_EDGES` cap), **real-data-only,
+NO GPT, NO fabricated/guessed links.** INTERNAL — **not shown in the UI**; it sits after
+memory-understanding in the pipeline, and its per-memory edge-degree feeds the significance engine
+(more connected = more significant) via a CLEAN optional `SignificanceContext.connectionCountByMemoryId`
+extension (additive; existing callers unaffected). No snapshot/DB change (it reads the
+`MemoryUnderstanding` layer). **FIXED pipeline order:** snapshot → memory-understanding → memory-graph
+→ story → favourite → anniversary → significance → emotional → personality → relationship → priority →
+one `<Remy>` renderer. Types (`MemoryGraph`/`MemoryNode`/`MemoryEdge`/`MemoryEdgeType`/
+`ConnectionStrength`/`MemoryCluster`) additive in `family-types.ts`; foundation for FUTURE
+related-memories / journeys / semantic-search / reasoning. (Distinct from the separate, unrelated
+`lib/remy/memory-graph.ts` AI-intelligence file.) Verified tsc/lint/build + adversarial review CLEAN
+(12/12). **Do NOT** surface the graph in the UI, fabricate/guess links, put a clock/DB/randomness in
+it, make edges non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

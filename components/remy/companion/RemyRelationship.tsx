@@ -9,6 +9,7 @@ import {
 } from "@/lib/remy/core/relationship-engine";
 import { selectMoment } from "@/lib/remy/core/priority-engine";
 import { buildMemoryUnderstanding } from "@/lib/remy/core/memory-understanding-engine";
+import { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -104,6 +105,21 @@ export default function RemyRelationship() {
           personImportance: new Map(people.map((p) => [p.id, p.memoryCount] as const)),
         });
 
+        // Memory Graph — deterministic semantic links between memories (internal). Its per-memory
+        // connection count feeds the significance engine (more connected = more significant).
+        const memoryGraph = buildMemoryGraph(understandings);
+        const connectionCountByMemoryId = new Map<string, number>();
+        for (const edge of memoryGraph.edges) {
+          connectionCountByMemoryId.set(
+            edge.source,
+            (connectionCountByMemoryId.get(edge.source) ?? 0) + 1,
+          );
+          connectionCountByMemoryId.set(
+            edge.target,
+            (connectionCountByMemoryId.get(edge.target) ?? 0) + 1,
+          );
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -118,6 +134,7 @@ export default function RemyRelationship() {
           anniversaryMemoryIds: new Set(anniversaries.map((a) => a.memoryId)),
           revisitedMemoryIds,
           chapterSizeByMemoryId,
+          connectionCountByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 

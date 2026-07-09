@@ -15,11 +15,17 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Memory Understanding Engine.
+Readiness**. No implementation task is active — the last work was the Memory Graph Engine.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Memory Graph Engine** — PURE engine turning the understandings into a deterministic semantic graph
+  (nodes/edges/clusters) of how memories connect — edges from REAL shared attributes only (same-person/
+  family/theme/chapter/year/category/event/life-stage), weighted, pruned + capped; theme clusters. No
+  GPT/fabricated links. INTERNAL (not shown); sits after memory-understanding; its edge-degree feeds
+  significance (clean optional context extension). No snapshot/DB change. Adversarial review CLEAN
+  (12/12; the flagged event/category double-count was fixed). tsc/lint/build green.
 - **Memory Understanding Engine** — PURE engine at the front of the pipeline turning each REAL memory
   into a structured `MemoryUnderstanding` (themes/life-stage/importance/richness/relationship/confidence;
   deterministic, real-data-only, no prose/GPT/fabrication). INTERNAL (not shown); feeds the richness
@@ -86,8 +92,8 @@ Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none bloc
 hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), the living
 Nest companion increment (`a818fb0`), the app-wide Remy companion layer (`5598641`), the Companion
 Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), the Emotional Intelligence
-Engine (`cc768a9`), and the Memory Understanding Engine on top. **Not pushed** — pushing auto-deploys
-to prod, so it is an operator decision. tsc/lint/build green.
+Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), and the Memory Graph Engine on top.
+**Not pushed** — pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -102,7 +108,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Memory Understanding — pure per-memory semantic engine (front of pipeline)
+- *(HEAD)* feat(remy): Memory Graph — pure deterministic semantic links between memories
+- `63e944e` feat(remy): Memory Understanding — pure per-memory semantic engine (front of pipeline)
 - `cc768a9` feat(remy): Emotional Intelligence — significance/emotional/personality engines
 - `ccfb907` feat(remy): Living Relationship System — relationship/story/anniversary/favourite/legacy engines
 - `ded5a4d` feat(remy): Companion Intelligence — insights + priority engines, proactive moments
