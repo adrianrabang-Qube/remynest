@@ -80,3 +80,80 @@ export function writeCompanionMemory(memory: CompanionMemory): void {
     /* private mode / quota — best-effort only */
   }
 }
+
+/**
+ * Behavioural memory for the Living Relationship System (RemyRelationship): per-kind cooldowns, the
+ * acknowledged people total (to notice a new family member), which favourite people / anniversaries
+ * / chapters have already been surfaced, revisited memory ids, and a cached favourite-people list.
+ * A separate JSON blob (additive; the companion memory above is untouched). SSR- and failure-safe.
+ */
+const KEY_RELATIONSHIP_MEMORY = "remy.relationship.memory";
+
+export interface RelationshipMemory {
+  cooldowns: Record<string, number>;
+  acknowledgedPeopleTotal: number | null;
+  acknowledgedFavourites: string[];
+  acknowledgedAnniversaries: string[];
+  acknowledgedChapters: string[];
+  visitedMemories: string[];
+  favouritePeople: string[];
+}
+
+const EMPTY_RELATIONSHIP_MEMORY: RelationshipMemory = {
+  cooldowns: {},
+  acknowledgedPeopleTotal: null,
+  acknowledgedFavourites: [],
+  acknowledgedAnniversaries: [],
+  acknowledgedChapters: [],
+  visitedMemories: [],
+  favouritePeople: [],
+};
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+}
+
+export function readRelationshipMemory(): RelationshipMemory {
+  if (typeof window === "undefined") return cloneRelationshipMemory(EMPTY_RELATIONSHIP_MEMORY);
+  try {
+    const raw = window.localStorage.getItem(KEY_RELATIONSHIP_MEMORY);
+    if (!raw) return cloneRelationshipMemory(EMPTY_RELATIONSHIP_MEMORY);
+    const parsed = JSON.parse(raw) as Partial<RelationshipMemory>;
+    return {
+      cooldowns:
+        parsed.cooldowns && typeof parsed.cooldowns === "object"
+          ? (parsed.cooldowns as Record<string, number>)
+          : {},
+      acknowledgedPeopleTotal:
+        typeof parsed.acknowledgedPeopleTotal === "number" ? parsed.acknowledgedPeopleTotal : null,
+      acknowledgedFavourites: stringArray(parsed.acknowledgedFavourites),
+      acknowledgedAnniversaries: stringArray(parsed.acknowledgedAnniversaries),
+      acknowledgedChapters: stringArray(parsed.acknowledgedChapters),
+      visitedMemories: stringArray(parsed.visitedMemories),
+      favouritePeople: stringArray(parsed.favouritePeople),
+    };
+  } catch {
+    return cloneRelationshipMemory(EMPTY_RELATIONSHIP_MEMORY);
+  }
+}
+
+export function writeRelationshipMemory(memory: RelationshipMemory): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(KEY_RELATIONSHIP_MEMORY, JSON.stringify(memory));
+  } catch {
+    /* private mode / quota — best-effort only */
+  }
+}
+
+function cloneRelationshipMemory(memory: RelationshipMemory): RelationshipMemory {
+  return {
+    ...memory,
+    cooldowns: { ...memory.cooldowns },
+    acknowledgedFavourites: [...memory.acknowledgedFavourites],
+    acknowledgedAnniversaries: [...memory.acknowledgedAnniversaries],
+    acknowledgedChapters: [...memory.acknowledgedChapters],
+    visitedMemories: [...memory.visitedMemories],
+    favouritePeople: [...memory.favouritePeople],
+  };
+}

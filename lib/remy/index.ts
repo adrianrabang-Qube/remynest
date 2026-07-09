@@ -67,6 +67,27 @@ export { default as RemyCelebration } from "@/components/remy/companion/RemyCele
 export { default as RemyMilestones } from "@/components/remy/companion/RemyMilestones";
 /** Companion Intelligence: proactive, once-per-app-open behavioural moments (mounted once). */
 export { default as RemyMoments } from "@/components/remy/companion/RemyMoments";
+/** Living Relationship System: long-term, once-per-app-open relationship moments (mounted once). */
+export { default as RemyRelationship } from "@/components/remy/companion/RemyRelationship";
+
+// Living Relationship System — PURE engines + types (for the relationship surface today and future
+// timeline / legacy-book screens; the public import path stays `@/lib/remy`).
+export { buildChapters } from "@/lib/remy/core/story-engine";
+export { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
+export { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
+export { buildLifeSummary, type LegacyInput } from "@/lib/remy/core/legacy-engine";
+export { buildLegacyExport } from "@/lib/remy/core/legacy-export";
+export type {
+  DatedMemory,
+  DatePrecision,
+  FamilyPerson,
+  LifeChapter,
+  Anniversary,
+  FavouritePerson,
+  LifeSummary,
+  LegacyExport,
+  RelationshipObservation,
+} from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).
 export type { RemyEvent, RemyEventName, RemyContextKey } from "@/lib/remy/core/events";

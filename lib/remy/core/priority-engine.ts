@@ -7,7 +7,7 @@
  * by urgency then importance. PURE: no React/DOM/DB/timers. `now` + `cooldowns` are supplied by the
  * caller (from the persistence layer) so the engine stays deterministic and testable.
  */
-import type { Observation } from "./insights-engine";
+import type { RankableMoment } from "./family-types";
 
 export interface PriorityMemory {
   /** Last-shown timestamp (ms) per observation kind — the cooldown ledger. */
@@ -16,11 +16,15 @@ export interface PriorityMemory {
   now: number;
 }
 
-/** Pick at most ONE observation to show now, or null. */
-export function selectMoment(
-  observations: Observation[],
+/**
+ * Pick at most ONE moment to show now, or null. Generic over any `RankableMoment` (an insights
+ * `Observation` or a `RelationshipObservation`) so the single selection rule is shared — no
+ * duplicated logic.
+ */
+export function selectMoment<T extends RankableMoment>(
+  observations: T[],
   memory: PriorityMemory,
-): Observation | null {
+): T | null {
   // Dedupe by kind (keep the first occurrence).
   const seen = new Set<string>();
   const unique = observations.filter((o) => {

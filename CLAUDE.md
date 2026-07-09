@@ -779,6 +779,30 @@ vocabulary) — no second provider/bus/brain, no chat. Verified tsc/lint/build +
 CLEAN (12/12). **Do NOT** put a clock/DB call inside the engines, poll or cron the snapshot, add a
 notifications/chat path, fabricate observations for absent data, or exceed one moment at a time.
 
+**Remy — Living Relationship System (authoritative, 2026-07-09 — extends the ONE platform):** the
+long-term counterpart to Companion Intelligence — Remy builds a relationship with the family over
+time (behavioural, deterministic; **NOT AI/GPT, NOT chat, NOT notifications, NOT a poll**). **Six PURE
+core engines** (`lib/remy/core/`, no React/DOM/DB/timers/clock — the caller supplies `today`/`now`):
+`relationship-engine` (`RelationshipSnapshot` → warm long-term `RelationshipObservation[]`),
+`story-engine` (`buildChapters` — life chapters INFERRED from decade + dominant category, **never
+hardcoded**), `anniversary-engine` (`findAnniversaries` — **only real day-precision dates**),
+`favourite-engine` (`rankFavouritePeople` — real `people.mention_count` + optional view/search),
+`legacy-engine` (`buildLifeSummary` — timeline/chapters/key-people/major-events, **not AI**),
+`legacy-export` (`buildLegacyExport` — a structured object for a FUTURE PDF/book, no rendering). Shared
+types in `family-types.ts`. **`components/remy/companion/RemyRelationship.tsx`** (mounted once) runs
+these **once per app-open** over the read-only, auth-gated, workspace-scoped
+**`app/api/remy/relationship-snapshot`** (memories + `people` + dated memories, effective date =
+`memory_date ?? created_at`; **never polled**; degrades to empty) and shows AT MOST ONE relationship
+moment through the single `<Remy>` renderer. **Global coordination (LOCKED):** only ONE proactive
+moment chip shows at a time — the shared **`RemyMomentChip`** (one impl for both surfaces), the
+process-wide **`moment-gate`** mutex, and the single generic **`selectMoment<T extends RankableMoment>`**
+(one selector for both). RemyRelationship yields to RemyMoments (longer delay + the gate). Relationship
+memory (`persistence.ts` `RelationshipMemory`: cooldowns, acknowledged people-total/favourites/
+anniversaries/chapters) persists so moments never repeat. Story/legacy engines are exported from
+`@/lib/remy` for future timeline/legacy-book screens. Verified tsc/lint/build + adversarial review
+CLEAN (14/14). **Do NOT** put a clock/DB in the engines, hardcode chapter names, fabricate dates/
+people, add a second moment chip/selector/gate, poll the snapshot, or show two moments at once.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

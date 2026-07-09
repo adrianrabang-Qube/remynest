@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
-import RemyRenderer from "@/components/remy/Remy";
 import {
   deriveObservations,
   type CompanionSnapshot,
@@ -18,47 +16,41 @@ import {
   readCompanionMemory,
   writeCompanionMemory,
 } from "@/lib/remy/companion/persistence";
+import { tryBeginMoment, endMoment } from "@/lib/remy/companion/moment-gate";
+import { dayKey, daysBetween } from "@/lib/remy/companion/day";
+import RemyMomentChip from "./RemyMomentChip";
 
 /**
  * Remy Platform (v2) — REMY MOMENTS (Companion Intelligence surface, mounted ONCE by the app shell).
  *
  * Proactive, NOT chat and NOT notifications: once per app-open it gathers a real workspace snapshot
  * (a single read-only fetch — never polled), runs the pure Insights + Priority engines to pick AT
- * MOST ONE observation, and — if one clears its cooldown — Remy briefly appears with a natural line,
- * then fades. Behavioural memory (last-visit day, acknowledged Nest stage, per-kind cooldowns) is
- * persisted so greetings fire once a day and observations never repeat/spam.
- *
- * Extends the ONE platform only: the single `<Remy>` renderer, the behaviour vocabulary, the
- * persistence layer, the core engines. No second provider/bus/brain. Portaled, `pointer-events`
- * limited to a tap-to-dismiss chip, aria-live polite, reduced-motion-safe. Best-effort ambient —
- * any failure silently shows nothing (never throws).
+ * MOST ONE observation, and — if one clears its cooldown AND no other moment is on screen (the
+ * shared moment gate) — Remy briefly appears with a natural line, then fades. Behavioural memory
+ * (last-visit day, acknowledged Nest stage, per-kind cooldowns) is persisted so greetings fire once
+ * a day and observations never repeat/spam. Extends the ONE platform (single renderer + persistence
+ * + core engines); best-effort ambient — any failure silently shows nothing.
  */
-function dayKey(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
-
-function daysBetween(fromKey: string, toKey: string): number {
-  const from = Date.parse(fromKey);
-  const to = Date.parse(toKey);
-  if (Number.isNaN(from) || Number.isNaN(to)) return 0;
-  return Math.round((to - from) / (24 * 60 * 60 * 1000));
-}
-
 export default function RemyMoments() {
   const reduce = useReducedMotion();
   const [moment, setMoment] = useState<Observation | null>(null);
   const ran = useRef(false);
-  // Read the motion preference via a ref so the once-per-app-open effect can have empty deps and
-  // never re-run (a mid-session preference flip can't cancel a pending moment).
+  const began = useRef(false);
   const reduceRef = useRef(reduce);
   useEffect(() => {
     reduceRef.current = reduce;
   }, [reduce]);
 
+  const close = useCallback(() => {
+    setMoment(null);
+    if (began.current) {
+      endMoment();
+      began.current = false;
+    }
+  }, []);
+
   useEffect(() => {
-    // Run the companion intelligence exactly ONCE per app-open (the shell stays mounted across
+    // Run the companion intelligence exactly ONCE per app-open (the shell persists across
     // navigations). Not a poll — a single read.
     if (ran.current) return;
     ran.current = true;
@@ -101,7 +93,6 @@ export default function RemyMoments() {
           daysSinceLastVisit:
             memory.lastVisitDate != null ? daysBetween(memory.lastVisitDate, today) : null,
           acknowledgedStage: (memory.acknowledgedStage as NestStage | null) ?? null,
-          // upcomingDates: wired when a birthday source exists — empty is a no-op for that rule.
         };
 
         const selected = selectMoment(deriveObservations(snapshot), {
@@ -109,21 +100,17 @@ export default function RemyMoments() {
           now: now.getTime(),
         });
 
-        // Record the visit + acknowledge the current stage regardless of what we show, so
-        // greetings fire once/day and a future evolution reads as fresh.
-        writeCompanionMemory({
-          ...memory,
-          lastVisitDate: today,
-          acknowledgedStage: nestStage,
-        });
+        // Record the visit + acknowledge the current stage regardless of what we show.
+        writeCompanionMemory({ ...memory, lastVisitDate: today, acknowledgedStage: nestStage });
 
         if (!selected || cancelled) return;
 
-        // A short delay so Remy doesn't jump the instant the app opens.
         showTimer = setTimeout(() => {
           if (cancelled) return;
+          // Only one proactive moment on screen at a time (shared across companion surfaces).
+          if (!tryBeginMoment()) return;
+          began.current = true;
           setMoment(selected);
-          // Persist this kind's cooldown at show time.
           const fresh = readCompanionMemory();
           writeCompanionMemory({
             ...fresh,
@@ -131,7 +118,7 @@ export default function RemyMoments() {
           });
           hideTimer = setTimeout(
             () => {
-              if (!cancelled) setMoment(null);
+              if (!cancelled) close();
             },
             reduceRef.current ? 3500 : 6000,
           );
@@ -145,44 +132,23 @@ export default function RemyMoments() {
       cancelled = true;
       if (showTimer) clearTimeout(showTimer);
       if (hideTimer) clearTimeout(hideTimer);
+      if (began.current) {
+        endMoment();
+        began.current = false;
+      }
     };
-  }, []);
+  }, [close]);
 
-  if (typeof document === "undefined" || !moment) return null;
+  const look = moment ? resolveBehaviorLook(moment.behavior) : null;
 
-  const look = resolveBehaviorLook(moment.behavior);
-
-  return createPortal(
-    <div
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-[54] flex justify-center px-4 lg:bottom-6"
-      aria-live="polite"
-    >
-      <AnimatePresence>
-        {moment && (
-          <motion.button
-            type="button"
-            onClick={() => setMoment(null)}
-            aria-label={`${moment.message} — dismiss`}
-            className="pointer-events-auto flex max-w-[22rem] items-center gap-3 rounded-full bg-white/95 py-2 pl-2 pr-4 text-left shadow-soft-lg ring-1 ring-sand-deep/40 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
-            transition={
-              reduce ? { duration: 0.2 } : { type: "spring", stiffness: 320, damping: 26 }
-            }
-          >
-            <RemyRenderer
-              state={look.expression}
-              emotion={look.emotion}
-              reactionKey={moment.kind}
-              size={40}
-              decorative
-            />
-            <span className="text-sm font-medium text-charcoal">{moment.message}</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </div>,
-    document.body,
+  return (
+    <RemyMomentChip
+      visible={Boolean(moment)}
+      expression={look?.expression ?? "idle"}
+      emotion={look?.emotion}
+      reactionKey={moment?.kind ?? "none"}
+      message={moment?.message ?? ""}
+      onDismiss={close}
+    />
   );
 }

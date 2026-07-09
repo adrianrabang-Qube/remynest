@@ -17,6 +17,7 @@ import {
   RemyCelebration,
   RemyMilestones,
   RemyMoments,
+  RemyRelationship,
 } from "@/lib/remy";
 import RemyConnectivityBridge from "@/components/RemyConnectivityBridge";
 
@@ -148,6 +149,9 @@ export default async function AppLayout({
         <RemyMilestones memoryCount={memoryCount} />
         {/* Companion Intelligence — proactive behavioural moments (once per app-open, not polled). */}
         <RemyMoments />
+        {/* Living Relationship System — long-term relationship moments (once per app-open; yields
+            to the daily moment via the shared gate). */}
+        <RemyRelationship />
 
         {/* Bridges browser online/offline into Remy semantic events (no UI). */}
         <RemyConnectivityBridge />
