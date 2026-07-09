@@ -400,6 +400,97 @@ export interface LifeStoryAnalysis {
   summary: LifeStorySummary;
 }
 
+/**
+ * REASONING — Remy's structural understanding OF a life, reasoned deterministically from the real
+ * journey / life-story / graph / understanding layers. It surfaces the dominant structural anchors,
+ * lifetime themes, most-influential people, structured relationship importance, and FACTUAL gaps —
+ * all as structured data (never prose, never AI, never fabricated/inferred content). Internal; the
+ * foundation for future reasoning / conversation / biography surfaces.
+ */
+export interface LifeAnchor {
+  id: string;
+  theme: MemoryTheme;
+  journeyIds: string[];
+  memoryIds: string[];
+  /** 0–100 structural strength of this anchor across the whole life. */
+  strength: number;
+  /** 0–100 how much REAL signal (dated / documented / peopled memories) backs it. */
+  confidence: number;
+}
+
+/** A dominant lifetime theme, from the real journey distribution (no prose). */
+export interface LifeTheme {
+  theme: MemoryTheme;
+  memoryCount: number;
+  journeyCount: number;
+  /** 0–100 share of the life's journey-memories. */
+  share: number;
+}
+
+/** A person with real lifetime influence, derived from journeys + understandings + graph. */
+export interface LifeInfluence {
+  personId: string;
+  memoryCount: number;
+  journeyCount: number;
+  /** Total memory-graph degree across the person's memories. */
+  graphConnections: number;
+  /** 0–100 composite lifetime influence. */
+  influence: number;
+}
+
+/** Structured relationship importance (counts only — no emotional interpretation). */
+export interface RelationshipStrength {
+  personId: string;
+  memoryCount: number;
+  journeyCount: number;
+  /** Number of distinct other people who share a memory with this person. */
+  coAppearances: number;
+  /** 0–100 structural strength. */
+  strength: number;
+}
+
+export type MemoryGapKind =
+  | "year-gap"
+  | "sparse-life-stage"
+  | "missing-life-stage"
+  | "weak-documentation";
+
+/** A FACTUAL documentation gap — structured only; Remy never guesses WHY it exists. */
+export interface MemoryGap {
+  id: string;
+  kind: MemoryGapKind;
+  /** For a year-gap: the bounding real years; 0 when not applicable. */
+  startYear: number;
+  endYear: number;
+  /** For a life-stage gap: the stage; null when not applicable. */
+  lifeStage: LifeStage | null;
+  /** Factual magnitude — a gap length in years, or the (low) memory count. Never a reason. */
+  magnitude: number;
+}
+
+/** Structured metadata about the reasoning pass (no prose). */
+export interface ReasoningSummary {
+  dominantAnchor: string | null;
+  dominantTheme: MemoryTheme;
+  strongestRelationship: string | null;
+  /** 0–100 how much real structure the reasoning could derive. */
+  reasoningDepth: number;
+  /** 0–100 aggregate confidence in the reasoning. */
+  confidence: number;
+  /** 0–100 how much of the life is covered / documented. */
+  lifeCoverage: number;
+}
+
+/** The Reasoning Engine's complete output. */
+export interface ReasoningAnalysis {
+  anchors: LifeAnchor[];
+  themes: LifeTheme[];
+  influences: LifeInfluence[];
+  relationshipStrengths: RelationshipStrength[];
+  gaps: MemoryGap[];
+  summary: ReasoningSummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

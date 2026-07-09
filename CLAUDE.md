@@ -926,6 +926,37 @@ points, 0 findings). **Do NOT** surface the life story in the UI, fabricate/gues
 merge disconnected journeys, generate prose/narration, put a clock/DB/randomness in it, reorder the
 downstream pipeline, make output non-deterministic, or duplicate the significance engine.
 
+**Remy — Reasoning Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core engine
+(`lib/remy/core/reasoning-engine.ts`, `buildReasoning({ journeyAnalysis, lifeStory, graph,
+understandings, …optional }) → ReasoningAnalysis`) that REASONS over the real journey/life-story/graph/
+understanding layers to derive Remy's structural understanding OF a life — the foundation for future
+reasoning / conversation / biography surfaces. Five structured products, all real-data-derived:
+**Life Anchors** (dominant structural pillars — a theme with `≥ MIN_ANCHOR_MEMORIES` real
+journey-memories; `"other"` is **never** an anchor; carries `strength` + real-signal `confidence`),
+**Life Themes** (lifetime theme distribution + share), **Life Influences** (people with greatest real
+influence — memory/journey counts + graph degree + optional favourite bonus), **Relationship Strengths**
+(structured counts only — memory/journey/co-appearance, **NO emotional interpretation**), and **Memory
+Gaps** (**FACTUAL only** — large year gaps, sparse / missing-between-present / weakly-documented life
+stages; **NEVER a guess at WHY** — the `MemoryGap` type has no reason field). Everything is deterministic
+(stable sorts with total-order tiebreakers, structural ids, no clock/randomness) and structured (all
+scores are numbers — **no prose/narration**); **NO GPT, no fabricated anchors/people/dates/chronology,
+no inference beyond the real data.** INTERNAL — **not shown in the UI** (no JSX/chip/observation); it sits
+after the life-story engine, and its per-memory anchor strength feeds the significance engine (a memory
+anchoring a strong life pillar = more significant) via a CLEAN optional
+`SignificanceContext.reasoningStrengthByMemoryId` extension (additive → adds 0 when absent; existing
+callers unaffected). **REQUIRED inputs = journey + life-story + graph + understanding** (the layers
+computed at its pipeline position); emotional/personality/relationship/favourite/significant are OPTIONAL
+refinements (forward-compatible; do NOT reorder the downstream pipeline to feed them). No snapshot/DB
+change. **FIXED pipeline order:** snapshot → memory-understanding → memory-graph → journey → life-story →
+reasoning → story → favourite → anniversary → significance → emotional → personality → relationship →
+priority → one `<Remy>` renderer. Types (`ReasoningAnalysis`/`LifeAnchor`/`LifeTheme`/`LifeInfluence`/
+`RelationshipStrength`/`MemoryGap`/`MemoryGapKind`/`ReasoningSummary`) additive in `family-types.ts`.
+Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7 lenses — purity /
+determinism / no-fabrication / platform-integrity / pipeline-order / consumption / regressions — 0
+findings). **Do NOT** surface reasoning in the UI, invent anchors/people/dates/chronology, add a "why" to
+a Memory Gap, generate prose/narration, put a clock/DB/randomness in it, reorder the downstream pipeline,
+make output non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

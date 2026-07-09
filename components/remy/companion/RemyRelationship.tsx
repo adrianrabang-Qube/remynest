@@ -12,6 +12,7 @@ import { buildMemoryUnderstanding } from "@/lib/remy/core/memory-understanding-e
 import { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 import { buildJourneys } from "@/lib/remy/core/journey-engine";
 import { buildLifeStory } from "@/lib/remy/core/life-story-engine";
+import { buildReasoning } from "@/lib/remy/core/reasoning-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -152,6 +153,26 @@ export default function RemyRelationship() {
           }
         }
 
+        // Reasoning Engine — Remy's structural understanding of the life (anchors / themes /
+        // influences / relationship strengths / factual gaps), reasoned from the journey + life-story
+        // + graph + understanding layers (internal, never shown). A memory anchoring a strong life
+        // pillar feeds the significance engine.
+        const reasoningAnalysis = buildReasoning({
+          journeyAnalysis,
+          lifeStory,
+          graph: memoryGraph,
+          understandings,
+        });
+        const reasoningStrengthByMemoryId = new Map<string, number>();
+        for (const anchor of reasoningAnalysis.anchors) {
+          for (const id of anchor.memoryIds) {
+            reasoningStrengthByMemoryId.set(
+              id,
+              Math.max(reasoningStrengthByMemoryId.get(id) ?? 0, anchor.strength),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -169,6 +190,7 @@ export default function RemyRelationship() {
           connectionCountByMemoryId,
           journeyImportanceByMemoryId,
           lifeStoryCentralityByMemoryId,
+          reasoningStrengthByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 
