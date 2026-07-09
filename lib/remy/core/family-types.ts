@@ -644,6 +644,115 @@ export interface ConversationFoundation {
   summary: ConversationSummary;
 }
 
+/**
+ * QUESTION UNDERSTANDING — the deterministic layer that converts a FUTURE user question into
+ * structured RETRIEVAL INTENT over the existing Remy intelligence stack. This is NOT chat, NOT GPT,
+ * NOT an LLM, and takes NO free-text: it enumerates the answerable retrieval intents (and their real
+ * focus / constraints / references) that a future conversational layer will match a parsed question
+ * against. Every field is a structured id, enum, or number — no natural language, no generated text,
+ * no invented ids. Internal only.
+ */
+export type QuestionIntentKind =
+  | "memory"
+  | "person"
+  | "journey"
+  | "theme"
+  | "life-stage"
+  | "relationship"
+  | "timeline"
+  | "event"
+  | "date"
+  | "place"
+  | "comparison"
+  | "summary"
+  | "reference";
+
+/** A bag of REAL structured ids in retrieval scope (no invented ids, no natural language). */
+export interface QuestionFocus {
+  memoryIds: string[];
+  journeyIds: string[];
+  chapterIds: string[];
+  anchorIds: string[];
+  themeIds: MemoryTheme[];
+  personIds: string[];
+  lifeStages: LifeStage[];
+}
+
+/** A single deterministic retrieval intent (kind + the real focus it would retrieve). */
+export interface QuestionIntent {
+  id: string;
+  kind: QuestionIntentKind;
+  /** The primary real entity id this intent targets, or null for a global intent. */
+  refId: string | null;
+  focus: QuestionFocus;
+  /** 0–100 how strong / answerable this intent is. */
+  weight: number;
+  /** 0–100 how well-backed by real signal it is. */
+  confidence: number;
+}
+
+export type QuestionConstraintKind =
+  | "date-range"
+  | "life-stage"
+  | "person"
+  | "theme"
+  | "journey";
+
+/** A structured retrieval constraint (never natural language). */
+export interface QuestionConstraint {
+  kind: QuestionConstraintKind;
+  /** For a date-range: bounding real years; 0 when not applicable. */
+  startYear: number;
+  endYear: number;
+  /** For a life-stage constraint. */
+  lifeStage: LifeStage | null;
+  /** For a person / theme / journey constraint: the real id. */
+  refId: string | null;
+}
+
+export type QuestionReferenceKind =
+  | "memory"
+  | "journey"
+  | "chapter"
+  | "theme"
+  | "anchor"
+  | "person";
+
+/** A pointer to a REAL referenced entity, and the intent it belongs to (if any). */
+export interface QuestionReference {
+  kind: QuestionReferenceKind;
+  refId: string;
+  intentId: string | null;
+}
+
+/** Structured question-understanding metrics (no prose). */
+export interface QuestionContext {
+  focusCoverage: number;
+  confidence: number;
+  candidateCount: number;
+  referenceCount: number;
+  contextDepth: number;
+}
+
+/** Structured question-understanding metadata (no prose). */
+export interface QuestionSummary {
+  dominantIntent: QuestionIntentKind | null;
+  dominantTheme: MemoryTheme;
+  dominantAnchor: string | null;
+  coverage: number;
+  confidence: number;
+}
+
+/** The Question Understanding Engine's complete output. */
+export interface QuestionUnderstanding {
+  intents: QuestionIntent[];
+  focus: QuestionFocus;
+  constraints: QuestionConstraint[];
+  references: QuestionReference[];
+  context: QuestionContext;
+  summary: QuestionSummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

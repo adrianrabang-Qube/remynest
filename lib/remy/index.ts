@@ -105,6 +105,11 @@ export {
   buildConversationFoundation,
   type ConversationFoundationInput,
 } from "@/lib/remy/core/conversation-foundation-engine";
+// Question Understanding — deterministic retrieval-intent layer for a future question layer (Phase 13).
+export {
+  buildQuestionUnderstanding,
+  type QuestionUnderstandingInput,
+} from "@/lib/remy/core/question-understanding-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -167,6 +172,16 @@ export type {
   ConversationContext,
   ConversationSummary,
   ConversationFoundation,
+  QuestionIntent,
+  QuestionIntentKind,
+  QuestionFocus,
+  QuestionConstraint,
+  QuestionConstraintKind,
+  QuestionReference,
+  QuestionReferenceKind,
+  QuestionContext,
+  QuestionSummary,
+  QuestionUnderstanding,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

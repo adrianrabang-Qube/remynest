@@ -1023,6 +1023,44 @@ phase, surface it in the UI, invent topics/threads/memories/people/dates, refere
 a clock/DB/randomness in it, reorder the downstream pipeline, make output non-deterministic, or duplicate
 the significance engine.
 
+**Remy — Question Understanding Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE
+core engine (`lib/remy/core/question-understanding-engine.ts`, `buildQuestionUnderstanding({
+conversationFoundation, biography, reasoning, lifeStory, journeyAnalysis, graph, understandings, …optional })
+→ QuestionUnderstanding`) that builds the deterministic layer a FUTURE conversational layer will use to
+convert a PARSED question into structured RETRIEVAL INTENT over the existing intelligence stack. **This is
+EXPLICITLY NOT chat, NOT GPT, NOT an LLM, and it takes NO free-text question — there is NO natural-language
+parsing and NO deferred AI/chat was built.** **Intents** = the answerable retrieval intents (kinds
+memory / person / journey / theme / life-stage / relationship / timeline / event / date / **place** /
+comparison / summary / reference), each derived from a REAL upstream entity (conversation topics / anchors /
+journeys / chapters / milestones / influences / relationship-strengths / graph-degree memories) with its own
+structured `focus` + `weight` + `confidence`. **The `place` kind is NEVER produced** — the schema stores no
+locations, so a supported kind with no real backing yields ZERO intents rather than a fabricated one (the
+canonical no-fabrication guarantee). **Focus** = real structured ids only (memory/journey/chapter/anchor/
+theme/person/life-stage); **Constraints** = structured only (date-range / life-stage / person / theme /
+journey); **References** = pointers ONLY to real memory/journey/chapter/theme/anchor/person; **Context**/
+**Summary** = structured metrics only. **No natural language, no generated text, no prompts, no invented
+ids** — every output is a structured number, a real id, or an enum (the only string literals are structural
+id templates + kind/enum tags + a numeric `<startYear>-<endYear>` date slug). Deterministic (all foci sorted
+via `makeFocus`; intents sorted [weight desc, id asc] + per-kind capped + globally capped `MAX_INTENTS`;
+structural ids `intent-<kind>-<slug>`; no clock/randomness → byte-identical output). INTERNAL — **not shown
+in the UI** (no JSX/chip/observation); it sits after the conversation-foundation engine, and its per-memory
+intent weight feeds the significance engine (a memory in a strong retrieval-intent focus = more significant)
+via a CLEAN optional `SignificanceContext.questionStrengthByMemoryId` extension (additive → adds 0 when
+absent; existing callers unaffected). **REQUIRED inputs = conversation-foundation + biography + reasoning +
+life-story + journey + graph + understanding** (passed live); favourite/relationship/significant/emotional
+are OPTIONAL refinements (forward-compatible; do NOT reorder the downstream pipeline to feed them). No
+snapshot/DB change. **FIXED pipeline order:** snapshot → memory-understanding → memory-graph → journey →
+life-story → reasoning → biography → conversation-foundation → question-understanding → story → favourite →
+anniversary → significance → emotional → personality → relationship → priority → one `<Remy>` renderer.
+Types (`QuestionUnderstanding`/`QuestionIntent`/`QuestionIntentKind`/`QuestionFocus`/`QuestionConstraint`/
+`QuestionConstraintKind`/`QuestionReference`/`QuestionReferenceKind`/`QuestionContext`/`QuestionSummary`)
+additive in `family-types.ts`. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN
+(7 lenses — purity / determinism / no-fabrication / platform-integrity / pipeline-order / consumption /
+regressions — 0 findings). **Do NOT** build chat/GPT/LLM/free-text parsing/generated responses on top of
+this without a separate approved phase, produce a fabricated `place` (or any no-backing) intent, surface it
+in the UI, invent ids, reference a non-real entity, put a clock/DB/randomness in it, reorder the downstream
+pipeline, make output non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

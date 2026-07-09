@@ -15,11 +15,21 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Conversation Foundation Engine.
+Readiness**. No implementation task is active — the last work was the Question Understanding Engine.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Question Understanding Engine** — PURE engine building the deterministic retrieval-intent layer a
+  FUTURE conversational layer will use to convert a PARSED question into structured intent
+  (`QuestionUnderstanding`: intents/focus/constraints/references/context/summary). **NOT chat, NOT GPT,
+  NOT an LLM, takes NO free-text.** Intents = answerable retrieval intents (13 kinds), each from a real
+  upstream entity; the `place` kind is NEVER produced (no location data — a no-backing kind yields zero,
+  never a fabricated one). Focus/constraints/references are real structured ids only; no natural language,
+  no invented ids. INTERNAL (not shown); sits after conversation-foundation; its per-memory intent weight
+  feeds significance (clean optional context extension). No snapshot/DB/UI change; downstream pipeline
+  order preserved. Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 findings). tsc/lint/build
+  green.
 - **Conversation Foundation Engine** — PURE engine building the deterministic groundwork a FUTURE
   conversational layer will consume (`ConversationFoundation`: topics/threads/references/context/summary).
   **NOT chat, NOT GPT, NOT an LLM, NOT prompts, NOT generated text.** Topics = real recurring subjects
@@ -140,8 +150,9 @@ Nest companion increment (`a818fb0`), the app-wide Remy companion layer (`559864
 Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), the Emotional Intelligence
 Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Graph Engine (`d6cfb9c`),
 the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), the
-Biography Engine (`984f4b6`), and the Conversation Foundation Engine on top. **Not pushed** — pushing
-auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), and the Question
+Understanding Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
+tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -156,7 +167,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Conversation Foundation Engine — deterministic groundwork for a future chat layer
+- *(HEAD)* feat(remy): Question Understanding Engine — deterministic retrieval-intent layer (no free-text)
+- `96ee7b7` feat(remy): Conversation Foundation Engine — deterministic groundwork for a future chat layer
 - `984f4b6` feat(remy): Biography Engine — pure structured (non-prose) representation of a life
 - `96e6ce0` feat(remy): Reasoning Engine — pure structural reasoning about a life over the real layers
 - `c9b3c93` feat(remy): Life Story Engine — pure canonical chronological life story from journeys
