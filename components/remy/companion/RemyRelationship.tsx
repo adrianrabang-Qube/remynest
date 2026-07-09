@@ -11,6 +11,7 @@ import { selectMoment } from "@/lib/remy/core/priority-engine";
 import { buildMemoryUnderstanding } from "@/lib/remy/core/memory-understanding-engine";
 import { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 import { buildJourneys } from "@/lib/remy/core/journey-engine";
+import { buildLifeStory } from "@/lib/remy/core/life-story-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -134,6 +135,23 @@ export default function RemyRelationship() {
           }
         }
 
+        // Life Story Engine — the canonical chronological life story assembled from the journeys
+        // (internal, never shown). A memory in a central story chapter feeds the significance engine.
+        const lifeStory = buildLifeStory({
+          journeyAnalysis,
+          graph: memoryGraph,
+          understandings,
+        });
+        const lifeStoryCentralityByMemoryId = new Map<string, number>();
+        for (const chapter of lifeStory.chapters) {
+          for (const id of chapter.memoryIds) {
+            lifeStoryCentralityByMemoryId.set(
+              id,
+              Math.max(lifeStoryCentralityByMemoryId.get(id) ?? 0, chapter.centrality),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -150,6 +168,7 @@ export default function RemyRelationship() {
           chapterSizeByMemoryId,
           connectionCountByMemoryId,
           journeyImportanceByMemoryId,
+          lifeStoryCentralityByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 

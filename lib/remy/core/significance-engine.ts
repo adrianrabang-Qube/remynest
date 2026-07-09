@@ -18,6 +18,8 @@ export interface SignificanceContext {
   connectionCountByMemoryId?: ReadonlyMap<string, number>;
   /** Journey significance (0–100) — a memory that belongs to a meaningful life journey is more significant. Optional. */
   journeyImportanceByMemoryId?: ReadonlyMap<string, number>;
+  /** Life-story centrality (0–100) — how central the memory's story chapter is to the whole life story. Optional. */
+  lifeStoryCentralityByMemoryId?: ReadonlyMap<string, number>;
   /** Future-compatible — empty today (a manual "pin" feature / conversation references). */
   pinnedMemoryIds?: ReadonlySet<string>;
   conversationMemoryIds?: ReadonlySet<string>;
@@ -36,6 +38,7 @@ export function scoreMemorySignificance(m: DatedMemory, ctx: SignificanceContext
   score += ctx.revisitedMemoryIds.has(m.id) ? 12 : 0; // the family returns to it
   score += Math.min(15, (ctx.connectionCountByMemoryId?.get(m.id) ?? 0) * 2); // graph connectivity
   score += Math.min(12, (ctx.journeyImportanceByMemoryId?.get(m.id) ?? 0) / 8); // part of a life journey
+  score += Math.min(10, (ctx.lifeStoryCentralityByMemoryId?.get(m.id) ?? 0) / 10); // central to the life story
   score += ctx.pinnedMemoryIds?.has(m.id) ? 25 : 0; // manually pinned (future)
   score += ctx.conversationMemoryIds?.has(m.id) ? 8 : 0; // referenced in conversation (future)
   return score;

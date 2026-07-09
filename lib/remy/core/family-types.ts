@@ -312,6 +312,94 @@ export interface JourneyAnalysis {
   summary: JourneySummary;
 }
 
+/**
+ * LIFE STORY — the canonical, structured chronological representation of a life, assembled ONLY from
+ * real journeys (`JourneyAnalysis`). A chapter is a run of chronologically-continuous, connected
+ * journeys; the timeline / milestones / summary are structured references to EXISTING journeys, years,
+ * and memories — never generated prose, never invented chronology, never merged disconnected journeys.
+ * Internal; the canonical source for future AI conversation / biography / timeline UI / story-book
+ * export / memory reconstruction / reasoning.
+ */
+export interface LifeStoryChapter {
+  id: string;
+  /** Reuses a real constituent journey title — no generated prose. */
+  title: string;
+  journeyIds: string[];
+  memoryIds: string[];
+  dominantTheme: MemoryTheme;
+  lifeStage: LifeStage;
+  startYear: number;
+  endYear: number;
+  /** 0–100 how chronologically continuous the chapter's journeys are. */
+  continuity: number;
+  /** 0–100 how central this chapter is to the whole life story (share of the story + continuity). */
+  centrality: number;
+}
+
+/** A real anchoring point in the story (a chapter's start, or its most significant real memory). */
+export interface LifeStoryMilestone {
+  id: string;
+  year: number;
+  journeyId: string;
+  chapterId: string;
+  /** A real anchoring memory when one is available, else null. */
+  memoryId: string | null;
+  kind: "chapter-start" | "significant-memory";
+  /** Reuses a real chapter/journey title — no generated prose. */
+  label: string;
+}
+
+/** One chronological entry on the story timeline — a reference to an existing journey. */
+export interface LifeStoryTimelineEntry {
+  journeyId: string;
+  chapterId: string;
+  startYear: number;
+  endYear: number;
+}
+
+/** The structured story timeline — existing journeys + existing years only (no narration). */
+export interface LifeStoryTimeline {
+  startYear: number;
+  endYear: number;
+  entries: LifeStoryTimelineEntry[];
+}
+
+export interface LifeStory {
+  id: string;
+  /** A factual label built from real span metadata — never narration. */
+  title: string;
+  /** Journey ids in chronological order. */
+  journeys: string[];
+  startYear: number;
+  endYear: number;
+  dominantTheme: MemoryTheme;
+  /** 0–100 overall chronological continuity of the story. */
+  continuity: number;
+}
+
+/** Structured metadata about the whole story (no prose). */
+export interface LifeStorySummary {
+  dominantTheme: MemoryTheme;
+  firstJourneyId: string | null;
+  latestJourneyId: string | null;
+  journeyCount: number;
+  chapterCount: number;
+  /** Count of distinct real years the story's journeys cover. */
+  coveredYears: number;
+  /** Journeys per life stage that actually appears in the story. */
+  lifeStageCoverage: Partial<Record<LifeStage, number>>;
+  continuityScore: number;
+}
+
+/** The Life Story Engine's complete output. */
+export interface LifeStoryAnalysis {
+  story: LifeStory;
+  chapters: LifeStoryChapter[];
+  timeline: LifeStoryTimeline;
+  milestones: LifeStoryMilestone[];
+  summary: LifeStorySummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

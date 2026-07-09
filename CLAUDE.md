@@ -896,6 +896,36 @@ CLEAN (12/12, no blocking issues). **Do NOT** surface journeys in the UI, fabric
 transitions/links, put a clock/DB/randomness in it, reorder the downstream pipeline, make output
 non-deterministic, or duplicate the significance engine.
 
+**Remy — Life Story Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core engine
+(`lib/remy/core/life-story-engine.ts`, `buildLifeStory({ journeyAnalysis, graph?, understandings?,
+chapters?, significantMemories? }) → LifeStoryAnalysis`) that assembles the canonical, structured
+CHRONOLOGICAL life story from real journeys — the source for future AI conversation / biography /
+timeline UI / story-book export / memory reconstruction / reasoning. **A Life Story is NOT generated
+prose.** Journeys are chronologically ordered (undated last) then chained into **chapters** by
+single-linkage: two adjacent journeys join **only** when their years are continuous (dated gap `≤
+MAX_CHAPTER_GAP`; a dated gap `> MAX_HARD_GAP` **ALWAYS splits** — disconnected life periods are never
+merged), their life stages are compatible, AND a REAL relational signal supports it (shared people /
+journey-or-graph connection / same theme / shared life chapter). Chapters carry deterministic
+`continuity`/`centrality`; the `timeline`/`milestones`/`summary` are structured references to EXISTING
+journeys/years/memories only (titles reuse real journey titles; the story title is factual span
+metadata — **no narration/paragraphs**). **Undated memories never fabricate a year** (`startYear/
+endYear = 0`); **NO GPT, no invented chapters/years/events, no merged disconnected journeys** —
+deterministic (stable sorts, no clock/randomness). INTERNAL — **not shown in the UI** (no JSX/chip/
+observation); it sits after the journey engine, and its per-memory life-story centrality feeds the
+significance engine (more central to the story = more significant) via a CLEAN optional
+`SignificanceContext.lifeStoryCentralityByMemoryId` extension (additive → adds 0 when absent; existing
+callers unaffected). **REQUIRED input = `JourneyAnalysis`**; graph/understandings/chapters/significant
+are OPTIONAL refinements (graph + understandings passed live; do NOT reorder the downstream pipeline to
+feed the others). No snapshot/DB change. **FIXED pipeline order:** snapshot → memory-understanding →
+memory-graph → journey → life-story → story → favourite → anniversary → significance → emotional →
+personality → relationship → priority → one `<Remy>` renderer. Types (`LifeStory`/`LifeStoryChapter`/
+`LifeStoryTimeline`/`LifeStoryTimelineEntry`/`LifeStoryMilestone`/`LifeStorySummary`/`LifeStoryAnalysis`)
+additive in `family-types.ts`; foundation for FUTURE timeline / biography / story-book / reasoning
+surfaces. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (4 lenses × 12
+points, 0 findings). **Do NOT** surface the life story in the UI, fabricate/guess chapters/years/events,
+merge disconnected journeys, generate prose/narration, put a clock/DB/randomness in it, reorder the
+downstream pipeline, make output non-deterministic, or duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

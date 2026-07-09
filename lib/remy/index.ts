@@ -94,6 +94,8 @@ export {
 export { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 // Journey Engine — complete life journeys built from the understanding + graph layers (Phase 8).
 export { buildJourneys, type JourneyInput } from "@/lib/remy/core/journey-engine";
+// Life Story Engine — the canonical chronological life story assembled from journeys (Phase 9).
+export { buildLifeStory, type LifeStoryInput } from "@/lib/remy/core/life-story-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -126,6 +128,13 @@ export type {
   JourneyConnection,
   JourneySummary,
   JourneyAnalysis,
+  LifeStory,
+  LifeStoryChapter,
+  LifeStoryTimeline,
+  LifeStoryTimelineEntry,
+  LifeStoryMilestone,
+  LifeStorySummary,
+  LifeStoryAnalysis,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).
