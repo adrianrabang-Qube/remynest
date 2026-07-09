@@ -647,36 +647,49 @@ platform** — distinct from the separate `lib/remy/*.ts` AI-intelligence layer 
 `components/remy/avatar/*` sprite.) See `docs/architecture/REMY_PLATFORM_V2.md` (the single
 source of truth; v1 `REMY_PLATFORM_ARCHITECTURE.md` is historical).
 
-**The Nest — bottom-nav center interaction hub (authoritative, 2026-07-08 — supersedes the Pass-1
-`RemyActionButton` action-sheet):** the mobile center slot is **"The Nest"** — Remy's interaction
-hub, an evolution of the Pass-1 sheet (NOT a new FAB; the "+" stays retired). Remy **rests in the
-nest** (idle: `<Remy state="idle" float>` + soft gold glow via `nest.module.css`); on tap Remy
-**wakes → peeks → pops out → presents the menu** (a calm timed sequence), then **settles back** on
-close. The menu routes to **five EXISTING surfaces** — Ask Remy (`/remy`), Add a memory
-(`/memories/new` via `MOBILE_NEW_ACTION.href`), Add a reminder (`/reminders`), Search (`/search`),
-Insights (`/insights`) — each threaded through `withContext()` (care routing unchanged). Search +
-Insights are **also** kept in the "More" drawer (both surfaces, by design). **Architecture (lives in
-`components/navigation/nest/`):** a **pure interaction FSM** `nest-state-machine.ts`
-(`NestPhase` idle/peek/popout/menuOpen/returnHome + reserved listening/thinking/processing/celebrate;
-`NEST_VISUALS` = the single phase→**existing**-`RemyExpression` map; pure `nestTransition`), timing in
-`nest-animations.ts`, keyframes in `nest.module.css`, the React binding `use-nest-interaction.ts`
-(timed advances, **reduced-motion-safe** on both axes, leak-proof `onPhaseChange` seam — **not** wired
-to the platform), and the components `Nest.tsx` (trigger + idle pedestal) + `NestMenu.tsx` (the
-portaled sheet). **This FSM is UI/interaction state, NOT a second Remy brain** — Remy is drawn ONLY
-through the single `<Remy state>` renderer (no hardcoded `<img>`), the overlay is
-`createPortal(document.body)` (backdrop-blur containing-block invariant), and **no second
-renderer/provider/registry/public-API/event-bus/brain/policy** was created (platform one-of-each
-preserved). **Presentation + routing ONLY** — no backend/auth/billing/reminder/memory/search change;
-verified tsc/lint/build green + independent adversarial review CLEAN (all 16 verdicts YES). **Deferred
-still deferred** (see next note): no Rive/Lottie, real emotional reactions, voice, conversation, or AI
-were built — reserved FSM states are defined+mapped but NOT reachable from the tap flow. **Known
-constraints (flagged):** the referenced "Remy Design Bible" is **not in the repo** (external — visuals
-scoped to existing approved assets + CSS), and the Remy PNGs have **opaque backgrounds** so the clean
-white `variant="nest"` pedestal is the nest vessel (true "Remy-inside-a-nest" compositing + `nestOpen/
-nestClosed` art await transparent assets — a future registry-only drop, no code change). **Do NOT**
-reintroduce the "+" FAB, route the center straight to `/memories/new`, fork a second Remy
-renderer/provider/registry, un-portal the sheet, drop `withContext` on any destination, or build the
-deferred live/AI content here.
+**The Nest — Remy's living HOME, behaviour-driven (authoritative, 2026-07-09 — CORRECTS the
+2026-07-08 hub; supersedes the Pass-1 `RemyActionButton` sheet):** the mobile center slot is
+**"The Nest"** — Remy's persistent, alive, evolving HOME, NOT a FAB and NOT a menu button (the "+"
+stays retired). **The interaction is the feature; the menu is a CONSEQUENCE of Remy greeting.** The
+earlier hub was corrected because it still behaved like a prettier FAB (idle→tap→menu→close with a
+`menuOpen` UI state). **The correction is BEHAVIOUR-driven and lives in the ONE Remy platform** — no
+parallel system. **New platform layer (`lib/remy/core/`, exported via `@/lib/remy`):**
+`behavior.ts` = the **behaviour vocabulary** `RemyBehavior` (resting/sleeping/idle/waking/peeking/
+emerging/greeting/listening/thinking/searching/recording/celebrating/reminder/memoryFound/processing/
+success/returningHome) + `BEHAVIOR_LOOK` mapping **each behaviour to an EXISTING
+expression/emotion/animation-cue** (no new artwork) with a `presentsActions` flag; `nest.ts` = the
+Nest **choreography** as platform data (`NEST_WAKE_SEQUENCE` waking→peeking→emerging→**greeting**
+[sticky, `presentsActions`], `NEST_RETURN_SEQUENCE` returningHome→**resting**) **+ Nest EVOLUTION**
+(`NestStage` small→growing→blooming→family→legendary + pure `resolveNestStage(memoryCount)`).
+**Behaviour is a NEW platform layer above expression/emotion — this is the requested extension, not a
+second brain/renderer/provider/registry/policy/event-bus** (the existing emotion pipeline + floating
+presence are **byte-untouched**). **The nav surface (`components/navigation/nest/`) is a thin PLAYER:**
+`use-nest-interaction.ts` schedules the platform choreography's timed beats (reduced-motion-safe:
+jumps straight to greeting/resting; leak-proof `onBehaviorChange` seam — not wired), `Nest.tsx` renders
+the behaviour-driven Remy via the **single `<Remy state>` renderer** (no hardcoded `<img>`) inside the
+persistent stage-aware nest, `NestMenu.tsx` is the portaled sheet Remy presents **while greeting**. The
+parallel `nest-state-machine.ts` (menuOpen states) and `nest-animations.ts` were **DELETED**. Default
+state = Remy **asleep in the nest** (`resting`→`sleeping` expression + float + gold glow); tapping
+**wakes** Remy who peeks, climbs out, greets, and only THEN presents 5 EXISTING routes — Ask Remy
+(`/remy`), Add a memory (`/memories/new` via `MOBILE_NEW_ACTION.href`), Add a reminder (`/reminders`),
+Search (`/search`), Insights (`/insights`) — each `withContext()`-threaded (care routing unchanged;
+Search+Insights also stay in the "More" drawer). Choosing an action sends Remy **home** → resting.
+The overlay is `createPortal(document.body)` (backdrop-blur containing-block invariant). **Future-ready
+WITHOUT rewrite:** voice/AI/celebrations/memory-found/reminder/search/insights reactions, Golden
+Feather, seasonal themes, Nest evolution, accessories, emotion, physical companion/Watch/Widgets/CarPlay
+all wire in by TRIGGERING an existing reserved behaviour (or adding one row to `BEHAVIOR_LOOK`/a
+choreography beat) + emitting a platform event — the reserved behaviours are defined+mapped but NOT
+reachable from the tap flow, and **no deferred AI/voice/Rive/Lottie was built**. **Presentation +
+routing ONLY** — billing/auth/caregiver+access_level/reconcile/reminders(scheduling/native/OneSignal)/
+memory/search/workspace/active-profile all byte-unchanged; verified tsc/lint/build green + independent
+adversarial review CLEAN (all 15 verdicts YES). **Known constraints (flagged):** the "Remy Design
+Bible" is **not in the repo** (external — visuals scoped to existing approved assets + CSS), and the
+Remy PNGs have **opaque backgrounds**, so the clean white `variant="nest"` pedestal is the nest vessel
+and dedicated per-stage nest art awaits transparent assets (a future registry-only drop, no code
+change). **Do NOT** reintroduce the "+" FAB, add a `menuOpen`/menu STATE (the menu derives from a
+behaviour's `presentsActions`), fork a second renderer/provider/registry/brain/policy/event-bus, build
+a second state machine in the nav layer, add a Remy expression/behaviour that isn't drawn through the
+single `<Remy>` renderer, un-portal the sheet, drop `withContext`, or build the deferred live/AI content.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

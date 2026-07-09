@@ -61,3 +61,22 @@ export { default as RemyFloatingPresence } from "@/components/remy/companion/Flo
 export type { RemyEvent, RemyEventName, RemyContextKey } from "@/lib/remy/core/events";
 export type { RemyEmotion } from "@/lib/remy/core/emotion";
 export type { RemyExpression, RemyPresentation } from "@/lib/remy/core/presentation";
+
+// Living-companion BEHAVIOUR vocabulary + the NEST choreography/evolution. Still semantic — a
+// behaviour maps to an EXISTING expression internally (never an asset path), so the Nest surface
+// speaks in Remy behaviour, not menu state. Part of the ONE platform (no parallel system).
+export {
+  BEHAVIOR_LOOK,
+  REMY_BEHAVIORS,
+  resolveBehaviorLook,
+} from "@/lib/remy/core/behavior";
+export type { RemyBehavior, RemyBehaviorLook } from "@/lib/remy/core/behavior";
+export {
+  NEST_WAKE_SEQUENCE,
+  NEST_RETURN_SEQUENCE,
+  NEST_RESTING_BEHAVIOR,
+  NEST_GREETING_BEHAVIOR,
+  NEST_STAGES,
+  resolveNestStage,
+} from "@/lib/remy/core/nest";
+export type { NestStep, NestStage, NestStageInfo } from "@/lib/remy/core/nest";

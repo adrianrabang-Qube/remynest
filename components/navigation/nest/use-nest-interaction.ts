@@ -2,14 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { NEST_TIMING } from "./nest-animations";
 import {
-  NEST_VISUALS,
-  nestTransition,
-  type NestEvent,
-  type NestPhase,
-  type NestPhaseVisual,
-} from "./nest-state-machine";
+  NEST_GREETING_BEHAVIOR,
+  NEST_RESTING_BEHAVIOR,
+  NEST_RETURN_SEQUENCE,
+  NEST_WAKE_SEQUENCE,
+  resolveBehaviorLook,
+  type NestStep,
+  type RemyBehavior,
+  type RemyBehaviorLook,
+} from "@/lib/remy";
 
 function prefersReducedMotion(): boolean {
   return (
@@ -20,37 +22,40 @@ function prefersReducedMotion(): boolean {
 }
 
 export interface NestInteraction {
-  phase: NestPhase;
-  visual: NestPhaseVisual;
-  isMenuOpen: boolean;
-  /** Mid-wake (peek / popout) — drives the one-shot wake animation on the pedestal. */
+  /** Remy's current platform BEHAVIOUR (never a menu/UI state). */
+  behavior: RemyBehavior;
+  /** The resolved look for the current behaviour (expression / emotion / animation). */
+  look: RemyBehaviorLook;
+  /** True while Remy is presenting actions (greeting) — the menu is a CONSEQUENCE of this. */
+  presentsActions: boolean;
+  /** True mid-wake (waking / peeking / emerging) — drives the one-shot wake motion. */
   isWaking: boolean;
-  /** Begin the wake sequence (or open instantly under reduced motion). */
-  open: () => void;
-  /** Close via backdrop / Escape / breakpoint — Remy settles back into the nest. */
-  dismiss: () => void;
-  /** A menu item was chosen — same settle, but navigation follows. */
-  select: () => void;
+  /** True while Remy rests in the Nest (asleep / at rest). */
+  isResting: boolean;
+  /** Wake Remy: play the wake choreography (or jump to greeting under reduced motion). */
+  wake: () => void;
+  /** Send Remy home: play the return choreography (dismiss — no navigation follows). */
+  sendHome: () => void;
+  /** An action was chosen — Remy returns home; navigation follows. */
+  chooseAction: () => void;
 }
 
 /**
- * React binding for the pure Nest interaction FSM (`nest-state-machine.ts`). Owns the phase state
- * and schedules the timed wake/return advances, respecting `prefers-reduced-motion`. Presentation
- * stays declarative in the components; timing lives in `nest-animations.ts`; the transition rules
- * live in the pure FSM — this hook only wires them together.
- *
- * `onPhaseChange` is a leak-proof seam for FUTURE platform integration (e.g. `Remy.emit(...)` so
- * the wider companion reacts when the Nest opens). It is deliberately NOT wired to the platform
- * today — no deferred AI/conversation is built here — only reported.
+ * The Nest interaction — a PLAYER for the platform's Nest choreography (`@/lib/remy`). It advances
+ * Remy through the platform BEHAVIOUR sequences (wake / return home), honouring
+ * `prefers-reduced-motion`, and exposes Remy's current behaviour + its resolved look. It defines
+ * NO Remy vocabulary and NO transitions of its own — those live in the ONE Remy platform
+ * (`lib/remy/core/{behavior,nest}.ts`); this hook only schedules the timed beats. `onBehaviorChange`
+ * is a leak-proof seam for FUTURE platform integration (e.g. `Remy.emit`) — reported, not wired.
  */
 export function useNestInteraction(options?: {
-  onPhaseChange?: (phase: NestPhase) => void;
+  onBehaviorChange?: (behavior: RemyBehavior) => void;
 }): NestInteraction {
-  const [phase, setPhase] = useState<NestPhase>("idle");
+  const [behavior, setBehavior] = useState<RemyBehavior>(NEST_RESTING_BEHAVIOR);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const onPhaseChangeRef = useRef(options?.onPhaseChange);
+  const onBehaviorChangeRef = useRef(options?.onBehaviorChange);
   useEffect(() => {
-    onPhaseChangeRef.current = options?.onPhaseChange;
+    onBehaviorChangeRef.current = options?.onBehaviorChange;
   });
 
   const clearTimers = useCallback(() => {
@@ -58,63 +63,62 @@ export function useNestInteraction(options?: {
     timers.current = [];
   }, []);
 
-  const fire = useCallback(
-    (event: NestEvent) => setPhase((p) => nestTransition(p, event)),
-    [],
+  // Play a platform choreography: the first beat is immediate; each later beat fires at the sum of
+  // the prior beats' durations; the final (durationMs 0) beat is sticky until the next input.
+  const play = useCallback(
+    (sequence: readonly NestStep[]) => {
+      clearTimers();
+      let elapsed = 0;
+      sequence.forEach((step, index) => {
+        if (index === 0) {
+          setBehavior(step.behavior);
+        } else {
+          timers.current.push(
+            setTimeout(() => setBehavior(step.behavior), elapsed),
+          );
+        }
+        elapsed += step.durationMs;
+      });
+    },
+    [clearTimers],
   );
 
-  const open = useCallback(() => {
-    clearTimers();
+  const wake = useCallback(() => {
     if (prefersReducedMotion()) {
-      fire("REDUCED_TAP"); // → menuOpen, no animation
+      clearTimers();
+      setBehavior(NEST_GREETING_BEHAVIOR); // straight to greeting, no animation
       return;
     }
-    fire("TAP"); // idle → peek
-    timers.current.push(
-      setTimeout(() => fire("PEEK_DONE"), NEST_TIMING.peekMs), // peek → popout
-    );
-    timers.current.push(
-      setTimeout(
-        () => fire("POP_DONE"), // popout → menuOpen
-        NEST_TIMING.peekMs + NEST_TIMING.popMs,
-      ),
-    );
-  }, [clearTimers, fire]);
+    play(NEST_WAKE_SEQUENCE);
+  }, [clearTimers, play]);
 
-  const settle = useCallback(
-    (event: Extract<NestEvent, "DISMISS" | "SELECT">) => {
+  const sendHome = useCallback(() => {
+    if (prefersReducedMotion()) {
       clearTimers();
-      if (prefersReducedMotion()) {
-        fire("RESET"); // → idle instantly
-        return;
-      }
-      fire(event); // menuOpen → returnHome
-      timers.current.push(
-        setTimeout(() => fire("RETURN_DONE"), NEST_TIMING.returnMs), // returnHome → idle
-      );
-    },
-    [clearTimers, fire],
-  );
+      setBehavior(NEST_RESTING_BEHAVIOR); // straight home, no animation
+      return;
+    }
+    play(NEST_RETURN_SEQUENCE);
+  }, [clearTimers, play]);
 
-  const dismiss = useCallback(() => settle("DISMISS"), [settle]);
-  const select = useCallback(() => settle("SELECT"), [settle]);
+  const chooseAction = useCallback(() => sendHome(), [sendHome]);
 
-  // Report phase changes (future platform seam) after each render that changed it.
+  // Report behaviour changes (future platform seam) + never leave a timer running past unmount.
   useEffect(() => {
-    onPhaseChangeRef.current?.(phase);
-  }, [phase]);
-
-  // Never leave a timer running past unmount.
+    onBehaviorChangeRef.current?.(behavior);
+  }, [behavior]);
   useEffect(() => () => clearTimers(), [clearTimers]);
 
-  const visual = NEST_VISUALS[phase];
+  const look = resolveBehaviorLook(behavior);
   return {
-    phase,
-    visual,
-    isMenuOpen: visual.menuOpen,
-    isWaking: phase === "peek" || phase === "popout",
-    open,
-    dismiss,
-    select,
+    behavior,
+    look,
+    presentsActions: Boolean(look.presentsActions),
+    isWaking:
+      behavior === "waking" || behavior === "peeking" || behavior === "emerging",
+    isResting: behavior === "resting" || behavior === "sleeping",
+    wake,
+    sendHome,
+    chooseAction,
   };
 }

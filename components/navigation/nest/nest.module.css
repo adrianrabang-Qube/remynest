@@ -1,9 +1,9 @@
 /*
- * The Nest — idle glow + wake motion for the bottom-nav center hub.
+ * The Nest — the physical presence of Remy's home in the bottom-nav center.
  *
- * Additive to <Remy>'s own breathe/float (motion.module.css): this file only adds the soft
- * "nest" glow around the pedestal and the one-shot wake lift as Remy peeks/pops out. On-brand
- * warm gold glow (the Companion/Remy accent), never sage. All motion is reduced-motion-safe.
+ * Additive to <Remy>'s own breathe/float (motion.module.css): this file adds the persistent "nest"
+ * glow, the evolution-stage accent behind Remy, and the one-shot wake lift as Remy peeks/climbs
+ * out. On-brand warm gold (the Companion/Remy accent), never sage. All motion is reduced-motion-safe.
  */
 
 /* Soft, slow gold glow around the white nest pedestal while Remy rests. Applied to the pedestal
@@ -27,10 +27,67 @@
   }
 }
 
-/* One-shot wake: a gentle rise + scale as Remy peeks then pops from the nest. Re-triggered by the
- * component re-keying this element per phase. */
-.wake {
+/* The nest vessel around Remy. `::after` is the evolution accent — a warm halo behind Remy that
+ * deepens as the Nest grows (Small → Legendary), so the persistent Nest visibly evolves without
+ * needing new artwork. Dedicated per-stage nest art can later replace this accent via the registry
+ * with no change to consumers. */
+.nest {
+  position: relative;
+  z-index: 0;
   display: inline-block;
+}
+
+.nest::after {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: -1;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 106, 0.18) 0%,
+    rgba(201, 168, 106, 0) 70%
+  );
+  opacity: 0.6;
+  transition: opacity 400ms ease;
+  pointer-events: none;
+}
+
+.nest[data-nest-stage="growing"]::after {
+  opacity: 0.78;
+}
+
+.nest[data-nest-stage="blooming"]::after {
+  opacity: 0.9;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 106, 0.26) 0%,
+    rgba(201, 168, 106, 0) 72%
+  );
+}
+
+.nest[data-nest-stage="family"]::after {
+  opacity: 1;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 106, 0.32) 0%,
+    rgba(201, 168, 106, 0) 74%
+  );
+}
+
+.nest[data-nest-stage="legendary"]::after {
+  opacity: 1;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 106, 0.4) 0%,
+    rgba(138, 107, 208, 0.16) 55%,
+    rgba(201, 168, 106, 0) 78%
+  );
+}
+
+/* One-shot wake: a gentle rise + scale as Remy stirs, peeks, then climbs out of the nest.
+ * Re-triggered by the component re-keying this element per behaviour. */
+.wake {
   animation: nestWake 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -53,5 +110,8 @@
   }
   .wake {
     animation: none;
+  }
+  .nest::after {
+    transition: none;
   }
 }
