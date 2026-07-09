@@ -4,7 +4,14 @@ The **single source of workflow truth**. `/docs` is the source of **content trut
 Do not create parallel workflow/instruction files — enhance this one.
 
 ## Start every session (mandatory) — Session Continuity Rule
-1. **Read `docs/handoffs/HANDOFF_CURRENT.md` FIRST**, then the **relevant sections of
+0. **Read `docs/REMY_MASTER_STATE.md` FIRST** (authoritative, 2026-07-09) — the single
+   consolidated source of truth for project state: launch %, current/next task, VERIFIED
+   COMPLETE (never re-suggest), DO NOT REBUILD, LOCKED architecture decisions, launch blockers,
+   and known open items. **Source code always wins over any doc**; reconcile docs forward.
+   **After every completed task you MUST update `docs/REMY_MASTER_STATE.md`** (+ HANDOFF, + this
+   file for architectural changes) — never ask, never skip. Do not re-suggest anything under its
+   VERIFIED COMPLETE / DO NOT REBUILD / POST-LAUNCH sections unless the operator explicitly asks.
+1. **Read `docs/handoffs/HANDOFF_CURRENT.md`**, then the **relevant sections of
    this `CLAUDE.md`** second. **Continue from the documented project state.**
 2. Read **only the docs relevant to the task** (map below). Trust docs over rediscovery.
 3. **Do not scan unrelated files** or run repository-wide analysis unless the task
