@@ -957,6 +957,38 @@ findings). **Do NOT** surface reasoning in the UI, invent anchors/people/dates/c
 a Memory Gap, generate prose/narration, put a clock/DB/randomness in it, reorder the downstream pipeline,
 make output non-deterministic, or duplicate the significance engine.
 
+**Remy — Biography Engine (authoritative, 2026-07-09 — extends the ONE platform):** a PURE core engine
+(`lib/remy/core/biography-engine.ts`, `buildBiography({ journeyAnalysis, lifeStory, reasoning, graph,
+understandings, …optional }) → BiographyAnalysis`) that assembles a STRUCTURED representation of a life
+from the real journey/life-story/reasoning/graph/understanding layers — the foundation for a future
+biography / story-book renderer that resolves the references to real data. **A Biography is NOT generated
+prose.** **Sections** mirror the real life-story chapters 1:1 (id / title [**reuses the real chapter
+title**] / journeyIds / chapterIds / memoryIds / theme / lifeStage + `coverage` [breadth] + `confidence`
+[dated/media/peopled backing]); **Periods** group sections chronologically by life stage using **only
+real memory years** (`startYear/endYear = 0` when undated — **never invents a date**); **References**
+point **ONLY** at real journey / chapter / anchor / theme / person / memory ids (bounded by
+`MAX_PEOPLE_REFS`/`MAX_MEMORY_REFS`); **Coverage** = structured metrics (memory / journey / chapter /
+life-stage / timeline coverage + confidence); **Summary** = dominantTheme / dominantAnchor / coveredYears
+/ coverage / confidence. **No paragraphs, no narration, no fabricated memories/people/dates/chronology** —
+every output is a structured number or a real id. Deterministic (sections follow chapters order; periods
+iterate a fixed stage order; structural ids `section-<chapterId>`/`period-<stage>`; no clock/randomness →
+byte-identical output). INTERNAL — **not shown in the UI** (no JSX/chip/observation); it sits after the
+reasoning engine, and its per-memory section coverage feeds the significance engine (a memory in a
+well-covered biography section = more significant) via a CLEAN optional
+`SignificanceContext.biographyCoverageByMemoryId` extension (additive → adds 0 when absent; existing
+callers unaffected). **REQUIRED inputs = journey + life-story + reasoning + graph + understanding** (passed
+live); favourite/emotional/relationship/significant are OPTIONAL refinements (forward-compatible; do NOT
+reorder the downstream pipeline to feed them). No snapshot/DB change. **FIXED pipeline order:** snapshot →
+memory-understanding → memory-graph → journey → life-story → reasoning → biography → story → favourite →
+anniversary → significance → emotional → personality → relationship → priority → one `<Remy>` renderer.
+Types (`BiographyAnalysis`/`BiographySection`/`BiographyPeriod`/`BiographyReference`/`BiographyReferenceKind`/
+`BiographyCoverage`/`BiographySummary`) additive in `family-types.ts`. Verified tsc/lint/build + independent
+MULTI-AGENT adversarial review CLEAN (7 lenses — purity / determinism / no-fabrication / platform-integrity
+/ pipeline-order / consumption / regressions — 0 findings). **Do NOT** surface the biography in the UI,
+generate prose/paragraphs/narration, fabricate memories/people/dates/chronology, reference a non-real
+entity, put a clock/DB/randomness in it, reorder the downstream pipeline, make output non-deterministic, or
+duplicate the significance engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

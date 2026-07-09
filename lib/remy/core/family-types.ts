@@ -491,6 +491,81 @@ export interface ReasoningAnalysis {
   summary: ReasoningSummary;
 }
 
+/**
+ * BIOGRAPHY — a structured representation of a life, assembled ONLY from the real journey / life-story
+ * / reasoning / graph / understanding layers. It is NOT generated prose: every section / period /
+ * reference points at REAL journeys / chapters / anchors / themes / people / memories, and every metric
+ * is a structured number. No paragraphs, no narration, no fabrication. Internal; the foundation for a
+ * future biography / story-book renderer that resolves these references to real data.
+ */
+export interface BiographySection {
+  id: string;
+  /** Reuses a real life-story chapter title — no generated prose. */
+  title: string;
+  journeyIds: string[];
+  chapterIds: string[];
+  memoryIds: string[];
+  theme: MemoryTheme;
+  lifeStage: LifeStage;
+  /** 0–100 how much of the documented life this section covers (breadth). */
+  coverage: number;
+  /** 0–100 how well-backed by real signal the section is (dated / media / peopled). */
+  confidence: number;
+}
+
+/** A real chronological period (grouped by life stage); years come only from real memory dates. */
+export interface BiographyPeriod {
+  id: string;
+  startYear: number;
+  endYear: number;
+  sectionIds: string[];
+  lifeStage: LifeStage;
+  memoryCount: number;
+}
+
+export type BiographyReferenceKind =
+  | "journey"
+  | "chapter"
+  | "anchor"
+  | "theme"
+  | "person"
+  | "memory";
+
+/** A pointer to a REAL referenced entity (never fabricated), and the section it belongs to (if any). */
+export interface BiographyReference {
+  kind: BiographyReferenceKind;
+  refId: string;
+  sectionId: string | null;
+}
+
+/** Structured coverage metrics for the whole biography (no prose). */
+export interface BiographyCoverage {
+  memoryCoverage: number;
+  journeyCoverage: number;
+  chapterCoverage: number;
+  lifeStageCoverage: number;
+  timelineCoverage: number;
+  confidence: number;
+}
+
+/** Structured biography metadata (no prose). */
+export interface BiographySummary {
+  dominantTheme: MemoryTheme;
+  dominantAnchor: string | null;
+  coveredYears: number;
+  coverage: number;
+  confidence: number;
+}
+
+/** The Biography Engine's complete output. */
+export interface BiographyAnalysis {
+  sections: BiographySection[];
+  periods: BiographyPeriod[];
+  references: BiographyReference[];
+  coverage: BiographyCoverage;
+  summary: BiographySummary;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

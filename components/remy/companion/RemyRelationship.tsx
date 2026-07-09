@@ -13,6 +13,7 @@ import { buildMemoryGraph } from "@/lib/remy/core/memory-graph-engine";
 import { buildJourneys } from "@/lib/remy/core/journey-engine";
 import { buildLifeStory } from "@/lib/remy/core/life-story-engine";
 import { buildReasoning } from "@/lib/remy/core/reasoning-engine";
+import { buildBiography } from "@/lib/remy/core/biography-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -173,6 +174,26 @@ export default function RemyRelationship() {
           }
         }
 
+        // Biography Engine — a structured representation of the life assembled from the journey +
+        // life-story + reasoning + graph + understanding layers (internal, never shown). A memory in a
+        // well-covered biography section feeds the significance engine.
+        const biographyAnalysis = buildBiography({
+          journeyAnalysis,
+          lifeStory,
+          reasoning: reasoningAnalysis,
+          graph: memoryGraph,
+          understandings,
+        });
+        const biographyCoverageByMemoryId = new Map<string, number>();
+        for (const section of biographyAnalysis.sections) {
+          for (const id of section.memoryIds) {
+            biographyCoverageByMemoryId.set(
+              id,
+              Math.max(biographyCoverageByMemoryId.get(id) ?? 0, section.coverage),
+            );
+          }
+        }
+
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
@@ -191,6 +212,7 @@ export default function RemyRelationship() {
           journeyImportanceByMemoryId,
           lifeStoryCentralityByMemoryId,
           reasoningStrengthByMemoryId,
+          biographyCoverageByMemoryId,
         });
         const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
 

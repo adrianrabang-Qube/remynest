@@ -98,6 +98,8 @@ export { buildJourneys, type JourneyInput } from "@/lib/remy/core/journey-engine
 export { buildLifeStory, type LifeStoryInput } from "@/lib/remy/core/life-story-engine";
 // Reasoning Engine — Remy's structural reasoning about a life, over the real layers (Phase 10).
 export { buildReasoning, type ReasoningInput } from "@/lib/remy/core/reasoning-engine";
+// Biography Engine — a structured (non-prose) representation of a life, over the real layers (Phase 11).
+export { buildBiography, type BiographyInput } from "@/lib/remy/core/biography-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -145,6 +147,13 @@ export type {
   MemoryGapKind,
   ReasoningSummary,
   ReasoningAnalysis,
+  BiographySection,
+  BiographyPeriod,
+  BiographyReference,
+  BiographyReferenceKind,
+  BiographyCoverage,
+  BiographySummary,
+  BiographyAnalysis,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

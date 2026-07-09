@@ -15,11 +15,20 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Reasoning Engine.
+Readiness**. No implementation task is active — the last work was the Biography Engine.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Biography Engine** — PURE engine assembling a STRUCTURED (non-prose) representation of a life from
+  the real journey/life-story/reasoning/graph/understanding layers (`BiographyAnalysis`: sections/periods/
+  references/coverage/summary). Sections mirror real life-story chapters 1:1 (title reuses the real chapter
+  title); periods group by life stage using only real years (0 when undated); references point ONLY at
+  real journey/chapter/anchor/theme/person/memory ids (bounded); coverage/summary are structured metrics.
+  No paragraphs/narration, no fabricated memories/people/dates/chronology. INTERNAL (not shown); sits after
+  reasoning; its per-memory section coverage feeds significance (clean optional context extension). No
+  snapshot/DB/UI change; downstream pipeline order preserved. Independent MULTI-AGENT adversarial review
+  CLEAN (7 lenses, 0 findings). tsc/lint/build green.
 - **Reasoning Engine** — PURE engine reasoning over the real journey/life-story/graph/understanding
   layers to derive Remy's structural understanding OF a life (`ReasoningAnalysis`: anchors/themes/
   influences/relationshipStrengths/gaps/summary): Life Anchors (dominant pillars — `"other"` never
@@ -121,8 +130,9 @@ hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`,
 Nest companion increment (`a818fb0`), the app-wide Remy companion layer (`5598641`), the Companion
 Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), the Emotional Intelligence
 Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Graph Engine (`d6cfb9c`),
-the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), and the Reasoning Engine on top.
-**Not pushed** — pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), and
+the Biography Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
+tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -137,7 +147,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Reasoning Engine — pure structural reasoning about a life over the real layers
+- *(HEAD)* feat(remy): Biography Engine — pure structured (non-prose) representation of a life
+- `96e6ce0` feat(remy): Reasoning Engine — pure structural reasoning about a life over the real layers
 - `c9b3c93` feat(remy): Life Story Engine — pure canonical chronological life story from journeys
 - `11afd67` feat(remy): Journey Engine — pure deterministic life journeys from understanding + graph
 - `d6cfb9c` feat(remy): Memory Graph — pure deterministic semantic links between memories
