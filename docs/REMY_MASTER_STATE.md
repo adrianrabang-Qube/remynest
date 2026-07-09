@@ -8,9 +8,9 @@
 > (10-agent, file:line-cited). Items are re-verified against code before being trusted, not from memory.
 
 Last Updated: 2026-07-09
-Branch: main (ahead of origin/main; **unpushed** — Nest hub + master-state doc commits)
-Commit: 7f65178 `docs(sync): establish REMY_MASTER_STATE.md` (baseline; later doc-sync commits build on top)
-Repository Verified: **YES** — 2026-07-09, via a 10-agent file:line-cited source audit. **Source code is authoritative over all documentation** (this file, CLAUDE.md, HANDOFF, architecture docs); reconcile docs forward when they diverge.
+Branch: main — 4 commits ahead of `origin/main` (`f53694b`); **unpushed**: `e73dc7e`, `a97dfac`, `7f65178`, `94088c3` (+ this sync-pass commit)
+Commit: 94088c3 `docs(sync): conform REMY_MASTER_STATE header` (HEAD at the start of this sync pass; this pass commits on top)
+Repository Verified: **YES** — 2026-07-09. Basis: the 10-agent file:line-cited source audit, plus a targeted source re-verification this sync pass (access_level enforcement, AI stack, Nest, audio/PDF-UI, reminder-edit, security-headers/rate-limiting all reconfirmed against actual code). **Source code is authoritative over all documentation** (this file, CLAUDE.md, HANDOFF, architecture docs); reconcile docs forward when they diverge.
 
 ==================================================
 ## PROJECT STATUS
@@ -24,7 +24,7 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — the synchronization audit just completed and this master-state system was established.)*
+Current Task: *(none active — the documentation-synchronization pass just completed. Ready to begin the Next Task on operator go-ahead.)*
 
 Next Task: **UGC report/block + EULA abuse clause (Apple Guideline 1.2)** — the single highest-priority engineering task before ship (memories are shared into caregiver/family workspaces → Apple treats it as a UGC/social app requiring report + block + an EULA abuse clause).
 
@@ -113,7 +113,7 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 **OPERATOR**
 - Apply prod Supabase migrations (storage_ledger `20260623120000`; reminder lease `20260707120000` + confirmations `20260707130000`).
 - Set Vercel env: Sentry DSN; `NEXT_PUBLIC_APP_STORE_URL` / `_PLAY_STORE_URL`; verify 6 Stripe LIVE price IDs + webhook secret.
-- Push the 2 unpushed Nest commits (e73dc7e, a97dfac) + smoke-test upload→quota→checkout→webhook.
+- Push the 4 unpushed commits (e73dc7e, a97dfac, 7f65178, 94088c3 + this sync-pass commit) + smoke-test upload→quota→checkout→webhook.
 - Stand up real contact mailboxes (support@ / privacy@ / dpo@ / security@ — `lib/contact.ts` placeholders).
 - *(Only if Android ships now)* FCM `google-services.json` + CAMERA/media perms + release keystore/signing.
 
@@ -173,26 +173,21 @@ Estimated Tasks Remaining (to launch): **~9** — 1 engineering (UGC report/bloc
 
 **FUTURE** — see POST-LAUNCH ROADMAP.
 
-**Documentation divergences to reconcile** *(source code is authoritative)*
-- HANDOFF_CURRENT.md open-issues still says `memory-media` is public → it is PRIVATE (CLAUDE.md authoritative). STALE line.
-- HANDOFF "unpushed commits" says 11–14 → actual is 2. STALE.
-- CLAUDE.md older Pass-1 paragraph still describes `RemyActionButton` as the center action → superseded by the 2026-07-09 Nest note (RemyActionButton deleted).
-- CLAUDE.md older caregiver notes say "access_level not enforced" → superseded by the enforcement note (f53694b).
-- Roadmap says "resolveStorageTier is a FREE stub / subscription integration is the big gap" → FALSE, fully wired.
-- Roadmap says "wire landing store buttons to /download (no href today)" → already wired.
-- RLS applied-state (memories INSERT + relationship tables) is dashboard-managed → confirm in Supabase SQL editor, not repo-verifiable.
+**Documentation divergences** *(source code is authoritative)* — **reconciled in the 2026-07-09 sync pass:** HANDOFF was rebuilt as a lightweight continuation doc (the stale "memory-media public" + "11–14 unpushed commits" + obsolete-roadmap/blocker lines removed); CLAUDE.md's Pass-1 `RemyActionButton` reference now carries a SUPERSEDED marker pointing to the Nest note; and `docs/roadmap/launch-roadmap.md` carries a SUPERSEDED banner deferring to this file. Remaining, still true (not a contradiction):
+- RLS applied-state (memories INSERT + relationship/cluster tables) is **dashboard-managed** → confirm in the Supabase SQL editor; not repo-verifiable.
+- CLAUDE.md keeps older per-feature notes (Polaris Pass-1, "access_level open") in place as dated history, each explicitly **superseded** by a later authoritative note — layered supersession, not a live contradiction.
 
 ==================================================
 ## LAST COMPLETED TASK
 ==================================================
 
-Summary: **Project synchronization audit** — a 10-agent read-only audit verifying all 10 launch areas against actual source, plus establishing this master-state synchronization system.
+Summary: **Documentation synchronization pass** — made the three docs fully self-consistent with the current HEAD and source. Rebuilt `HANDOFF_CURRENT.md` as a lightweight continuation doc (removed the stale "memory-media public" / "11–14 unpushed commits" / obsolete-roadmap + Recent-commits lines; full history preserved in git). Set the CLAUDE.md startup READ ORDER to exactly master → CLAUDE.md → HANDOFF → arch docs → source, and expanded the mandatory 6-step maintenance protocol. Marked CLAUDE.md's Pass-1 `RemyActionButton` reference SUPERSEDED and banner-superseded `launch-roadmap.md`. Updated this file's header/status to HEAD. Re-verified every VERIFIED COMPLETE / DO NOT REBUILD / LOCKED item against source — all still accurate. **No application code changed.**
 
-Files Changed: `docs/REMY_MASTER_STATE.md` (new) + CLAUDE.md (workflow note) + HANDOFF_CURRENT.md (pointer). *(The audit itself changed no code.)*
+Files Changed: `docs/REMY_MASTER_STATE.md`, `CLAUDE.md`, `docs/handoffs/HANDOFF_CURRENT.md`, `docs/roadmap/launch-roadmap.md` (SUPERSEDED banner).
 
-Commit: *(this doc commit — see git log)*
+Commit: *(this sync-pass commit — see git log; prior HEAD 94088c3)*
 
-Validation: N/A (documentation only; findings were file:line-verified during the audit).
+Validation: `npx tsc --noEmit` clean (documentation-only; zero application code touched — verified via `git diff`).
 
 ==================================================
 ## NEXT RECOMMENDED TASK
@@ -210,8 +205,10 @@ The single highest-priority engineering deliverable before App Store submission:
 
 **Before suggesting any feature, check:** (1) does it already exist? (2) already completed? (3) intentionally deferred? (4) in DO NOT REBUILD? (5) already implemented differently? If any = yes → do NOT suggest it.
 
-**After every completed task, automatically (never ask):**
-1. Update this file (VERIFIED COMPLETE, CURRENT TASK/NEXT TASK, LAST COMPLETED TASK, launch % + project %, milestone, sprint).
-2. Update HANDOFF_CURRENT.md.
-3. Update CLAUDE.md if an architectural decision changed/was added → also add it to LOCKED ARCHITECTURE DECISIONS here.
-4. Re-verify the touched docs still match source (source wins; reconcile forward).
+**After every completed task, automatically (never ask) — the mandatory 6-step workflow:**
+1. **Verify against source code** (source is the only authority — never rely on memory or docs alone).
+2. **Update this file** (`REMY_MASTER_STATE.md`): VERIFIED COMPLETE, Current/Next Task, Last Completed Task, launch % + project %, milestone, sprint, and the header (Commit / Branch / Repository Verified).
+3. **Update `HANDOFF_CURRENT.md`** — keep it a lightweight continuation doc; it must never contradict this file.
+4. **Update `CLAUDE.md` ONLY if architecture changed** → also append the decision to LOCKED ARCHITECTURE DECISIONS here.
+5. **Verify documentation still matches source** (reconcile forward; source wins).
+6. **Only then continue** to the next roadmap task.

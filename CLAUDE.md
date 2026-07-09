@@ -4,22 +4,32 @@ The **single source of workflow truth**. `/docs` is the source of **content trut
 Do not create parallel workflow/instruction files — enhance this one.
 
 ## Start every session (mandatory) — Session Continuity Rule
-0. **Read `docs/REMY_MASTER_STATE.md` FIRST** (authoritative, 2026-07-09) — the single
-   consolidated source of truth for project state: launch %, current/next task, VERIFIED
-   COMPLETE (never re-suggest), DO NOT REBUILD, LOCKED architecture decisions, launch blockers,
-   and known open items. **Source code always wins over any doc**; reconcile docs forward.
-   **After every completed task you MUST update `docs/REMY_MASTER_STATE.md`** (+ HANDOFF, + this
-   file for architectural changes) — never ask, never skip. Do not re-suggest anything under its
-   VERIFIED COMPLETE / DO NOT REBUILD / POST-LAUNCH sections unless the operator explicitly asks.
-1. **Read `docs/handoffs/HANDOFF_CURRENT.md`**, then the **relevant sections of
-   this `CLAUDE.md`** second. **Continue from the documented project state.**
-2. Read **only the docs relevant to the task** (map below). Trust docs over rediscovery.
-3. **Do not scan unrelated files** or run repository-wide analysis unless the task
+
+**Mandatory startup READ ORDER — do not skip, do not reorder:**
+- **Step 0 — `docs/REMY_MASTER_STATE.md`** — the single authoritative source of truth (launch %,
+  current/next task, VERIFIED COMPLETE, DO NOT REBUILD, LOCKED architecture decisions, launch
+  blockers, open items). **Continue from its CURRENT TASK.**
+- **Step 1 — this `CLAUDE.md`** — the authoritative workflow + architecture decisions (relevant sections).
+- **Step 2 — `docs/handoffs/HANDOFF_CURRENT.md`** — the lightweight continuation log (never overrides the master state).
+- **Step 3 — only task-relevant architecture/feature docs** (`docs/architecture/*`, `docs/features/*`; doc map below).
+- **Step 4 — only task-relevant source code.**
+
+**SOURCE CODE ALWAYS WINS** over any doc — if a doc disagrees with code, fix the doc in the same
+task. No rediscovery, no rebuilding finished systems, no repeating completed audits. Do **not**
+re-suggest anything under the master state's VERIFIED COMPLETE / DO NOT REBUILD / POST-LAUNCH
+sections unless the operator explicitly asks. **After every completed task, run the mandatory
+6-step maintenance protocol** (`docs/REMY_MASTER_STATE.md` → Maintenance Protocol: verify source →
+update master state → update HANDOFF → update this file only if architecture changed → verify docs
+match source → continue) — never ask, never skip.
+
+Then, for every task:
+1. Read **only the docs relevant to the task** (map below). Trust docs over rediscovery.
+2. **Do not scan unrelated files** or run repository-wide analysis unless the task
    explicitly requires an audit. Identify the smallest set of files first.
-4. **Do not repeat investigations already documented** (HANDOFF / this file), and
-   **do not reintroduce retired features or re-litigate already-approved decisions**
+3. **Do not repeat investigations already documented** (the master state / HANDOFF / this file),
+   and **do not reintroduce retired features or re-litigate already-approved decisions**
    (e.g. the Workspace-navigation note below — the My Nest drawer row is retired).
-5. **Treat documented architectural decisions as source-of-truth** — follow them
+4. **Treat documented architectural decisions as source-of-truth** — follow them
    unless concrete evidence in the current code proves a doc is stale; if so, fix the
    doc in the same task rather than silently diverging.
 
@@ -268,7 +278,9 @@ backend/auth/schema/API/business-logic changes, every feature preserved. Cadence
 (done): Dashboard + shell.** **(1) The bottom-nav center action is now Remy, not "+".** The
 green "+" FAB was retired: the center slot renders the **Remy avatar** (`<Remy state="welcome">`
 via the asset registry) and tapping it opens a **calm, portaled bottom action-sheet**
-(`components/navigation/RemyActionButton.tsx`) with **existing routes only** — Ask Remy
+(`components/navigation/RemyActionButton.tsx` — **SUPERSEDED 2026-07-09:** the center is now the
+behaviour-driven **Nest** [`components/navigation/nest/*`]; `RemyActionButton` was deleted — see the
+authoritative "The Nest — Remy's living HOME, behaviour-driven" note below) with **existing routes only** — Ask Remy
 (`/remy`), Add a memory (`/memories/new`), Add a reminder (`/reminders`). **No deferred
 AI/conversation was built** — it only routes to surfaces that already exist. The sheet is
 `createPortal(document.body)` (**required** — the host `MobileBottomNav` has `backdrop-blur`,

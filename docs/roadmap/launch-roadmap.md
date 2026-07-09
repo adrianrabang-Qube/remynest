@@ -1,5 +1,12 @@
 # Launch Roadmap
 
+> **⚠️ SUPERSEDED (2026-07-09) — see [`docs/REMY_MASTER_STATE.md`](../REMY_MASTER_STATE.md) for the
+> authoritative, source-verified launch state.** This file is retained as historical planning
+> context. Known-stale lines below (do **not** act on them): "resolveStorageTier is a FREE stub /
+> subscription integration is the big remaining gap" (FALSE — fully wired), "wire the landing store
+> buttons to /download (no href today)" (already wired), and the "~72%" / "Restore Purchases required"
+> framings. **Source code wins**; trust the master state.
+
 Derived from current code reality (see MASTER_SPEC + HANDOFF_CURRENT). Web app is
 **live in production**; remaining work is hardening, fixing known breakages, and
 mobile store readiness.
