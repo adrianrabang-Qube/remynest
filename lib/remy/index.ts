@@ -77,6 +77,14 @@ export { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
 export { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 export { buildLifeSummary, type LegacyInput } from "@/lib/remy/core/legacy-engine";
 export { buildLegacyExport } from "@/lib/remy/core/legacy-export";
+// Emotional Intelligence — significance over quantity (Phase 5).
+export {
+  rankSignificantMemories,
+  scoreMemorySignificance,
+  type SignificanceContext,
+} from "@/lib/remy/core/significance-engine";
+export { buildEmotionalProfile, type EmotionalInput } from "@/lib/remy/core/emotional-engine";
+export { derivePersonalityTraits } from "@/lib/remy/core/personality-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -87,6 +95,10 @@ export type {
   LifeSummary,
   LegacyExport,
   RelationshipObservation,
+  SignificantMemory,
+  EmotionalProfile,
+  PersonalityTrait,
+  PersonalitySignals,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

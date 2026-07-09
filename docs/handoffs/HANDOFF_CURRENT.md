@@ -15,11 +15,18 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Living Relationship System.
+Readiness**. No implementation task is active — the last work was the Emotional Intelligence Engine.
 `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Emotional Intelligence Engine** — Remy understands PEOPLE + emotional SIGNIFICANCE (not quantity).
+  Three PURE engines (`significance-engine` ranks by significance not recency; `emotional-engine` →
+  `EmotionalProfile`; `personality-engine` → behavioural traits — raw scores NEVER exposed).
+  `relationship-engine` consumes the profile → 5 new observations. Pipeline wired in `RemyRelationship`
+  (snapshot→story→favourite→anniversary→significance→emotional→personality→relationship→priority→one
+  renderer); snapshot enriched with real `attachments`/`ai_importance`/`memory_person_links`/historical.
+  Adversarial review CLEAN (12/12). tsc/lint/build green.
 - **Living Relationship System** — long-term behavioural relationship (NOT AI/chat/notifications/poll).
   Six PURE engines (relationship/story/anniversary/favourite/legacy/legacy-export, `lib/remy/core/*`)
   over REAL data (memories/people/dates; chapters inferred, anniversaries day-precision only), a
@@ -72,8 +79,9 @@ Authoritative list: master state → **KNOWN OPEN ITEMS**. Highlights (none bloc
 `main` (production; auto-deploys on push) — **unpushed, ahead of `origin/main` (`f53694b`)**: the Nest
 hub (`e73dc7e`, `a97dfac`), the documentation-sync system (`7f65178`, `94088c3`, `ce0feb5`), the living
 Nest companion increment (`a818fb0`), the app-wide Remy companion layer (`5598641`), the Companion
-Intelligence layer (`ded5a4d`), and the Living Relationship System on top. **Not pushed** — pushing
-auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Intelligence layer (`ded5a4d`), the Living Relationship System (`ccfb907`), and the Emotional
+Intelligence Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator
+decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -88,7 +96,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Living Relationship System — relationship/story/anniversary/favourite/legacy engines
+- *(HEAD)* feat(remy): Emotional Intelligence — significance/emotional/personality engines
+- `ccfb907` feat(remy): Living Relationship System — relationship/story/anniversary/favourite/legacy engines
 - `ded5a4d` feat(remy): Companion Intelligence — insights + priority engines, proactive moments
 - `5598641` feat(remy): app-wide companion — screen awareness, milestone celebrations, effects
 - `a818fb0` feat(remy): living Nest companion — time-of-day, real-count evolution, framer-motion

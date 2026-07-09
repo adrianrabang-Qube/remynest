@@ -803,6 +803,31 @@ anniversaries/chapters) persists so moments never repeat. Story/legacy engines a
 CLEAN (14/14). **Do NOT** put a clock/DB in the engines, hardcode chapter names, fabricate dates/
 people, add a second moment chip/selector/gate, poll the snapshot, or show two moments at once.
 
+**Remy — Emotional Intelligence Engine (authoritative, 2026-07-09 — extends the ONE platform):** Remy
+stops ranking memories by QUANTITY and starts understanding PEOPLE + emotional SIGNIFICANCE. **Three
+PURE core engines** (`lib/remy/core/`, no React/DOM/DB/timers/clock): **`significance-engine`**
+(`rankSignificantMemories` — ranks memories by significance, **NOT recency/creation-order**: signals
+= people involved / favourite person / anniversary / chapter size / attachments / ai_importance /
+revisits, + future-compatible pinned & conversation refs), **`emotional-engine`**
+(`buildEmotionalProfile` → `EmotionalProfile`: most-significant person/memory, strongest chapter,
+most-active relationship, most-revisited memory, most-emotional category, **+ four INTERNAL 0–100
+scores** family-strength / life-continuity / relationship-health / memory-preservation), and
+**`personality-engine`** (`derivePersonalityTraits` → behavioural TRAITS: family-historian /
+memory-guardian / story-teller / legacy-builder / care-champion / photo-collector / daily-rememberer
+/ occasional-visitor). **Remy NEVER exposes raw scores — only behaviours / observations / traits.**
+`relationship-engine` now CONSUMES the `EmotionalProfile` (+ traits) via optional
+`RelationshipSnapshot.emotionalProfile`/`personalityTraits` → 5 new observations ("…has become part
+of your family's story", "X seems especially important", "…shaped much of your family's history",
+"your family returns to this story often", "you've carefully protected these memories"). **FIXED
+pipeline** (wired in `RemyRelationship`): snapshot → `buildChapters` → `rankFavouritePeople` →
+`findAnniversaries` → `rankSignificantMemories` → `buildEmotionalProfile` → `derivePersonalityTraits`
+→ `deriveRelationshipObservations` → `selectMoment` → the single `<Remy>` renderer. The relationship
+snapshot loader (`app/api/remy/relationship-snapshot`) was enriched with REAL signals only —
+`attachments` length, `ai_importance`, a `memory_person_links` join for people-per-memory, and a
+`historical` flag (workspace-scoped + auth-gated; degrades to empty). Verified tsc/lint/build +
+adversarial review CLEAN (12/12). **Do NOT** render a raw score, rank memories by recency, put a
+clock/DB in these engines, or fabricate significance/traits from absent data.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

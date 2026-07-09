@@ -12,7 +12,9 @@ import type { RemyBehavior } from "./behavior";
 import type { NestStage } from "./nest";
 import type {
   Anniversary,
+  EmotionalProfile,
   FavouritePerson,
+  PersonalityTrait,
   RelationshipObservation,
 } from "./family-types";
 
@@ -33,6 +35,10 @@ export interface RelationshipSnapshot {
   acknowledgedFavourites: string[];
   todaysAnniversaries: Anniversary[];
   topChapterTitle: string | null;
+  /** Remy's emotional understanding of the family (from the emotional engine) — optional. */
+  emotionalProfile?: EmotionalProfile | null;
+  /** Behavioural traits (from the personality engine) — optional. */
+  personalityTraits?: PersonalityTrait[];
 }
 
 export function deriveRelationshipObservations(
@@ -125,6 +131,64 @@ export function deriveRelationshipObservations(
   // A gentle invitation back to an older chapter of the story.
   if (s.topChapterTitle && s.memoryCount >= 20) {
     out.push(mk("revisit-chapter", `Would you like to revisit ${s.topChapterTitle}?`, "reminder", 44, 30, 5 * DAY));
+  }
+
+  // --- Emotional intelligence — significance over quantity (from the emotional engine) ---
+  const ep = s.emotionalProfile;
+  if (ep) {
+    if (ep.mostSignificantMemory && ep.mostSignificantMemory.score >= 40) {
+      out.push(
+        mk(
+          `significant-memory:${ep.mostSignificantMemory.id}`,
+          `"${ep.mostSignificantMemory.title}" has become part of your family's story.`,
+          "memoryFound",
+          68,
+          55,
+          5 * DAY,
+        ),
+      );
+    }
+    if (ep.mostSignificantPerson && ep.mostSignificantPerson.memoryCount >= 4) {
+      out.push(
+        mk(
+          `significant-person:${ep.mostSignificantPerson.id}`,
+          `${ep.mostSignificantPerson.name} seems especially important.`,
+          "listening",
+          60,
+          48,
+          4 * DAY,
+        ),
+      );
+    }
+    if (ep.strongestChapter && ep.strongestChapter.count >= 5) {
+      out.push(
+        mk(
+          `strongest-chapter:${ep.strongestChapter.id}`,
+          `${ep.strongestChapter.title} shaped much of your family's history.`,
+          "reminder",
+          56,
+          42,
+          6 * DAY,
+        ),
+      );
+    }
+    if (ep.mostRevisitedMemory) {
+      out.push(
+        mk(
+          `revisited-memory:${ep.mostRevisitedMemory.id}`,
+          "Your family returns to this story often.",
+          "memoryFound",
+          54,
+          40,
+          5 * DAY,
+        ),
+      );
+    }
+  }
+
+  // A behavioural trait — never a raw score.
+  if ((s.personalityTraits ?? []).includes("memory-guardian")) {
+    out.push(mk("memory-guardian", "You've carefully protected these memories.", "greeting", 50, 35, 7 * DAY));
   }
 
   return out;

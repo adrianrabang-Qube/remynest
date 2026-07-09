@@ -24,6 +24,10 @@ interface SnapshotMemory {
   dateIso: string;
   precision: "day" | "month" | "year" | "decade";
   category: string | null;
+  attachmentCount: number;
+  importance: number;
+  historical: boolean;
+  peopleIds: string[];
 }
 
 export async function GET() {
@@ -66,7 +70,9 @@ export async function GET() {
     // --- Recent dated memories (for chapters / anniversaries / legacy) ---
     let memQuery = supabase
       .from("memories")
-      .select("id, title, created_at, memory_date, memory_date_precision, ai_category")
+      .select(
+        "id, title, created_at, memory_date, memory_date_precision, ai_category, attachments, ai_importance",
+      )
       .order("created_at", { ascending: false })
       .limit(MEMORY_LIMIT);
     memQuery = activeProfileId
@@ -93,6 +99,25 @@ export async function GET() {
 
     const firstRow = (firstRes.data ?? [])[0] as { created_at?: string } | undefined;
 
+    // People per memory (memory_person_links for the fetched memories) — RLS-scoped to the caller.
+    const memoryIds = ((memRes.data ?? []) as Array<{ id?: unknown }>)
+      .map((m) => (typeof m.id === "string" ? m.id : null))
+      .filter((id): id is string => id != null);
+
+    const peopleByMemory = new Map<string, string[]>();
+    if (memoryIds.length > 0) {
+      const { data: links } = await supabase
+        .from("memory_person_links")
+        .select("memory_id, person_id")
+        .in("memory_id", memoryIds);
+      for (const link of (links ?? []) as Array<{ memory_id?: string; person_id?: string }>) {
+        if (typeof link.memory_id !== "string" || typeof link.person_id !== "string") continue;
+        const list = peopleByMemory.get(link.memory_id);
+        if (list) list.push(link.person_id);
+        else peopleByMemory.set(link.memory_id, [link.person_id]);
+      }
+    }
+
     const datedMemories: SnapshotMemory[] = ((memRes.data ?? []) as Array<{
       id?: string;
       title?: string;
@@ -100,17 +125,19 @@ export async function GET() {
       memory_date?: string | null;
       memory_date_precision?: string | null;
       ai_category?: string | null;
+      attachments?: unknown;
+      ai_importance?: number | null;
     }>)
       .map((m) => {
         const id = typeof m.id === "string" ? m.id : null;
-        const dateIso =
-          typeof m.memory_date === "string" && m.memory_date
-            ? m.memory_date
-            : typeof m.created_at === "string"
-              ? m.created_at
-              : null;
+        const historical = typeof m.memory_date === "string" && Boolean(m.memory_date);
+        const dateIso = historical
+          ? (m.memory_date as string)
+          : typeof m.created_at === "string"
+            ? m.created_at
+            : null;
         if (!id || !dateIso) return null;
-        const rawPrecision = m.memory_date ? m.memory_date_precision : "day";
+        const rawPrecision = historical ? m.memory_date_precision : "day";
         const precision =
           rawPrecision === "month" || rawPrecision === "year" || rawPrecision === "decade"
             ? rawPrecision
@@ -121,6 +148,10 @@ export async function GET() {
           dateIso,
           precision: precision as SnapshotMemory["precision"],
           category: typeof m.ai_category === "string" && m.ai_category ? m.ai_category : null,
+          attachmentCount: Array.isArray(m.attachments) ? m.attachments.length : 0,
+          importance: typeof m.ai_importance === "number" ? m.ai_importance : 0,
+          historical,
+          peopleIds: peopleByMemory.get(id) ?? [],
         };
       })
       .filter((m): m is SnapshotMemory => m != null);

@@ -18,6 +18,15 @@ export interface DatedMemory {
   precision: DatePrecision;
   /** ai_category if enriched, else null. */
   category: string | null;
+  // --- Optional significance signals (present when the relationship snapshot enriches them) ---
+  /** Number of media attachments. */
+  attachmentCount?: number;
+  /** ai_importance (0–100) if enriched. */
+  importance?: number;
+  /** Person ids linked to this memory (from memory_person_links). */
+  peopleIds?: string[];
+  /** True when the memory carries a real historical `memory_date` (not just its created_at). */
+  historical?: boolean;
 }
 
 /** A person extracted from memories (the `people` table), with how many memories mention them. */
@@ -74,6 +83,59 @@ export interface LifeSummary {
   keyPeople: FavouritePerson[];
   majorEvents: { memoryId: string; title: string; dateIso: string }[];
   importantMemories: DatedMemory[];
+}
+
+/** A memory ranked by emotional significance (not recency). `score` is INTERNAL — never shown. */
+export interface SignificantMemory {
+  id: string;
+  title: string;
+  dateIso: string;
+  score: number;
+}
+
+/**
+ * Remy's emotional understanding of a family. The named entities are surfaced as behaviours; the
+ * 0–100 scores are INTERNAL signals only — never rendered raw (the relationship/personality engines
+ * translate them to observations + traits).
+ */
+export interface EmotionalProfile {
+  mostSignificantPerson: FavouritePerson | null;
+  mostSignificantMemory: SignificantMemory | null;
+  strongestChapter: LifeChapter | null;
+  mostActiveRelationship: FavouritePerson | null;
+  mostRevisitedMemory: SignificantMemory | null;
+  mostEmotionalCategory: string | null;
+  familyStrength: number;
+  lifeContinuity: number;
+  relationshipHealth: number;
+  memoryPreservation: number;
+}
+
+/** Long-term behavioural traits Remy infers about the family. Exposed as behaviours, never scores. */
+export type PersonalityTrait =
+  | "family-historian"
+  | "memory-guardian"
+  | "story-teller"
+  | "legacy-builder"
+  | "care-champion"
+  | "photo-collector"
+  | "daily-rememberer"
+  | "occasional-visitor";
+
+/** Real signals the personality engine reasons over (all caller-derived; no clock/DB). */
+export interface PersonalitySignals {
+  memoryCount: number;
+  chapterCount: number;
+  peopleCount: number;
+  /** 0–1: share of memories with at least one attachment. */
+  attachmentRatio: number;
+  /** 0–1: share of memories with a real historical date. */
+  datedRatio: number;
+  daysSinceLastVisit: number | null;
+  isCareWorkspace: boolean;
+  /** Internal 0–100 scores from the emotional profile. */
+  memoryPreservation: number;
+  lifeContinuity: number;
 }
 
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */

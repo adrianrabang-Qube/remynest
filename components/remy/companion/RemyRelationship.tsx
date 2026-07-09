@@ -11,6 +11,10 @@ import { selectMoment } from "@/lib/remy/core/priority-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
+import { rankSignificantMemories } from "@/lib/remy/core/significance-engine";
+import { buildEmotionalProfile } from "@/lib/remy/core/emotional-engine";
+import { derivePersonalityTraits } from "@/lib/remy/core/personality-engine";
+import { buildLifeSummary } from "@/lib/remy/core/legacy-engine";
 import { resolveBehaviorLook } from "@/lib/remy/core/behavior";
 import { resolveNestStage, type NestStage } from "@/lib/remy/core/nest";
 import type {
@@ -70,6 +74,7 @@ export default function RemyRelationship() {
         const res = await fetch("/api/remy/relationship-snapshot", { cache: "no-store" });
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as {
+          isMyNest?: boolean;
           memoryCount?: number;
           firstMemoryDate?: string | null;
           peopleTotal?: number;
@@ -86,26 +91,77 @@ export default function RemyRelationship() {
         const nestStage = resolveNestStage(memoryCount);
         const people = Array.isArray(data.people) ? data.people : [];
         const datedMemories = Array.isArray(data.datedMemories) ? data.datedMemories : [];
+        const peopleTotal = data.peopleTotal ?? people.length;
+        const daysSinceLastVisit =
+          companion.lastVisitDate != null ? daysBetween(companion.lastVisitDate, today) : null;
 
-        // Enrich the snapshot with the focused sub-engines.
+        // Pipeline: story → favourite → anniversary → significance → emotional → personality.
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);
         const anniversaries = findAnniversaries(datedMemories, now.toISOString());
+
+        const chapterSizeByMemoryId = new Map<string, number>();
+        for (const c of chapters) {
+          for (const id of c.memoryIds) chapterSizeByMemoryId.set(id, c.count);
+        }
+        const revisitedMemoryIds = new Set(relationship.visitedMemories);
+        const significant = rankSignificantMemories(datedMemories, {
+          favouritePersonIds: new Set(favourites.map((f) => f.id)),
+          anniversaryMemoryIds: new Set(anniversaries.map((a) => a.memoryId)),
+          revisitedMemoryIds,
+          chapterSizeByMemoryId,
+        });
+        const revisited = significant.filter((m) => revisitedMemoryIds.has(m.id));
+
+        const attachmentRatio =
+          datedMemories.length > 0
+            ? datedMemories.filter((m) => (m.attachmentCount ?? 0) > 0).length / datedMemories.length
+            : 0;
+        const datedRatio =
+          datedMemories.length > 0
+            ? datedMemories.filter((m) => m.historical).length / datedMemories.length
+            : 0;
+
+        const summary = buildLifeSummary({ memories: datedMemories, people, memoryCount });
+        const emotionalProfile = buildEmotionalProfile({
+          memoryCount,
+          peopleTotal,
+          daysSinceLastVisit,
+          summary,
+          favourites,
+          chapters,
+          significant,
+          revisited,
+          memories: datedMemories,
+          attachmentRatio,
+        });
+        const personalityTraits = derivePersonalityTraits({
+          memoryCount,
+          chapterCount: chapters.length,
+          peopleCount: peopleTotal,
+          attachmentRatio,
+          datedRatio,
+          daysSinceLastVisit,
+          isCareWorkspace: !data.isMyNest,
+          memoryPreservation: emotionalProfile.memoryPreservation,
+          lifeContinuity: emotionalProfile.lifeContinuity,
+        });
 
         const snapshot: RelationshipSnapshot = {
           memoryCount,
           firstMemoryDate: data.firstMemoryDate ?? null,
           nestStage,
           acknowledgedStage: (companion.acknowledgedStage as NestStage | null) ?? null,
-          daysSinceLastVisit:
-            companion.lastVisitDate != null ? daysBetween(companion.lastVisitDate, today) : null,
+          daysSinceLastVisit,
           today,
-          peopleTotal: data.peopleTotal ?? people.length,
+          peopleTotal,
           acknowledgedPeopleTotal: relationship.acknowledgedPeopleTotal,
           topFavourite: favourites[0] ?? null,
           acknowledgedFavourites: relationship.acknowledgedFavourites,
           todaysAnniversaries: anniversaries,
           topChapterTitle: chapters.length > 0 ? chapters[chapters.length - 1].title : null,
+          emotionalProfile,
+          personalityTraits,
         };
 
         const selected = selectMoment(deriveRelationshipObservations(snapshot), {
