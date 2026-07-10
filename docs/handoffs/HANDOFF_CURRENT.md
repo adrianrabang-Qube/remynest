@@ -15,13 +15,22 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Conversation Verbalizer Engine (the
-FIRST provider-boundary layer; it builds the deterministic PROVIDER REQUEST + prompt contract, with the
-real LLM verbalization DEFERRED — no network/LLM call). `main` auto-deploys to production on push.
-Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the Conversation Provider Interface (the
+provider ABSTRACTION layer under `lib/remy/providers/`; NO implementation/network/SDK/wiring — future
+adapters implement it, none built). `main` auto-deploys to production on push. Authoritative detail: master
+state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Conversation Provider Interface** (the provider ABSTRACTION layer) — 4 pure files under
+  `lib/remy/providers/` (provider-errors / provider-types / conversation-provider / provider-registry) that
+  establish the `ConversationProviderAdapter` interface + provider types + a deterministic registry. **It
+  does NOT connect to OpenAI/Anthropic/Gemini/Azure/Ollama or any network — NO fetch/SDK/async/wiring.** The
+  `DeferredProvider` stub `generateConversation` simply THROWS "Provider not implemented." (sync, not async);
+  future adapters (OpenAI/Anthropic/Gemini/Azure OpenAI/Ollama/LM Studio/Custom Enterprise) are documented but
+  NONE implemented (each is the ONLY place a fetch/LLM call may live). NO existing file changed (git diff HEAD
+  = pbxproj only); no UI/wiring/significance change; intentionally not exported from `@/lib/remy` (internal
+  infra). Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 findings). tsc/lint/build green.
 - **Conversation Verbalizer Engine** (the FIRST provider-boundary layer) — PURE, deterministic, SYNCHRONOUS
   engine that consumes ONLY the `ConversationComposition` (+ render/assembly) and assembles the deterministic
   PROVIDER REQUEST (`ConversationOutput`: text/citations/metadata/tokens/generation) a FUTURE provider
@@ -212,9 +221,9 @@ Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Grap
 the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), the
 Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), the Question
 Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
-(`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), and the
-Conversation Verbalizer Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator
-decision. tsc/lint/build green.
+(`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
+Conversation Verbalizer Engine (`ce058dc`), and the Conversation Provider Interface on top. **Not pushed** —
+pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -229,7 +238,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Conversation Verbalizer Engine — provider boundary and natural language generation
+- *(HEAD)* feat(remy): Conversation Provider Interface — provider abstraction layer
+- `ce058dc` feat(remy): Conversation Verbalizer Engine — provider boundary and natural language generation
 - `0c8c91f` feat(remy): Conversation Composer Engine — first NL-planning layer, deterministic composition plan
 - `74b96d1` feat(remy): Conversation Rendering Engine — first presentation layer, deterministic render metadata
 - `c46a4f2` feat(remy): Answer Assembly Engine — final deterministic factual answer package (no answers)

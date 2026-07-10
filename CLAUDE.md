@@ -1258,6 +1258,35 @@ it in the UI, invent ids, reference a non-real entity, put a clock/DB/randomness
 non-deterministic. The next Remy layer would be the actual provider ADAPTER (real OpenAI/Anthropic call) that
 verbalizes this request — a separate approved phase, NOT to be built without explicit approval.
 
+**Remy — Conversation Provider Interface (authoritative, 2026-07-10 — extends the ONE platform; the provider
+ABSTRACTION layer):** the provider abstraction the FUTURE provider adapters implement, in a new
+`lib/remy/providers/` subsystem. **It does NOT connect to OpenAI/Anthropic/Gemini/Azure/Ollama or any network —
+NO fetch, NO SDK, NO async, NO network, NO wiring.** It creates ONLY the abstraction. Four PURE files:
+**`conversation-provider.ts`** = the sole `ConversationProviderAdapter` interface (`generateConversation(request:
+ConversationOutput): Promise<ConversationOutput>` + `configuration(): ProviderConfiguration` + `health():
+ProviderHealth`; the provider layer may **ONLY** accept a `ConversationOutput` and return one — it MUST NOT
+retrieve memories / rank / reason / score / plan / render / compose). **`provider-types.ts`** = `ProviderName`
+(deferred/openai/anthropic/gemini/azure-openai/ollama/lm-studio/custom-enterprise) / `ProviderCapability` /
+`ProviderConfiguration` / `ProviderHealth` (+ `ProviderHealthStatus`) / `ProviderResult` / `ProviderLimits` /
+`ProviderVersion`. **`provider-errors.ts`** = `ProviderErrorCode` + the throwable `ProviderError extends Error`
+(code + provider) + `notImplementedError`. **`provider-registry.ts`** = a **deterministic** registry mapping
+EVERY `ProviderName` to a `DeferredProvider` stub whose `generateConversation` **simply THROWS "Provider not
+implemented."** (NOT async — a synchronous throw satisfying the `Promise<ConversationOutput>` return type;
+`configuration().implemented=false`, `health().status="unimplemented"`), plus `getConversationProvider` /
+`listProviders` / `isProviderImplemented` (all deterministic; `isProviderImplemented` always false). **FUTURE
+ADAPTERS documented, NONE implemented:** OpenAI, Anthropic, Gemini, Azure OpenAI, Ollama, LM Studio, Custom
+Enterprise — **each future adapter is the ONLY place a `fetch`/SDK/real LLM call may EVER live.** **NO wiring**
+into RemyRelationship, **NO UI/JSX**, **NO provider call**, and **NO existing file changed** (only the new
+`lib/remy/providers/` directory was added — `git diff HEAD` = pbxproj only; RemyRelationship / `lib/remy/index.ts`
+/ significance-engine / family-types / all prior engines byte-unchanged; still exactly one `RemyMomentChip`).
+Intentionally **NOT exported from `@/lib/remy`** (internal platform infra, not a feature API — a future adapter
+imports the siblings directly). Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7
+lenses — purity / provider-isolation / no-intelligence / abstraction-correctness / determinism /
+platform-integrity / regressions — 0 findings). **Do NOT** implement a real provider (network/SDK/fetch/async)
+in this abstraction, do intelligence in the provider layer, wire it into RemyRelationship/UI/significance, or
+make the registry non-deterministic. A real provider ADAPTER is a separate approved phase — the ONLY place a
+real LLM/network call may EVER live.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
