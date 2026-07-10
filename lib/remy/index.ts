@@ -130,6 +130,11 @@ export {
   buildConversationComposition,
   type ConversationComposerInput,
 } from "@/lib/remy/core/conversation-composer-engine";
+// Conversation Verbalizer — the FIRST provider-boundary layer: deterministic provider request (Phase 18).
+export {
+  buildConversationOutput,
+  type ConversationVerbalizerInput,
+} from "@/lib/remy/core/conversation-verbalizer-engine";
 export type {
   DatedMemory,
   DatePrecision,
@@ -239,6 +244,12 @@ export type {
   ConversationCompositionContext,
   ConversationCompositionSummary,
   ConversationComposition,
+  ConversationProvider,
+  ConversationCitation,
+  ConversationTokenUsage,
+  ConversationOutputMetadata,
+  ConversationGeneration,
+  ConversationOutput,
 } from "@/lib/remy/core/family-types";
 
 // Public types (semantic only — never renderer/asset internals).

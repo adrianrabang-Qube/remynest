@@ -1155,6 +1155,70 @@ export interface ConversationComposition {
   summary: ConversationCompositionSummary;
 }
 
+/**
+ * CONVERSATION OUTPUT — the FIRST conversational PROVIDER-boundary output. This is the ONLY layer where
+ * natural language would be produced, but the actual LLM verbalization is DEFERRED: this engine builds
+ * the deterministic PROVIDER REQUEST — the exact prompt (with the mandatory contract), the citations
+ * back to real ids, and provider/generation/token metadata — that a FUTURE provider adapter (OpenAI /
+ * Anthropic / etc.) would send. It does NO intelligence and makes NO network/LLM call. `text` is empty
+ * until a real provider adapter verbalizes it; `metadata.verbalized` / `generation.status` mark that.
+ */
+export type ConversationProvider = "deferred" | "openai" | "anthropic" | "azure" | "local";
+
+/** Traceability back to the composition + real entity ids — never generated content. */
+export interface ConversationCitation {
+  paragraphId: string;
+  sentenceIds: string[];
+  referenceIds: string[];
+  /** The real entity ids (memory/journey/chapter/anchor/theme/person) the paragraph must trace to. */
+  refIds: string[];
+}
+
+/** Deterministic token accounting (an estimate until a real provider reports usage). */
+export interface ConversationTokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+/** Provider metadata + the resolved deterministic controls (never language). */
+export interface ConversationOutputMetadata {
+  provider: ConversationProvider;
+  model: string;
+  temperature: number;
+  /** True only once a real provider adapter has verbalized the text (false while deferred). */
+  verbalized: boolean;
+  style: ConversationStyle;
+  audience: ConversationAudience;
+  intent: ConversationIntent;
+  tone: ConversationTone;
+  verbosity: ConversationVerbosity;
+}
+
+/** Generation metadata — the exact provider prompt + contract a future adapter sends (deterministic). */
+export interface ConversationGeneration {
+  /** The full provider prompt: the mandatory contract + the structured composition (never the answer). */
+  prompt: string;
+  /** The mandatory prompt-contract clauses, verbatim. */
+  contract: string[];
+  /** Deterministic status: "deferred" until a real provider adapter is wired, then "verbalized". */
+  status: "deferred" | "verbalized";
+  sectionCount: number;
+  paragraphCount: number;
+  sentenceCount: number;
+  referenceCount: number;
+}
+
+/** The Conversation Verbalizer Engine's complete output — provider request + citations, no intelligence. */
+export interface ConversationOutput {
+  /** The verbalized answer. Empty until a real provider adapter fills it (LLM verbalization deferred). */
+  text: string;
+  citations: ConversationCitation[];
+  metadata: ConversationOutputMetadata;
+  tokens: ConversationTokenUsage;
+  generation: ConversationGeneration;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

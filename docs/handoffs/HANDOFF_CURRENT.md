@@ -15,13 +15,26 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Conversation Composer Engine (the
-FIRST natural-language-planning layer; the deterministic intelligence stack was completed by the Answer
-Assembly Engine, and Conversation Rendering was the first presentation layer). `main` auto-deploys to
-production on push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the Conversation Verbalizer Engine (the
+FIRST provider-boundary layer; it builds the deterministic PROVIDER REQUEST + prompt contract, with the
+real LLM verbalization DEFERRED — no network/LLM call). `main` auto-deploys to production on push.
+Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Conversation Verbalizer Engine** (the FIRST provider-boundary layer) — PURE, deterministic, SYNCHRONOUS
+  engine that consumes ONLY the `ConversationComposition` (+ render/assembly) and assembles the deterministic
+  PROVIDER REQUEST (`ConversationOutput`: text/citations/metadata/tokens/generation) a FUTURE provider
+  adapter (OpenAI/Anthropic/…) would send — the strict prompt with the mandatory 7-clause PROMPT CONTRACT
+  embedded verbatim, citations back to real ids, and provider/token/generation metadata. **The actual LLM
+  verbalization is DEFERRED**: the engine makes NO network/LLM call; `text=""`, `verbalized=false`,
+  `status="deferred"`. A real provider ADAPTER (the ONLY place a fetch/LLM call may live) is NOT built. It
+  does NO intelligence (every refId resolves from an existing referencePlan). **Deterministic vs
+  non-deterministic boundary:** all inputs + this output are deterministic; the only non-determinism (a
+  future LLM's wording) is not in this output; the LLM may choose wording but NOT content. **Feeds NOTHING**
+  — NO significance-engine change, NO prior deterministic engine changed; computed then `void`-ed. No UI
+  change (one RemyMomentChip). Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 findings).
+  tsc/lint/build green.
 - **Conversation Composer Engine** (the FIRST natural-language-planning layer) — PURE engine that adds NO
   intelligence: it consumes ONLY the `ConversationRender` + the `AnswerAssembly` it renders (+ optional
   style/audience/intent controls) and prepares a deterministic COMPOSITION PLAN
@@ -199,8 +212,9 @@ Engine (`cc768a9`), the Memory Understanding Engine (`63e944e`), the Memory Grap
 the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning Engine (`96e6ce0`), the
 Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), the Question
 Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
-(`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), and the Conversation Composer Engine on top.
-**Not pushed** — pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+(`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), and the
+Conversation Verbalizer Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator
+decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -215,7 +229,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Conversation Composer Engine — first NL-planning layer, deterministic composition plan
+- *(HEAD)* feat(remy): Conversation Verbalizer Engine — provider boundary and natural language generation
+- `0c8c91f` feat(remy): Conversation Composer Engine — first NL-planning layer, deterministic composition plan
 - `74b96d1` feat(remy): Conversation Rendering Engine — first presentation layer, deterministic render metadata
 - `c46a4f2` feat(remy): Answer Assembly Engine — final deterministic factual answer package (no answers)
 - `45f9314` feat(remy): Answer Planning Engine — deterministic execution plan (no generated answers)

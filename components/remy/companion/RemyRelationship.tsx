@@ -20,6 +20,7 @@ import { buildAnswerPlan } from "@/lib/remy/core/answer-planning-engine";
 import { buildAnswerAssembly } from "@/lib/remy/core/answer-assembly-engine";
 import { buildConversationRender } from "@/lib/remy/core/conversation-rendering-engine";
 import { buildConversationComposition } from "@/lib/remy/core/conversation-composer-engine";
+import { buildConversationOutput } from "@/lib/remy/core/conversation-verbalizer-engine";
 import { rankFavouritePeople } from "@/lib/remy/core/favourite-engine";
 import { buildChapters } from "@/lib/remy/core/story-engine";
 import { findAnniversaries } from "@/lib/remy/core/anniversary-engine";
@@ -314,6 +315,19 @@ export default function RemyRelationship() {
           answerAssembly,
         });
         void conversationComposition;
+
+        // Conversation Verbalizer — the PROVIDER-boundary layer. It consumes ONLY the composition +
+        // render + assembly and builds the deterministic provider REQUEST (prompt with the mandatory
+        // contract + citations + provider/token metadata) a FUTURE LLM provider adapter would send. It
+        // performs NO intelligence and makes NO network/LLM call — the real verbalization is DEFERRED
+        // (text is empty; verbalized=false). Like the other presentation-side engines it feeds NOTHING
+        // (no significance) and is exported from @/lib/remy for the future provider adapter.
+        const conversationOutput = buildConversationOutput({
+          conversationComposition,
+          conversationRender,
+          answerAssembly,
+        });
+        void conversationOutput;
 
         const favourites = rankFavouritePeople(people);
         const chapters = buildChapters(datedMemories);

@@ -1214,6 +1214,50 @@ make output non-deterministic. The next Remy layer would be the actual conversat
 verbalizes this composition + the AnswerAssembly — a separate approved phase, NOT to be built without
 explicit approval.
 
+**Remy — Conversation Verbalizer Engine (authoritative, 2026-07-10 — extends the ONE platform; the FIRST
+provider-boundary layer):** a PURE, deterministic, SYNCHRONOUS core engine
+(`lib/remy/core/conversation-verbalizer-engine.ts`, `buildConversationOutput({ conversationComposition,
+conversationRender, answerAssembly, provider?, model?, temperature? }) → ConversationOutput`). It is
+architecturally the FIRST conversational PROVIDER layer — the only place natural language WOULD be produced —
+**but the actual LLM verbalization is DEFERRED** (consistent with the launch-only priority and the
+codebase-wide AI-connection deferral). **The engine makes NO network/LLM call**; it consumes ONLY the
+already-complete `ConversationComposition` (+ the `ConversationRender`/`AnswerAssembly` it composes) read-only
+and assembles the deterministic **PROVIDER REQUEST** a FUTURE provider adapter (OpenAI/Anthropic/…) would
+send: **(1) the strict prompt** with the mandatory **PROMPT CONTRACT** embedded VERBATIM — "You are not
+allowed to retrieve information / rank memories / infer new facts / change chronology; You must verbalize
+ONLY the supplied ConversationComposition; Every factual statement must trace to supplied references; If
+information is missing, do not invent it" — plus the structured composition serialization; **(2) citations**
+(paragraph → sentence ids → reference ids → real entity ids, for traceability); **(3) provider metadata**
+(provider [default `"deferred"`]/model/temperature); **(4) token** estimate (`ceil(prompt.length/4)`,
+completion 0); **(5) generation** metadata (prompt + contract + status). **`text` is empty `""`,
+`metadata.verbalized=false`, `generation.status="deferred"`.** It does **NO intelligence** (no retrieve /
+search / rank / infer / compare / evaluate-evidence / decide-chronology / score-significance / build-plans /
+render-metadata / composition / hallucinate-facts / invent-references — every refId resolves from an EXISTING
+`referencePlan`). **PROVIDER BOUNDARY / LLM RESPONSIBILITIES:** a real provider ADAPTER (the ONLY place a
+`fetch`/network/LLM call may EVER live) is **NOT built** — a future phase plugs it in behind the provider
+seam and fills `text`; the LLM may choose **WORDING** but NOT **content** (it may not change chronology /
+importance / ordering / references / facts / memory-ids — the prompt contract enforces this).
+**DETERMINISTIC vs NON-DETERMINISTIC BOUNDARY:** all inputs + this pure output are deterministic (structural
+ids, ordered iteration, query-only Maps, `ceil` token estimate, no clock/randomness → byte-identical
+output); the ONLY non-determinism (a future LLM's wording) is not present in this output (`text=""`).
+**CRITICAL: this provider-side engine feeds NOTHING** — there is **NO `significance-engine` change and NO
+prior deterministic engine changed** (among `lib/remy/core/*.ts` only `family-types.ts` [additive] changed);
+in `RemyRelationship` it is computed immediately after the composer and `void`-ed (consumer = the future
+provider adapter). INTERNAL — **not shown in the UI** (render path byte-unchanged; exactly one
+`RemyMomentChip`). **REQUIRED inputs = `ConversationComposition` + `ConversationRender` + `AnswerAssembly`**;
+provider/model/temperature are OPTIONAL controls. **FIXED pipeline order:** … answer-assembly →
+conversation-rendering → conversation-composer → conversation-verbalizer → story → favourite → … → priority
+→ one `<Remy>` renderer. Types (`ConversationOutput`/`ConversationOutputMetadata`/`ConversationCitation`/
+`ConversationGeneration`/`ConversationTokenUsage`/`ConversationProvider`) additive in `family-types.ts`;
+exported from `@/lib/remy` for the future provider adapter. Verified tsc/lint/build + independent MULTI-AGENT
+adversarial review CLEAN (7 lenses — purity / provider-isolation / no-intelligence / prompt-safety /
+determinism-boundaries / platform-integrity / regressions — 0 findings). **Do NOT** make the pure engine
+call a real LLM/network/fetch (that belongs ONLY in a future provider adapter behind the seam), do
+intelligence, weaken the prompt contract, feed it into significance/ranking, import any other engine, surface
+it in the UI, invent ids, reference a non-real entity, put a clock/DB/randomness in it, or make the output
+non-deterministic. The next Remy layer would be the actual provider ADAPTER (real OpenAI/Anthropic call) that
+verbalizes this request — a separate approved phase, NOT to be built without explicit approval.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
