@@ -1287,6 +1287,41 @@ in this abstraction, do intelligence in the provider layer, wire it into RemyRel
 make the registry non-deterministic. A real provider ADAPTER is a separate approved phase — the ONLY place a
 real LLM/network call may EVER live.
 
+**Remy — Conversation Request/Response model (authoritative, 2026-07-10 — extends the ONE platform;
+provider-request refactor):** a PURE ARCHITECTURAL REFACTOR (`lib/remy/core/conversation-request-engine.ts` +
+additive types in `family-types.ts`) that separates the overloaded Phase-18 `ConversationOutput` — a
+"provider request" object carrying an empty `text` field (architecturally a REQUEST, not an OUTPUT) — into a
+dedicated **`ConversationRequest`** (provider INPUT) + **`ConversationResponse`** (provider OUTPUT
+foundation), BEFORE any real provider adapter is built. **`ConversationRequest`** = `prompt` (a structured
+`ConversationPrompt` system/body/full with the 7-clause contract in `prompt.system`) + `contract`
+(`ConversationContract` clauses + version) + `citations` (reused `ConversationCitation[]`) + `metadata`
+(provider-agnostic controls: style/audience/intent/tone/verbosity) + `summary` (counts + prompt-token
+estimate); **it MUST NOT contain generated text** (no `text` field). **`ConversationResponse`** = `text` +
+`provider` + `model` + `usage` + `status` (`ConversationResponseStatus`: deferred/generated/failed) +
+`citations` + `metadata`; **it MUST NOT contain the prompt** — intentionally minimal, filled by a FUTURE
+provider (no engine produces it yet). `buildConversationRequest({ conversationComposition, conversationRender,
+answerAssembly }) → ConversationRequest` is a PURE, deterministic transform that produces a
+`ConversationRequest` ONLY (never a `ConversationResponse`), carrying the SAME deterministic request info the
+verbalizer produces into the dedicated model (a migration-safe drop-in). It does **NO intelligence** (no
+retrieval / ranking / chronology / reasoning / language-generation — pure serialization of the ordered plans;
+every refId resolves from an EXISTING referencePlan; `answerSectionById.has(...)` only annotates
+`source=assembly`, not a search/rank). Deterministic (ordered iteration; query-only Maps; `ceil` token
+estimate; no clock/randomness → byte-identical output). **`ConversationOutput` (Phase 18) is RETAINED** for
+backwards compatibility until a future migration phase. **NO provider/network/SDK/fetch/async/Promise, NO
+wiring, NO UI, NO index.ts export, NO significance/intelligence change, NO existing engine modified** — the
+verbalizer, composer, rendering engine, provider interface/registry, significance-engine, RemyRelationship,
+and `index.ts` are all byte-unchanged (`git diff HEAD` = `family-types.ts` [additive] + the ios pbxproj only;
+the new engine is untracked; still exactly one `RemyMomentChip`). Types (`ConversationRequest`/
+`ConversationRequestMetadata`/`ConversationPrompt`/`ConversationContract`/`ConversationRequestSummary`/
+`ConversationResponse`/`ConversationResponseMetadata`/`ConversationResponseUsage`/`ConversationResponseStatus`)
+additive in `family-types.ts`. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7
+lenses — purity / determinism / no-intelligence / request-response-architecture / platform-integrity /
+regressions / future-migration-safety — 0 findings). **Do NOT** remove `ConversationOutput` before the
+migration phase, add `text` to `ConversationRequest` or `prompt` to `ConversationResponse`, make the request
+engine call a provider / do intelligence / be non-deterministic, wire it into RemyRelationship/UI/significance,
+or export it from `@/lib/remy`. **Future migration:** a later approved phase points the provider interface
+(`generateConversation`) at `ConversationRequest` → `ConversationResponse` and then retires `ConversationOutput`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

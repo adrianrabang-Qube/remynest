@@ -1219,6 +1219,99 @@ export interface ConversationOutput {
   generation: ConversationGeneration;
 }
 
+/**
+ * CONVERSATION REQUEST / RESPONSE — the dedicated, separated provider models. The Phase-18
+ * `ConversationOutput` overloaded "provider request" (an empty-`text` object) and "provider output" into
+ * one type; these split them cleanly:
+ *   • `ConversationRequest`  = the canonical IMMUTABLE provider INPUT (prompt + contract + citations +
+ *     controls). It carries NO generated text — it is what a future provider adapter reads.
+ *   • `ConversationResponse` = the provider OUTPUT foundation (text + provider/model + usage + status +
+ *     citations). It carries NO prompt — it is intentionally minimal, filled by a FUTURE provider.
+ * `ConversationOutput` remains for backwards compatibility until a future migration phase.
+ */
+
+/** The mandatory prompt contract that governs what a provider may do (never language). */
+export interface ConversationContract {
+  clauses: string[];
+  version: number;
+}
+
+/** The structured provider prompt — instructions + structured composition, NEVER the generated answer. */
+export interface ConversationPrompt {
+  /** The system / contract portion of the prompt. */
+  system: string;
+  /** The structured-composition portion of the prompt (sections/paragraphs/sentences + factual sources). */
+  body: string;
+  /** The full prompt string (system + body), ready for a provider. */
+  full: string;
+}
+
+/** The provider-agnostic controls carried by a request (deterministic metadata — never language). */
+export interface ConversationRequestMetadata {
+  style: ConversationStyle;
+  audience: ConversationAudience;
+  intent: ConversationIntent;
+  tone: ConversationTone;
+  verbosity: ConversationVerbosity;
+}
+
+/** Structured request summary (no prose). */
+export interface ConversationRequestSummary {
+  sectionCount: number;
+  paragraphCount: number;
+  sentenceCount: number;
+  referenceCount: number;
+  citationCount: number;
+  /** Deterministic prompt-token estimate. */
+  promptTokens: number;
+}
+
+/**
+ * The canonical IMMUTABLE provider REQUEST. It contains ONLY the prompt, the contract, the citations,
+ * the request metadata, and a structured summary — and MUST NOT contain generated text.
+ */
+export interface ConversationRequest {
+  prompt: ConversationPrompt;
+  contract: ConversationContract;
+  citations: ConversationCitation[];
+  metadata: ConversationRequestMetadata;
+  summary: ConversationRequestSummary;
+}
+
+/** The status of a provider response — "deferred" until a real provider adapter fills it. */
+export type ConversationResponseStatus = "deferred" | "generated" | "failed";
+
+/** Deterministic response token usage (a real provider reports the real usage). */
+export interface ConversationResponseUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+/** Provider-execution metadata for a response (which provider/model actually produced it). */
+export interface ConversationResponseMetadata {
+  provider: ConversationProvider;
+  model: string;
+  temperature: number;
+  /** True only once a real provider generated the text (false while deferred). */
+  generated: boolean;
+}
+
+/**
+ * The provider OUTPUT foundation. It contains ONLY the text, provider/model, usage, status, citations,
+ * and response metadata — and MUST NOT contain the prompt. Intentionally minimal: a FUTURE provider
+ * adapter fills it from a `ConversationRequest`. No engine produces this yet.
+ */
+export interface ConversationResponse {
+  text: string;
+  provider: ConversationProvider;
+  model: string;
+  usage: ConversationResponseUsage;
+  status: ConversationResponseStatus;
+  citations: ConversationCitation[];
+  metadata: ConversationResponseMetadata;
+}
+
 /** A structured export object a future generator (PDF/book) will consume. No rendering here. */
 export interface LegacyExport {
   title: string;

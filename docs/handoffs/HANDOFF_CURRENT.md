@@ -15,13 +15,23 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Conversation Provider Interface (the
-provider ABSTRACTION layer under `lib/remy/providers/`; NO implementation/network/SDK/wiring — future
-adapters implement it, none built). `main` auto-deploys to production on push. Authoritative detail: master
-state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the Conversation Request Engine (a pure
+additive refactor separating `ConversationOutput` into `ConversationRequest` [provider input] +
+`ConversationResponse` [output foundation]; `ConversationOutput` retained for backwards compat). `main`
+auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Conversation Request Engine** (provider request/response refactor) — PURE additive refactor separating the
+  overloaded `ConversationOutput` (a "provider request" with an empty `text`) into `ConversationRequest`
+  (provider INPUT: prompt/contract/citations/metadata/summary — **no text**) + `ConversationResponse` (output
+  foundation: text/provider/model/usage/status/citations/metadata — **no prompt**; filled by a future
+  provider). `buildConversationRequest({ conversationComposition, conversationRender, answerAssembly })`
+  produces a `ConversationRequest` ONLY (never a Response), carrying the same deterministic request info the
+  verbalizer produces (migration-safe drop-in). NO intelligence, NO provider/network/SDK/fetch/async, NO
+  wiring/UI/index.ts export/significance change, NO existing engine modified — only `family-types.ts`
+  (additive) + the new engine changed. **`ConversationOutput` retained** (backwards compat). Independent
+  MULTI-AGENT adversarial review CLEAN (7 lenses, 0 findings). tsc/lint/build green.
 - **Conversation Provider Interface** (the provider ABSTRACTION layer) — 4 pure files under
   `lib/remy/providers/` (provider-errors / provider-types / conversation-provider / provider-registry) that
   establish the `ConversationProviderAdapter` interface + provider types + a deterministic registry. **It
@@ -222,8 +232,9 @@ the Journey Engine (`11afd67`), the Life Story Engine (`c9b3c93`), the Reasoning
 Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), the Question
 Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
 (`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
-Conversation Verbalizer Engine (`ce058dc`), and the Conversation Provider Interface on top. **Not pushed** —
-pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), and the
+Conversation Request Engine on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator
+decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -238,7 +249,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Conversation Provider Interface — provider abstraction layer
+- *(HEAD)* feat(remy): Conversation Request Engine — dedicated provider request/response model
+- `544f714` feat(remy): Conversation Provider Interface — provider abstraction layer
 - `ce058dc` feat(remy): Conversation Verbalizer Engine — provider boundary and natural language generation
 - `0c8c91f` feat(remy): Conversation Composer Engine — first NL-planning layer, deterministic composition plan
 - `74b96d1` feat(remy): Conversation Rendering Engine — first presentation layer, deterministic render metadata
