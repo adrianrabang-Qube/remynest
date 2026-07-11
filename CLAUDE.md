@@ -1576,6 +1576,53 @@ non-service-role, or import OpenAI outside the provider layer. **Operator step:*
 `SUPABASE_SERVICE_ROLE_KEY` is set (already required by other service-role features) to activate logging. **Follow-ups
 (not blockers):** no usage UI yet; quotas are architecture-only (enforcement OFF); `ai_usage` has no retention/rollup.
 
+**Remy — AI Subscriptions, Quotas & Usage Dashboard (authoritative, 2026-07-11 — production hardening; turns
+the Phase-26 dormant quota architecture into REAL, subscription-aware enforcement + a usage dashboard/API +
+server-only admin analytics; NO provider/prompt/architecture redesign, still ONE execution path):** the single
+execution path is unchanged (UI → story-action → `executeConversationWithUsage` → `executeConversation` →
+`getProductionProvider()` → `OpenAIProvider`); `executeConversation` still has EXACTLY ONE caller (the wrapper),
+the wrapper EXACTLY ONE caller (the story action). **Entitlements (SINGLE config):**
+`lib/ai/usage/entitlements.ts` — **`AI_PLAN_LIMITS`** keyed by `BillingPlan` (**FREE = 5/day + 50/month**;
+**PREMIUM/FAMILY/ENTERPRISE = unlimited**) + `resolveAiEntitlement(profile)` (built on the existing
+`resolveSubscription` — Premium ⇒ unlimited) + a neutral `AI_UPGRADE_MESSAGE`. **Do NOT scatter AI limits
+elsewhere — change them here.** No Stripe/`plans.ts`/schema change (AI limits are AI-specific config, not a
+Stripe product). **Quota enforcement (REAL):** `lib/ai/usage/quota.ts` — `canExecuteConversation(userId,
+entitlement)` returns a STRUCTURED result (`allowed`/`tier`/`reason`/`daily+monthlyRemaining`/`upgradeMessage`),
+**premium bypasses with NO DB read**, Free is enforced on **SUCCESSFUL** conversation counts (a failed provider
+call never consumes quota), degrades to zeros, **NEVER throws**; a pure `evaluateConversationGate` lets the
+dashboard reuse already-read counts. **Enforcement lives in the STORY ACTION as a PRE-check** (after the empty
+check, BEFORE the expensive pipeline build) so a blocked Free user gets a structured `status:"quota_exceeded"`
+(reason/remaining/upgradeMessage/tier) with **NO provider call**; the action still NEVER throws + stays
+server-authoritative. **The wrapper's old dormant gate was REMOVED** (it can only return a
+`ConversationResponse`); it is now pure execution + observability. **iOS anti-steering (Apple 3.1.1/3.1.3):**
+`RemyStoryConversation` shows the upgrade copy **only on web** (`useIsNativePlatform` gate) — **NO purchase
+link/CTA on native**. **Usage dashboard/API/settings:** `lib/ai/usage/overview.ts` `getAiUsageOverview` (today/
+month windows, daily/monthly cost, remaining quota, **provider+model read via the registry seam
+`getProductionProvider().configuration()` — provider-INDEPENDENT**, never OpenAI-specific), the presentational
+`components/remy/AiUsageDashboard.tsx`, the display-only **`/settings/ai`** page (+ one `ProfileSection` link on
+`/settings`), and **`GET /api/remy/usage`** (auth-gated, per-user, future-ready-for-mobile JSON; degrades, no
+500). **Admin analytics (SERVER-ONLY):** `lib/ai/usage/admin-analytics.ts` — global conversations / success+error
+rates / avg latency / avg tokens / spend / most-used model; **NOT wired to any public route** (there is no
+admin-gate in the repo — server-only is the correct read of "never exposed publicly"). **Migration**
+`supabase/migrations/20260711130000_ai_usage_analytics.sql` — service-role-only `SECURITY DEFINER` aggregates
+`ai_usage_overview` (per-user) + `ai_usage_admin_overview`/`ai_usage_admin_model_usage` (global) with execute
+**revoked from public/anon/authenticated** (no IDOR). **Provider-independence:** the missing-key classifier in
+`ai-usage.ts` no longer probes `process.env.OPENAI_API_KEY` — it detects a missing key from the error MESSAGE
+(agnostic), so **no OpenAI-specific logic remains in the AI-usage layer**; Claude/Gemini/Azure/Ollama plug in
+via the provider registry with no change to this phase. Byte-unchanged: `executeConversation` + the whole
+provider layer, `family-types.ts`/`ConversationRequest`/`ConversationResponse`, all conversation/significance
+engines, `story-pipeline.ts`, Ask Remy (`ask-action.ts`), `RemyRelationship`, `lib/ai/usage/cost.ts`,
+`package.json`. Verified tsc/lint/build green + independent MULTI-AGENT adversarial review CLEAN (7 lenses —
+execution-integrity / quota-enforcement / entitlement-billing / security-scoping / provider-independence /
+data-correctness / scope-regression — 0 confirmed blocking; the provider-independence fix above was then
+applied). **Operator step:** apply BOTH `ai_usage` migrations + set `SUPABASE_SERVICE_ROLE_KEY` (already set)
+to activate logging/quotas. **Do NOT** scatter AI limits outside `entitlements.ts`, add a second
+`executeConversation`/wrapper caller or execution path, make the quota gate throw / block the UI / be
+client-controllable, expose admin analytics or the `ai_usage_*` aggregates to non-service-role, put OpenAI-
+specific logic outside the provider layer, or show a purchase link on native. **Known limitation (not a
+blocker):** the quota gate is read-then-act (a soft cost-control cap, not a security boundary) — concurrent Free
+requests could transiently exceed by up to N−1; the single-client UI serializes, so it's negligible.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

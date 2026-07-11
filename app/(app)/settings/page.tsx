@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 import ProfileHeader from "@/components/navigation/ProfileHeader";
 import ProfileSection from "@/components/profile/ProfileSection";
@@ -54,6 +56,21 @@ export default async function SettingsPage() {
           <div className="rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft">
             <StorageUsageCard variant="full" />
           </div>
+        </ProfileSection>
+
+        <ProfileSection id="ai" title="AI & Usage">
+          <Link
+            href="/settings/ai"
+            className="flex items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft transition hover:bg-sand/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+          >
+            <span className="min-w-0">
+              <span className="block font-medium text-charcoal">Remy AI usage &amp; plan</span>
+              <span className="block text-sm text-charcoal-muted">
+                Conversations, tokens, estimated cost, and your remaining quota.
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
+          </Link>
         </ProfileSection>
 
         <ProfileSection id="export-data" title="Export Your Data">

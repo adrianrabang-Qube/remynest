@@ -8,6 +8,9 @@ import {
 } from "@/lib/remy/story-pipeline";
 import { executeConversationWithUsage } from "@/lib/remy/execute-conversation-with-usage";
 import type { DatedMemory, FamilyPerson } from "@/lib/remy/core/family-types";
+import { resolveAiEntitlement, type AiEntitlement } from "@/lib/ai/usage/entitlements";
+import { canExecuteConversation, type ConversationGateResult } from "@/lib/ai/usage/quota";
+import type { BillingPlan } from "@/lib/billing/plans";
 
 /**
  * Phase 25 — the FIRST user-facing invocation of `executeConversation`. A user explicitly asks Remy to
@@ -26,14 +29,26 @@ const MEMORY_LIMIT = 300;
 const PEOPLE_LIMIT = 200;
 const MAX_ANSWER_LENGTH = 8000;
 
-export type StoryConversationStatus = "generated" | "empty" | "unavailable";
+export type StoryConversationStatus = "generated" | "empty" | "unavailable" | "quota_exceeded";
+
+/** Quota detail surfaced ONLY when a Free user is over their limit (status === "quota_exceeded"). */
+export interface StoryQuotaInfo {
+  reason: ConversationGateResult["reason"];
+  dailyRemaining: number | null;
+  monthlyRemaining: number | null;
+  /** Neutral upgrade copy; the UI decides whether to show it (never a purchase link on native — Apple 3.1.1). */
+  upgradeMessage: string | null;
+  tier: BillingPlan;
+}
 
 export interface StoryConversationResult {
-  /** The narrated story text from the provider, or null when empty/unavailable. */
+  /** The narrated story text from the provider, or null when empty/unavailable/quota_exceeded. */
   text: string | null;
   status: StoryConversationStatus;
   /** Workspace memory count (for the UI's empty-state copy). */
   memoryCount: number;
+  /** Present only when status === "quota_exceeded". */
+  quota?: StoryQuotaInfo;
 }
 
 /**
@@ -42,7 +57,13 @@ export interface StoryConversationResult {
  * degrades to empties on a failed read.
  */
 async function loadStorySnapshot(): Promise<
-  (StorySnapshot & { memoryCount: number; userId: string; workspaceId: string | null }) | null
+  | (StorySnapshot & {
+      memoryCount: number;
+      userId: string;
+      workspaceId: string | null;
+      entitlement: AiEntitlement;
+    })
+  | null
 > {
   try {
     const supabase = await createClient();
@@ -80,7 +101,21 @@ async function loadStorySnapshot(): Promise<
       ? peopleQuery.eq("memory_profile_id", activeProfileId)
       : peopleQuery.is("memory_profile_id", null).eq("created_by_account_id", user.id);
 
-    const [countRes, memRes, peopleRes] = await Promise.all([countQuery, memQuery, peopleQuery]);
+    // Subscription fields → AI entitlement (Premium = unlimited, Free = capped). Own profile, RLS-scoped.
+    const profileQuery = supabase
+      .from("profiles")
+      .select("is_premium, subscription_status, subscription_plan")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const [countRes, memRes, peopleRes, profileRes] = await Promise.all([
+      countQuery,
+      memQuery,
+      peopleQuery,
+      profileQuery,
+    ]);
+
+    const entitlement = resolveAiEntitlement(profileRes.data ?? null);
 
     const memoryIds = ((memRes.data ?? []) as Array<{ id?: unknown }>)
       .map((m) => (typeof m.id === "string" ? m.id : null))
@@ -156,6 +191,7 @@ async function loadStorySnapshot(): Promise<
       memoryCount: countRes.count ?? 0,
       userId: user.id,
       workspaceId: activeProfileId,
+      entitlement,
     };
   } catch {
     // Unauthenticated OR a degraded read/context error → null, surfaced by the caller as "unavailable"
@@ -176,6 +212,24 @@ export async function narrateStoryConversation(): Promise<StoryConversationResul
     if (snapshot.datedMemories.length === 0) {
       // No memories → never call the provider (nothing to narrate, no wasted/ungrounded call).
       return { text: null, status: "empty", memoryCount: snapshot.memoryCount };
+    }
+
+    // QUOTA ENFORCEMENT — PRE-check, BEFORE the expensive pipeline build (Premium bypasses with no DB read).
+    // Never throws; a Free user over their cap gets a structured result and NO provider call.
+    const gate = await canExecuteConversation(snapshot.userId, snapshot.entitlement);
+    if (!gate.allowed) {
+      return {
+        text: null,
+        status: "quota_exceeded",
+        memoryCount: snapshot.memoryCount,
+        quota: {
+          reason: gate.reason,
+          dailyRemaining: gate.dailyRemaining,
+          monthlyRemaining: gate.monthlyRemaining,
+          upgradeMessage: gate.upgradeMessage,
+          tier: gate.tier,
+        },
+      };
     }
 
     const inputs = buildStoryConversationInputs({

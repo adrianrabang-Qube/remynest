@@ -62,9 +62,16 @@ export function classifyAiError(error: unknown): AiUsageErrorCode {
       case "not-implemented":
       case "unsupported-provider":
         return "provider_unavailable";
-      case "invalid-request":
-        // The production adapter throws invalid-request when OPENAI_API_KEY is unset — separate that out.
-        return process.env.OPENAI_API_KEY ? "invalid_request" : "missing_api_key";
+      case "invalid-request": {
+        // Provider-AGNOSTIC missing-key detection from the error MESSAGE (e.g. "<PROVIDER>_API_KEY is not
+        // configured") — no provider-specific env probe, so it works for any future provider.
+        const msg = error.message.toLowerCase();
+        const missingKey =
+          msg.includes("not configured") ||
+          (msg.includes("api key") && (msg.includes("missing") || msg.includes("unset"))) ||
+          (msg.includes("api_key") && msg.includes("not"));
+        return missingKey ? "missing_api_key" : "invalid_request";
+      }
       default:
         return "unknown";
     }

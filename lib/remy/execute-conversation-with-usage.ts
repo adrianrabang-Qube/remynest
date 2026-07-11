@@ -1,12 +1,14 @@
 /**
- * Instrumented conversation execution (Phase 26) — observability + cost accounting around the SINGLE
- * execution path. This wrapper is now the ONLY caller of `executeConversation`; it does NOT reach the
- * provider itself, so there is still exactly ONE execution path (UI → action → here → executeConversation →
+ * Instrumented conversation execution (Phase 26/27) — observability + cost accounting around the SINGLE
+ * execution path. This wrapper is the ONLY caller of `executeConversation`; it does NOT reach the provider
+ * itself, so there is still exactly ONE execution path (UI → action → here → executeConversation →
  * getProductionProvider() → OpenAIProvider). It adds NO prompt/engine/provider changes — it only measures.
  *
- * Behaviour is preserved: on success it returns the provider's `ConversationResponse` unchanged; on failure
- * it re-throws the original error (the caller's existing try/catch still handles it). Usage logging NEVER
- * throws and never alters the result.
+ * Quota ENFORCEMENT is intentionally NOT here — it lives in the caller (the story action) as a PRE-check
+ * BEFORE the expensive pipeline build, so a quota-blocked user never pays that cost and gets a structured
+ * result (this wrapper can only return a `ConversationResponse`). By the time execution reaches here the call
+ * is already authorized. Behaviour is preserved: on success it returns the provider's response unchanged; on
+ * failure it re-throws the original error. Usage logging NEVER throws and never alters the result.
  */
 import { getProductionProvider } from "@/lib/remy/providers/provider-registry";
 import {
@@ -20,25 +22,16 @@ import {
   recordAiUsage,
   type AiUsageContext,
 } from "@/lib/ai/usage/ai-usage";
-import { canExecuteConversation } from "@/lib/ai/usage/quota";
 
 /**
  * Execute a conversation and record its usage. `context` (userId / workspaceId / operation) is supplied by the
- * server caller — never the client. The `canExecuteConversation` gate is consulted first (the single, ready
- * enforcement point — it ALWAYS allows today and short-circuits with no DB read while limits are off).
+ * server caller — never the client. The caller is responsible for the quota gate (pre-check); this wrapper
+ * executes + measures only.
  */
 export async function executeConversationWithUsage(
   input: ConversationExecutionInput,
   context: AiUsageContext,
 ): Promise<ConversationResponse> {
-  // Gate PER-USER (cost control must not be bypassable by switching workspaces); the row below still
-  // RECORDS the actual workspaceId.
-  const gate = await canExecuteConversation(context.userId);
-  if (!gate.allowed) {
-    // Never happens while limits are off; this is the real (dormant) enforcement seam.
-    throw new Error(`AI usage limit reached: ${gate.reason ?? "unknown"}`);
-  }
-
   const startedAt = Date.now();
   try {
     const response = await executeConversation(input);

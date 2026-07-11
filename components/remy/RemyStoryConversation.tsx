@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Sparkles } from "lucide-react";
 
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
+import { useIsNativePlatform } from "@/lib/platform";
 import {
   narrateStoryConversation,
   type StoryConversationResult,
@@ -18,6 +19,7 @@ import {
 export default function RemyStoryConversation() {
   const [result, setResult] = useState<StoryConversationResult | null>(null);
   const [pending, startTransition] = useTransition();
+  const isNative = useIsNativePlatform();
 
   const run = () => {
     setResult(null);
@@ -67,6 +69,19 @@ export default function RemyStoryConversation() {
           <div className="rounded-2xl bg-sand/60 p-4">
             <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-charcoal">{result.text}</p>
             <AIDisclaimer kind="memoryChat" variant="footnote" />
+          </div>
+        )}
+
+        {!pending && result?.status === "quota_exceeded" && (
+          <div className="rounded-2xl border border-gold/30 bg-gold/5 p-4">
+            <p className="text-sm text-charcoal">
+              You&apos;ve reached your free limit for Remy&apos;s storytelling
+              {result.quota?.reason === "daily_limit" ? " today" : " this month"}.
+            </p>
+            {/* iOS anti-steering (Apple 3.1.1/3.1.3): show upgrade copy on web only, never a purchase link/CTA. */}
+            {!isNative && result.quota?.upgradeMessage && (
+              <p className="mt-1 text-sm text-charcoal-muted">{result.quota.upgradeMessage}</p>
+            )}
           </div>
         )}
 

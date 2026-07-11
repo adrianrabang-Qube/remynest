@@ -15,18 +15,38 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **AI Usage, Billing & Observability**
-(production hardening): every real AI execution now records usage/tokens/latency/cost + a classified error to a
-new **`ai_usage`** table via **`executeConversationWithUsage`** — a wrapper that is `executeConversation`'s
-SINGLE caller (instrumentation only; `executeConversation` + the whole provider layer byte-unchanged; still
-ONE execution path). Provider-independent model-aware cost layer + quota architecture (`canExecuteConversation`,
-NOT enforced). **INERT until the operator applies the migration**
-(`20260711120000_ai_usage_foundation.sql`); logging/quota reads degrade silently so the deploy is a no-op
-until then. `/remy/story` still needs a server `OPENAI_API_KEY` to actually generate. `main` auto-deploys to
+Readiness**. No implementation task is active — the last work was **AI Subscriptions, Quotas & Usage Dashboard**
+(production hardening): the Phase-26 dormant quota architecture is now REAL, subscription-aware enforcement
+(Free capped 5/day + 50/month; Premium unlimited) with a structured `quota_exceeded` result (never throws;
+iOS shows no purchase link on native), plus a usage dashboard (**`/settings/ai`**) + **`GET /api/remy/usage`**
++ server-only admin analytics. Single AI-limits config (`lib/ai/usage/entitlements.ts`); fully
+provider-independent; **still ONE execution path** (`executeConversation` + provider layer byte-unchanged; one
+exec caller = the wrapper, one wrapper caller = the story action; enforcement is a PRE-check in the action).
+**INERT until the operator applies BOTH `ai_usage` migrations** (`…120000` + `…130000`); reads/writes degrade
+silently. `/remy/story` still needs a server `OPENAI_API_KEY` to actually generate. `main` auto-deploys to
 production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **AI Subscriptions, Quotas & Usage Dashboard** (production hardening; no provider/prompt/architecture
+  redesign; still ONE execution path) — REAL subscription-aware quota enforcement replaces the Phase-26 dormant
+  architecture. **Entitlements** = ONE config `lib/ai/usage/entitlements.ts` (`AI_PLAN_LIMITS` by `BillingPlan`:
+  FREE 5/day + 50/month; PREMIUM/FAMILY/ENTERPRISE unlimited) + `resolveAiEntitlement` (on `resolveSubscription`).
+  **Quota** (`lib/ai/usage/quota.ts` `canExecuteConversation`) is structured (allowed/tier/reason/remaining/
+  upgrade), premium-bypass (no DB read), Free enforced on SUCCESSFUL counts, never throws. **Enforcement is a
+  PRE-check in the story action** (before the pipeline build) → structured `status:"quota_exceeded"` with NO
+  provider call; the wrapper's dormant gate was removed. **iOS anti-steering:** upgrade copy web-only
+  (`useIsNativePlatform`), no purchase link on native. **Dashboard/API/settings:** `lib/ai/usage/overview.ts`,
+  `components/remy/AiUsageDashboard.tsx`, display-only `/settings/ai` (+ a `/settings` link), `GET
+  /api/remy/usage` (auth-gated, per-user, mobile-ready). **Admin analytics** `lib/ai/usage/admin-analytics.ts`
+  is SERVER-ONLY (no public route). **Migration** `20260711130000_ai_usage_analytics.sql` (service-role-only
+  SECURITY DEFINER aggregates; no IDOR). Provider-independent (provider/model via the registry seam; the
+  missing-key classifier is now message-based — no `OPENAI_API_KEY` probe). `executeConversation` + provider
+  layer + engines + story-pipeline + Ask Remy + `RemyRelationship` + `cost.ts` + `package.json` byte-unchanged;
+  ONE exec caller (wrapper), ONE wrapper caller (action). Independent MULTI-AGENT adversarial review CLEAN (7
+  lenses, 0 confirmed blocking; provider-independence fix applied). **Operator step:** apply BOTH `ai_usage`
+  migrations (+ `SUPABASE_SERVICE_ROLE_KEY`, already set). Known limitation (not a blocker): read-then-act soft
+  quota (negligible with the serialized UI). tsc/lint/build green.
 - **AI Usage, Billing & Observability** (production hardening; instrumentation only) — every real AI execution
   now records user/workspace/provider/model/operation/REAL-tokens/latency/estimated-cost/status/error_code to a
   new **`ai_usage`** table. Instrumentation lives in **`lib/remy/execute-conversation-with-usage.ts`** — the
@@ -345,10 +365,12 @@ Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the An
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
 Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), the Production Provider
-Activation (`a92e9f7`), the Live Conversation Integration (`3c3a7a5`), and the AI Usage/Billing/Observability
-increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. **Operator
-steps to activate AI features:** apply `20260711120000_ai_usage_foundation.sql` + set a server
-`OPENAI_API_KEY` (usage logging + `/remy/story` generation are both no-ops until then). tsc/lint/build green.
+Activation (`a92e9f7`), the Live Conversation Integration (`3c3a7a5`), the AI Usage/Billing/Observability
+(`88dd366`), and the AI Subscriptions/Quotas/Usage-Dashboard increment on top. **Not pushed** — pushing
+auto-deploys to prod, so it is an operator decision. **Operator steps to activate AI features:** apply BOTH
+`20260711120000_ai_usage_foundation.sql` + `20260711130000_ai_usage_analytics.sql` + set a server
+`OPENAI_API_KEY` (usage logging, quota enforcement, `/settings/ai`, `/api/remy/usage`, and `/remy/story`
+generation are all no-ops / degrade until then). tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -363,7 +385,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): AI Usage, Billing & Observability — usage/cost logging around the single execution path
+- *(HEAD)* feat(remy): AI Subscriptions, Quotas & Usage Dashboard — real quota enforcement + usage dashboard/API
+- `88dd366` feat(remy): AI Usage, Billing & Observability — usage/cost logging around the single execution path
 - `3c3a7a5` feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)
 - `a92e9f7` feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)
 - `689f917` feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
