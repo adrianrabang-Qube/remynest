@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateMemoryInsights, type ExtractedPerson } from "@/lib/ai-memory";
 import { norm, containsWord } from "@/lib/remy/retrieval";
+import { logger, errorMessage } from "@/lib/logger";
 
 /**
  * Phase C2 — People Extraction Foundation.
@@ -42,10 +43,13 @@ export interface BuildPeopleResult {
 }
 
 function logStage(stage: string, metadata?: unknown) {
-  console.info(`[${BUILD_PEOPLE_TAG}] ${stage}`, metadata || {});
+  // Dev-only narration (no-op in prod) — never carries extracted person names.
+  logger.debug(`[${BUILD_PEOPLE_TAG}] ${stage}`, metadata || {});
 }
-function logError(stage: string, error: unknown) {
-  console.error(`[${BUILD_PEOPLE_TAG}] ${stage}`, error);
+function logError(stage: string, metadata?: unknown) {
+  // Callers pass ID-only metadata with the error pre-reduced to errorMessage() —
+  // never a raw PostgrestError (details/hint can echo row values) or a person name.
+  logger.error(`[${BUILD_PEOPLE_TAG}] ${stage}`, metadata ?? {});
 }
 
 function clampConfidence(value: unknown): number {
@@ -162,7 +166,7 @@ async function resolvePersonId(
       return raced.id;
     }
   }
-  if (error) logError("person-insert-failed", { displayName, error });
+  if (error) logError("person-insert-failed", { error: errorMessage(error) });
   return null;
 }
 
@@ -192,7 +196,7 @@ async function linkPersonToMemory(
     )
     .select("id");
   if (error) {
-    logError("link-upsert-failed", { memoryId, personId, error });
+    logError("link-upsert-failed", { memoryId, personId, error: errorMessage(error) });
     return false;
   }
   return (data?.length ?? 0) > 0;
@@ -277,7 +281,7 @@ export async function buildPeople(
         await recomputeAggregates(supabase, personId, candidate.confidence);
       } catch (perCandidate) {
         // One bad candidate must not abort the rest, or the memory.
-        logError("person-persist-failed", { memoryId, name: candidate.name, perCandidate });
+        logError("person-persist-failed", { memoryId, error: errorMessage(perCandidate) });
       }
     }
 
@@ -290,7 +294,7 @@ export async function buildPeople(
     return { success: true, linked };
   } catch (error) {
     // NEVER throw — extraction failure must not fail the memory insert.
-    logError("build-people-failed", { memoryId, error });
+    logError("build-people-failed", { memoryId, error: errorMessage(error) });
     return { success: false, linked: 0 };
   }
 }

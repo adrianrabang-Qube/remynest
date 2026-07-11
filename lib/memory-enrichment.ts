@@ -5,6 +5,7 @@ import { generateEmbedding } from "@/lib/embeddings";
 import { buildRelationships } from "@/lib/build-relationships";
 import { buildClusters } from "@/lib/build-clusters";
 import { buildPeople } from "@/lib/build-people";
+import { logger, errorMessage } from "@/lib/logger";
 
 const TAG = "memory-enrichment";
 
@@ -48,7 +49,7 @@ export async function enrichMemory({
   attachmentCount = 0,
   attachmentTypes = [],
 }: EnrichMemoryArgs): Promise<{ ok: boolean; insights: boolean; embedding: boolean }> {
-  console.info(`[${TAG}] ENRICHMENT_START`, {
+  logger.debug(`[${TAG}] ENRICHMENT_START`, {
     userId,
     profileId,
     memoryId,
@@ -62,7 +63,7 @@ export async function enrichMemory({
     try {
       ai = await generateMemoryInsights(content);
     } catch (error) {
-      console.error(`[${TAG}] insights-error`, { memoryId, error });
+      logger.error(`[${TAG}] insights-error`, { memoryId, error: errorMessage(error) });
     }
 
     // 2. Embedding (best-effort)
@@ -70,7 +71,7 @@ export async function enrichMemory({
     try {
       embedding = await generateEmbedding(content);
     } catch (error) {
-      console.error(`[${TAG}] embedding-error`, { memoryId, error });
+      logger.error(`[${TAG}] embedding-error`, { memoryId, error: errorMessage(error) });
     }
 
     // 3. Persist whatever we computed (only the columns we actually have).
@@ -110,31 +111,31 @@ export async function enrichMemory({
         .eq("id", memoryId)
         .eq("user_id", userId);
       if (error) {
-        console.error(`[${TAG}] update-error`, { memoryId, error });
+        logger.error(`[${TAG}] update-error`, { memoryId, error: errorMessage(error) });
       }
     }
 
     // 4. Cognition — relationships / clusters / people. Independent + best-effort.
     await Promise.allSettled([
       buildRelationships(memoryId).catch((error) =>
-        console.error(`[${TAG}] relationship-error`, { memoryId, error }),
+        logger.error(`[${TAG}] relationship-error`, { memoryId, error: errorMessage(error) }),
       ),
       buildClusters(memoryId).catch((error) =>
-        console.error(`[${TAG}] cluster-error`, { memoryId, error }),
+        logger.error(`[${TAG}] cluster-error`, { memoryId, error: errorMessage(error) }),
       ),
       buildPeople(memoryId, content, userId, profileId, ai?.people ?? []).catch(
-        (error) => console.error(`[${TAG}] people-error`, { memoryId, error }),
+        (error) => logger.error(`[${TAG}] people-error`, { memoryId, error: errorMessage(error) }),
       ),
     ]);
 
-    console.info(`[${TAG}] ENRICHMENT_COMPLETE`, {
+    logger.debug(`[${TAG}] ENRICHMENT_COMPLETE`, {
       memoryId,
       insights: Boolean(ai),
       embedding: Array.isArray(embedding),
     });
     return { ok: true, insights: Boolean(ai), embedding: Array.isArray(embedding) };
   } catch (error) {
-    console.error(`[${TAG}] ENRICHMENT_FAILURE`, { memoryId, error });
+    logger.error(`[${TAG}] ENRICHMENT_FAILURE`, { memoryId, error: errorMessage(error) });
     return { ok: false, insights: false, embedding: false };
   }
 }

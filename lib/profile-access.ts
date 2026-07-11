@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { logger, errorMessage } from "@/lib/logger";
 
 type ProfileRelationship = {
   memory_profile_id: string;
@@ -30,13 +31,9 @@ export const getAccessibleProfiles = cache(async () => {
     return [];
   }
 
-  console.info(
-    "[PROFILE_ACCESS_USER]",
-    {
-      userId: user.id,
-      userEmail: user.email,
-    }
-  );
+  // RC4: dev-only, ID-only — never log user.email or full profile rows
+  // (care-recipient name/DOB/relationship = PHI/PII); this runs on every navigation.
+  logger.debug("[profile-access] resolving", { userId: user.id });
 
   // OWNED PROFILES
   const {
@@ -50,20 +47,15 @@ export const getAccessibleProfiles = cache(async () => {
       user.id
     );
 
-  console.info(
-    "[OWNED_PROFILES_DEBUG]",
-    {
-      userId: user.id,
-      ownedProfilesCount:
-        ownedProfiles?.length || 0,
-      ownedProfiles,
-    }
-  );
+  logger.debug("[profile-access] owned", {
+    userId: user.id,
+    ownedProfilesCount: ownedProfiles?.length || 0,
+  });
 
   if (ownedError) {
-    console.error(
-      "Owned profiles error:",
-      ownedError
+    logger.error(
+      "[profile-access] owned profiles error",
+      errorMessage(ownedError)
     );
   }
 
@@ -84,9 +76,9 @@ export const getAccessibleProfiles = cache(async () => {
     .eq("invite_status", "accepted");
 
   if (relationshipError) {
-    console.error(
-      "Relationship error:",
-      relationshipError
+    logger.error(
+      "[profile-access] relationship error",
+      errorMessage(relationshipError)
     );
   }
 
@@ -94,18 +86,10 @@ export const getAccessibleProfiles = cache(async () => {
     !relationships ||
     relationships.length === 0
   ) {
-    console.log(
-      "[getAccessibleProfiles]",
-      {
-        ownedProfilesCount:
-          ownedProfiles?.length,
-        sharedProfilesCount: 0,
-        ownedProfiles,
-        sharedProfiles: [],
-        reason:
-          "no relationships found",
-      }
-    );
+    logger.debug("[profile-access] no relationships", {
+      ownedProfilesCount: ownedProfiles?.length || 0,
+      sharedProfilesCount: 0,
+    });
 
     return ownedProfiles || [];
   }
@@ -125,9 +109,9 @@ export const getAccessibleProfiles = cache(async () => {
     .in("id", profileIds);
 
   if (sharedProfilesError) {
-    console.error(
-      "Shared profiles error:",
-      sharedProfilesError
+    logger.error(
+      "[profile-access] shared profiles error",
+      errorMessage(sharedProfilesError)
     );
   }
 
@@ -153,17 +137,10 @@ export const getAccessibleProfiles = cache(async () => {
       }
     ) || [];
 
-  console.log(
-    "[getAccessibleProfiles]",
-    {
-      ownedProfilesCount:
-        ownedProfiles?.length,
-      sharedProfilesCount:
-        sharedProfiles?.length,
-      ownedProfiles,
-      sharedProfiles,
-    }
-  );
+  logger.debug("[profile-access] merged", {
+    ownedProfilesCount: ownedProfiles?.length || 0,
+    sharedProfilesCount: sharedProfiles?.length || 0,
+  });
 
   const mergedProfiles = [
     ...(ownedProfiles || []),
@@ -181,15 +158,10 @@ export const getAccessibleProfiles = cache(async () => {
     ).values()
   );
 
-  console.info(
-    "[ACCESSIBLE_PROFILES_DEBUG]",
-    {
-      userId: user.id,
-      count:
-        dedupedProfiles?.length || 0,
-      profiles: dedupedProfiles,
-    }
-  );
+  logger.debug("[profile-access] accessible", {
+    userId: user.id,
+    count: dedupedProfiles?.length || 0,
+  });
 
   return dedupedProfiles;
 });

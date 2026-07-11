@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- RC4: the app uses only standard HTTPS/TLS (Capacitor server.url, cleartext:false),
+	     which qualifies for the export-compliance exemption. Declaring this false removes
+	     the "Missing Compliance" prompt that otherwise blocks every TestFlight/App Store build. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

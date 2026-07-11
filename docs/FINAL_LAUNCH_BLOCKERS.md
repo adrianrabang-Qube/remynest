@@ -27,6 +27,17 @@
   an unacceptable data-loss risk.
 - **Close it:** complete BACKUP_OPERATOR_CHECKLIST.md (all criteria + test restore).
 
+> **RC4 reconciliation (2026-07-11):** this is an **operator/infra** item, not a code
+> blocker. The *policy* is DECIDED and authoritative in `docs/REMY_MASTER_STATE.md`:
+> **daily Supabase backups are the accepted recovery baseline; PITR is intentionally
+> deferred post-launch (cost)** — so "PITR off" is a decision, not an open blocker.
+> What genuinely REMAINS for the operator (cannot be done from code): **(1)** confirm
+> daily backups are actually **enabled** on the Pro plan; **(2)** establish a
+> **Storage-bucket (`memory-media`, PHI) backup/replication strategy** — Postgres daily
+> backups do NOT cover Storage objects (this is the highest-consequence residual gap);
+> **(3)** perform + record a **test restore of DB + media** (RTO currently unproven).
+> Track (1)–(3) via BACKUP_OPERATOR_CHECKLIST.md §2/§4/§5.
+
 *(No other hard blockers were found.)*
 
 ---

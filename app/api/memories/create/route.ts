@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { logger } from "@/lib/logger";
+import { logger, errorMessage } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { userCanWriteProfile } from "@/lib/profile-ownership";
@@ -41,11 +41,12 @@ function logPipelineStage(
 
 function logPipelineError(
   stage: string,
-  error: unknown
+  meta?: unknown
 ) {
-  console.error(
+  // Callers pass ID-only metadata with the error pre-reduced to errorMessage().
+  logger.error(
     `[${MEMORY_PIPELINE_TAG}] ${stage}`,
-    error
+    meta ?? {}
   );
 }
 
@@ -113,6 +114,9 @@ function logPipelineMetrics(
     metrics
   );
 }
+
+// RC4: headroom for the per-attachment authoritative-size (storage HEAD) loop.
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
@@ -562,8 +566,19 @@ cover_image_url:
           requestId:
             pipelineRequestId,
 
-          error,
+          error: errorMessage(error),
         }
+      );
+
+      // RC4: the row was NOT created, so the just-uploaded attachment objects are
+      // now orphaned (nothing references them, and no orphan-sweeper runs yet).
+      // Remove them — server-generated, owner-scoped, unreferenced — mirroring the
+      // over-quota cleanup above. Best-effort (removeStorageObjects never throws).
+      await removeStorageObjects(
+        supabase,
+        normalizedAttachments
+          .map((a) => String(a.storagePath ?? a.url ?? ""))
+          .filter(Boolean)
       );
 
       return NextResponse.json(
@@ -711,7 +726,7 @@ cover_image_url:
     logPipelineError(
       "memory-create-error",
       {
-        error,
+        error: errorMessage(error),
       }
     );
 

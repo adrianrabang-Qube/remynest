@@ -6,6 +6,10 @@ import { createClient } from "@/utils/supabase/server";
 import RemyStoryConversation from "@/components/remy/RemyStoryConversation";
 
 export const dynamic = "force-dynamic";
+// RC4: the narrateStoryConversation server action makes an OpenAI provider call;
+// give it headroom so a slow LLM completion degrades into the action's never-throws
+// "unavailable" state rather than a raw platform timeout.
+export const maxDuration = 60;
 
 /**
  * /remy/story — the opt-in "Remy narrates your story" surface (Phase 25). It is the FIRST user-facing

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories } from "@/lib/memory-media-signing";
+import { logger, errorMessage } from "@/lib/logger";
 
 export { POST } from "./create/route";
 
@@ -274,12 +275,12 @@ export async function GET(
       ).toFixed(2)
     );
 
-    console.error(
+    logger.error(
       `${MEMORIES_API_TAG} request-crashed`,
       {
         requestId,
         durationMs,
-        error,
+        error: errorMessage(error),
       }
     );
 

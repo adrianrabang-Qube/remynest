@@ -52,6 +52,9 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // RC4: suppress the `X-Powered-By: Next.js` response header (framework
+  // fingerprinting); reaches the Capacitor webview too. No behavioural impact.
+  poweredByHeader: false,
   // Enables instrumentation.ts on Next 14 (server/edge Sentry init).
   experimental: {
     instrumentationHook: true,

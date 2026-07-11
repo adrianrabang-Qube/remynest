@@ -7,6 +7,8 @@ import { planUserDeletion } from "@/lib/gdpr/plan-user-deletion";
 import { executeUserDeletion } from "@/lib/gdpr/execute-user-deletion";
 
 export const dynamic = "force-dynamic";
+// RC4: cascading deletes + recursive storage cleanup can run long on large accounts.
+export const maxDuration = 60;
 
 /**
  * GDPR account deletion.

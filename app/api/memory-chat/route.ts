@@ -105,6 +105,10 @@ ${Math.round(
     .join("\n\n");
 }
 
+// RC4: exceed the 30s OpenAI AbortSignal (OPENAI_TIMEOUT_MS) so a slow completion
+// hits the route's graceful 500 instead of a raw platform 504.
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const requestId =
     createMemoryChatRequestId();

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createClient } from "@supabase/supabase-js";
+import { logger, errorMessage } from "@/lib/logger";
 
 const DEVICE_REGISTRATION_TAG =
   "device-registration-engine";
@@ -12,7 +13,8 @@ function logDeviceRegistrationStage(
   stage: string,
   metadata?: unknown
 ) {
-  console.info(
+  // Dev-only (no-op in prod): device/push tokens are device identifiers (PII).
+  logger.debug(
     `[${DEVICE_REGISTRATION_TAG}] ${stage}`,
     metadata || {}
   );
@@ -22,9 +24,10 @@ function logDeviceRegistrationError(
   stage: string,
   error: unknown
 ) {
-  console.error(
+  // Message-only — never the raw error object (PostgrestError details/hint can echo row values).
+  logger.error(
     `[${DEVICE_REGISTRATION_TAG}] ${stage}`,
-    error
+    errorMessage(error)
   );
 }
 

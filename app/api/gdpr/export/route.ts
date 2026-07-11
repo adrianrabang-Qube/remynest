@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { collectUserData } from "@/lib/gdpr/collect-user-data";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { logger, errorMessage } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+// RC4: give the full-account data aggregation headroom so a large export returns
+// the route's structured error rather than a raw platform timeout.
+export const maxDuration = 60;
 
 /**
  * GDPR data export — Art. 15 (access) + Art. 20 (portability). Read-only,
@@ -59,9 +63,9 @@ export async function GET() {
       }
     );
   } catch (error) {
-    console.error(
+    logger.error(
       "[gdpr-export] export failed",
-      error
+      errorMessage(error)
     );
 
     return NextResponse.json(

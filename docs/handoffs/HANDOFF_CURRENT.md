@@ -15,8 +15,20 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **RC3 — GDPR & Privacy Compliance**
-(compliance-hardening only; NO feature/behaviour change; every feature preserved). A 10-dimension
+Readiness**. No implementation task is active — the last work was **RC4 — Production Launch Readiness**
+(production-hardening only; NO feature/behaviour change; reminder engine untouched). An 8-dimension
+multi-agent audit (74/100 → ~85) drove a low-risk fix set: closed a hot-path **PHI/PII log leak**
+(`profile-access.ts` email + care-recipient rows on every navigation; `build-people.ts` person names) →
+dev-gated `logger`/IDs-only; extended the Sentry `beforeSend` scrubber to **exception values + console
+breadcrumbs**; added **`maxDuration`** to 8 long/AI routes (so a slow OpenAI call degrades gracefully, not
+a raw 504) + a 30s story-provider timeout; memory-create **orphan-storage cleanup** on insert-failure;
+`poweredByHeader:false`; committed **`.env.example`**; iOS **`ITSAppUsesNonExemptEncryption=false`** + a
+new **`PrivacyInfo.xcprivacy`** app manifest. Verified tsc/lint/build green + main-loop 7-lens self-review
+(0 blocking). **Recommendation: READY FOR APP STORE with operator steps** (wire the manifest into the
+Xcode target + rebuild; confirm backups + a Storage-bucket backup + a test restore — the one HIGH
+residual); **Google Play deferred** (no FCM). `main` auto-deploys on push (RC4 committed locally,
+unpushed). Full detail: `docs/RC4-PRODUCTION-READINESS-REPORT.md`. Before RC4: **RC3 — GDPR & Privacy
+Compliance** (compliance-hardening only; every feature preserved). A 10-dimension
 multi-agent source audit (70/100 baseline → ~80 after) drove a low-risk code+doc hardening set:
 GDPR **export completeness** (`people`/`ai_usage`/`memory_intelligence`/`storage_ledger`), **Sentry PII
 scrubbing** (`sendDefaultPii:false` + non-dropping `beforeSend`), **PII log minimisation** (raw error
@@ -35,6 +47,16 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC4 — Production Launch Readiness hardening** (production-hardening only; no feature/behaviour change;
+  reminder engine untouched). 8-dimension multi-agent audit → low-risk fixes. **Security/observability:**
+  `lib/profile-access.ts` (removed caregiver-email + full-care-recipient-row logs) + `lib/build-people.ts`
+  (dropped person names) → dev-gated `logger`, IDs/counts + `errorMessage()`; `lib/observability/sentry-privacy.ts`
+  scrubber extended to exception values + console breadcrumbs (never returns null); residual raw-error logs
+  message-only'd. **Reliability:** `maxDuration` on 8 long/AI routes; 30s `AbortSignal.timeout` on the story
+  provider call; memory-create orphan-storage cleanup on insert-failure. **Deploy/store:** `poweredByHeader:false`;
+  committed `.env.example`; iOS `ITSAppUsesNonExemptEncryption=false`; new `ios/App/App/PrivacyInfo.xcprivacy`.
+  Verified tsc/lint/build green + main-loop 7-lens self-review (0 blocking). **App Store: READY with operator
+  steps; Google Play: deferred.** Report: `docs/RC4-PRODUCTION-READINESS-REPORT.md`.
 - **RC3 — GDPR & Privacy Compliance hardening** (compliance-only; no feature/behaviour change).
   10-dimension multi-agent audit → low-risk code+doc hardening. **Code:** export widened
   (`lib/gdpr/collect-user-data.ts` + `people`/`ai_usage`/`memory_intelligence`/`storage_ledger`,

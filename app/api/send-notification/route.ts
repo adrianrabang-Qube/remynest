@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { authorizeCronRequest } from "@/lib/cron-auth";
+import { logger, errorMessage } from "@/lib/logger";
 
 export async function GET(req: Request) {
   const denied = authorizeCronRequest(req);
@@ -93,7 +94,7 @@ export async function GET(req: Request) {
     });
 
   } catch (err) {
-    console.error("[send-notification] error", err);
+    logger.error("[send-notification] error", errorMessage(err));
 
     // RC2: generic client error — never serialize the raw exception to the response.
     return NextResponse.json(

@@ -106,12 +106,17 @@ export class OpenAIProvider implements ConversationProviderAdapter {
     try {
       // Send the immutable prompt EXACTLY as supplied by the request engine — no rewriting, no injected
       // intelligence, no reordering, no enrichment. `prompt.full` is sent verbatim as the request content.
-      const completion = await client.chat.completions.create({
-        model,
-        temperature: TEMPERATURE,
-        stream: false,
-        messages: [{ role: "user", content: request.prompt.full }],
-      });
+      // RC4: a 30s per-call timeout (parity with every other OpenAI caller in the repo) so a hung/slow
+      // completion aborts into toProviderError() → the caller's graceful degrade, not a runaway request.
+      const completion = await client.chat.completions.create(
+        {
+          model,
+          temperature: TEMPERATURE,
+          stream: false,
+          messages: [{ role: "user", content: request.prompt.full }],
+        },
+        { signal: AbortSignal.timeout(30_000) }
+      );
 
       const text = completion.choices[0]?.message?.content ?? "";
       const resolvedModel = completion.model || model;

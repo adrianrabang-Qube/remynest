@@ -1770,6 +1770,47 @@ cognitive/Alzheimer-risk **insights** disclose-or-remove decision (also an App-S
 re-trust raw error objects in logs, remove the Sentry scrubbing, re-add analytics/Resend to the
 subprocessor list, make the export non-owner-scoped, or gate care-profile submission on the authority note.
 
+**RC4 — Production Launch Readiness hardening (authoritative, 2026-07-11 — production-hardening ONLY,
+NO feature/behaviour change; reminder engine untouched):** an 8-dimension multi-agent audit (74/100 →
+~85) drove a low-risk hardening set. **Implemented (code):** **(1)** closed a hot-path **PHI/PII log
+leak** the RC3 pass missed — `lib/profile-access.ts` (runs on every navigation) logged `user.email` +
+full care-recipient rows, and `lib/build-people.ts` logged extracted person names; both now use the
+dev-gated `logger` with IDs/counts only + `errorMessage()`. **(2)** extended `lib/observability/
+sentry-privacy.ts` `beforeSend` to redact emails across the **event message, captured exception values,
+AND console breadcrumbs** (the SDK captures `console.*` as breadcrumbs, so a PHI log line would otherwise
+ride to Sentry un-redacted) — still **never returns null**. **(3)** message-only'd residual
+raw-`PostgrestError` logs (`memory-enrichment`, `memories/create` [`logPipelineError`], `gdpr/export`,
+`register-device`, `send-notification`, `memories/route`). **(4)** added `export const maxDuration` to 8
+long/AI routes (memory-chat 60, `remy/story` page 60, memories search/create 60, upload-url 30, gdpr
+export/delete 60, build-relationships 60) so a slow OpenAI call (the existing 30s `AbortSignal` on
+memory-chat, `OPENAI_TIMEOUT_MS`) reaches the route's **graceful** error/degrade instead of a raw
+platform 504 (the platform default ~15s was killing the function before the abort could fire). **(5)**
+gave the story provider call a 30s `AbortSignal.timeout` in `lib/remy/providers/openai-provider.ts`
+(parity with every other OpenAI caller → `toProviderError` → the action's never-throws "unavailable"
+degrade). **(6)** `memories/create` now removes the just-uploaded storage objects on a DB-insert failure
+(mirrors the over-quota cleanup; `normalizedAttachments`, best-effort). **Implemented (config/store):**
+`next.config.js` `poweredByHeader:false`; committed **`.env.example`** (allowlisted in `.gitignore`,
+placeholders only); iOS `Info.plist` `ITSAppUsesNonExemptEncryption=false`; **new
+`ios/App/App/PrivacyInfo.xcprivacy`** app privacy manifest (`NSPrivacyTracking=false`; data types =
+email/name/photos-videos/other-user-content/user-id/device-id/crash/performance, all linked-not-tracking;
+`NSPrivacyAccessedAPICategoryUserDefaults` CA92.1). **Docs:** `FINAL_LAUNCH_BLOCKERS.md` HB1 reconciled
+with the master-state backup decision; `docs/RC4-PRODUCTION-READINESS-REPORT.md` added. Verified
+tsc/lint/build green + main-loop 7-lens self-review (Senior Staff/SRE/DevOps/Perf/Security/Apple/Google —
+behaviour preserved, 0 blocking; the multi-agent audit ran, the review was done inline to conserve the
+subagent budget). **OPERATOR STEPS (native, like migrations/pbxproj — NOT done from code):** add
+`PrivacyInfo.xcprivacy` to the **App target's Copy Bundle Resources** in Xcode (a file in the folder is
+NOT bundled without target membership) + `pod install` + native rebuild; verify/extend the
+required-reason-API list against Xcode's Privacy Report; confirm daily Supabase backups are enabled +
+establish a **Storage-bucket (`memory-media`, PHI) backup strategy** + run a **test restore** (the one
+HIGH residual — Postgres daily backups do NOT cover Storage objects). **ROADMAP (do NOT re-flag as a NEW
+defect):** `select('*')` embedding-column trim on the memory feed/timeline/detail (medium-risk column
+enumeration); Stripe per-event idempotency/ordering ledger; `auth_pending` retry cron; `pg_trgm` GIN
+search index (operator/DBA); central env-var startup validation + `requestId`→Sentry correlation; offline
+UI; **Android Play-readiness (deferred — no `google-services.json`/FCM, `allowBackup=true`, versionCode 1).**
+**Recommendation: READY FOR APP STORE (with the operator steps); Google Play deferred.** **Do NOT**
+re-trust raw error objects / log PHI (email/names/rows/device tokens), remove the Sentry
+breadcrumb/exception scrubbing, drop the `maxDuration` budgets, or modify the frozen reminder engine.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

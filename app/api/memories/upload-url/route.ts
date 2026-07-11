@@ -48,6 +48,9 @@ interface RequestedFile {
  *  - quota is enforced SERVER-SIDE here (pre-check, client-reported sizes) AND again at
  *    create/edit against the REAL object sizes — under-reporting here cannot bypass quota.
  */
+// RC4: headroom for the per-file signed-upload-URL loop on large batches.
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
   const supabase = await createClient();
 

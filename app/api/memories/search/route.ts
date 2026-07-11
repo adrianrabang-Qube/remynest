@@ -91,6 +91,9 @@ function createEmptySearchResults() {
   return [];
 }
 
+// RC4: the semantic path (OpenAI embedding + match_memories RPC) can run long.
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   const requestId =
     createSearchRequestId();
