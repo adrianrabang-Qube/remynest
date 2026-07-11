@@ -747,7 +747,7 @@ export default async function DashboardPage() {
           progression (Greeting → Today → Jump back in → People → Insights → Account), with
           the heavy analytics tucked into progressive-disclosure sections so the first screen
           stays quiet. */}
-      <main className="mx-auto max-w-2xl space-y-6 px-0 py-6 md:max-w-3xl md:space-y-8 md:px-6 md:py-10">
+      <div className="mx-auto max-w-2xl space-y-6 px-0 py-6 md:max-w-3xl md:space-y-8 md:px-6 md:py-10">
 
         {/* GREETING */}
         <DashboardHeader
@@ -941,7 +941,7 @@ export default async function DashboardPage() {
             activeProfileName={activeProfile?.profile_name}
           />
         </CollapsibleSection>
-      </main>
+      </div>
     </WorkspaceShell>
   );
 }

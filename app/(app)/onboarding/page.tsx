@@ -224,7 +224,7 @@ export default async function OnboardingPage() {
               className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
             />
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-charcoal-soft">
               This is how RemyNest will
               greet you.
             </p>

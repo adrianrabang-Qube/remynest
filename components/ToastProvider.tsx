@@ -48,11 +48,19 @@ export default function ToastProvider({
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      <div className="fixed top-5 right-5 space-y-2 z-50">
+      {/* LA2 (WCAG 4.1.3 Status Messages): a persistent polite live region so the
+          app-wide success/error channel ("Memory saved", "Person added", errors) is
+          announced to screen-reader users. */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="fixed top-5 right-5 space-y-2 z-50"
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="bg-green-600 text-white px-4 py-2 rounded shadow-lg animate-slide-in"
+            className="bg-green-700 text-white px-4 py-2 rounded shadow-lg animate-slide-in"
           >
             {toast.message}
           </div>

@@ -42,6 +42,15 @@
 
 html {
   scroll-behavior: smooth;
+  /* LA2 (WCAG 2.4.11 Focus Not Obscured): keep tabbed/anchored targets below the
+     sticky translucent app headers so focus never lands hidden behind them. */
+  scroll-padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {

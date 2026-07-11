@@ -727,6 +727,23 @@ function MemoriesPageContent() {
     },
   });
 
+  // LA2 (WCAG 3.3.4 Error Prevention): deleting a memory is irreversible, so confirm
+  // before the mutation. A native confirm is keyboard- + screen-reader-accessible and
+  // guards against an accidental one-tap deletion of irreplaceable data — important
+  // for the app's older-adult / cognitively-impaired audience. Client-only; the delete
+  // API/mutation is unchanged.
+  const handleDelete = (id: string) => {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm(
+        "Delete this memory permanently? This can’t be undone."
+      )
+    ) {
+      return;
+    }
+    deleteMutation.mutate(id);
+  };
+
   // =========================
   // SORT
   // =========================
@@ -876,7 +893,7 @@ const sortedMemories = [
             label={`Search results · ${searchResults.length} found`}
             memories={searchResults}
             onEdit={(m) => setEditingMemory(m)}
-            onDelete={(id) => deleteMutation.mutate(id)}
+            onDelete={handleDelete}
           />
         )}
 
@@ -928,7 +945,7 @@ const sortedMemories = [
           label="Today"
           memories={today}
           onEdit={(m) => setEditingMemory(m)}
-          onDelete={(id) => deleteMutation.mutate(id)}
+          onDelete={handleDelete}
         />
       )}
 
@@ -938,7 +955,7 @@ const sortedMemories = [
           label="This Week"
           memories={thisWeek}
           onEdit={(m) => setEditingMemory(m)}
-          onDelete={(id) => deleteMutation.mutate(id)}
+          onDelete={handleDelete}
         />
       )}
 
@@ -948,7 +965,7 @@ const sortedMemories = [
           label="Earlier"
           memories={earlier}
           onEdit={(m) => setEditingMemory(m)}
-          onDelete={(id) => deleteMutation.mutate(id)}
+          onDelete={handleDelete}
         />
       )}
 

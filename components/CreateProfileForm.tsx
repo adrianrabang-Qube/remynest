@@ -69,41 +69,44 @@ export default function CreateProfileForm({
 
       <form action={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="profile_name" className="block text-sm font-medium mb-2">
             Their name
           </label>
           <input
+            id="profile_name"
             type="text"
             name="profile_name"
             required
             placeholder="Grandma Mary"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="preferred_name" className="block text-sm font-medium mb-2">
             Preferred Name
           </label>
           <input
+            id="preferred_name"
             type="text"
             name="preferred_name"
             placeholder="Mary"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor="date_of_birth" className="block text-sm font-medium mb-2">
             Date of Birth
           </label>
           {/* GDPR data minimisation: date_of_birth is NOT persisted by
               createProfile (it inserts name fields only). Kept as an optional
               UI field; do not start storing it without a lawful-basis review. */}
           <input
+            id="date_of_birth"
             type="date"
             name="date_of_birth"
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
         </div>
 

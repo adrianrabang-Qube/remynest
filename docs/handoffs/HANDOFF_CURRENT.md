@@ -15,9 +15,20 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA1 — Memory-Care Clinical Readiness**
-(clinical/caregiving workflow polish; presentation-only, no schema/API/architecture change, reminder engine
-untouched). A 9-persona clinical review (clinical 73/caregiver 76/patient 70) drove 5 safe fixes: **(1)
+Readiness**. No implementation task is active — the last work was **LA2 — Accessibility & Inclusive Design
+Readiness** (WCAG 2.2 AA pass; presentation/aria/semantic/contrast/client-confirm only, no logic/data/
+architecture change; dark mode still deferred; frozen reminder engine logic untouched). A 7-dimension
+multi-agent audit (a11y 68→~84) cleared the **4 Level-A blockers**: keyboard-reachable media upload
+(`AttachmentManager` `hidden`→`sr-only`), announced toasts (`ToastProvider` live region), labeled primary
+forms (CreateProfile/InviteCaregiver/MemoryDate/reminders), and a **memory-delete confirmation** — plus a
+skip-to-content link, `CreateMemoryForm` focus rings + contrast, single `<main>` landmark (13 pages),
+navbar/PhotoViewer aria, heading semantics, and reduced-motion skeletons. Verified tsc/lint/build green +
+6-lens self-review. Larger items recommended (charcoal-muted contrast sweep, modal focus traps, MemoryCard
+restructure, Undo/soft-delete, VoiceOver/NVDA smoke test) — not blockers. Before LA2: **LA1 — Memory-Care
+Clinical Readiness**; **RC5 — CERTIFIED FOR APP STORE + PRODUCTION**. `main` auto-deploys on push (LA2
+committed locally, unpushed). Full detail: `docs/LA2-ACCESSIBILITY-REPORT.md`. The remaining launch gates
+are OPERATOR/infra only (Xcode privacy-manifest wiring + rebuild; backups + Storage-bucket backup + test
+restore; prod env/migrations). A 9-persona clinical review (clinical 73/caregiver 76/patient 70) drove 5 safe fixes: **(1)
 de-medicalized Insights** — removed the fabricated biometric/Alzheimer-risk/cognitive-score charts
 (synthesized from journal mood) + deleted the 12 orphaned files; kept only honest views + the non-clinical
 summary (**this RESOLVES the RC3-flagged disclose-or-remove item — do not re-add**); **(2)** reality-orientation
@@ -69,6 +80,13 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA2 — Accessibility & Inclusive Design Readiness** (WCAG 2.2 AA pass; presentation/aria/semantic/
+  contrast/client-confirm only — no logic/data/architecture change). 7-dimension audit (68→~84) cleared 4
+  Level-A blockers (keyboard media upload, toast live region, primary-form labels, memory-delete confirm) +
+  skip link + CreateMemoryForm focus rings/contrast + single `<main>` landmark (13 pages) + navbar/PhotoViewer
+  aria + heading semantics + reduced-motion skeletons + scroll-padding. tsc/lint/build green + 6-lens
+  self-review. Larger items (charcoal-muted contrast sweep, modal focus traps, MemoryCard restructure,
+  Undo/soft-delete) recommended. Report: `docs/LA2-ACCESSIBILITY-REPORT.md`.
 - **LA1 — Memory-Care Clinical Readiness** (clinical/caregiving workflow polish; presentation-only, no
   schema/API/architecture change, reminder engine untouched). 9-persona clinical review → 5 safe fixes:
   de-medicalized Insights (removed fabricated biometric/Alzheimer-risk/cognitive charts + deleted 12 orphaned

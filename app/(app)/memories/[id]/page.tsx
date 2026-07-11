@@ -161,7 +161,7 @@ export default async function MemoryPage({
       <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
         {/* Header */}
         <div className="p-8 border-b border-gray-100">
-          <p className="text-xs uppercase tracking-widest text-gray-400 mb-3">
+          <p className="text-xs uppercase tracking-widest text-charcoal-soft mb-3">
             Memory Intelligence
           </p>
 
@@ -437,7 +437,7 @@ export default async function MemoryPage({
 
                           {/* Similarity Score */}
                           {related.similarity && (
-                            <div className="mt-3 text-xs text-gray-400">
+                            <div className="mt-3 text-xs text-charcoal-soft">
                               Semantic Similarity:{" "}
                               {Math.round(
                                 related.similarity *
@@ -466,7 +466,7 @@ export default async function MemoryPage({
         {/* Footer */}
         <div className="px-8 py-6 bg-gray-50">
           {formatAddedDate(memory.created_at) && (
-            <p className="text-xs text-gray-400 mb-3">
+            <p className="text-xs text-charcoal-soft mb-3">
               Added to RemyNest on{" "}
               {formatAddedDate(memory.created_at)}
             </p>
@@ -477,7 +477,7 @@ export default async function MemoryPage({
               Semantic Memory Stored
             </div>
 
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-charcoal-soft">
               RemyNest Cognitive Engine
             </div>
           </div>

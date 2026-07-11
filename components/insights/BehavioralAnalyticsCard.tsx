@@ -77,9 +77,9 @@ const BehavioralAnalyticsCard = memo(
             Behavioral Consistency
           </p>
 
-          <h3 className="text-4xl font-bold text-[#243428] mt-3">
+          <p className="text-4xl font-bold text-[#243428] mt-3">
             {behavioralPatterns.consistency}
-          </h3>
+          </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
 
@@ -115,9 +115,9 @@ const BehavioralAnalyticsCard = memo(
             Reminder Adherence
           </p>
 
-          <h3 className="text-4xl font-bold text-[#243428] mt-3">
+          <p className="text-4xl font-bold text-[#243428] mt-3">
             {streakAnalysis.adherence}
-          </h3>
+          </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
 
@@ -153,9 +153,9 @@ const BehavioralAnalyticsCard = memo(
             Emotional Stability
           </p>
 
-          <h3 className="text-4xl font-bold text-[#243428] mt-3">
+          <p className="text-4xl font-bold text-[#243428] mt-3">
             {emotionalVolatility.emotionalStability}
-          </h3>
+          </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
 
@@ -191,9 +191,9 @@ const BehavioralAnalyticsCard = memo(
             Memory Activity
           </p>
 
-          <h3 className="text-4xl font-bold text-[#243428] mt-3">
+          <p className="text-4xl font-bold text-[#243428] mt-3">
             {inactivityDetection.cognitiveActivity}
-          </h3>
+          </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
 
@@ -231,9 +231,9 @@ const BehavioralAnalyticsCard = memo(
 
           {/* LA1: neutral (was clinical red) — this reflects logging-routine
               consistency, not a clinical decline warning. */}
-          <h3 className="text-4xl font-bold text-[#243428] mt-3">
+          <p className="text-4xl font-bold text-[#243428] mt-3">
             {declineSignals.declineRisk}
-          </h3>
+          </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
 

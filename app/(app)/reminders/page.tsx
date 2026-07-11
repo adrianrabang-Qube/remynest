@@ -638,6 +638,7 @@ export default async function RemindersPage({
           {/* Title */}
           <input
             name="title"
+            aria-label="Reminder title"
             defaultValue=""
             placeholder="e.g. Donepezil 10 mg — with breakfast"
             required
@@ -672,6 +673,7 @@ export default async function RemindersPage({
 
             <select
               name="frequency"
+              aria-label="Repeat frequency"
               defaultValue="daily"
               className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
             >

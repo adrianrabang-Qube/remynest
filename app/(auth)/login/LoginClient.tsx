@@ -66,7 +66,7 @@ export default function LoginClient() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {error && <p className="text-red-500 mb-3">{error}</p>}
+        {error && <p role="alert" className="text-red-600 mb-3">{error}</p>}
 
         <button
           type="submit"

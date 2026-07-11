@@ -31,7 +31,7 @@ export default function DashboardTelemetry({
             {memoryCount}
           </h3>
 
-          <p className="text-sm text-gray-400 mt-3">
+          <p className="text-sm text-charcoal-soft mt-3">
             Stored cognitive memories
             across your RemyNest archive.
           </p>

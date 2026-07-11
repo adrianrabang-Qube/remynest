@@ -131,11 +131,22 @@ export default function PhotoViewer({
     "absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-3xl leading-none text-white backdrop-blur-sm transition disabled:pointer-events-none disabled:opacity-0";
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex flex-col bg-black">
+    // LA2 (WCAG 4.1.2): expose the full-screen viewer as a named dialog so SR users
+    // are told it opened. (aria-modal is intentionally omitted — a focus trap is a
+    // tracked follow-up; do not assert modality that isn't enforced.)
+    <div
+      role="dialog"
+      aria-label="Photo viewer"
+      className="fixed inset-0 z-[60] flex flex-col bg-black"
+    >
       <OverlayCloseButton onClick={onClose} />
 
       {multi ? (
-        <div className="absolute left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-20 -translate-x-1/2 rounded-full bg-white/15 px-3 py-1 text-sm text-white backdrop-blur-sm">
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-20 -translate-x-1/2 rounded-full bg-white/15 px-3 py-1 text-sm text-white backdrop-blur-sm"
+        >
           {active + 1} / {images.length}
         </div>
       ) : null}

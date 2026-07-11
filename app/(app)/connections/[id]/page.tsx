@@ -38,7 +38,7 @@ export default async function ConnectionDetailPage({
   const span = formatConnectionSpan(connection);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-4xl px-6 py-10">
       <Link
         href="/connections"
         className="text-sm text-charcoal-muted hover:text-charcoal"
@@ -115,6 +115,6 @@ export default async function ConnectionDetailPage({
           </ul>
         )}
       </section>
-    </main>
+    </div>
   );
 }

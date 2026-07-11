@@ -5,7 +5,7 @@
  */
 export default function LoadingInsightsPage() {
   return (
-    <main
+    <div
       className="min-h-screen bg-sand"
       aria-busy="true"
       aria-label="Loading insights"
@@ -24,6 +24,6 @@ export default function LoadingInsightsPage() {
         <div className="h-40 w-full animate-pulse rounded-3xl bg-sand-deep/20 motion-reduce:animate-none" />
         <div className="h-20 w-full animate-pulse rounded-3xl bg-sand-deep/20 motion-reduce:animate-none" />
       </section>
-    </main>
+    </div>
   );
 }

@@ -1873,6 +1873,41 @@ vitals engine, clinical shift-notes/daily-care-log, wandering-GPS/EHR/telehealth
 promoting Reminders to the primary bottom-nav. **Verdict: launch-ready for real dementia-care use.** See
 `docs/LA1-CLINICAL-READINESS-REPORT.md`.
 
+**LA2 — Accessibility & Inclusive Design Readiness (authoritative, 2026-07-12 — WCAG 2.2 AA pass;
+PRESENTATION/ARIA/SEMANTIC/CONTRAST/CLIENT-CONFIRM ONLY, no logic/data/architecture change):** a 7-dimension
+multi-agent WCAG 2.2 AA + cognitive-accessibility audit (score 68→~84) cleared the four Level-A blockers on
+core tasks and the worst AA gaps. **Level-A fixes:** **(1)** media upload was keyboard-UNREACHABLE — the file
+input was `hidden` (`display:none`), removed from tab order; changed to `sr-only` (focusable/operable) + a
+label `focus-within` ring (`AttachmentManager.tsx`, 2.1.1). **(2)** the global Toast (the app-wide
+save-success/error channel) had no live region → added `role="status" aria-live="polite" aria-atomic`
+(`ToastProvider.tsx`, 4.1.3; also green-600→700 for contrast). **(3)** the primary-flow forms lacked
+programmatic names → `CreateProfileForm` (htmlFor/id), `InviteCaregiverForm` (email/relationship aria-label +
+result `role=status`), `MemoryDateField` (4 aria-labels), and the reminders title/frequency controls
+(aria-label — aria-only, allowed on the frozen page) all now expose accessible names (3.3.2/4.1.2). **(4)**
+deleting a memory was one-tap-IRREVERSIBLE → a keyboard/SR-accessible `window.confirm` guard before the
+mutation (`memories/page.tsx` single `handleDelete`, routed from all 4 trigger sites; the delete API/mutation
+is byte-unchanged; 3.3.4). **AA fixes:** a skip-to-content link + `<main id="main-content" tabIndex=-1>`
+(`app/(app)/layout.tsx`, 2.4.1); `CreateMemoryForm` focus rings on all 5 `outline-none` controls (2.4.7) +
+`text-gray-400`→`charcoal-soft` / `text-red-500`→`red-600` (1.4.3); login/signup error `role=alert`+contrast;
+the nested-`<main>` landmark bug fixed by swapping 13 page-level `<main>`→`<div>` so the layout's is the single
+main landmark (1.3.1); `motion-reduce:animate-none` on 4 route skeletons (2.2.2) + `scroll-padding-top` +
+reduced-motion `scroll-behavior` (`globals.css`, 2.4.11/2.3.3); AppNavbar menu-trigger `aria-haspopup`/
+`aria-expanded`/`aria-label`/focus-ring + `aria-hidden` chevron (4.1.2); PhotoViewer `role="dialog"`+aria-label
++ counter `role=status` (4.1.2/4.1.3 — `aria-modal` deliberately OMITTED since no focus trap is added, per the
+same principle as the Settings DeleteAccountModal); `BehavioralAnalyticsCard` value `<h3>`→`<p>` (card keeps
+its `<h2>`; 1.3.1). Verified tsc/lint/build green + 6-lens self-review (accessibility specialist / UX / FE /
+screen-reader / older-adult / caregiver — behaviour preserved, 0 blocking). **DECISIONS (do NOT re-litigate):**
+dark mode remains intentionally deferred (mechanism-only) — do NOT enable app-wide; the Timeline in-bar
+controls stay `<44px` (enlarging breaks the sticky day-header offset). **RECOMMENDED (larger — do NOT treat
+as blockers, scope separately):** the `text-charcoal-muted` sub-18px contrast sweep (~142 sites; the token
+contract is "≥18px only") + a lint rule; modal focus-traps + `aria-modal` for PhotoViewer/ModalShell/
+DeleteAccountModal (the last needs the Settings freeze lifted first); the MemoryCard button-in-`<Link>`
+restructure (4.1.2); Undo/soft-delete for memory+reminder deletion; a client-side reminder-delete confirm;
+RemyAsk live-region consolidation; the `memory-book/print` 2-`<main>` file; a manual VoiceOver/NVDA smoke
+test. **Do NOT** re-add `outline-none` without a focus ring, use `text-gray-400`/`text-red-500` for text,
+reintroduce a page-level `<main>` inside the `(app)` layout, or remove the memory-delete confirm. See
+`docs/LA2-ACCESSIBILITY-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

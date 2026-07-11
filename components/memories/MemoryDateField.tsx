@@ -101,7 +101,7 @@ export default function MemoryDateField({
         <label className="text-sm font-medium text-gray-700">
           When did this happen?
         </label>
-        <span className="text-xs text-gray-400">{preview}</span>
+        <span className="text-xs text-charcoal-soft">{preview}</span>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -127,6 +127,7 @@ export default function MemoryDateField({
       {mode === "custom" && (
         <input
           type="date"
+          aria-label="Exact date this happened"
           value={customDate}
           max={TODAY_ISO}
           onChange={(e) => setCustomDate(e.target.value)}
@@ -137,6 +138,7 @@ export default function MemoryDateField({
       {mode === "month" && (
         <input
           type="month"
+          aria-label="Month this happened"
           value={month}
           max={CURRENT_MONTH}
           onChange={(e) => setMonth(e.target.value)}
@@ -148,6 +150,7 @@ export default function MemoryDateField({
         <input
           type="number"
           inputMode="numeric"
+          aria-label="Year this happened"
           min={1900}
           max={CURRENT_YEAR}
           value={year}
@@ -159,6 +162,7 @@ export default function MemoryDateField({
 
       {mode === "decade" && (
         <select
+          aria-label="Decade this happened"
           value={decade}
           onChange={(e) => setDecade(e.target.value)}
           className={inputClass}

@@ -38,7 +38,7 @@ export default async function ChapterDetailPage({
   const range = formatChapterRange(chapter);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-4xl px-6 py-10">
       <Link
         href="/chapters"
         className="text-sm text-charcoal-muted hover:text-charcoal"
@@ -110,6 +110,6 @@ export default async function ChapterDetailPage({
           </ul>
         )}
       </section>
-    </main>
+    </div>
   );
 }

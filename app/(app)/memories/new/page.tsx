@@ -15,9 +15,9 @@ export const metadata = {
  */
 export default function NewMemoryPage() {
   return (
-    <main className="mx-auto max-w-xl px-4 py-8">
+    <div className="mx-auto max-w-xl px-4 py-8">
       <h1 className="mb-4 text-2xl font-semibold text-charcoal">New memory</h1>
       <CreateMemoryForm />
-    </main>
+    </div>
   );
 }

@@ -76,6 +76,9 @@ export default function AppNavbar({
           <div className="relative" ref={menuRef}>
             <button
             onClick={() => setOpen(!open)}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-label="Account menu"
             className="
               flex
               items-center
@@ -88,6 +91,10 @@ export default function AppNavbar({
               py-1.5
               transition
               hover:bg-white
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-sage
+              focus-visible:ring-offset-2
             "
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white">
@@ -96,7 +103,7 @@ export default function AppNavbar({
 
             <span className="text-sm font-medium text-charcoal">{displayName}</span>
 
-            <span className="text-xs text-charcoal-muted">▾</span>
+            <span aria-hidden className="text-xs text-charcoal-muted">▾</span>
           </button>
 
             {open && profile && (

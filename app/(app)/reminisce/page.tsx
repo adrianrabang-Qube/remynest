@@ -43,7 +43,7 @@ export default async function ReminiscePage() {
     : `Let's revisit some memories together.`;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-10">
         <h1 className="text-4xl font-semibold text-charcoal">Reminisce</h1>
         <p className="mt-3 text-xl leading-relaxed text-charcoal-soft">
@@ -80,7 +80,7 @@ export default async function ReminiscePage() {
           </div>
         </>
       )}
-    </main>
+    </div>
   );
 }
 

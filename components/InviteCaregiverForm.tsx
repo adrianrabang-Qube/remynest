@@ -106,17 +106,19 @@ export default function InviteCaregiverForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
+          aria-label="Email address"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border px-4 py-2"
+          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           required
         />
 
         <select
+          aria-label="Relationship"
           value={relationshipType}
           onChange={(e) => setRelationshipType(e.target.value)}
-          className="w-full rounded-lg border px-4 py-2"
+          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
         >
           <option value="family">Family</option>
           <option value="caregiver">Caregiver</option>
@@ -159,7 +161,9 @@ export default function InviteCaregiverForm({
         </button>
 
         {message && (
-          <p className="text-sm text-gray-700">{message}</p>
+          <p role="status" aria-live="polite" className="text-sm text-charcoal">
+            {message}
+          </p>
         )}
       </form>
     </div>

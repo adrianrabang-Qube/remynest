@@ -464,7 +464,7 @@ export default function CreateMemoryForm() {
         onChange={(e) => {
           setTitle(e.target.value);
         }}
-        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
       />
 
       <label htmlFor="memory-content" className="sr-only">
@@ -481,7 +481,7 @@ export default function CreateMemoryForm() {
         onChange={(e) => {
           setContent(e.target.value);
         }}
-        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none resize-none"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40 resize-none"
       />
 
       {/* When did this happen? — historical dating */}
@@ -490,7 +490,7 @@ export default function CreateMemoryForm() {
           <label className="text-sm font-medium text-gray-700">
             When did this happen?
           </label>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-charcoal-soft">
             {memoryDatePreview}
           </span>
         </div>
@@ -537,7 +537,7 @@ export default function CreateMemoryForm() {
                 e.target.value
               )
             }
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
         )}
 
@@ -555,7 +555,7 @@ export default function CreateMemoryForm() {
               )
             }
             placeholder="e.g. 1995"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
         )}
 
@@ -568,7 +568,7 @@ export default function CreateMemoryForm() {
                 e.target.value
               )
             }
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
           >
             {DECADE_OPTIONS.map(
               (decade) => (
@@ -596,7 +596,7 @@ export default function CreateMemoryForm() {
         />
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="flex items-center justify-between text-xs text-charcoal-soft">
         <span>
           {normalizedContent.length} /
           {MAX_CONTENT_LENGTH}
@@ -606,7 +606,7 @@ export default function CreateMemoryForm() {
           <span
             id="memory-validation-error"
             role="alert"
-            className="text-red-500"
+            className="text-red-600"
           >
             {validationError}
           </span>

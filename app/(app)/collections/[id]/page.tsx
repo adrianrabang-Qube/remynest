@@ -38,7 +38,7 @@ export default async function CollectionDetailPage({
   const range = formatCollectionRange(collection);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-4xl px-6 py-10">
       <Link
         href="/collections"
         className="text-sm text-charcoal-muted hover:text-charcoal"
@@ -111,6 +111,6 @@ export default async function CollectionDetailPage({
           </ul>
         )}
       </section>
-    </main>
+    </div>
   );
 }

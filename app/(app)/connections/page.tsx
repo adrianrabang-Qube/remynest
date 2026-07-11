@@ -19,7 +19,7 @@ export default async function ConnectionsPage() {
   const connections = await getRemyConnections(supabase, user.id);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8">
         <h1 className="text-4xl font-semibold text-charcoal">Connections</h1>
         <p className="mt-2 text-charcoal-soft">
@@ -55,6 +55,6 @@ export default async function ConnectionsPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }

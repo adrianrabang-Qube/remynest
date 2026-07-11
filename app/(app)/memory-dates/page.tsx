@@ -74,7 +74,7 @@ export default async function MemoryDatesPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <div className="mx-auto max-w-3xl px-6 py-10">
       <header className="mb-8">
         <h1 className="text-4xl font-semibold text-charcoal">Memory dates</h1>
         <p className="mt-2 text-charcoal-soft">
@@ -88,6 +88,6 @@ export default async function MemoryDatesPage() {
         memories={missing}
         saveAction={saveMemoryDate}
       />
-    </main>
+    </div>
   );
 }
