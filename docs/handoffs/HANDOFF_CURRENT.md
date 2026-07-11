@@ -15,14 +15,36 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **Provider Registry Activation**: the
-provider registry is now the SINGLE authoritative conversation-provider resolver, with a resolution-only
-production seam (`getProductionProvider()`/`PRODUCTION_PROVIDER="openai"`) that is still DORMANT (nothing
-invokes it — Phase 24 will). No runtime activation; behaviour byte-unchanged; deterministic construction
-preserved. `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **Production Provider Activation**: the
+FIRST end-to-end conversation EXECUTION path (`lib/remy/providers/conversation-execution.ts`
+`executeConversation()` = `buildConversationRequest` → `getProductionProvider()` → `generateConversation` →
+`ConversationResponse`). It is still **DORMANT** (nothing invokes it — Phase 25 wires it into a user-facing
+conversational surface); no UI/route change; behaviour byte-unchanged. `main` auto-deploys to production on
+push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Production Provider Activation** (the FIRST end-to-end conversation execution path; still dormant) — one
+  new file `lib/remy/providers/conversation-execution.ts` exporting async
+  **`executeConversation(input): Promise<ConversationResponse>`** (input = the request engine's
+  `ConversationRequestInput` = `{ conversationComposition, conversationRender, answerAssembly }`) that composes:
+  **`buildConversationRequest(input)`** (pure Phase-20 request engine → `ConversationRequest`, incl.
+  `prompt.full`) → **`getProductionProvider()`** (Phase-23 registry seam → `OpenAIProvider`) →
+  **`provider.generateConversation(request)`** → `ConversationResponse`. The provider gets `request.prompt.full`
+  EXACTLY as built (no rewrite/inject/enrich). NO intelligence; uses `getProductionProvider()` (never
+  instantiates a provider, never imports OpenAI, never bypasses the registry); `ConversationRequest`/
+  `ConversationResponse` + every engine preserved exactly. Lives in the provider layer (network boundary);
+  imports only the pure `buildConversationRequest` from core (one-way providers→core; no cycle);
+  side-effect-free import (no clock/`Math.random`/env/provider-construction at load — the LLM call is the only
+  non-determinism, at `generateConversation`). The deprecated Phase-18 verbalizer (`buildConversationOutput`)
+  is NOT in the live path (superseded by the request engine). DORMANT — nothing invokes it yet (no UI/route;
+  NOT wired into `RemyRelationship`); Phase 25 wires it into a user-facing surface. Exactly ONE execution path,
+  no duplicate resolution. Only the one new file changed (+ docs); all forbidden files byte-unchanged
+  (`family-types`/request/verbalizer/composer/rendering/significance engines, all provider-layer files,
+  `index.ts`, `RemyRelationship.tsx`, UI/routes/API, `package.json`). Independent MULTI-AGENT adversarial
+  review CLEAN (7 lenses — execution-correctness / provider-correctness / architecture-purity /
+  runtime-regression / platform-integrity / deterministic-execution / future-multi-provider-readiness — 0
+  findings). tsc/lint/build green.
 - **Provider Registry Activation** (registry = single authoritative resolver; still dormant) — makes
   `lib/remy/providers/provider-registry.ts` the ONE canonical conversation-provider resolver. Verified: nothing
   outside `lib/remy/providers/` imports/constructs/resolves a provider (the layer is fully DORMANT —
@@ -279,8 +301,9 @@ Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the An
 (`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
-Provider Adapter (`e7b572c`), and the Provider Registry Activation on top. **Not pushed** — pushing
-auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), and the Production Provider
+Activation on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
+tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -295,7 +318,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
+- *(HEAD)* feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)
+- `689f917` feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
 - `e7b572c` feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)
 - `04c65c2` feat(remy): Conversation Provider Migration — migrate provider abstraction to request/response
 - `ff11123` feat(remy): Conversation Request Engine — dedicated provider request/response model

@@ -1437,6 +1437,48 @@ path or duplicate the registry; make `PRODUCTION_PROVIDER` env-derived or the re
 non-deterministic (no network/SDK/clock/env at construction); or migrate `ProviderResult` / reconcile the
 provider-identifier enums here (that is the divergent-adapter phase).
 
+**Remy — Production Provider Activation (authoritative, 2026-07-11 — extends the ONE platform; the FIRST
+end-to-end conversation EXECUTION path, still uninvoked):** activates the provider architecture built in
+Phases 18–23 by wiring the already-built deterministic pipeline into the production provider. **NOT a
+redesign, NOT prompt engineering, NOT retrieval** — just the first execution of the already-built pipeline.
+**The ONLY change is ONE new file:** `lib/remy/providers/conversation-execution.ts`, exporting the single
+async **`executeConversation(input): Promise<ConversationResponse>`** (input = the request engine's
+`ConversationRequestInput` = `{ conversationComposition, conversationRender, answerAssembly }`). It composes,
+in order: **(1)** `buildConversationRequest(input)` (the pure Phase-20 request engine — builds the immutable
+`ConversationRequest`, incl. `prompt.full`), **(2)** `getProductionProvider()` (the Phase-23 registry seam —
+resolves the authoritative production provider, currently `OpenAIProvider`), **(3)**
+`provider.generateConversation(request)` → `ConversationResponse`. **The provider receives `request.prompt.full`
+EXACTLY as produced by the request engine** — NO rewriting/injection/enrichment/prompt-manipulation here (the
+OpenAIProvider itself sends it verbatim). It performs **NO intelligence** (no retrieval/ranking/chronology/
+reasoning/significance/planning/language-generation); it **uses `getProductionProvider()`** (never instantiates
+a provider, **never imports OpenAI**, **never bypasses the registry**); and it preserves `ConversationRequest`/
+`ConversationResponse` and every deterministic engine **exactly**. **Placement:** the file lives in the
+**provider layer** (the network-capable boundary — it is `async` and can trigger a real provider call); it
+imports only the pure `buildConversationRequest` from core (a safe one-way **providers→core** dependency — core
+stays provider-free, no import cycle). **Deterministic-vs-nondeterministic boundary:** the request BUILD stays
+pure/deterministic; the ONLY non-determinism is the provider's LLM call itself, exactly at
+`generateConversation` — this file adds no clock/`Math.random`, reads no env, and constructs no provider state
+at module load (side-effect-free import; the OpenAI client/env stay lazy inside the byte-unchanged
+`openai-provider.ts`). **Verbalizer note:** the deprecated Phase-18 `buildConversationOutput` verbalizer
+produces the `@deprecated ConversationOutput` (empty-text/deferred) — NOT the provider's input type — so Phase
+20's `buildConversationRequest` superseded its request-building role and it is intentionally **NOT** in the
+live path (the request engine builds the prompt; the OpenAIProvider is the runtime verbalizer). **DORMANT:**
+**nothing invokes `executeConversation` yet** — no UI, no route, and it is **NOT** wired into `RemyRelationship`
+(doing so would fire a real OpenAI call on every app-open — a forbidden behaviour change). It is the callable
+activation seam exactly like `getProductionProvider()`; a future **Phase 25** wires it into a user-facing
+conversational surface. **Exactly ONE execution path, no duplicate provider resolution.** Only the one new file
+changed (+ docs); **byte-unchanged:** `family-types.ts`/`ConversationRequest`/`ConversationResponse`, the
+request/verbalizer/composer/rendering/significance engines, `openai-provider.ts`/`provider-errors.ts`/
+`provider-types.ts`/`provider-registry.ts`/`conversation-provider.ts`, `lib/remy/index.ts`,
+`RemyRelationship.tsx`, all UI/routes/API, `package.json`/`package-lock.json`; still exactly one
+`RemyMomentChip`. Verified tsc/lint/build green + independent MULTI-AGENT adversarial review CLEAN (7 lenses —
+execution-correctness / provider-correctness / architecture-purity / runtime-regression / platform-integrity /
+deterministic-execution / future-multi-provider-readiness — 0 findings). **Do NOT** invoke `executeConversation`
+from `RemyRelationship`/UI/an app-open path (that is Phase 25 — a user-facing conversational surface), add a
+second execution path or duplicate provider resolution, instantiate a provider directly / bypass the registry /
+import OpenAI outside the provider layer, move intelligence/retrieval/ranking/planning into the execution seam,
+rewrite/enrich `request.prompt.full`, or add retries/streaming/timeout/fallback/persistence here.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
