@@ -1700,15 +1700,37 @@ hardcoded `http://localhost:3000`); `/api/health` no longer discloses the commit
 already SOLID (Supabase httpOnly/secure/sameSite; the active-context cookie httpOnly+secure(prod)+sameSite=lax);
 **error leakage** otherwise well-contained (generic client messages). Verified tsc/lint/build green + independent
 MULTI-AGENT adversarial review CLEAN (7 lenses; 0 confirmed blocking; all 6 non-blocking findings fixed +
-re-validated). **KNOWN REMAINING (do NOT re-flag as new; scheduled):** **(HIGH, deferred to a focused follow-up)**
-the memory-EDIT kept-attachment **storage-quota bypass** — `PUT /api/memories/[id]` trusts the client-reported
-`size` of KEPT attachments (the ledger under-counts); the fix is to re-derive kept sizes from storage via
-`getStorageObjectInfo` (as create does) — deferred because it touches the frozen media pipeline + attachment
-types and needs its own tested change. **(Product decision):** the live **Ask Remy chat + `/api/memory-chat`**
+re-validated). **KNOWN REMAINING (do NOT re-flag as new; scheduled):** ~~**(HIGH, deferred)** the memory-EDIT
+kept-attachment storage-quota bypass~~ — **RESOLVED (see the RC2-follow-up note below).** **(Product decision):**
+the live **Ask Remy chat + `/api/memory-chat`**
 call OpenAI with NO `canExecuteConversation` quota gate / no `recordAiUsage` (rate-limited now, but not
 quota-gated) — decide whether Ask Remy counts against the AI quota before gating it. **Do NOT** tighten the CSP
 without Capacitor/realtime/Stripe testing, remove `unsafe-inline` without a nonce pipeline, log PHI/PII, or
 re-introduce the deleted orphan routes.
+
+**RC2 follow-up — memory-EDIT kept-attachment storage-quota bypass FIXED (authoritative, 2026-07-11 —
+surgical security fix, closes the RC2 deferred HIGH):** the storage ledger trigger projects each attachment's
+`->>'size'` from `memories.attachments` jsonb, so `PUT /api/memories/[id]` trusting the CLIENT-reported `size`
+of KEPT attachments let a client under-count the ledger and bypass the storage quota (the create/new-attachment
+path was already authoritative). **Fix:** in BOTH edit branches — the active JSON direct-to-storage branch AND
+the dormant multipart rollback branch — every KEPT attachment's `size` is now re-derived from AUTHORITATIVE
+storage metadata via `getStorageObjectInfo(supabase, a.storagePath ?? a.url)` (the **same** helper the
+new-attachment path uses) BEFORE the array is persisted / passed to `buildMemoryMediaPayload`; only `size` is
+corrected (`{ ...a, size: info.size }` when `info.exists && info.size != null`, else the attachment is kept
+unchanged — no data loss, and a missing/foreign path cannot under-report a real object). `Promise.all` preserves
+order; url/name/type/mimeType/storagePath/schema/cover/API-shape/ownership-guard all unchanged. **The multipart
+fix lives in the ROUTE, not the shared media pipeline** (`normalizeAttachments`/`handleMemoryMediaUpload` stay
+byte-unchanged — they still trust the reported size; the route now hands them corrected sizes). The pre-existing
+final owner-scope guard (`isOwnedStoragePath` over the whole final set) 400-rejects foreign/planted kept paths,
+so a client cannot point a kept attachment at another user's smaller object to under-report. Verified tsc/lint/
+build green + a focused adversarial review (quota-bypass / client-trust / spoofing / TOCTOU / mixed-edits — the
+HIGH is FULLY ELIMINATED). **Residuals are PRE-EXISTING + orthogonal (NOT re-opened by this fix, do not re-flag
+as new):** the documented orphan-object gap (a dereferenced object stays in the bucket uncounted — needs the
+not-yet-built orphan-sweep cron), the non-forceable `exists=true && size=null` fallback (Storage, not the
+client, controls whether size is surfaced), the coarse read-then-persist TOCTOU shared with the create path, and
+the ledger's `DISTINCT ON (attachment_id)` dedup (a duplicate-`id` under-count that predates + is orthogonal to
+this size fix — a ledger-architecture item, out of scope). **Do NOT** re-trust the client kept `size`, move the
+kept-size re-derivation into the shared media pipeline, or change the ledger/quota/attachment-schema/upload flow.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

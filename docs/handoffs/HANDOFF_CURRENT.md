@@ -10,24 +10,37 @@
 > CLAUDE.md authoritative notes and slimmed to this continuation doc on 2026-07-09. The full prior
 > history remains in git.)*
 
-Last Updated: 2026-07-09
+Last Updated: 2026-07-11
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **RC2 — Security Hardening**: HTTP security
-headers (CSP/HSTS/XFO/nosniff/Referrer/Permissions in `next.config.js`, Capacitor/Stripe/Supabase-compatible) +
-dependency-free API rate limiting (`lib/security/rate-limit.ts`, on 9 AI/write/billing/export endpoints) +
-logging hardening (`lib/logger.ts` — removed the RAG **PHI leak** + checkout email log; dev-gated narration) +
-deletion of 3 orphan routes + OWASP fixes (active-profile write-time authz, scoped `inviteCaregiver`, middleware
-**fail-closed**, error-leak/logout/health). MULTI-AGENT ASVS/API-Top-10 review found authorization otherwise
-CLEAN. **Remaining:** HIGH memory-EDIT kept-attachment storage-quota bypass (deferred follow-up on the frozen
-media pipeline); product decision on Ask Remy / `memory-chat` AI quota gating. RC2 PASSES → ready for RC3
-(GDPR & Privacy Compliance). `main` auto-deploys to production on push. Authoritative detail: master state →
-PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the **RC2 follow-up: memory-EDIT
+kept-attachment storage-quota bypass FIX** (the RC2 deferred HIGH). `PUT /api/memories/[id]` no longer trusts
+the client-reported `size` of KEPT attachments — both edit branches re-derive each kept attachment's size from
+authoritative storage metadata (`getStorageObjectInfo`) before the ledger-projected `memories.attachments` is
+persisted, so the storage-quota bypass is closed. Verified tsc/lint/build green + focused adversarial review
+(HIGH FULLY ELIMINATED; residuals are pre-existing + orthogonal). Before that: **RC2 — Security Hardening**.
+**Remaining:** product decision on Ask Remy / `memory-chat` AI quota gating. RC2 PASSES → ready for RC3
+(GDPR & Privacy Compliance). `main` auto-deploys to production on push (this fix is committed locally, unpushed).
+Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC2 follow-up — memory-EDIT kept-attachment storage-quota bypass FIXED** (surgical security fix; closes the
+  RC2 deferred HIGH). The ledger trigger projects each attachment's `->>'size'` from `memories.attachments`, so
+  `PUT /api/memories/[id]` trusting the CLIENT-reported `size` of KEPT attachments let a client under-count the
+  ledger + bypass the storage quota (create was already authoritative). Fix (only `app/api/memories/[id]/route.ts`
+  changed): BOTH edit branches — active JSON direct-to-storage AND dormant multipart rollback — now re-derive
+  every kept attachment's size from AUTHORITATIVE storage metadata via `getStorageObjectInfo(supabase,
+  a.storagePath ?? a.url)` (the SAME helper the new-attachment path uses) BEFORE persist / `buildMemoryMediaPayload`;
+  only `size` is corrected (`{...a, size}` when `exists && size!=null`, else unchanged — no data loss), order
+  preserved (`Promise.all`). Multipart fix is in the ROUTE (shared `normalizeAttachments`/`handleMemoryMediaUpload`
+  byte-unchanged); url/name/type/mimeType/path/schema/cover/API-shape/ownership-guard unchanged; the pre-existing
+  final `isOwnedStoragePath` guard 400-rejects foreign kept paths. Verified tsc/lint/build green + focused
+  adversarial review (quota-bypass / client-trust / spoofing / TOCTOU / mixed-edits → HIGH FULLY ELIMINATED).
+  Residuals PRE-EXISTING + orthogonal (orphan-object gap, non-forceable `size=null` fallback, create-shared
+  TOCTOU, ledger `DISTINCT ON` duplicate-`id` dedup) — do NOT re-flag as new.
 - **RC2 — Security Hardening** (production security posture; no feature/UI/architecture change). **Headers:**
   `next.config.js` adds CSP + HSTS + X-Frame-Options DENY + nosniff + Referrer-Policy + Permissions-Policy + COOP
   on every response (CSP kept Capacitor/Supabase-realtime/Stripe/OneSignal/Sentry-compatible; nonce tightening

@@ -61,6 +61,16 @@ export async function PUT(
       }
     }
 
+    // SECURITY (RC2 follow-up): make the DORMANT multipart (rollback) edit path equally authoritative —
+    // re-derive every kept attachment's size from storage HERE (in the route, without changing the shared
+    // media pipeline, which trusts the reported size). Same authoritative source as the JSON branch.
+    const keptVerified = await Promise.all(
+      normalizeAttachments(kept).map(async (a) => {
+        const info = await getStorageObjectInfo(supabase, a.storagePath ?? a.url);
+        return info.exists && info.size != null ? { ...a, size: info.size } : a;
+      }),
+    );
+
     const uploadedFiles = form
       .getAll("uploadedFiles")
       .filter((f): f is File => f instanceof File);
@@ -80,7 +90,7 @@ export async function PUT(
 
     const media =
       await buildMemoryMediaPayload({
-        body: { attachments: kept, uploadedFiles },
+        body: { attachments: keptVerified, uploadedFiles },
         userId: user.id,
       });
 
@@ -113,6 +123,21 @@ export async function PUT(
     content = body.content;
 
     const kept = normalizeAttachments(body.attachments);
+
+    // SECURITY (RC2 follow-up): the storage ledger projects each attachment's `size` from
+    // memories.attachments, so a KEPT attachment's CLIENT-reported size could under-count the ledger and
+    // bypass the storage quota. Re-derive every kept attachment's size from AUTHORITATIVE storage metadata
+    // (getStorageObjectInfo — the SAME source the create/new-attachment path uses); NEVER trust the client
+    // size. Order + fields are preserved (Promise.all keeps array order) — only `size` is corrected. A real
+    // kept object always resolves to its authoritative size; the fallback (object missing, or size not
+    // surfaced by Storage) keeps the attachment unchanged (no data loss) and cannot be used to under-report
+    // a real object's size.
+    const keptVerified = await Promise.all(
+      kept.map(async (a) => {
+        const info = await getStorageObjectInfo(supabase, a.storagePath ?? a.url);
+        return info.exists && info.size != null ? { ...a, size: info.size } : a;
+      }),
+    );
 
     const newDirect = Array.isArray(body.newAttachments)
       ? (body.newAttachments as Array<Record<string, unknown>>)
@@ -156,12 +181,12 @@ export async function PUT(
         );
       }
 
-      attachments = [...kept, ...normalizeAttachments(verifiedNew)];
+      attachments = [...keptVerified, ...normalizeAttachments(verifiedNew)];
       // Cover = first image of the FINAL set (matches the multipart branch).
       coverImageUrl =
         attachments.find((a) => a.type === "image")?.url ?? null;
     } else {
-      attachments = kept;
+      attachments = keptVerified;
       // Recompute the cover from the kept set — the migrated clients no longer send
       // coverImageUrl, so reading body.coverImageUrl would wipe the cover on every
       // no-new-file edit (title/content edit, photo removal, reorder).
