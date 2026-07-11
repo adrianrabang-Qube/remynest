@@ -1322,6 +1322,39 @@ engine call a provider / do intelligence / be non-deterministic, wire it into Re
 or export it from `@/lib/remy`. **Future migration:** a later approved phase points the provider interface
 (`generateConversation`) at `ConversationRequest` → `ConversationResponse` and then retires `ConversationOutput`.
 
+**Remy — Conversation Provider Migration (authoritative, 2026-07-11 — extends the ONE platform;
+provider-abstraction type-migration):** the conversation provider ABSTRACTION was migrated from the legacy
+`ConversationOutput` request model to the canonical `ConversationRequest` → `ConversationResponse`
+architecture. **PURE, types-only, behaviour-preserving; NO real provider implemented.** The
+`ConversationProviderAdapter` interface method (`lib/remy/providers/conversation-provider.ts`) is now
+`generateConversation(request: ConversationRequest): Promise<ConversationResponse>` (was `ConversationOutput
+→ Promise<ConversationOutput>`). The `DeferredProvider` (`provider-registry.ts`) migrated to the same
+signature and its **BODY is byte-unchanged** — still the synchronous `void request; throw
+notImplementedError(this.name)` (NO async introduced — a `never`-typed throw satisfies the
+`Promise<ConversationResponse>` return; execution model preserved; `configuration()`/`health()`/
+`getConversationProvider`/`listProviders`/`isProviderImplemented` unchanged). **`ConversationOutput` is
+`@deprecated` but RETAINED** (JSDoc pointing at `ConversationRequest`; its 5 fields byte-unchanged; a future
+phase removes it) — the verbalizer (`buildConversationOutput`), `RemyRelationship`, the `index.ts`
+re-export, and `provider-types.ts` `ProviderResult.output` still reference it and compile (the `@deprecated`
+JSDoc adds NO lint warnings — `no-deprecated` isn't enabled). **NO network/SDK/fetch/async, NO wiring/UI/
+index.ts change, NO significance/intelligence change, NO other engine modified.** Only 3 files changed
+(`conversation-provider.ts`, `provider-registry.ts`, `family-types.ts`); the request/verbalizer/composer/
+rendering/significance engines, `RemyRelationship`, `index.ts`, `provider-types.ts`, `provider-errors.ts`
+are byte-unchanged. Verified tsc/lint/build + independent MULTI-AGENT adversarial review CLEAN (7 lenses —
+provider-abstraction-correctness / migration-correctness / backwards-compatibility / platform-integrity /
+purity / regressions / future-provider-readiness — **0 confirmed blocking**). **KNOWN FOLLOW-UP (pre-existing
+from Phase 20, non-blocking, NOT introduced here):** `ConversationResponse.provider` /
+`ConversationResponseMetadata.provider` are typed by `ConversationProvider` (family-types — 5 values:
+deferred/openai/anthropic/azure/local) which DIVERGES from the registry's `ProviderName` (providers — 8
+values: +gemini/azure-openai/ollama/lm-studio/custom-enterprise). A future real adapter for those 5 extra
+providers cannot set `provider` from its own `name` without reconciling the two enums (it is LATENT — the
+deferred stub only throws, never builds a `ConversationResponse`; baseline tsc clean). **The future
+real-adapter phase MUST reconcile `ConversationProvider` ↔ `ProviderName` first** (out of scope here — would
+require editing `provider-types.ts`, and this migration was restricted to the 3 files above). **Do NOT** make
+the deferred provider return a value instead of throwing (behaviour must stay preserved) or become async,
+implement a real provider here, re-add `ConversationOutput` as the provider input, or remove
+`ConversationOutput` before the removal phase.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -1209,7 +1209,15 @@ export interface ConversationGeneration {
   referenceCount: number;
 }
 
-/** The Conversation Verbalizer Engine's complete output — provider request + citations, no intelligence. */
+/**
+ * @deprecated Since Phase 21 — `ConversationRequest` is now the canonical (immutable) provider INPUT and
+ * `ConversationResponse` the provider OUTPUT. This overloaded type (an empty-`text` "provider request")
+ * is retained temporarily for backwards compatibility only; a future migration phase removes it. Do NOT
+ * use it for new code — build a `ConversationRequest` via `buildConversationRequest`, and let providers
+ * return a `ConversationResponse`.
+ *
+ * The Conversation Verbalizer Engine's complete output — provider request + citations, no intelligence.
+ */
 export interface ConversationOutput {
   /** The verbalized answer. Empty until a real provider adapter fills it (LLM verbalization deferred). */
   text: string;

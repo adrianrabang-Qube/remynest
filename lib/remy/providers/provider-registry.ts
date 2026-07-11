@@ -9,7 +9,7 @@
  * PURE: type-only imports (+ the local error factory); no React/DOM/Supabase/fetch/timers/clock/Date/
  * Math.random/persistence/network/async.
  */
-import type { ConversationOutput } from "@/lib/remy/core/family-types";
+import type { ConversationRequest, ConversationResponse } from "@/lib/remy/core/family-types";
 import type { ConversationProviderAdapter } from "./conversation-provider";
 import { notImplementedError } from "./provider-errors";
 import type {
@@ -51,8 +51,10 @@ export class DeferredProvider implements ConversationProviderAdapter {
     this.name = name;
   }
 
-  generateConversation(request: ConversationOutput): Promise<ConversationOutput> {
+  generateConversation(request: ConversationRequest): Promise<ConversationResponse> {
     // No network, no SDK, no async — the real verbalization is deferred to a future provider adapter.
+    // Behaviour unchanged from Phase 19: the deferred stub still throws "Provider not implemented." Only
+    // the request/response TYPES migrated (ConversationOutput -> ConversationRequest/ConversationResponse).
     void request;
     throw notImplementedError(this.name);
   }
