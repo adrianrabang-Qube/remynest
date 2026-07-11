@@ -35,30 +35,6 @@ const BehavioralAnalyticsCard =
     }
   );
 
-const CognitiveScoreChart =
-  dynamic(
-    () =>
-      import(
-        "./CognitiveScoreChart"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
-const CognitiveDriftChart =
-  dynamic(
-    () =>
-      import(
-        "./CognitiveDriftChart"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
 const EmotionalTrendsChart =
   dynamic(
     () =>
@@ -95,73 +71,17 @@ const ReminderConsistencyChart =
     }
   );
 
-const SleepRecoveryChart =
-  dynamic(
-    () =>
-      import(
-        "./SleepRecoveryChart"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
-const WearableTelemetryChart =
-  dynamic(
-    () =>
-      import(
-        "./WearableTelemetryChart"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
-const MemoryContinuityChart =
-  dynamic(
-    () =>
-      import(
-        "./MemoryContinuityChart"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
-const AlzheimerRiskSignals =
-  dynamic(
-    () =>
-      import(
-        "./AlzheimerRiskSignals"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
-const AttentionAnalytics =
-  dynamic(
-    () =>
-      import(
-        "./AttentionAnalytics"
-      ),
-    {
-      ssr: false,
-      loading: () => <ChartSkeleton />,
-    }
-  );
-
+// LA1 — de-medicalization: the fabricated-sensor and diagnostic-named charts
+// (Cognitive Score/Drift, Memory Continuity/Recall Drift, Attention, Sleep Recovery,
+// Wearable Biometrics, Alzheimer Risk Signals) were REMOVED. They synthesized
+// pseudo-clinical trend lines from journal mood — data no sensor or clinician
+// produced — which contradicts the app's non-diagnostic promise (RC3-flagged
+// disclose-or-remove decision, resolved on the honest side). Only real-data views
+// remain (emotional tone, memory categories, reminder consistency, everyday patterns).
+// The `cognitionScore`/`driftData` values are retained ONLY as inputs to the
+// non-clinical text summary (they are no longer shown as a score/chart).
 import { calculateCognitionScore } from "@/lib/cognition/cognitionScore";
 import { calculateDriftTelemetry } from "@/lib/cognition/driftEngine";
-import { calculateContinuityTelemetry } from "@/lib/cognition/continuityEngine";
-import { calculateRiskTelemetry } from "@/lib/cognition/riskAnalysis";
-import { calculateAttentionTelemetry } from "@/lib/cognition/attentionEngine";
-import { calculateSleepRecoveryTelemetry } from "@/lib/cognition/sleepRecoveryEngine";
-import { calculateWearableTelemetry } from "@/lib/cognition/wearableEngine";
 
 import { generateInsightSummary } from "@/lib/insights/generateInsightSummary";
 import { buildRemyInsights } from "@/lib/remy/insights";
@@ -379,61 +299,6 @@ export default function InsightsClient({
 
     }, [moodData]);
 
-  const {
-    continuityData,
-  } =
-    useMemo(() => {
-
-      return calculateContinuityTelemetry(
-        moodData
-      );
-
-    }, [moodData]);
-
-  const {
-    attentionData,
-  } =
-    useMemo(() => {
-
-      return calculateAttentionTelemetry(
-        moodData
-      );
-
-    }, [moodData]);
-
-  const {
-    sleepData,
-  } =
-    useMemo(() => {
-
-      return calculateSleepRecoveryTelemetry(
-        moodData
-      );
-
-    }, [moodData]);
-
-  const {
-    wearableData,
-  } =
-    useMemo(() => {
-
-      return calculateWearableTelemetry(
-        moodData
-      );
-
-    }, [moodData]);
-
-  const {
-    riskData,
-  } =
-    useMemo(() => {
-
-      return calculateRiskTelemetry(
-        moodData
-      );
-
-    }, [moodData]);
-
   // =====================================
   // ANALYTICS INTELLIGENCE LAYER
   // =====================================
@@ -587,17 +452,12 @@ export default function InsightsClient({
             declineSignals={declineSignals}
           />
 
-          {/* TELEMETRY */}
-          <CognitiveScoreChart cognitionScore={cognitionScore} />
-          <CognitiveDriftChart driftData={driftData} />
+          {/* REAL-DATA VIEWS ONLY (see the de-medicalization note above) —
+              emotional tone of the memories, memory categories, and reminder
+              consistency. No fabricated biometric/sensor or diagnostic charts. */}
           <EmotionalTrendsChart moodData={moodData} />
           <MoodDistributionChart categoryData={categoryData} />
           <ReminderConsistencyChart reminderData={reminderData} />
-          <MemoryContinuityChart continuityData={continuityData} />
-          <AttentionAnalytics attentionData={attentionData} />
-          <SleepRecoveryChart sleepData={sleepData} />
-          <WearableTelemetryChart wearableData={wearableData} />
-          <AlzheimerRiskSignals riskData={riskData} />
         </div>
       </details>
 

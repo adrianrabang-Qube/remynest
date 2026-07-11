@@ -13,6 +13,7 @@ import ProfileCoverageCard from "@/components/profile/identity/ProfileCoverageCa
 import MyNestExplainer from "@/components/profile/MyNestExplainer";
 import { RemyStage } from "@/lib/remy";
 import { getAccessibleProfiles } from "@/lib/profile-access";
+import OrientationLine from "@/components/OrientationLine";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,9 @@ export default async function RemyHomePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4 md:space-y-5 md:p-6">
       <header>
-        <h1 className="font-serif text-2xl font-semibold text-charcoal md:text-3xl">
+        {/* LA1: reality-orientation anchor — a persistent day/date cue. */}
+        <OrientationLine />
+        <h1 className="mt-1 font-serif text-2xl font-semibold text-charcoal md:text-3xl">
           Home
         </h1>
         <p className="mt-1 text-sm text-charcoal-muted">

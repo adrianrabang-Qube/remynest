@@ -639,10 +639,17 @@ export default async function RemindersPage({
           <input
             name="title"
             defaultValue=""
-            placeholder="Take medicine every Tuesday at 2PM..."
+            placeholder="e.g. Donepezil 10 mg — with breakfast"
             required
             className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
           />
+          {/* LA1: legibility helper (presentation/copy only — non-clinical, no dosing
+              advice). A clear title lets a covering caregiver act on the reminder
+              without tacit knowledge. Input name/form logic byte-unchanged (frozen). */}
+          <p className="text-xs text-charcoal-muted">
+            Tip: for medications, include the name, dose, and time — so anyone
+            helping knows exactly what to give.
+          </p>
 
           {/* Date (timezone-correct: converts local → UTC in the browser) */}
           <ReminderDateTimeField

@@ -15,8 +15,20 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **RC5 — App Store & Production Release
-Certification** (final certification; no feature/behaviour change; reminder engine untouched). An 8-lens
+Readiness**. No implementation task is active — the last work was **LA1 — Memory-Care Clinical Readiness**
+(clinical/caregiving workflow polish; presentation-only, no schema/API/architecture change, reminder engine
+untouched). A 9-persona clinical review (clinical 73/caregiver 76/patient 70) drove 5 safe fixes: **(1)
+de-medicalized Insights** — removed the fabricated biometric/Alzheimer-risk/cognitive-score charts
+(synthesized from journal mood) + deleted the 12 orphaned files; kept only honest views + the non-clinical
+summary (**this RESOLVES the RC3-flagged disclose-or-remove item — do not re-add**); **(2)** reality-orientation
+date on Home (`OrientationLine`); **(3)** honest My-Nest reminder copy (`DashboardFocus`); **(4)** caregiver
+access-level clarity (`InviteCaregiverForm`); **(5)** legible medication-reminder hint (`reminders/page.tsx`,
+frozen form byte-unchanged). Verified tsc/lint/build green + 5-lens self-review. **Verdict: launch-ready for
+real dementia-care use**; features (ICE card, "This is Me", completion attribution, family roster, voice) are
+recommended post-launch. Before LA1: **RC5 — CERTIFIED FOR APP STORE + PRODUCTION** (94/100). `main`
+auto-deploys on push (LA1 committed locally, unpushed). Full detail: `docs/LA1-CLINICAL-READINESS-REPORT.md`.
+The remaining launch gates are OPERATOR/infra only (Xcode privacy-manifest wiring + rebuild; backups +
+Storage-bucket backup + test restore; prod env/migrations). An 8-lens
 multi-agent certification (Apple/Google/QA/Staff/SRE/Security/A11y/Privacy) re-verified every RC2–RC4
 hardening claim in code and found **0 NEW code-level release blockers** (**overall 94/100**). **Verdict:
 ✅ CERTIFIED FOR APP STORE SUBMISSION + ✅ CERTIFIED FOR PRODUCTION RELEASE (iOS + web); Google Play
@@ -57,6 +69,14 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA1 — Memory-Care Clinical Readiness** (clinical/caregiving workflow polish; presentation-only, no
+  schema/API/architecture change, reminder engine untouched). 9-persona clinical review → 5 safe fixes:
+  de-medicalized Insights (removed fabricated biometric/Alzheimer-risk/cognitive charts + deleted 12 orphaned
+  files; kept honest views — **resolves the RC3 disclose-or-remove item**); reality-orientation date on Home
+  (`OrientationLine`); honest My-Nest reminder copy (`DashboardFocus`); access-level clarity
+  (`InviteCaregiverForm`); legible med-reminder hint (`reminders/page.tsx`, frozen form byte-unchanged).
+  tsc/lint/build green + 5-lens self-review. Recommendations (ICE card, "This is Me", completion attribution,
+  family roster, voice) + rejections recorded. Report: `docs/LA1-CLINICAL-READINESS-REPORT.md`.
 - **RC5 — App Store & Production Release Certification** (final certification; no feature/behaviour change;
   reminder engine untouched). 8 independent lenses + synthesis → **overall 94/100, 0 NEW code-level release
   blockers**; every RC2–RC4 claim re-verified in code. **✅ CERTIFIED FOR APP STORE SUBMISSION + ✅ CERTIFIED

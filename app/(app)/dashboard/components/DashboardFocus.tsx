@@ -37,14 +37,17 @@ export default function DashboardFocus({
     });
   };
 
-  // ---- My Nest: reminders are care-only, gentle redirect ----------------
+  // ---- My Nest: invite the person to set their OWN reminders --------------
+  // LA1: personal ("My Nest") reminders work end-to-end and are device-validated,
+  // so this must NOT say reminders are care-profile-only (that hid a working,
+  // independence-preserving feature and discouraged self-management).
   if (isMyNest) {
     return (
       <section className="rounded-3xl border border-sand-deep/70 bg-white p-4 md:p-6 shadow-soft">
         <h2 className="text-xl font-semibold text-charcoal">Today&apos;s Focus</h2>
         <p className="mt-2 text-sm text-charcoal-soft">
-          Reminders live inside a care profile. Enter a care workspace to see
-          the day&apos;s focus, routines, and gentle reminders.
+          Set gentle reminders for your own day — medications, appointments, and
+          daily routines. They&apos;ll reach you even offline.
         </p>
         <Link
           href="/reminders"

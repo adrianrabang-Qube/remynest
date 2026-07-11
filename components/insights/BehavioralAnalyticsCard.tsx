@@ -229,7 +229,9 @@ const BehavioralAnalyticsCard = memo(
             Routine Changes
           </p>
 
-          <h3 className="text-4xl font-bold text-[#9f3a2f] mt-3">
+          {/* LA1: neutral (was clinical red) — this reflects logging-routine
+              consistency, not a clinical decline warning. */}
+          <h3 className="text-4xl font-bold text-[#243428] mt-3">
             {declineSignals.declineRisk}
           </h3>
 

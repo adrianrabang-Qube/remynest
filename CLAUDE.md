@@ -1835,6 +1835,44 @@ probe-gated migrations) **+ the documented roadmap** — none a code defect. **D
 item, re-open the frozen reminder engine, or treat the operator/roadmap deferrals as new blockers. See
 `docs/RC5-RELEASE-CERTIFICATION.md`.
 
+**LA1 — Memory-Care Clinical Readiness (authoritative, 2026-07-12 — clinical/caregiving workflow polish;
+PRESENTATION-ONLY, no schema/API/architecture change, reminder engine untouched):** a 9-persona clinical
+review (dementia specialist / geriatrician / OT / memory-care nurse / professional + family caregiver /
+person with early dementia / assisted-living manager / facility admin) scored clinical 73 / caregiver 76 /
+patient 70 and drove FIVE safe, high/medium-value presentation fixes (anti-bloat discipline — most gaps were
+recorded as RECOMMEND or REJECT, not built). **(1) DE-MEDICALIZED Insights — RESOLVES the RC3/RC4/RC5-flagged
+"cognitive/Alzheimer insights disclose-or-remove decision" on the REMOVE side.** The Insights page rendered
+FABRICATED pseudo-clinical/biometric charts — "Cognitive Score/Drift", "Memory Continuity/Recall Drift",
+"Attention", "Sleep Recovery", "Wearable Biometrics", "Alzheimer Risk Signals" — all synthesized from the
+AI-assigned mood of journal text (data no sensor or clinician produced), which contradicted the app's
+non-diagnostic promise and risked false alarm/reassurance for families. Those chart renders were removed from
+`components/insights/InsightsClient.tsx`, the card's alarming red "Routine Changes" value was neutralized
+(`BehavioralAnalyticsCard.tsx`), and the **12 now-orphaned files were deleted** (the 7 chart components +
+`lib/cognition/{continuityEngine,attentionEngine,sleepRecoveryEngine,wearableEngine,riskAnalysis}.ts`). Only
+HONEST real-data views remain (emotional tone of memories, memory categories, reminder consistency) + the
+non-clinical narrative; the plain-language AI summary is unchanged (its `cognitionScore`/`driftData` inputs —
+`lib/cognition/{cognitionScore,driftEngine}.ts` — are retained internally; no score/chart is shown). **Do NOT
+re-add fabricated biometric/sleep/cognitive-score/Alzheimer-risk surfaces — the app collects no such sensor
+data and must never present pseudo-clinical scoring/prediction.** **(2)** reality-orientation date anchor on
+Home (`components/OrientationLine.tsx` — a persistent "Good morning — today is …", computed client-side after
+mount [SSR-safe, same pattern as the Nest's time-of-day], `aria-live`; a cornerstone reality-orientation
+intervention). **(3)** honest My-Nest reminder copy (`app/(app)/dashboard/components/DashboardFocus.tsx` no
+longer falsely claims reminders are care-profile-only — personal reminders work end-to-end). **(4)** caregiver
+access-level clarity (`components/InviteCaregiverForm.tsx` — plain-language Read-only/Full-access labels +
+a least-privilege helper; "admin" confers the same rights as "full", management is owner-only; COPY/LABEL
+only, no permission-logic change). **(5)** legible medication-reminder placeholder + a strictly non-clinical
+format hint (`app/(app)/reminders/page.tsx` — presentation/copy only; input name/form/scheduling/delivery
+byte-unchanged, consistent with the Polaris Pass-8 precedent; NO dosing/medical advice). Verified tsc/lint/
+build green + main-loop 5-lens self-review (clinical advisor / dementia nurse / family caregiver / healthcare
+UX / product designer — behaviour preserved, 0 blocking). **RECOMMENDED post-launch (features, non-clinical —
+do NOT treat as blockers):** ICE/emergency-contact card; "This is Me" care-continuity block; reminder
+completion attribution (read-only over existing `completed_by`/`reminder_events` — never touch frozen
+scheduling); who's-who family roster; care-team activity view; voice capture (known deferred); memory-form
+reminiscence guidance. **REJECTED (bloat/liability — do NOT build):** medication-interaction/dosing checker or
+vitals engine, clinical shift-notes/daily-care-log, wandering-GPS/EHR/telehealth/wearable-biometric ingestion,
+promoting Reminders to the primary bottom-nav. **Verdict: launch-ready for real dementia-care use.** See
+`docs/LA1-CLINICAL-READINESS-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

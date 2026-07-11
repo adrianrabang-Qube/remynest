@@ -128,15 +128,27 @@ export default function InviteCaregiverForm({
           <option value="other">Other</option>
         </select>
 
-        <select
-          value={accessLevel}
-          onChange={(e) => setAccessLevel(e.target.value)}
-          className="w-full rounded-lg border px-4 py-2"
-        >
-          <option value="read">Read Only</option>
-          <option value="full">Full Access</option>
-          <option value="admin">Admin</option>
-        </select>
+        <label className="block text-sm font-medium text-charcoal">
+          What can they do?
+          <select
+            value={accessLevel}
+            onChange={(e) => setAccessLevel(e.target.value)}
+            className="mt-1 w-full rounded-lg border px-4 py-2 font-normal"
+          >
+            <option value="read">Read-only — can view</option>
+            <option value="full">Full access — can view, add &amp; edit</option>
+            <option value="admin">Admin — same as full access</option>
+          </select>
+        </label>
+        {/* LA1: least-privilege clarity — 'admin' currently confers the same rights as
+            'full' (only 'read' restricts writes; inviting/removing people is owner-only).
+            Copy/label only — no permission-logic change. */}
+        <p className="text-xs text-charcoal-muted">
+          <strong>Read-only</strong> can view memories &amp; reminders.{" "}
+          <strong>Full access</strong> can also add and edit them. Only you, the
+          profile owner, can invite or remove people — pick Read-only to share
+          viewing without giving edit access to private memories.
+        </p>
 
         <button
           type="submit"
