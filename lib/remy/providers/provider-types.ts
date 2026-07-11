@@ -2,15 +2,16 @@
  * Remy Platform (v2) — CONVERSATION PROVIDER TYPES (pure, type-only surface).
  *
  * The structured vocabulary for the conversation PROVIDER abstraction. These are ONLY type/interface
- * definitions describing what a FUTURE provider adapter would report — they carry NO network/SDK/fetch
- * behaviour and no live state. The supported provider names are declared here; NONE are implemented.
+ * definitions describing what a provider adapter reports — they carry NO network/SDK/fetch behaviour and no
+ * live state. The supported provider names are declared here; OpenAI is implemented (Phase 22), the rest are
+ * deferred.
  *
  * PURE: type-only imports; no runtime code, no network/persistence.
  */
 import type { ConversationOutput } from "@/lib/remy/core/family-types";
 import type { ProviderError } from "./provider-errors";
 
-/** The supported (future) provider names — NONE are implemented in this abstraction. */
+/** The supported provider names — OpenAI is implemented (Phase 22); the remaining names are deferred. */
 export type ProviderName =
   | "deferred"
   | "openai"
@@ -45,7 +46,7 @@ export interface ProviderLimits {
   maxRequestsPerMinute: number;
 }
 
-/** Static configuration a (future) provider adapter exposes. `implemented` is always false here. */
+/** Static configuration a provider adapter exposes. `implemented` is true only for a real adapter (OpenAI). */
 export interface ProviderConfiguration {
   name: ProviderName;
   model: string;
@@ -53,13 +54,13 @@ export interface ProviderConfiguration {
   capabilities: ProviderCapability[];
   limits: ProviderLimits;
   version: ProviderVersion;
-  /** True only when a real adapter implementation exists — always false in this abstraction. */
+  /** True only when a real adapter implementation exists (true for OpenAI since Phase 22; false for the deferred stubs). */
   implemented: boolean;
 }
 
 export type ProviderHealthStatus = "unimplemented" | "ready" | "degraded" | "unavailable";
 
-/** A structured health report — never a live network probe; this abstraction reports "unimplemented". */
+/** A structured health report — never a live network probe; deferred stubs report "unimplemented", an implemented adapter reports its readiness. */
 export interface ProviderHealth {
   name: ProviderName;
   status: ProviderHealthStatus;

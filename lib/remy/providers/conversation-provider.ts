@@ -9,9 +9,9 @@
  *
  * This module defines ONLY the interface — NO implementation, NO network, NO SDK, NO async body.
  *
- * FUTURE ADAPTERS (documented, NONE implemented): OpenAI, Anthropic, Gemini, Azure OpenAI, Ollama,
- * LM Studio, Custom Enterprise. Each future adapter is the ONLY place a `fetch` / SDK / real LLM call
- * may ever live.
+ * ADAPTERS: OpenAI is IMPLEMENTED (Phase 22 — the only real adapter; it isolates the OpenAI SDK / network).
+ * The remaining providers (Anthropic, Gemini, Azure OpenAI, Ollama, LM Studio, Custom Enterprise) are still
+ * deferred/future. Each real adapter is the ONLY place a `fetch` / SDK / real LLM call may ever live.
  *
  * RESPONSIBILITIES — a provider adapter is ONLY allowed to:
  *   • accept a `ConversationRequest`,
@@ -29,14 +29,14 @@ export interface ConversationProviderAdapter {
   /** The provider this adapter represents. */
   readonly name: ProviderName;
   /**
-   * Verbalize the canonical `ConversationRequest` into a filled `ConversationResponse` (fills `text`). A
-   * future adapter implements this; the deferred stub throws "Provider not implemented." It MUST NOT
-   * change chronology / importance / ordering / references / facts / memory ids — it may only choose
-   * wording.
+   * Verbalize the canonical `ConversationRequest` into a filled `ConversationResponse` (fills `text`). The
+   * OpenAI adapter implements this (Phase 22); every other provider's deferred stub throws "Provider not
+   * implemented." It MUST NOT change chronology / importance / ordering / references / facts / memory ids —
+   * it may only choose wording.
    */
   generateConversation(request: ConversationRequest): Promise<ConversationResponse>;
   /** The adapter's static configuration (model / capabilities / limits / version / implemented). */
   configuration(): ProviderConfiguration;
-  /** The adapter's structured health (this abstraction always reports "unimplemented"). */
+  /** The adapter's structured health (deferred stubs report "unimplemented"; an implemented adapter such as OpenAI reports its live readiness). */
   health(): ProviderHealth;
 }

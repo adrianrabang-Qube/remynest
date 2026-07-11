@@ -15,13 +15,32 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the OpenAI Provider Adapter (the FIRST real
-production provider behind the provider abstraction; official OpenAI SDK isolated + env-gated + DORMANT —
-nothing invokes it yet; deferred providers preserved). `main` auto-deploys to production on push.
-Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **Provider Registry Activation**: the
+provider registry is now the SINGLE authoritative conversation-provider resolver, with a resolution-only
+production seam (`getProductionProvider()`/`PRODUCTION_PROVIDER="openai"`) that is still DORMANT (nothing
+invokes it — Phase 24 will). No runtime activation; behaviour byte-unchanged; deterministic construction
+preserved. `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Provider Registry Activation** (registry = single authoritative resolver; still dormant) — makes
+  `lib/remy/providers/provider-registry.ts` the ONE canonical conversation-provider resolver. Verified: nothing
+  outside `lib/remy/providers/` imports/constructs/resolves a provider (the layer is fully DORMANT —
+  `getConversationProvider` is not even called yet). Added a resolution-only production seam:
+  **`PRODUCTION_PROVIDER: ProviderName = "openai"`** (a fixed deterministic literal, never env-derived) +
+  **`getProductionProvider()`** which delegates to `getConversationProvider(PRODUCTION_PROVIDER)` (single
+  canonical resolver — no second path). Both RESOLVE ONLY — they return an adapter; they **never** call
+  `generateConversation`, open a network connection, read env, or execute (Phase 24 will invoke the seam).
+  `"openai"` → real `OpenAIProvider`; every other name → `DeferredProvider` (still THROWS `notImplementedError`,
+  behaviour byte-unchanged). Registry construction stays deterministic (no network/SDK/env/clock at load or
+  construction). Corrected now-false post-Phase-22 docstrings ("NONE implemented"/"always false"/"ONLY
+  registered adapter") across `provider-registry.ts` + `conversation-provider.ts` + `provider-types.ts` —
+  interface signatures + type definitions byte-identical (comment-only); the legacy `ProviderResult` (typed on
+  the deprecated `ConversationOutput`) left byte-unchanged. Only those 3 provider-layer files changed (+ docs);
+  NO runtime activation, NO UI/routes/API/significance/RemyRelationship/`family-types`/`ConversationRequest`/
+  `ConversationResponse`/`package.json` change. Independent MULTI-AGENT adversarial review CLEAN (7 lenses —
+  every raw finding adversarially refuted; 0 confirmed blocking). **Phase 24 will ACTIVATE** (wire
+  `getProductionProvider()` into an execution path). tsc/lint/build green.
 - **OpenAI Provider Adapter** (the FIRST real production provider) — `lib/remy/providers/openai-provider.ts`
   (new) `OpenAIProvider implements ConversationProviderAdapter`, registered for `"openai"` in
   `provider-registry.ts`. PURE EXECUTION layer: sends `request.prompt.full` to OpenAI EXACTLY as supplied (no
@@ -259,9 +278,9 @@ Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), th
 Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
 (`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
-Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), and the OpenAI
-Provider Adapter on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
-tsc/lint/build green.
+Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
+Provider Adapter (`e7b572c`), and the Provider Registry Activation on top. **Not pushed** — pushing
+auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -276,7 +295,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)
+- *(HEAD)* feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
+- `e7b572c` feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)
 - `04c65c2` feat(remy): Conversation Provider Migration — migrate provider abstraction to request/response
 - `ff11123` feat(remy): Conversation Request Engine — dedicated provider request/response model
 - `544f714` feat(remy): Conversation Provider Interface — provider abstraction layer

@@ -1397,6 +1397,46 @@ intelligence/retrieval/ranking to the provider, rewrite/modify the prompt or cit
 dependency, or leak SDK exceptions. **A second real adapter** (Anthropic/Gemini/…) implements the SAME
 interface and must first reconcile the two provider-identifier enums.
 
+**Remy — Provider Registry Activation (authoritative, 2026-07-11 — extends the ONE platform; makes the
+registry the SINGLE authoritative provider resolver, still DORMANT):** an architectural activation phase
+that makes `lib/remy/providers/provider-registry.ts` the ONE canonical mechanism for resolving conversation
+providers, **while preserving existing behaviour and WITHOUT activating any user-facing AI** (it only
+prepares for Phase 24). **NO provider is wired into any user-facing execution path; no provider executes.**
+Confirmed pre-work: **nothing outside `lib/remy/providers/` imports/constructs/resolves a provider** (repo
+sweep = zero external importers; `getConversationProvider` is not even *called* yet) — so the layer is fully
+self-contained + dormant. **What changed (comment/type-neutral except the two additive registry exports):**
+**(1)** the registry gained a resolution-only production seam — **`PRODUCTION_PROVIDER: ProviderName =
+"openai"`** (a **fixed deterministic literal**, never env-derived) + **`getProductionProvider():
+ConversationProviderAdapter`** which **delegates to `getConversationProvider(PRODUCTION_PROVIDER)`** (the
+single canonical resolver — **no second/competing resolution path**). Both **RESOLVE ONLY** — they return an
+adapter instance and **NEVER call `generateConversation`, open a network connection, read env, or execute a
+provider**. Nothing invokes `getProductionProvider` yet; **Phase 24 will** use this seam to actually run the
+provider. **(2)** now-false post-Phase-22 docstrings across the provider layer (`conversation-provider.ts`,
+`provider-types.ts`, `provider-registry.ts`) that still claimed **"NONE implemented" / "always false" /
+"always reports unimplemented" / "the ONLY registered adapter"** were corrected to the truth (**OpenAI is
+implemented; every other name is deferred**) — **interface signatures + type definitions are byte-identical**
+(comment-only). **`"openai"` resolves to the real `OpenAIProvider`; every other name resolves to
+`DeferredProvider`, whose `generateConversation` still THROWS `notImplementedError`** (behaviour byte-unchanged
+from Phase 22). **Registry construction stays deterministic** — no network, no SDK creation, no env read at
+module load or at construction (the OpenAI adapter's client + env stay lazy inside its own
+`generateConversation`, in the byte-unchanged `openai-provider.ts`). The legacy **`ProviderResult`** type (still
+typed on the deprecated `ConversationOutput`) was **deliberately left byte-unchanged** — it belongs to the
+separate `ConversationProvider`(5)↔`ProviderName`(8) reconciliation follow-up, not this phase. **Only 3
+provider-layer files changed** (`provider-registry.ts` + `conversation-provider.ts` + `provider-types.ts`) +
+docs; **byte-unchanged:** `family-types.ts`/`ConversationRequest`/`ConversationResponse`, the request/
+verbalizer/composer/rendering/significance engines, `openai-provider.ts`, `provider-errors.ts`,
+`lib/remy/index.ts`, `RemyRelationship.tsx`, all UI/routes/API, `package.json`, `package-lock.json`; still
+exactly one `RemyMomentChip`. Verified tsc/lint/build green + independent MULTI-AGENT adversarial review CLEAN
+(7 lenses — registry correctness / provider-abstraction correctness / platform integrity / regression
+detection / deterministic construction / future multi-provider readiness / architectural purity — every raw
+finding adversarially refuted; 0 confirmed blocking, 0 confirmed non-blocking). **Phase 24 will ACTIVATE** —
+wire `getProductionProvider()` into a user-facing execution path and actually call `generateConversation`
+(a separate approved phase, NOT built here). **Do NOT** invoke a provider / call `generateConversation` from
+the registry, RemyRelationship, UI, routes, or significance (activation is Phase 24); add a second resolution
+path or duplicate the registry; make `PRODUCTION_PROVIDER` env-derived or the registry construction
+non-deterministic (no network/SDK/clock/env at construction); or migrate `ProviderResult` / reconcile the
+provider-identifier enums here (that is the divergent-adapter phase).
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
