@@ -15,15 +15,37 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **Production Provider Activation**: the
-FIRST end-to-end conversation EXECUTION path (`lib/remy/providers/conversation-execution.ts`
-`executeConversation()` = `buildConversationRequest` → `getProductionProvider()` → `generateConversation` →
-`ConversationResponse`). It is still **DORMANT** (nothing invokes it — Phase 25 wires it into a user-facing
-conversational surface); no UI/route change; behaviour byte-unchanged. `main` auto-deploys to production on
-push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **Live Conversation Integration**: the
+FIRST user-facing AI execution of the conversation platform. A new opt-in surface **`/remy/story` ("Remy
+narrates your story")** runs the deterministic pipeline server-side then invokes `executeConversation()` →
+`OpenAIProvider`. `executeConversation` now has **exactly one caller** (no dormant seam remains); the live Ask
+Remy chat + the app-open path are byte-unchanged; the prompt is server-authoritative. **Activation needs a
+server `OPENAI_API_KEY` (operator env).** `main` auto-deploys to production on push. Authoritative detail:
+master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Live Conversation Integration** (the FIRST user-facing AI execution of the conversation platform) — a new
+  opt-in **`/remy/story` "Remy narrates your story"** surface invokes `executeConversation` on a user tap.
+  **Investigation finding:** the deterministic pipeline is NOT a question flow (it's an app-open life-story
+  analysis in `RemyRelationship`), and the real Ask Remy chat is a separate live AI layer — so the operator
+  chose a new, isolated, opt-in surface (wiring into `RemyRelationship` would fire a paid call every app-open;
+  splicing into the live chat needs a forbidden redesign). **4 new files + 1 tiny edit:**
+  `lib/remy/story-pipeline.ts` (PURE orchestrator sequencing the EXISTING 12 engines in `RemyRelationship`'s
+  exact order → `{ conversationComposition, conversationRender, answerAssembly }`; flat file to avoid a
+  basename clash with `lib/remy/conversation.ts`), `app/(app)/remy/story-action.ts` (`"use server"`
+  `narrateStoryConversation()` — auth-gated + workspace-scoped snapshot mirroring
+  `/api/remy/relationship-snapshot` → orchestrator → **`executeConversation`** → structured result that NEVER
+  throws; **server-authoritative** — client supplies nothing; 0 memories → `"empty"` w/o a provider call;
+  failure/unconfigured `OPENAI_API_KEY` → `"unavailable"`), `components/remy/RemyStoryConversation.tsx`
+  (client button → `.text` + `AIDisclaimer`), `app/(app)/remy/story/page.tsx` (the page); **edit**
+  `app/(app)/remy/page.tsx` (one discovery `<Link>`). **`executeConversation` now has exactly ONE caller — no
+  dormant seam remains.** Reuse-not-redesign: the live chat, `RemyRelationship`/app-open path, every engine,
+  and the entire provider layer are byte-unchanged; no OpenAI import outside the provider layer;
+  `package.json` unchanged. Requires a server `OPENAI_API_KEY`; iOS purchase-compliance unaffected.
+  Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 confirmed blocking; 3 refuted-but-worthwhile
+  robustness fixes applied + re-verified SOUND). Follow-ups (not blockers): no per-question quota/rate-limit
+  on the story surface yet. tsc/lint/build green.
 - **Production Provider Activation** (the FIRST end-to-end conversation execution path; still dormant) — one
   new file `lib/remy/providers/conversation-execution.ts` exporting async
   **`executeConversation(input): Promise<ConversationResponse>`** (input = the request engine's
@@ -301,9 +323,10 @@ Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the An
 (`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
-Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), and the Production Provider
-Activation on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
-tsc/lint/build green.
+Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), the Production Provider
+Activation (`a92e9f7`), and the Live Conversation Integration on top. **Not pushed** — pushing auto-deploys
+to prod, so it is an operator decision. **`/remy/story` needs a server `OPENAI_API_KEY` to actually
+generate.** tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -318,7 +341,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)
+- *(HEAD)* feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)
+- `a92e9f7` feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)
 - `689f917` feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
 - `e7b572c` feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)
 - `04c65c2` feat(remy): Conversation Provider Migration — migrate provider abstraction to request/response

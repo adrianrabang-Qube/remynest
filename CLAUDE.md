@@ -1479,6 +1479,55 @@ second execution path or duplicate provider resolution, instantiate a provider d
 import OpenAI outside the provider layer, move intelligence/retrieval/ranking/planning into the execution seam,
 rewrite/enrich `request.prompt.full`, or add retries/streaming/timeout/fallback/persistence here.
 
+**Remy — Live Conversation Integration (authoritative, 2026-07-11 — the FIRST user-facing AI execution of the
+conversation platform; supersedes Phase 24's "dormant" state):** `executeConversation` is now invoked by a
+real user action. **Investigation that shaped the design (source-verified):** the deterministic companion
+pipeline is **NOT** a question-answering flow — it is a life-story/significance analysis computed in
+`RemyRelationship` on **app-open** (no question input), and the real **Ask Remy chat** (`answerAskRemy`,
+`app/(app)/remy/ask-action.ts`) is a **separate, already-live AI-intelligence layer** (retrieval →
+`answerAskQuestion` → `lib/openai.ts`) that never builds `ConversationComposition`/`ConversationRender`/
+`AnswerAssembly`. So wiring `executeConversation` into `RemyRelationship` would fire a paid OpenAI call on
+**every app-open** (a forbidden behaviour change), and splicing it into the live chat would need a forbidden
+pipeline/retrieval redesign. **Operator-chosen solution: a NEW, isolated, OPT-IN, user-triggered surface —
+"Remy narrates your story" (`/remy/story`).** **Files (4 new + 1 tiny edit):** **(1)**
+`lib/remy/story-pipeline.ts` — a **PURE** orchestrator `buildStoryConversationInputs(snapshot)` that
+**SEQUENCES the EXISTING 12 engines in the EXACT order + inputs `RemyRelationship` uses**
+(memory-understanding → memory-graph → journey → life-story → reasoning → biography → conversation-foundation
+→ question-understanding → answer-planning → answer-assembly → conversation-rendering → conversation-composer)
+and returns `{ conversationComposition, conversationRender, answerAssembly }`. **NOT a new engine / new
+intelligence / new pipeline architecture** — the same engines, deliberately duplicating `RemyRelationship`'s
+inline sequence so the **app-open path stays byte-unchanged**; pure/deterministic (no network/DB/clock/random).
+**(2)** `app/(app)/remy/story-action.ts` — a `"use server"` action `narrateStoryConversation()` that
+**auth-gates + workspace-scopes** a snapshot load **mirroring `/api/remy/relationship-snapshot` exactly**
+(My Nest = `memory_profile_id null` + `user_id`; care = active-profile cookie; people by
+`created_by_account_id`), runs the orchestrator, calls **`executeConversation`** (→ `getProductionProvider()`
+→ `OpenAIProvider`), and returns a **structured result `{ text, status, memoryCount }` that NEVER throws**
+(the whole body + the loader are try/guarded; provider/network/auth/context failure — incl. an unconfigured
+`OPENAI_API_KEY` — degrades to `status:"unavailable"`; a genuinely empty workspace → `status:"empty"`
+**without** calling the provider). **The prompt is SERVER-AUTHORITATIVE** — the client passes **nothing**, so
+it cannot craft or bill arbitrary provider calls. **(3)** `components/remy/RemyStoryConversation.tsx` — a
+`"use client"` button that calls the action and renders `response.text` (+ `AIDisclaimer`, loading/empty/
+unavailable states). **(4)** `app/(app)/remy/story/page.tsx` — the `/remy/story` page. **(edit)**
+`app/(app)/remy/page.tsx` — one discovery `<Link>` card (no chat-logic change). **`executeConversation` now
+has EXACTLY ONE caller** (`story-action.ts`); **no dormant seam remains.** **Reuse-not-redesign:** the live
+Ask Remy chat, `RemyRelationship`/app-open path, every deterministic engine, and the whole provider layer
+(`conversation-execution.ts`/`provider-registry.ts`/`openai-provider.ts`/…) are **byte-unchanged**; no new
+provider/registry/engine; `executeConversation`/`getProductionProvider()`/`OpenAIProvider` used exactly as
+built; no OpenAI import outside the provider layer; no prompt engineering; no retrieval rewrite;
+`package.json` unchanged. Citations/metadata are preserved through the response (the MVP UI renders `.text`
+per spec). **Naming note:** the orchestrator is `lib/remy/story-pipeline.ts` (a flat file) — deliberately NOT
+`lib/remy/conversation/…` to avoid a basename collision with the existing `lib/remy/conversation.ts`.
+**Activation:** requires a server-side `OPENAI_API_KEY` (operator env); iOS purchase-compliance is unaffected
+(this is not a purchase). Verified tsc/lint/build green + independent MULTI-AGENT adversarial review CLEAN (7
+lenses — execution / provider / architecture-purity / runtime-regression / security-scoping / determinism /
+platform-integrity — every raw finding adversarially refuted, 0 confirmed blocking; 3 refuted-but-worthwhile
+robustness fixes then applied + re-verified SOUND). **Do NOT** invoke `executeConversation` from
+`RemyRelationship`/the app-open path or the live Ask Remy chat, add a second `executeConversation` caller or
+execution path, let the client supply the prompt/inputs (keep it server-authoritative), instantiate a
+provider directly / import OpenAI outside the provider layer, or make `narrateStoryConversation` throw.
+**Follow-ups (not blockers):** per-question cost has no quota/entitlement gate yet (parity with the existing
+chat), and the story surface's provider-call is not rate-limited — add a quota/rate-limit before heavy use.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

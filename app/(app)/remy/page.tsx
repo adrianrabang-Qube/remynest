@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 import { createClient } from "@/utils/supabase/server";
 import { buildRemyHomeModel } from "@/lib/remy/home-model";
@@ -82,6 +82,26 @@ export default async function RemyConversationPage() {
           {model.subjectName ? ` about ${model.subjectName}` : ""}.
         </p>
       </header>
+
+      {/* Opt-in: let Remy narrate the saved memories into a flowing reflection (AI, on explicit tap). */}
+      <Link
+        href="/remy/story"
+        className="flex items-center gap-3 rounded-3xl border border-charcoal/10 bg-white/70 p-4 shadow-soft transition hover:bg-sand/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+      >
+        <span
+          aria-hidden
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sage/10 text-sage-deep"
+        >
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-serif text-base text-charcoal">Your story, told by Remy</span>
+          <span className="block text-sm text-charcoal-muted">
+            A warm reflection woven from the memories you&apos;ve saved.
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
+      </Link>
 
       <RemyConversation conversation={conversation} />
 
