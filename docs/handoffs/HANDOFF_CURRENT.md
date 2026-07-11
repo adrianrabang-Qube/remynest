@@ -15,16 +15,37 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **Live Conversation Integration**: the
-FIRST user-facing AI execution of the conversation platform. A new opt-in surface **`/remy/story` ("Remy
-narrates your story")** runs the deterministic pipeline server-side then invokes `executeConversation()` →
-`OpenAIProvider`. `executeConversation` now has **exactly one caller** (no dormant seam remains); the live Ask
-Remy chat + the app-open path are byte-unchanged; the prompt is server-authoritative. **Activation needs a
-server `OPENAI_API_KEY` (operator env).** `main` auto-deploys to production on push. Authoritative detail:
-master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **AI Usage, Billing & Observability**
+(production hardening): every real AI execution now records usage/tokens/latency/cost + a classified error to a
+new **`ai_usage`** table via **`executeConversationWithUsage`** — a wrapper that is `executeConversation`'s
+SINGLE caller (instrumentation only; `executeConversation` + the whole provider layer byte-unchanged; still
+ONE execution path). Provider-independent model-aware cost layer + quota architecture (`canExecuteConversation`,
+NOT enforced). **INERT until the operator applies the migration**
+(`20260711120000_ai_usage_foundation.sql`); logging/quota reads degrade silently so the deploy is a no-op
+until then. `/remy/story` still needs a server `OPENAI_API_KEY` to actually generate. `main` auto-deploys to
+production on push. Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **AI Usage, Billing & Observability** (production hardening; instrumentation only) — every real AI execution
+  now records user/workspace/provider/model/operation/REAL-tokens/latency/estimated-cost/status/error_code to a
+  new **`ai_usage`** table. Instrumentation lives in **`lib/remy/execute-conversation-with-usage.ts`** — the
+  wrapper that is now `executeConversation`'s SINGLE caller (honours the Phase-24 LOCKED "no persistence inside
+  `executeConversation`"; `executeConversation` + the whole provider layer byte-unchanged). **ONE execution
+  path** (the wrapper is a decorator, not a second path). New `lib/ai/usage/{cost,ai-usage,quota}.ts`: the
+  SINGLE isolated model-aware cost layer (`estimateCostUsd`; unknown→0), `classifyAiError` +
+  `recordAiUsage` (service-role, scoped by explicit user_id; NEVER throws AND never hangs — swallow + 3 s
+  timeout), and quota architecture (`getUsageToday/ThisMonth/EstimatedMonthlyCost/canExecuteConversation` —
+  NOT enforced; default unlimited → always allow, no DB read). Migration
+  `supabase/migrations/20260711120000_ai_usage_foundation.sql`: table + indexes + RLS (select-own; inserts
+  service-role only) + a service-role-only `SECURITY DEFINER` `ai_usage_summary` aggregate (no IDOR). Uses REAL
+  provider values; **INERT until the operator applies the migration** (degrades silently → deploy is a no-op).
+  Provider registry + deterministic engines + `RemyRelationship` + Ask Remy + `executeConversation` byte-unchanged;
+  no OpenAI import outside the provider layer; `package.json` unchanged. Independent MULTI-AGENT adversarial
+  review CLEAN (7 lenses, 0 confirmed blocking; 2 worthwhile fixes applied — bounded log-write timeout +
+  per-user gate). **Operator step:** apply the migration (+ `SUPABASE_SERVICE_ROLE_KEY`, already set) to
+  activate logging. Follow-ups (not blockers): no usage UI; quotas not enforced; no retention/rollup.
+  tsc/lint/build green.
 - **Live Conversation Integration** (the FIRST user-facing AI execution of the conversation platform) — a new
   opt-in **`/remy/story` "Remy narrates your story"** surface invokes `executeConversation` on a user tap.
   **Investigation finding:** the deterministic pipeline is NOT a question flow (it's an app-open life-story
@@ -324,9 +345,10 @@ Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the An
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
 Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), the Production Provider
-Activation (`a92e9f7`), and the Live Conversation Integration on top. **Not pushed** — pushing auto-deploys
-to prod, so it is an operator decision. **`/remy/story` needs a server `OPENAI_API_KEY` to actually
-generate.** tsc/lint/build green.
+Activation (`a92e9f7`), the Live Conversation Integration (`3c3a7a5`), and the AI Usage/Billing/Observability
+increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. **Operator
+steps to activate AI features:** apply `20260711120000_ai_usage_foundation.sql` + set a server
+`OPENAI_API_KEY` (usage logging + `/remy/story` generation are both no-ops until then). tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -341,7 +363,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)
+- *(HEAD)* feat(remy): AI Usage, Billing & Observability — usage/cost logging around the single execution path
+- `3c3a7a5` feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)
 - `a92e9f7` feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)
 - `689f917` feat(remy): Provider Registry Activation — registry is the single authoritative resolver (dormant)
 - `e7b572c` feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)

@@ -1528,6 +1528,54 @@ provider directly / import OpenAI outside the provider layer, or make `narrateSt
 **Follow-ups (not blockers):** per-question cost has no quota/entitlement gate yet (parity with the existing
 chat), and the story surface's provider-call is not rate-limited — add a quota/rate-limit before heavy use.
 
+**Remy — AI Usage, Billing & Observability (authoritative, 2026-07-11 — production hardening of the live AI
+execution layer; instrumentation ONLY, no redesign):** every real AI execution is now measurable, cost-tracked,
+quota-ready, and observable — WITHOUT redesigning Remy/providers/prompts/engines and WITHOUT a second execution
+path. **KEY CONSTRAINT honoured:** the Phase-24 LOCKED decision forbids persistence INSIDE `executeConversation`,
+so instrumentation lives in a **wrapper that is now `executeConversation`'s SINGLE caller** — `executeConversation`
+and the entire provider layer are **byte-unchanged**. **The ONE execution path is unchanged:** UI → story-action
+→ **`executeConversationWithUsage`** (instrumentation) → **`executeConversation`** → `getProductionProvider()` →
+`OpenAIProvider`. The wrapper never reaches the provider itself — it is a decorator, NOT a second path.
+**Files (all new + 1 edit):** **(1)** `supabase/migrations/20260711120000_ai_usage_foundation.sql` — the
+**`ai_usage`** table (`id, user_id, workspace_id[=memory_profile_id, null=My Nest], provider, model, operation,
+prompt/completion/total_tokens, estimated_cost numeric(12,6), latency_ms, status[success|error], error_code,
+created_at`) + indexes + **RLS (SELECT-own only; NO insert policy → inserts are service-role only)** + a
+**SERVICE-ROLE-ONLY `SECURITY DEFINER` aggregate `ai_usage_summary(user, workspace, since)`** (execute REVOKED
+from public/anon/authenticated, granted to `service_role` — no IDOR via PostgREST). **(2)** `lib/ai/usage/cost.ts`
+— the **SINGLE, isolated, provider-independent, model-aware** price table (`MODEL_PRICES`, published USD/1M rates,
+operator-updatable) + `estimateCostUsd()` (unknown model → 0, never a guess; a longest-known-prefix fallback
+handles OpenAI's dated snapshot ids like `gpt-4o-mini-2024-07-18` so costs aren't 0). **(3)** `lib/ai/usage/ai-usage.ts`
+— usage types + **`classifyAiError()`** (maps `ProviderError.code` → taxonomy `missing_api_key` / `timeout` /
+`rate_limited` / `provider_unavailable` / `invalid_request` / `invalid_response` / `unknown`) + **`recordAiUsage()`**
+(service-role insert scoped by an explicit session-derived `user_id`; **NEVER throws AND never hangs the caller** —
+degraded writes are swallowed, a stalled write is bounded by a 3 s timeout so it can't sit on the response path).
+**(4)** `lib/ai/usage/quota.ts` — **`getUsageToday` / `getUsageThisMonth` / `getEstimatedMonthlyCost` /
+`canExecuteConversation`** (**ARCHITECTURE ONLY, NOT ENFORCED** — `AI_USAGE_LIMITS` default `null` = unlimited, so
+`canExecuteConversation` ALWAYS allows and short-circuits with **no DB read** while limits are off; reads degrade to
+zeros, never throw; the single ready enforcement seam). **(5)** `lib/remy/execute-conversation-with-usage.ts` — the
+wrapper: consults the gate **per-user** (cost control isn't bypassable by switching workspaces; the row still
+records the actual workspace), times the call, records REAL usage from the `ConversationResponse` (tokens/model/
+provider) + estimated cost on success, records a classified error on failure, and **RE-THROWS the original error**
+(behaviour preserved — the action's try/catch still maps it to `"unavailable"`). **(edit)** `app/(app)/remy/story-action.ts`
+— `loadStorySnapshot` now also returns `userId` + `workspaceId`; the action calls `executeConversationWithUsage(inputs,
+{ userId, workspaceId, operation: "story_narration" })`; its never-throws/server-authoritative contract is unchanged.
+**Uses REAL provider values** (tokens/model from OpenAI); **cost is one isolated model-aware layer** (no scattered
+costs). **INERT until activated:** the code degrades silently until the operator applies the migration (writes/reads
+never break execution), so the deploy is a no-op until then. **`executeConversation` has EXACTLY ONE caller (the
+wrapper); the wrapper has exactly one caller (the story action); ONE execution path; no duplicate AI architecture.**
+Byte-unchanged: `conversation-execution.ts` (`executeConversation`), provider-registry/openai-provider/provider-types/
+conversation-provider/provider-errors, `family-types.ts`, all conversation/significance engines, `RemyRelationship`,
+Ask Remy (`ask-action.ts`), `story-pipeline.ts`, `package.json`. No OpenAI import outside the provider layer.
+Verified tsc/lint/build green + independent MULTI-AGENT adversarial review CLEAN (7 lenses — execution-integrity /
+observability-correctness / never-breaks-execution / cost-correctness / security-scoping / quota-architecture /
+scope-and-regression — 0 confirmed blocking; 2 worthwhile fixes then applied [bounded the awaited log write with a
+timeout; made the dormant gate per-user]). **Do NOT** add a second `executeConversation`/wrapper caller or execution
+path, move persistence INTO `executeConversation` (LOCKED), let `recordAiUsage`/quota throw or block/alter execution,
+enforce quotas without setting `AI_USAGE_LIMITS`, scatter cost rates outside `cost.ts`, expose `ai_usage_summary` to
+non-service-role, or import OpenAI outside the provider layer. **Operator step:** apply the migration + ensure
+`SUPABASE_SERVICE_ROLE_KEY` is set (already required by other service-role features) to activate logging. **Follow-ups
+(not blockers):** no usage UI yet; quotas are architecture-only (enforcement OFF); `ai_usage` has no retention/rollup.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -6,7 +6,7 @@ import {
   buildStoryConversationInputs,
   type StorySnapshot,
 } from "@/lib/remy/story-pipeline";
-import { executeConversation } from "@/lib/remy/providers/conversation-execution";
+import { executeConversationWithUsage } from "@/lib/remy/execute-conversation-with-usage";
 import type { DatedMemory, FamilyPerson } from "@/lib/remy/core/family-types";
 
 /**
@@ -42,7 +42,7 @@ export interface StoryConversationResult {
  * degrades to empties on a failed read.
  */
 async function loadStorySnapshot(): Promise<
-  (StorySnapshot & { memoryCount: number }) | null
+  (StorySnapshot & { memoryCount: number; userId: string; workspaceId: string | null }) | null
 > {
   try {
     const supabase = await createClient();
@@ -150,7 +150,13 @@ async function loadStorySnapshot(): Promise<
       }))
       .filter((p) => p.id && p.name);
 
-    return { people, datedMemories, memoryCount: countRes.count ?? 0 };
+    return {
+      people,
+      datedMemories,
+      memoryCount: countRes.count ?? 0,
+      userId: user.id,
+      workspaceId: activeProfileId,
+    };
   } catch {
     // Unauthenticated OR a degraded read/context error → null, surfaced by the caller as "unavailable"
     // (never conflated with a genuinely empty workspace, and never thrown).
@@ -176,7 +182,11 @@ export async function narrateStoryConversation(): Promise<StoryConversationResul
       people: snapshot.people,
       datedMemories: snapshot.datedMemories,
     });
-    const response = await executeConversation(inputs);
+    const response = await executeConversationWithUsage(inputs, {
+      userId: snapshot.userId,
+      workspaceId: snapshot.workspaceId,
+      operation: "story_narration",
+    });
     const text = (response.text ?? "").trim().slice(0, MAX_ANSWER_LENGTH) || null;
     return {
       text,
