@@ -1667,6 +1667,49 @@ silently until then). **Do NOT** wire V2 into Ask Remy/story/the execution path 
 phase, scatter weights outside `config.ts`, put a clock/DB/`Math.random` in a pure engine, alter the `memories`
 table, make `store.ts` throw or an unscoped write, or classify a keyword-less memory into a protected class.
 
+**RC2 — Security Hardening (authoritative, 2026-07-11 — production security posture; NO feature/UI/architecture
+change):** the RC1 audit's code-implementable security items are DONE. **(1) HTTP security headers**
+(`next.config.js` `headers()` on every response): CSP, HSTS (2y, preload), `X-Frame-Options: DENY`, nosniff,
+`Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `X-Permitted-Cross-Domain-Policies:
+none`, `Cross-Origin-Opener-Policy: same-origin-allow-popups`. **CSP compatibility (LOCKED reasoning):** the
+Capacitor iOS app loads the LIVE site via `server.url`, so headers reach the native app — the CSP is
+deliberately permissive (`script-src` allows `unsafe-inline`/`unsafe-eval`; `connect/img/media-src` allow
+`https:`/`wss:`) to NOT break Next/Supabase-realtime/Stripe/OneSignal/Sentry, while `frame-ancestors 'none'` /
+`object-src 'none'` / `base-uri 'self'` / `form-action` stay strict. A **nonce-based `script-src`** (drop
+`unsafe-inline/eval`) + tightened `connect-src` allowlist is the documented FUTURE hardening — do NOT tighten
+the CSP without testing the Capacitor webview + realtime + Stripe. **(2) API rate limiting** —
+`lib/security/rate-limit.ts` (dependency-free in-memory sliding window; ONE `RATE_LIMITS` config; `enforceRateLimit`
+→ 429 + `Retry-After`, `isRateLimited` for actions; **fails OPEN**, `MAX_KEYS` eviction). Applied, keyed by
+session `user.id` AFTER auth, to: `upload-url`, `memory-chat`, `memories/create`, `memories/[id]/enrich` (its own
+`enrich` preset ≥ create), `stripe/checkout`, `stripe/portal`, `gdpr/export`, `gdpr/delete-account`, and the
+`story-action`. In-memory = **per-warm-instance baseline**; a distributed Upstash/Redis store keyed identically
+is the documented **operator upgrade** for multi-instance guarantees. **(3) Logging hardening** — `lib/logger.ts`
+(`debug`/`info` DEV-ONLY; `warn`/`error` always → Sentry unaffected). **NEVER log PHI/PII** (memory content/
+titles, names, emails, sensitive ids). `lib/retrieve-memory-context.ts` no longer logs memory content/context
+(was `console.log(matches)`/context — the RAG PHI leak); the `stripe/checkout` `USER EMAIL` log removed; webhook/
+checkout/create/insights narration gated to `logger.debug/info`. **(4) Dead code** — deleted the 3 orphan routes
+`app/api/{search,create-reminder,send-reminders}` (zero callers; `app/api/search/global` is a DIFFERENT live
+route; the live reminder cron is `/api/cron/send-due-reminders`) + cleaned residual middleware/e2e references.
+**(5) OWASP fixes** (verified via a MULTI-AGENT ASVS/API-Top-10 review — authorization was otherwise CLEAN: no
+IDOR, no unscoped service-role query, no missing auth gate): `POST /api/active-profile` now auth-gates +
+`userCanAccessProfile`-checks the target profileId BEFORE writing the CARE cookie; `inviteCaregiver` resolves the
+invitee via a **scoped** `.ilike(email)` (LIKE metacharacters escaped) instead of a full-table fetch; the
+**middleware top-level catch FAILS CLOSED** (redirect `/login`) for non-public routes; `send-notification` no
+longer returns the raw DB error/exception; `app/auth/logout` uses `new URL("/login", request.url)` (was a
+hardcoded `http://localhost:3000`); `/api/health` no longer discloses the commit SHA. **Session/cookies** were
+already SOLID (Supabase httpOnly/secure/sameSite; the active-context cookie httpOnly+secure(prod)+sameSite=lax);
+**error leakage** otherwise well-contained (generic client messages). Verified tsc/lint/build green + independent
+MULTI-AGENT adversarial review CLEAN (7 lenses; 0 confirmed blocking; all 6 non-blocking findings fixed +
+re-validated). **KNOWN REMAINING (do NOT re-flag as new; scheduled):** **(HIGH, deferred to a focused follow-up)**
+the memory-EDIT kept-attachment **storage-quota bypass** — `PUT /api/memories/[id]` trusts the client-reported
+`size` of KEPT attachments (the ledger under-counts); the fix is to re-derive kept sizes from storage via
+`getStorageObjectInfo` (as create does) — deferred because it touches the frozen media pipeline + attachment
+types and needs its own tested change. **(Product decision):** the live **Ask Remy chat + `/api/memory-chat`**
+call OpenAI with NO `canExecuteConversation` quota gate / no `recordAiUsage` (rate-limited now, but not
+quota-gated) — decide whether Ask Remy counts against the AI quota before gating it. **Do NOT** tighten the CSP
+without Capacitor/realtime/Stripe testing, remove `unsafe-inline` without a nonce pipeline, log PHI/PII, or
+re-introduce the deleted orphan routes.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

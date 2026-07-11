@@ -248,10 +248,17 @@ export async function inviteCaregiver({
     };
   }
 
-  const { data: profiles, error: profilesError } =
+  // RC2: resolve the invitee by email SERVER-SIDE (scoped query, not a full-table fetch) — never pull the
+  // whole user directory into the action, regardless of how broad the profiles SELECT policy is. LIKE
+  // metacharacters are escaped so `.ilike` stays an EXACT (case-insensitive) match, not a wildcard pattern.
+  const escapedEmail = email.trim().replace(/[\\%_]/g, (m) => `\\${m}`);
+  const { data: caregiver, error: profilesError } =
     await supabase
       .from("profiles")
-      .select("id,email");
+      .select("id,email")
+      .ilike("email", escapedEmail)
+      .limit(1)
+      .maybeSingle();
 
   if (profilesError) {
     console.error(profilesError);
@@ -261,17 +268,6 @@ export async function inviteCaregiver({
         "Failed to fetch profiles",
     };
   }
-
-  const caregiver = profiles?.find(
-    (
-      p: {
-        id: string;
-        email: string | null;
-      }
-    ) =>
-      p.email?.toLowerCase() ===
-      email.toLowerCase()
-  );
 
   if (!caregiver) {
     return {

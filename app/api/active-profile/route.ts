@@ -8,6 +8,8 @@ import {
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 import { createClient } from "@/lib/supabase/server";
+import { userCanAccessProfile } from "@/lib/profile-ownership";
+import { logger } from "@/lib/logger";
 
 // =========================
 // GET ACTIVE PROFILE
@@ -39,7 +41,7 @@ export async function GET() {
     const activeProfileId =
       await resolveActiveProfileId();
 
-    console.info(
+    logger.debug(
       "[ACTIVE_PROFILE_API]",
       {
         activeContext,
@@ -86,6 +88,17 @@ export async function POST(
   request: NextRequest
 ) {
   try {
+    // RC2: auth-gate + authorize the target profile BEFORE writing the workspace cookie.
+    // (getActiveContext also re-validates on read, but rejecting a forged/foreign profileId at
+    // WRITE time is defense-in-depth — no unauthorized cookie is ever set.)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body =
       await request.json();
 
@@ -101,6 +114,13 @@ export async function POST(
         {
           status: 400,
         }
+      );
+    }
+
+    if (!(await userCanAccessProfile(user.id, profileId))) {
+      return NextResponse.json(
+        { error: "You don't have access to this care profile." },
+        { status: 403 }
       );
     }
 

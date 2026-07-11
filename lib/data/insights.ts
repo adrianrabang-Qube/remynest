@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { logger } from "@/lib/logger";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -210,7 +211,7 @@ export function logTelemetryWarnings(
 export function logTelemetrySnapshot(
   snapshot: unknown
 ) {
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry snapshot`,
     snapshot
   );
@@ -311,7 +312,7 @@ export function logTelemetryFreshness(
     return;
   }
 
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry freshness healthy`,
     freshness
   );
@@ -367,7 +368,7 @@ export function logTelemetryRefreshRecommendation(
     return;
   }
 
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry refresh recommended`,
     freshness
   );
@@ -395,7 +396,7 @@ export function logTelemetrySynchronization(
     return;
   }
 
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry synchronization recommended`,
     freshness
   );
@@ -423,7 +424,7 @@ export function logTelemetryWorkerRecommendation(
     return;
   }
 
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry worker scheduling recommended`,
     freshness
   );
@@ -451,7 +452,7 @@ export function logTelemetryQueueRecommendation(
     return;
   }
 
-  console.info(
+  logger.info(
     `[${INSIGHTS_CACHE_TAG}] telemetry queue refresh recommended`,
     freshness
   );
@@ -553,11 +554,11 @@ export const fetchInsightsTelemetry =
         performance.now() -
         telemetryStart;
 
-      console.info(
+      logger.info(
         `[${INSIGHTS_CACHE_TAG}] telemetry fetched in ${telemetryDuration.toFixed(2)}ms | cache window ${TELEMETRY_CACHE_WINDOW} | cache key ${telemetryCacheKey}`
       );
 
-      console.info(
+      logger.info(
         `[${INSIGHTS_CACHE_TAG}] telemetry lifecycle`,
         telemetryLifecycleSnapshot
       );

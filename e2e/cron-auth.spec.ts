@@ -13,7 +13,6 @@ import { test, expect } from "@playwright/test";
 
 const ENDPOINTS = [
   "/api/cron/send-due-reminders",
-  "/api/send-reminders",
   "/api/send-notification",
 ];
 

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { enrichMemory } from "@/lib/memory-enrichment";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 // Enrichment runs the AI cognition pipeline out-of-band, so give it its own generous
 // execution budget — separate from the (now fast) create request.
@@ -22,6 +23,9 @@ export async function POST(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
+
+  const limited = enforceRateLimit("enrich", user.id);
+  if (limited) return limited;
 
   const { data: memory, error } = await supabase
     .from("memories")

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { enforceUploadQuota } from "@/lib/storage/upload-guard";
 import { isAllowedAttachmentMime } from "@/lib/memory-media";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 const BUCKET = "memory-media";
 
@@ -54,6 +55,9 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const limited = enforceRateLimit("upload", user.id);
+  if (limited) return limited;
 
   const activeProfileId = await resolveActiveProfileId();
 

@@ -11,6 +11,7 @@ import type { DatedMemory, FamilyPerson } from "@/lib/remy/core/family-types";
 import { resolveAiEntitlement, type AiEntitlement } from "@/lib/ai/usage/entitlements";
 import { canExecuteConversation, type ConversationGateResult } from "@/lib/ai/usage/quota";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { isRateLimited } from "@/lib/security/rate-limit";
 
 /**
  * Phase 25 — the FIRST user-facing invocation of `executeConversation`. A user explicitly asks Remy to
@@ -212,6 +213,12 @@ export async function narrateStoryConversation(): Promise<StoryConversationResul
     if (snapshot.datedMemories.length === 0) {
       // No memories → never call the provider (nothing to narrate, no wasted/ungrounded call).
       return { text: null, status: "empty", memoryCount: snapshot.memoryCount };
+    }
+
+    // RATE LIMIT (RC2) — throttle bursts/loops per user BEFORE the expensive pipeline + provider call. A
+    // rate-limited request degrades to the existing "unavailable" state (structured, never throws).
+    if (isRateLimited("ai", snapshot.userId)) {
+      return { text: null, status: "unavailable", memoryCount: snapshot.memoryCount };
     }
 
     // QUOTA ENFORCEMENT — PRE-check, BEFORE the expensive pipeline build (Premium bypasses with no DB read).

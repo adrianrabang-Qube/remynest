@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,9 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    const limited = enforceRateLimit("billing", user.id);
+    if (limited) return limited;
 
     // RLS-scoped read of the caller's own profile.
     const { data: profile, error: profileError } = await supabase

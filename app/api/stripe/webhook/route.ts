@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-    console.log("🔥 WEBHOOK EVENT TYPE:", event.type);
+    logger.debug("🔥 WEBHOOK EVENT TYPE:", event.type);
   } catch (err) {
     console.error("❌ Webhook signature error:", err);
 
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    console.log("✅ CHECKOUT SESSION:", session.id);
+    logger.debug("✅ CHECKOUT SESSION:", session.id);
 
     const userId = session.metadata?.userId;
 
@@ -82,10 +83,10 @@ export async function POST(req: Request) {
       (session.metadata?.interval as BillingInterval) ||
       "monthly";
 
-    console.log("✅ USER ID:", userId);
+    logger.debug("✅ USER ID:", userId);
 
     if (!userId) {
-      console.log("❌ No userId found in metadata");
+      logger.debug("❌ No userId found in metadata");
 
       return NextResponse.json({
         received: true,
@@ -123,7 +124,7 @@ export async function POST(req: Request) {
           null
         : null;
 
-    console.log(
+    logger.debug(
       "✅ STRIPE CURRENT PERIOD END:",
       currentPeriodEnd
     );
@@ -195,7 +196,7 @@ export async function POST(req: Request) {
         userId
       );
     } else {
-      console.log(
+      logger.debug(
         "✅ UPDATED ROW VALUES:",
         {
           is_premium: data.is_premium,
@@ -214,7 +215,7 @@ export async function POST(req: Request) {
         }
       );
 
-      console.log(
+      logger.debug(
         "✅ User upgraded to premium:",
         userId
       );
@@ -241,7 +242,7 @@ export async function POST(req: Request) {
     const subscription =
       event.data.object as Stripe.Subscription;
 
-    console.log(
+    logger.debug(
       "🆕 SUBSCRIPTION CREATED:",
       subscription.id
     );
@@ -277,7 +278,7 @@ export async function POST(req: Request) {
       subscription.items?.data?.[0]?.current_period_end ??
       null;
 
-    console.log(
+    logger.debug(
       "✅ CREATED CURRENT PERIOD END:",
       currentPeriodEnd,
     );
@@ -331,7 +332,7 @@ export async function POST(req: Request) {
         customerId
       );
     } else {
-      console.log(
+      logger.debug(
         "✅ SUBSCRIPTION CREATED PROFILE UPDATED:",
         data
       );
@@ -345,7 +346,7 @@ export async function POST(req: Request) {
     const subscription =
       event.data.object as Stripe.Subscription;
 
-    console.log(
+    logger.debug(
       "⚠️ SUBSCRIPTION CANCELED:",
       subscription.id
     );
@@ -417,12 +418,12 @@ export async function POST(req: Request) {
       error = subscriptionResult.error;
     }
 
-    console.log(
+    logger.debug(
       "✅ DOWNGRADE DATA:",
       data
     );
 
-    console.log(
+    logger.debug(
       "❌ DOWNGRADE ERROR:",
       error
     );
@@ -470,7 +471,7 @@ export async function POST(req: Request) {
     const subscription =
       event.data.object as Stripe.Subscription;
 
-    console.log(
+    logger.debug(
       "🔄 SUBSCRIPTION UPDATED:",
       subscription.id
     );
@@ -491,7 +492,7 @@ export async function POST(req: Request) {
       subscription.items?.data?.[0]?.current_period_end ??
       null;
 
-    console.log(
+    logger.debug(
       "✅ UPDATED CURRENT PERIOD END:",
       currentPeriodEnd,
     );
@@ -608,7 +609,7 @@ export async function POST(req: Request) {
         }
       );
     } else {
-      console.log(
+      logger.debug(
         "✅ SUBSCRIPTION UPDATED:",
         data
       );
@@ -656,7 +657,7 @@ export async function POST(req: Request) {
     const invoice =
       event.data.object as Stripe.Invoice;
 
-    console.log(
+    logger.debug(
       "⚠️ PAYMENT FAILED:",
       invoice.id
     );
@@ -704,7 +705,7 @@ export async function POST(req: Request) {
         )
       );
     } else {
-      console.log(
+      logger.debug(
         "✅ PAYMENT FAILURE RECORDED:",
         data
       );

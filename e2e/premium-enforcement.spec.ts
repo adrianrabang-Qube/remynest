@@ -19,10 +19,12 @@ test.describe("Premium API enforcement [P0]", () => {
     "Requires E2E_OWNER_* creds (free-tier account)"
   );
 
-  test("free user is blocked from /api/search (semantic)", async ({
+  test("free user is blocked from /api/memories/search (semantic)", async ({
     request,
   }) => {
-    const res = await request.post("/api/search", {
+    // RC2: the orphan /api/search was removed; the LIVE premium-gated semantic endpoint is
+    // /api/memories/search (same 402 UPGRADE_REQUIRED contract).
+    const res = await request.post("/api/memories/search", {
       data: { query: "a test query" },
     });
     expect(res.status()).toBe(402);
@@ -49,7 +51,7 @@ test.describe("Premium API enforcement [P0]", () => {
       !PREMIUM_EMAIL,
       "Requires a premium E2E account (E2E_PREMIUM_*); cannot create one without modifying production data"
     );
-    const res = await request.post("/api/search", {
+    const res = await request.post("/api/memories/search", {
       data: { query: "a test query" },
     });
     expect(res.status()).not.toBe(402);

@@ -32,8 +32,9 @@ test.describe("Profile Switching Data Isolation [P0]", () => {
       "/api/active-profile",
       { data: { profileId: foreignProfileId } }
     );
-    // The POST may accept the value; the security boundary is read-side.
-    expect(setRes.ok()).toBeTruthy();
+    // RC2: the POST now REJECTS a non-accessible profileId at write time (403) — the workspace cookie is
+    // never set for a profile the caller cannot access (defense-in-depth on top of the read-side boundary).
+    expect(setRes.status()).toBe(403);
 
     // The active-profile read must NOT return the foreign profile object.
     const getRes = await request.get(

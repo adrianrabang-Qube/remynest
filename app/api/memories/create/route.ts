@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { userCanWriteProfile } from "@/lib/profile-ownership";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 import {
   MemoryAttachmentValidationError,
   isAllowedAttachmentMime,
@@ -31,7 +33,7 @@ function logPipelineStage(
   stage: string,
   metadata?: unknown
 ) {
-  console.info(
+  logger.info(
     `[${MEMORY_PIPELINE_TAG}] ${stage}`,
     metadata || {}
   );
@@ -137,7 +139,10 @@ export async function POST(req: Request) {
       );
     }
 
-    console.info("[create-memory] CREATE_MEMORY_START", {
+    const limited = enforceRateLimit("memoryCreate", user.id);
+    if (limited) return limited;
+
+    logger.info("[create-memory] CREATE_MEMORY_START", {
       userId: user.id,
     });
 
@@ -318,7 +323,7 @@ export async function POST(req: Request) {
 
       body.attachments = verified;
 
-      console.info("[create-memory] MEMORY_CREATE_JSON", {
+      logger.info("[create-memory] MEMORY_CREATE_JSON", {
         userId: user.id,
         profileId: activeProfileId ?? null,
         attachmentCount: verified.length,
@@ -326,7 +331,7 @@ export async function POST(req: Request) {
       });
     }
 
-    console.info("[create-memory] MEDIA_UPLOAD_START", {
+    logger.info("[create-memory] MEDIA_UPLOAD_START", {
       userId: user.id,
       profileId: activeProfileId ?? null,
       attachmentCount: uploadFiles.length,
@@ -345,7 +350,7 @@ export async function POST(req: Request) {
     const normalizedCoverImageUrl =
       memoryMediaPayload.coverImageUrl;
 
-    console.info("[create-memory] MEDIA_UPLOAD_SUCCESS", {
+    logger.info("[create-memory] MEDIA_UPLOAD_SUCCESS", {
       userId: user.id,
       profileId: activeProfileId ?? null,
       attachmentCount: normalizedAttachments.length,
@@ -531,7 +536,7 @@ cover_image_url:
       }
     );
 
-    console.info("[create-memory] MEMORY_INSERT_START", {
+    logger.info("[create-memory] MEMORY_INSERT_START", {
       userId: user.id,
       profileId: activeProfileId ?? null,
       attachmentCount: normalizedAttachments.length,
@@ -583,7 +588,7 @@ cover_image_url:
       }
     );
 
-    console.info("[create-memory] MEMORY_INSERT_SUCCESS", {
+    logger.info("[create-memory] MEMORY_INSERT_SUCCESS", {
       userId: user.id,
       profileId: activeProfileId ?? null,
       memoryId: data.id,
@@ -679,7 +684,7 @@ cover_image_url:
       }
     );
 
-    console.info("[create-memory] MEMORY_CREATE_SUCCESS", {
+    logger.info("[create-memory] MEMORY_CREATE_SUCCESS", {
       userId: user.id,
       profileId: activeProfileId ?? null,
       memoryId: data.id,

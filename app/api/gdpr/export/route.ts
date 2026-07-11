@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { collectUserData } from "@/lib/gdpr/collect-user-data";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    const limited = enforceRateLimit("export", user.id);
+    if (limited) return limited;
 
     const payload = await collectUserData(
       user.id,

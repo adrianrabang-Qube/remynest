@@ -5,6 +5,7 @@ import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { retrieveMemoryContext } from "@/lib/retrieve-memory-context";
 import { PROMPT_SAFETY_PREAMBLE } from "@/lib/constants/disclaimers";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 const MEMORY_CHAT_TAG =
   "memory-chat-engine";
@@ -147,6 +148,9 @@ export async function POST(req: Request) {
         }
       );
     }
+
+    const limited = enforceRateLimit("ai", user.id);
+    if (limited) return limited;
 
     logMemoryChatStage(
       "memory-chat-authenticated",

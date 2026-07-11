@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 import { stripe } from "@/lib/stripe";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 import {
   BillingPlan,
   BillingInterval,
@@ -35,6 +37,9 @@ export async function POST(
       );
     }
 
+    const limited = enforceRateLimit("billing", user.id);
+    if (limited) return limited;
+
     const body =
       await request.json()
         .catch(() => ({}));
@@ -53,11 +58,11 @@ export async function POST(
         interval
       );
 
-    console.log("PLAN:", plan);
-    console.log("INTERVAL:", interval);
-    console.log("PRICE ID:", stripePriceId);
-    console.log("USER EMAIL:", user.email);
-    console.log(
+    logger.debug("PLAN:", plan);
+    logger.debug("INTERVAL:", interval);
+    logger.debug("PRICE ID:", stripePriceId);
+    // RC2: user email intentionally NOT logged (PII).
+    logger.debug(
       "PRICE RESOLVER SOURCE:",
       `STRIPE_${plan}_${interval.toUpperCase()}_PRICE_ID`
     );
@@ -80,12 +85,11 @@ export async function POST(
       interval,
     });
 
-    console.log("CHECKOUT PAYLOAD:", {
+    logger.debug("CHECKOUT PAYLOAD:", {
       plan,
       interval,
       stripePriceId,
       userId: user.id,
-      email: user.email,
     });
 
     // Find or reuse existing Stripe customer
@@ -99,7 +103,7 @@ export async function POST(
     const existingCustomer =
       existingCustomers.data[0];
 
-    console.log(
+    logger.debug(
       "EXISTING CUSTOMER:",
       existingCustomer?.id
     );
@@ -137,9 +141,9 @@ export async function POST(
         "https://remynest.com/dashboard?canceled=true",
     });
 
-    console.log("✅ STRIPE SESSION CREATED");
-    console.log("✅ USER ID:", user.id);
-    console.log("✅ SESSION ID:", session.id);
+    logger.debug("✅ STRIPE SESSION CREATED");
+    logger.debug("✅ USER ID:", user.id);
+    logger.debug("✅ SESSION ID:", session.id);
 
     return NextResponse.json({
       url: session.url,

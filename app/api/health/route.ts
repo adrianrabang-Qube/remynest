@@ -10,13 +10,12 @@ export const dynamic = "force-dynamic";
  * Returns 200 with a small status payload.
  */
 export async function GET() {
+  // RC2: the public liveness probe does NOT disclose the deployed commit SHA (revision fingerprinting).
   return NextResponse.json(
     {
       status: "ok",
       service: "remynest",
       timestamp: new Date().toISOString(),
-      commit:
-        process.env.VERCEL_GIT_COMMIT_SHA ?? null,
     },
     {
       headers: { "Cache-Control": "no-store" },

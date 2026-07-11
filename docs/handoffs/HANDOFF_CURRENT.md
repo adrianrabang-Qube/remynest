@@ -15,20 +15,34 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **Memory Intelligence Engine V2**: a new,
-self-contained, ADDITIVE subsystem `lib/remy/memory-intelligence/` (adaptive importance / relationship
-weighting / deterministic decay / reinforcement / cached classification / event clustering / forgotten
-detection / configurable combined ranking) with ONE central config + pure engines + a service-role side table
-`memory_intelligence` (migration `20260711140000`, never alters `memories`, RLS + no-IDOR + reversible). It is
-**DORMANT** — nothing imports it, so the execution path (`executeConversation` + wrapper still ONE caller
-each), provider layer, Ask Remy, story pipeline, billing, quotas, and dashboard are byte-unchanged; the
-existing `match_memories` + `retrieval.ts` ranker remain the retrieval foundation. Activation into a retrieval
-path is a future phase. **Operator step:** apply `20260711140000_memory_intelligence.sql` (persistence degrades
-silently until then). `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT
-STATUS.
+Readiness**. No implementation task is active — the last work was **RC2 — Security Hardening**: HTTP security
+headers (CSP/HSTS/XFO/nosniff/Referrer/Permissions in `next.config.js`, Capacitor/Stripe/Supabase-compatible) +
+dependency-free API rate limiting (`lib/security/rate-limit.ts`, on 9 AI/write/billing/export endpoints) +
+logging hardening (`lib/logger.ts` — removed the RAG **PHI leak** + checkout email log; dev-gated narration) +
+deletion of 3 orphan routes + OWASP fixes (active-profile write-time authz, scoped `inviteCaregiver`, middleware
+**fail-closed**, error-leak/logout/health). MULTI-AGENT ASVS/API-Top-10 review found authorization otherwise
+CLEAN. **Remaining:** HIGH memory-EDIT kept-attachment storage-quota bypass (deferred follow-up on the frozen
+media pipeline); product decision on Ask Remy / `memory-chat` AI quota gating. RC2 PASSES → ready for RC3
+(GDPR & Privacy Compliance). `main` auto-deploys to production on push. Authoritative detail: master state →
+PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC2 — Security Hardening** (production security posture; no feature/UI/architecture change). **Headers:**
+  `next.config.js` adds CSP + HSTS + X-Frame-Options DENY + nosniff + Referrer-Policy + Permissions-Policy + COOP
+  on every response (CSP kept Capacitor/Supabase-realtime/Stripe/OneSignal/Sentry-compatible; nonce tightening
+  is FUTURE). **Rate limiting:** `lib/security/rate-limit.ts` (dependency-free in-memory sliding window, ONE
+  config, fails open) on upload-url/memory-chat/memories-create/enrich/checkout/portal/export/delete/story-action,
+  keyed by session user id (distributed store = operator upgrade). **Logging:** `lib/logger.ts` (debug/info
+  DEV-ONLY) + removed the RAG **PHI leak** (`retrieve-memory-context`) + checkout `USER EMAIL` log + dev-gated
+  webhook/checkout/create/insights. **Dead code:** deleted `/api/search`, `/api/create-reminder`,
+  `/api/send-reminders` (kept `/api/search/global`; live cron `/api/cron/send-due-reminders`) + cleaned residual
+  refs. **OWASP fixes** (MULTI-AGENT ASVS/API-Top-10 review — authz otherwise CLEAN, no IDOR): `POST
+  /api/active-profile` write-time authz; scoped escaped `inviteCaregiver` lookup; middleware **fail-closed**;
+  `send-notification` error-leak fix; `auth/logout` origin fix; `/api/health` SHA removal. Verified tsc/lint/build
+  green + independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 blocking; all 6 non-blocking fixed).
+  **Remaining:** HIGH memory-EDIT kept-attachment storage-quota bypass (deferred follow-up); product decision on
+  Ask Remy / `memory-chat` AI quota gating. **RC2 PASSES → ready for RC3 (GDPR & Privacy Compliance).**
 - **Memory Intelligence Engine V2** (ADDITIVE capability + data layer; the "advanced AI memory intelligence"
   post-launch item; NOT wired into any live path) — new subsystem `lib/remy/memory-intelligence/`: adaptive
   importance scoring, relationship weighting (`people.role`→tier), deterministic decay (pinned + medical/
@@ -385,12 +399,14 @@ Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface 
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
 Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), the Production Provider
 Activation (`a92e9f7`), the Live Conversation Integration (`3c3a7a5`), the AI Usage/Billing/Observability
-(`88dd366`), the AI Subscriptions/Quotas/Usage-Dashboard (`5b6a607`), and the Memory Intelligence Engine V2
-increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. **Operator
-steps to activate AI features:** apply `20260711120000_ai_usage_foundation.sql` +
+(`88dd366`), the AI Subscriptions/Quotas/Usage-Dashboard (`5b6a607`), the Memory Intelligence Engine V2 (`761d3e0`), and
+the RC2 Security Hardening increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an
+operator decision. **Operator steps to activate AI features:** apply `20260711120000_ai_usage_foundation.sql` +
 `20260711130000_ai_usage_analytics.sql` + `20260711140000_memory_intelligence.sql` + set a server
 `OPENAI_API_KEY` (usage logging, quota enforcement, `/settings/ai`, `/api/remy/usage`, `/remy/story`
-generation, and Memory-Intelligence-V2 persistence are all no-ops / degrade until then). tsc/lint/build green.
+generation, and Memory-Intelligence-V2 persistence are all no-ops / degrade until then). **RC2 note:** a
+distributed rate-limit store (Upstash/Redis) is the operator upgrade for multi-instance guarantees.
+tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -405,7 +421,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Memory Intelligence Engine V2 — additive importance/decay/reinforcement/ranking + data layer
+- *(HEAD)* chore(security): RC2 Security Hardening — headers + rate limiting + PHI-log removal + dead-code + OWASP fixes
+- `761d3e0` feat(remy): Memory Intelligence Engine V2 — additive importance/decay/reinforcement/ranking + data layer
 - `5b6a607` feat(remy): AI Subscriptions, Quotas & Usage Dashboard — real quota enforcement + usage dashboard/API
 - `88dd366` feat(remy): AI Usage, Billing & Observability — usage/cost logging around the single execution path
 - `3c3a7a5` feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)

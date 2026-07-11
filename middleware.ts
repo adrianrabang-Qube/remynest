@@ -37,7 +37,6 @@ const PUBLIC_ROUTES = [
 
 const PUBLIC_API_ROUTES = [
   "/api/stripe/webhook",
-  "/api/send-reminders",
   "/api/send-notification",
   "/api/cron",
   "/api/health",
@@ -401,7 +400,18 @@ export async function middleware(
       }
     );
 
-    return res;
+    // RC2: FAIL CLOSED. On an unexpected middleware error (e.g. auth lookup throwing), never let a request
+    // through to a PROTECTED route — redirect to /login. Public/static/auth routes stay reachable so an
+    // error can't lock everyone out of /login, the landing page, or public assets.
+    const isPublic =
+      isBypassRequest(pathname, method) ||
+      isPublicStaticFile(pathname) ||
+      isPublicApiRoute(pathname) ||
+      isPublicRoute(pathname);
+    if (isPublic) {
+      return res;
+    }
+    return createRedirectResponse(req, "/login");
   }
 }
 

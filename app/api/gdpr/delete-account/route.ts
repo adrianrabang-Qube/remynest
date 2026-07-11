@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createAnonClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { planUserDeletion } from "@/lib/gdpr/plan-user-deletion";
 import { executeUserDeletion } from "@/lib/gdpr/execute-user-deletion";
 
@@ -54,6 +55,9 @@ export async function DELETE(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const limited = enforceRateLimit("deleteAccount", user.id);
+    if (limited) return limited;
 
     let body: { password?: unknown; deleteContributed?: unknown } = {};
     try {

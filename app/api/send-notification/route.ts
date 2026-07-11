@@ -50,11 +50,10 @@ export async function GET(req: Request) {
         .single();
 
     if (deviceError || !device) {
+      // RC2: do NOT leak the raw DB error object to the client.
+      if (deviceError) console.error("[send-notification] device lookup failed", deviceError.message);
       return NextResponse.json(
-        {
-          error: "No registered device found",
-          details: deviceError,
-        },
+        { error: "No registered device found" },
         { status: 404 }
       );
     }
@@ -94,13 +93,11 @@ export async function GET(req: Request) {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("[send-notification] error", err);
 
+    // RC2: generic client error — never serialize the raw exception to the response.
     return NextResponse.json(
-      {
-        error: "Server crash",
-        details: err,
-      },
+      { error: "Server error" },
       { status: 500 }
     );
   }
