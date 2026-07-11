@@ -50,6 +50,7 @@ export default function LoginClient() {
           autoComplete="email"
           autoCapitalize="none"
           autoCorrect="off"
+          aria-label="Email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -59,6 +60,7 @@ export default function LoginClient() {
           className="border p-2 w-full mb-3 rounded-lg"
           type="password"
           autoComplete="current-password"
+          aria-label="Password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

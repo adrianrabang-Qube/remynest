@@ -146,6 +146,7 @@ export default function ResetPasswordClient() {
               name="new-password"
               autoComplete="new-password"
               required
+              aria-label="New password"
               placeholder="New password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -157,6 +158,7 @@ export default function ResetPasswordClient() {
               name="confirm-password"
               autoComplete="new-password"
               required
+              aria-label="Confirm new password"
               placeholder="Confirm new password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}

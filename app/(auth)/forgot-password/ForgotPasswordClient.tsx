@@ -70,6 +70,7 @@ export default function ForgotPasswordClient() {
               name="email"
               autoComplete="email"
               required
+              aria-label="Email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

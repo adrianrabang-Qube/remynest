@@ -15,8 +15,18 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **RC4 — Production Launch Readiness**
-(production-hardening only; NO feature/behaviour change; reminder engine untouched). An 8-dimension
+Readiness**. No implementation task is active — the last work was **RC5 — App Store & Production Release
+Certification** (final certification; no feature/behaviour change; reminder engine untouched). An 8-lens
+multi-agent certification (Apple/Google/QA/Staff/SRE/Security/A11y/Privacy) re-verified every RC2–RC4
+hardening claim in code and found **0 NEW code-level release blockers** (**overall 94/100**). **Verdict:
+✅ CERTIFIED FOR APP STORE SUBMISSION + ✅ CERTIFIED FOR PRODUCTION RELEASE (iOS + web); Google Play
+deferred** (decided post-iOS workstream). Two NEW low-risk findings were fixed in the RC5 commit: `(auth)`
+form input `aria-label`s (WCAG) + `lib/ai-memory.ts` logging routed through the dev-gated `logger`
+(name-only parse error; `errorMessage()`). tsc/lint/build green. **Remaining = OPERATOR/infra only:** wire
+`PrivacyInfo.xcprivacy` into the Xcode App target + native rebuild; confirm daily backups + a **Storage-bucket
+backup** + a **test restore**; set prod env + apply probe-gated migrations. `main` auto-deploys on push
+(RC5 committed locally, unpushed). Full detail: `docs/RC5-RELEASE-CERTIFICATION.md`. Before RC5: **RC4 —
+Production Launch Readiness** (production-hardening only). An 8-dimension
 multi-agent audit (74/100 → ~85) drove a low-risk fix set: closed a hot-path **PHI/PII log leak**
 (`profile-access.ts` email + care-recipient rows on every navigation; `build-people.ts` person names) →
 dev-gated `logger`/IDs-only; extended the Sentry `beforeSend` scrubber to **exception values + console
@@ -47,6 +57,13 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC5 — App Store & Production Release Certification** (final certification; no feature/behaviour change;
+  reminder engine untouched). 8 independent lenses + synthesis → **overall 94/100, 0 NEW code-level release
+  blockers**; every RC2–RC4 claim re-verified in code. **✅ CERTIFIED FOR APP STORE SUBMISSION + ✅ CERTIFIED
+  FOR PRODUCTION RELEASE (iOS + web); Google Play deferred.** Fixed 2 low-risk findings in-commit: `(auth)`
+  login/signup/forgot-password/reset-password input `aria-label`s (WCAG); `lib/ai-memory.ts` logging via the
+  dev-gated `logger` (parse error = name only; AI-request = `errorMessage()`). tsc/lint/build green. Remaining
+  = operator/infra + documented roadmap only. Report: `docs/RC5-RELEASE-CERTIFICATION.md`.
 - **RC4 — Production Launch Readiness hardening** (production-hardening only; no feature/behaviour change;
   reminder engine untouched). 8-dimension multi-agent audit → low-risk fixes. **Security/observability:**
   `lib/profile-access.ts` (removed caregiver-email + full-care-recipient-row logs) + `lib/build-people.ts`

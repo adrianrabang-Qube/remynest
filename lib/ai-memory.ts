@@ -1,4 +1,5 @@
 import { openai } from "@/lib/openai";
+import { logger, errorMessage } from "@/lib/logger";
 
 const AI_MEMORY_MODEL =
   "gpt-4.1-mini";
@@ -76,7 +77,8 @@ function logAIStage(
   stage: string,
   metadata?: unknown
 ) {
-  console.info(
+  // Dev-only narration (no-op in prod) — never carries model output / PHI.
+  logger.debug(
     `[${AI_MEMORY_TAG}] ${stage}`,
     metadata || {}
   );
@@ -84,11 +86,13 @@ function logAIStage(
 
 function logAIError(
   stage: string,
-  error: unknown
+  meta?: unknown
 ) {
-  console.error(
+  // Callers pass content-free metadata (errorMessage() / error name only) — never a
+  // raw error whose message could embed model output derived from health content.
+  logger.error(
     `[${AI_MEMORY_TAG}] ${stage}`,
-    error
+    meta ?? {}
   );
 }
 
@@ -138,10 +142,11 @@ function safelyParseAIResponse(
   try {
     return JSON.parse(content);
   } catch (error) {
-    logAIError(
-      "json-parse-error",
-      error
-    );
+    // Name only — a JSON.parse SyntaxError message can embed a snippet of the
+    // model's (health-derived) output, so we never log its message/content.
+    logAIError("json-parse-error", {
+      error: error instanceof Error ? error.name : "parse-error",
+    });
 
     return null;
   }
@@ -378,7 +383,7 @@ export async function generateMemoryInsights(
       {
         requestId,
 
-        error,
+        error: errorMessage(error),
       }
     );
 

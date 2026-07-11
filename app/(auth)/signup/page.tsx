@@ -81,6 +81,7 @@ export default function SignupPage() {
           autoComplete="email"
           autoCapitalize="none"
           autoCorrect="off"
+          aria-label="Email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -90,6 +91,7 @@ export default function SignupPage() {
           className="border p-2 w-full mb-3 rounded-lg"
           type="password"
           autoComplete="new-password"
+          aria-label="Password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

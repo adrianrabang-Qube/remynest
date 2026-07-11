@@ -1811,6 +1811,30 @@ UI; **Android Play-readiness (deferred — no `google-services.json`/FCM, `allow
 re-trust raw error objects / log PHI (email/names/rows/device tokens), remove the Sentry
 breadcrumb/exception scrubbing, drop the `maxDuration` budgets, or modify the frozen reminder engine.
 
+**RC5 — App Store & Production Release Certification (authoritative, 2026-07-11 — final certification; NO
+feature/behaviour change; reminder engine untouched):** an 8-lens multi-agent certification (Apple / Google
+Play / QA / Senior Staff / SRE / Security / Accessibility / Privacy) + synthesis re-verified every RC2–RC4
+hardening claim against code and found **0 NEW code-level release blockers** — **overall 94/100** (Security
+96, Reliability 97, Performance 95, Privacy 95, Store 97, A11y 83). **Verdict: ✅ CERTIFIED FOR APP STORE
+SUBMISSION + ✅ CERTIFIED FOR PRODUCTION RELEASE (iOS + web); Google Play deferred** (decided — `versionCode 1`,
+no signing/`google-services.json`/FCM, so it cannot be accidentally shipped and is a post-iOS operator
+workstream). **Two NEW low-risk findings were fixed in the RC5 commit (additive, behaviour-preserving):**
+**(1)** the `(auth)` login/signup/forgot-password/reset-password inputs were placeholder-only → added
+`aria-label`s (WCAG 1.3.1/3.3.2/4.1.2; the `(app)/*` UI was already AA-solid). **(2)** `lib/ai-memory.ts`
+`logAIStage`/`logAIError` now route through the dev-gated `logger` (matching the RC4 standard); the
+JSON-parse error logs its **name only** (a `SyntaxError` message can embed a snippet of the model's
+health-derived output) and the AI-request error uses `errorMessage()`. Verified tsc/lint/build green.
+**Confirmed-in-code (do NOT re-open):** Apple 3.1.1/3.1.3 native purchase-UI gating is comprehensive
+(`lib/platform.ts` on every checkout/portal/upgrade CTA — UpgradeButton/UpgradeModal/Storage*Modal/
+BillingSection/PricingActions/RemyStoryConversation), self-service in-app deletion (5.1.1(v)), caregiver
+sharing is private invite-only (no public UGC), `PrivacyInfo.xcprivacy` + usage strings + encryption
+exemption valid, no PHI in logs, no client secrets, no universal-links/Restore-Purchases needed
+(remote-URL WebView + web-only subscription). **Remaining = OPERATOR/infra ONLY** (Xcode manifest target
+wiring + native rebuild; confirm daily backups + a Storage-bucket backup + a test restore; prod env +
+probe-gated migrations) **+ the documented roadmap** — none a code defect. **Do NOT** re-flag any certified
+item, re-open the frozen reminder engine, or treat the operator/roadmap deferrals as new blockers. See
+`docs/RC5-RELEASE-CERTIFICATION.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
