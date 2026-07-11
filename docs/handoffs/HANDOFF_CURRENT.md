@@ -15,19 +15,38 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **AI Subscriptions, Quotas & Usage Dashboard**
-(production hardening): the Phase-26 dormant quota architecture is now REAL, subscription-aware enforcement
-(Free capped 5/day + 50/month; Premium unlimited) with a structured `quota_exceeded` result (never throws;
-iOS shows no purchase link on native), plus a usage dashboard (**`/settings/ai`**) + **`GET /api/remy/usage`**
-+ server-only admin analytics. Single AI-limits config (`lib/ai/usage/entitlements.ts`); fully
-provider-independent; **still ONE execution path** (`executeConversation` + provider layer byte-unchanged; one
-exec caller = the wrapper, one wrapper caller = the story action; enforcement is a PRE-check in the action).
-**INERT until the operator applies BOTH `ai_usage` migrations** (`…120000` + `…130000`); reads/writes degrade
-silently. `/remy/story` still needs a server `OPENAI_API_KEY` to actually generate. `main` auto-deploys to
-production on push. Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **Memory Intelligence Engine V2**: a new,
+self-contained, ADDITIVE subsystem `lib/remy/memory-intelligence/` (adaptive importance / relationship
+weighting / deterministic decay / reinforcement / cached classification / event clustering / forgotten
+detection / configurable combined ranking) with ONE central config + pure engines + a service-role side table
+`memory_intelligence` (migration `20260711140000`, never alters `memories`, RLS + no-IDOR + reversible). It is
+**DORMANT** — nothing imports it, so the execution path (`executeConversation` + wrapper still ONE caller
+each), provider layer, Ask Remy, story pipeline, billing, quotas, and dashboard are byte-unchanged; the
+existing `match_memories` + `retrieval.ts` ranker remain the retrieval foundation. Activation into a retrieval
+path is a future phase. **Operator step:** apply `20260711140000_memory_intelligence.sql` (persistence degrades
+silently until then). `main` auto-deploys to production on push. Authoritative detail: master state → PROJECT
+STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **Memory Intelligence Engine V2** (ADDITIVE capability + data layer; the "advanced AI memory intelligence"
+  post-launch item; NOT wired into any live path) — new subsystem `lib/remy/memory-intelligence/`: adaptive
+  importance scoring, relationship weighting (`people.role`→tier), deterministic decay (pinned + medical/
+  emergency/health never decay; milestone slow; recall rewinds age), reinforcement (confidence; future
+  feedback), cached classification (free-form `ai_category`→controlled taxonomy; medical/emergency bias only on
+  a real keyword hit → keyword-less falls through to `miscellaneous`), event clustering, forgotten detection,
+  and a configurable combined ranking (Semantic+Importance+Relationship+Recency+Reinforcement+Confidence). ONE
+  central config `config.ts`; pure deterministic engines (no clock/DB/`Math.random`) + a service-role `store.ts`
+  (batch reads = no N+1; user-scoped writes; lazy defaults; never throws) + migration
+  `20260711140000_memory_intelligence.sql` (NEW `memory_intelligence` side table — never alters `memories`; RLS
+  select-own + service-role writes; `reinforce_memory`/`backfill` SECURITY DEFINER, no IDOR; reversible).
+  Revives the dead `ai_importance` string; reuses (not rebuilds) `match_memories`/enrichment/existing clusters/
+  `retrieval.ts`. **DORMANT:** nothing imports it — `executeConversation` + wrapper each still ONE caller (ONE
+  execution path); provider layer / Ask Remy / story pipeline / billing / quota / dashboard byte-unchanged; no
+  OpenAI import. NO existing source file modified. Verified tsc/lint/build green + 28-assertion runtime formula
+  check + independent MULTI-AGENT adversarial review (7 lenses): 1 blocking (classification bias) + 1
+  non-blocking (write scoping) → BOTH fixed + independently re-verified CLEAN. **Operator step:** apply the
+  migration (persistence degrades silently until then). Activation into a retrieval path is a future phase.
 - **AI Subscriptions, Quotas & Usage Dashboard** (production hardening; no provider/prompt/architecture
   redesign; still ONE execution path) — REAL subscription-aware quota enforcement replaces the Phase-26 dormant
   architecture. **Entitlements** = ONE config `lib/ai/usage/entitlements.ts` (`AI_PLAN_LIMITS` by `BillingPlan`:
@@ -366,11 +385,12 @@ Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface 
 Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), the OpenAI
 Provider Adapter (`e7b572c`), the Provider Registry Activation (`689f917`), the Production Provider
 Activation (`a92e9f7`), the Live Conversation Integration (`3c3a7a5`), the AI Usage/Billing/Observability
-(`88dd366`), and the AI Subscriptions/Quotas/Usage-Dashboard increment on top. **Not pushed** — pushing
-auto-deploys to prod, so it is an operator decision. **Operator steps to activate AI features:** apply BOTH
-`20260711120000_ai_usage_foundation.sql` + `20260711130000_ai_usage_analytics.sql` + set a server
-`OPENAI_API_KEY` (usage logging, quota enforcement, `/settings/ai`, `/api/remy/usage`, and `/remy/story`
-generation are all no-ops / degrade until then). tsc/lint/build green.
+(`88dd366`), the AI Subscriptions/Quotas/Usage-Dashboard (`5b6a607`), and the Memory Intelligence Engine V2
+increment on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision. **Operator
+steps to activate AI features:** apply `20260711120000_ai_usage_foundation.sql` +
+`20260711130000_ai_usage_analytics.sql` + `20260711140000_memory_intelligence.sql` + set a server
+`OPENAI_API_KEY` (usage logging, quota enforcement, `/settings/ai`, `/api/remy/usage`, `/remy/story`
+generation, and Memory-Intelligence-V2 persistence are all no-ops / degrade until then). tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -385,7 +405,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): AI Subscriptions, Quotas & Usage Dashboard — real quota enforcement + usage dashboard/API
+- *(HEAD)* feat(remy): Memory Intelligence Engine V2 — additive importance/decay/reinforcement/ranking + data layer
+- `5b6a607` feat(remy): AI Subscriptions, Quotas & Usage Dashboard — real quota enforcement + usage dashboard/API
 - `88dd366` feat(remy): AI Usage, Billing & Observability — usage/cost logging around the single execution path
 - `3c3a7a5` feat(remy): Live Conversation Integration — first user-facing AI execution (/remy/story, opt-in)
 - `a92e9f7` feat(remy): Production Provider Activation — first end-to-end conversation execution path (dormant)

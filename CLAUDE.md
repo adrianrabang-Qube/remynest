@@ -1623,6 +1623,50 @@ specific logic outside the provider layer, or show a purchase link on native. **
 blocker):** the quota gate is read-then-act (a soft cost-control cap, not a security boundary) — concurrent Free
 requests could transiently exceed by up to N−1; the single-client UI serializes, so it's negligible.
 
+**Remy — Memory Intelligence Engine V2 (authoritative, 2026-07-11 — the "advanced AI memory intelligence"
+post-launch item, built ADDITIVELY as a reusable capability + data layer; NOT wired into any live path):** a
+new self-contained subsystem **`lib/remy/memory-intelligence/`** introducing adaptive importance scoring,
+relationship weighting, deterministic decay, reinforcement, cached classification, event clustering, forgotten
+detection, and a configurable combined ranking — while PRESERVING the current architecture (the existing
+`match_memories` semantic search + `lib/remy/retrieval.ts` blended ranker remain the foundation). **THE SINGLE
+CONFIG is `config.ts`** — `MEMORY_IMPORTANCE_WEIGHTS`, `RELATIONSHIP_WEIGHTS`/tier values (spouse/partner/parent/
+child **High** · sibling/friend/caregiver **Medium** · acquaintance **Low**), `DECAY_CONFIG`, `REINFORCEMENT_CONFIG`,
+`RANKING_WEIGHTS`, `FORGOTTEN_CONFIG`, `MEMORY_CATEGORIES` taxonomy, `MEMORY_CLUSTER_TYPES` — **every weight/
+threshold derives from here; do NOT scatter weights elsewhere.** **Pure deterministic engines** (no clock/DB/
+`Math.random`/network — the caller passes `now`): `importance-engine` (weighted-sum/total → 0..1; revives the
+previously-dead `ai_importance` string + emotional signals), `relationship-weighting` (`people.role` → tier →
+0..1), `decay-engine` (**PINNED + medical/emergency/health NEVER decay; milestone/childhood/family decay very
+slowly; frequent recall rewinds effective age; floored so nothing fully vanishes**), `reinforcement-engine`
+(confidence rises with recall / falls with down-rank; pure `reinforce`/`downRank`; **down-rank designed for
+FUTURE feedback, no UI**), `classification-engine` (**deterministic** free-form `ai_category`→controlled
+taxonomy, CACHEABLE — not a GPT rebuild; medical/emergency bias applies **only on a real keyword hit**, so a
+keyword-less memory correctly falls through to `miscellaneous` and is never mis-promoted to a protected class),
+`clustering-engine` (deterministic event clusters — wedding/hospital-stay/university/holiday/moving-house/
+employment/school/family-event/birthday), `forgotten-engine` (never-recalled/stale/lost-significance; INTERNAL,
+no UI), `ranking-engine` (final 0..1 = weighted blend of **Semantic+Importance+Relationship+Recency+
+Reinforcement+Confidence**, configurable), `engine.ts` orchestrator (`scoreMemoriesV2`). **Data layer** (the
+ONLY DB module, `store.ts`, service-role, scoped by explicit session-derived `user_id`, BATCH reads = no N+1,
+lazy defaults so a missing row needs no backfill, **NEVER throws**) + **migration**
+`20260711140000_memory_intelligence.sql` — a NEW `memory_intelligence` side table (1:1 FK `memory_id`→memories
+on delete cascade; retrieval_count/last_recalled_at/reinforcement/down_rank/conversation/pinned/favourite/cached
+classification+cluster) + **RLS select-own; writes service-role only** + `backfill_memory_intelligence` +
+atomic `reinforce_memory` RPCs (both SECURITY DEFINER, execute revoked from public/anon/authenticated → no IDOR)
++ a touch trigger. **It does NOT ALTER the `memories` table** (honours "never modify production tables in
+place") and is **reversible** (rollback block in the migration). The `store.ts` write path is **user-scoped**
+(scoped update-then-insert — a foreign-user row can never be re-owned). **DORMANT/ADDITIVE:** nothing imports
+the subsystem yet — the live Ask Remy retrieval, story pipeline, execution path (`executeConversation` + wrapper
+each still ONE caller, ONE execution path), provider layer, billing, quota, and usage dashboard are all
+**byte-unchanged**; there is **no second execution path, no duplicate retrieval pipeline, no OpenAI import**
+(provider-independent). Activation (wiring V2 ranking/reinforcement into a retrieval path) is a FUTURE approved
+phase. Verified tsc/lint/build green + a 28-assertion runtime formula check + independent MULTI-AGENT
+adversarial review (7 lenses — algorithm-correctness / purity-determinism / single-config / additive-no-
+regression / security-scoping / performance / migration-datalayer): the one blocking finding (classification
+bias) and the one non-blocking finding (write scoping) were fixed and independently re-verified CLEAN.
+**Operator step:** apply `20260711140000_memory_intelligence.sql` to activate persistence (reads/writes degrade
+silently until then). **Do NOT** wire V2 into Ask Remy/story/the execution path without a separate approved
+phase, scatter weights outside `config.ts`, put a clock/DB/`Math.random` in a pure engine, alter the `memories`
+table, make `store.ts` throw or an unscoped write, or classify a keyword-less memory into a protected class.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
