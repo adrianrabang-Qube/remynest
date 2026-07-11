@@ -47,8 +47,9 @@ export interface RecordAiUsageInput extends AiUsageContext {
 }
 
 /**
- * Map a thrown error to the structured usage taxonomy. Reads only the provider's own `code` (+ an env probe
- * to distinguish a missing key from other invalid requests). Never throws.
+ * Map a thrown error to the structured usage taxonomy. Reads the provider's own `code`, and for
+ * `invalid-request` distinguishes a missing API key using a provider-AGNOSTIC check of the error
+ * MESSAGE (not an env probe), so it works for any future provider. Never throws.
  */
 export function classifyAiError(error: unknown): AiUsageErrorCode {
   if (error instanceof ProviderError) {

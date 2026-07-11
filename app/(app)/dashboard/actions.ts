@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { logger, errorMessage } from "@/lib/logger";
 import { checkPremium } from "@/lib/premium";
 
 import type { BillingPlan } from "@/lib/billing/plans";
@@ -80,9 +81,9 @@ export async function createProfile(
     .eq("created_by_account_id", user.id);
 
   if (countError) {
-    console.error(
+    logger.error(
       "[createProfile] limit count failed",
-      countError
+      errorMessage(countError)
     );
     return {
       ok: false,
@@ -128,7 +129,7 @@ export async function createProfile(
     .single();
 
   if (error || !profile) {
-    console.error("[createProfile] insert failed", error);
+    logger.error("[createProfile] insert failed", errorMessage(error));
     return {
       ok: false,
       code: "SERVER_ERROR",
@@ -149,9 +150,9 @@ export async function createProfile(
     });
 
   if (relationshipError) {
-    console.error(
+    logger.error(
       "[createProfile] relationship failed",
-      relationshipError
+      errorMessage(relationshipError)
     );
     // Roll back the orphaned profile so the count stays consistent.
     await supabase
@@ -261,7 +262,7 @@ export async function inviteCaregiver({
       .maybeSingle();
 
   if (profilesError) {
-    console.error(profilesError);
+    logger.error("[dashboard] invite profiles lookup failed", errorMessage(profilesError));
 
     return {
       error:
@@ -292,7 +293,7 @@ export async function inviteCaregiver({
       });
 
   if (inviteError) {
-    console.error(inviteError);
+    logger.error("[dashboard] invite insert failed", errorMessage(inviteError));
 
     return {
       error:
@@ -367,7 +368,7 @@ export async function listProfileCaregivers(
     .eq("invite_status", "accepted");
 
   if (relError) {
-    console.error("[dashboard] list_caregivers_error", relError);
+    logger.error("[dashboard] list_caregivers_error", errorMessage(relError));
     return { error: "We couldn't load caregivers. Please try again." };
   }
 
@@ -496,7 +497,7 @@ export async function revokeCaregiver({
     .maybeSingle();
 
   if (relError) {
-    console.error("[dashboard] revoke_lookup_error", relError);
+    logger.error("[dashboard] revoke_lookup_error", errorMessage(relError));
     return { error: "We couldn't remove this caregiver. Please try again." };
   }
 
@@ -520,7 +521,7 @@ export async function revokeCaregiver({
     .neq("relationship_type", "owner");
 
   if (deleteError) {
-    console.error("[dashboard] revoke_delete_error", deleteError);
+    logger.error("[dashboard] revoke_delete_error", errorMessage(deleteError));
     return { error: "We couldn't remove this caregiver. Please try again." };
   }
 
@@ -554,7 +555,7 @@ export async function acceptInvite(
     .single();
 
   if (inviteFetchError || !invite) {
-    console.error(inviteFetchError);
+    logger.error("[dashboard] invite fetch failed", errorMessage(inviteFetchError));
 
     throw new Error(
       "Invite not found"
@@ -606,7 +607,7 @@ export async function acceptInvite(
       });
 
   if (relationshipError) {
-    console.error(relationshipError);
+    logger.error("[dashboard] invite accept relationship failed", errorMessage(relationshipError));
 
     throw new Error(
       "Failed to create relationship"
@@ -624,7 +625,7 @@ export async function acceptInvite(
       .eq("id", inviteId);
 
   if (updateError) {
-    console.error(updateError);
+    logger.error("[dashboard] invite status update failed", errorMessage(updateError));
 
     throw new Error(
       "Failed to update invite"
@@ -696,7 +697,7 @@ export async function declineInvite(
     .eq("id", inviteId);
 
   if (error) {
-    console.error(error);
+    logger.error("[dashboard] invite decline failed", errorMessage(error));
 
     throw new Error(
       "Failed to decline invite"

@@ -1,5 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * DATA CLASSIFICATION (GDPR): memory attachments are PHI-ADJACENT — photos/videos
+ * that may depict a third-party care recipient and may constitute special-category
+ * (Art 9) data. Bytes live in the PRIVATE `memory-media` bucket, owner-scoped, and
+ * are only guaranteed erased at full account deletion (per-memory delete + edit-
+ * removed attachments currently orphan their bytes — see lib/storage/object-info.ts).
+ * `metadata.geolocation` retains location personal data (Art 5(1)(c) minimisation);
+ * EXIF-geolocation stripping is a planned enhancement.
+ */
 export type MemoryAttachment = {
   id: string;
   url: string;

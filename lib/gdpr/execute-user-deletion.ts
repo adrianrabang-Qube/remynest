@@ -19,6 +19,16 @@ import {
  *      pending_account_deletions and retried on next login.
  *
  * Safe to re-run: every stage is a no-op once already applied.
+ *
+ * KNOWN PROCESSOR-SIDE ERASURE GAPS (RC3 — tracked follow-ups, Art 17):
+ *   - Stripe: the active subscription is NOT cancelled and the Stripe customer
+ *     is NOT deleted here (billing PII persists at Stripe; a live sub keeps
+ *     charging). Needs a Stripe call in the executor (separate billing phase).
+ *   - OneSignal: the local device_registrations rows are removed (via the RPC),
+ *     but the player/device is NOT deleted at OneSignal (push id persists there).
+ *   - reminder_local_confirmations rows are not yet enrolled in the RPC (no FK
+ *     cascade) — enroll them when the deletion RPC is next revised.
+ *   Do NOT mark deletion "fully complete at the processor" until these ship.
  */
 
 export interface ExecuteDeletionParams {

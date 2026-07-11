@@ -34,8 +34,23 @@ export default function CookiesPage() {
         We use essential cookies to keep you signed in and to operate core
         features — for example, your authentication session and the active
         profile context. The service cannot function without these, so they
-        are not optional.
+        are not optional. The specific cookies we set are:
       </p>
+      <ul className="list-disc space-y-1 pl-6">
+        <li>
+          <strong>sb-&lt;project&gt;-auth-token</strong> — your Supabase
+          authentication session (keeps you signed in). Strictly necessary;
+          <code>httpOnly</code>, <code>Secure</code>. Cleared when you sign
+          out or the session expires.
+        </li>
+        <li>
+          <strong>remynest-active-context</strong> — remembers which workspace
+          (your personal Nest or a care profile) you are viewing. Strictly
+          necessary functional cookie; <code>httpOnly</code>,{" "}
+          <code>Secure</code>, <code>SameSite=Lax</code>. No analytics,
+          marketing, or cross-site tracking.
+        </li>
+      </ul>
 
       <H>Third-party services</H>
       <p>

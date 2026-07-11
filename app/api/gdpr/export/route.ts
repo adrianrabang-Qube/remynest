@@ -7,11 +7,18 @@ import { enforceRateLimit } from "@/lib/security/rate-limit";
 export const dynamic = "force-dynamic";
 
 /**
- * GDPR data export (read-only, export-only — no deletion).
+ * GDPR data export — Art. 15 (access) + Art. 20 (portability). Read-only,
+ * export-only (no deletion).
  *
  * Authenticates the caller, then returns ALL of that user's data as a
  * downloadable JSON file. Data is gathered scoped strictly to the authenticated
  * user's id / email. No data is modified.
+ *
+ * SCOPE INVARIANT: the payload is strictly owner-only and MAY include
+ * special-category (health-adjacent) memory content — keep it scoped to the
+ * caller and never widen `collectUserData` beyond the authenticated user.
+ * Media is exported as REFERENCES only (the private bucket needs signed URLs);
+ * delivering the binaries is a tracked Art 20 enhancement.
  */
 export async function GET() {
   try {

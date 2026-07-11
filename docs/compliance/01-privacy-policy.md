@@ -286,16 +286,23 @@ under written data processing agreements. Our current sub-processors are:
 | Sub-processor | Function | Data processed | Location / transfer safeguard |
 |---|---|---|---|
 | Supabase | Database, authentication, cloud storage | Account data, content, media, auth data | Cloud hosting; SCCs where applicable |
-| OpenAI | AI categorisation, summaries, search assistance | Content you submit to AI features | US; SCCs; no model training on content |
-| OneSignal | Push notifications | Push tokens, device identifiers | US; SCCs where applicable |
+| OpenAI | AI categorisation, summaries, embeddings, chat/story assistance | Content you submit to AI features (e.g. memory titles/summaries, people names) | US; SCCs; no model training on API content |
+| OneSignal | Push notifications | Push/device tokens, your account identifier, and notification content (e.g. reminder titles you set) | US; SCCs where applicable |
+| Stripe | Subscription billing (web checkout) | Email, billing/transaction/subscription data | PCI-DSS processor; SCCs where applicable |
+| Sentry | Error/crash diagnostics | Error/log/diagnostic data (PII scrubbed; Session Replay disabled) | US/EU; SCCs where applicable |
 | Vercel | Application hosting/delivery | Technical/log data, IP | Cloud hosting; SCCs where applicable |
-| Payment processor (e.g., Stripe) | Subscription billing | Billing/transaction data | SCCs where applicable |
-| Error/crash monitoring (e.g., Sentry) | Diagnostics | Error/log/diagnostic data | SCCs where applicable |
-| Analytics (Google Analytics and/or PostHog) | Optional, consent-based analytics | Usage data | Only with consent; SCCs where applicable |
-| Email/auth provider (e.g., Resend) | Transactional email | Email address, message metadata | SCCs where applicable |
 
-An up-to-date list is available on request from **dpo@remynest.com**. We will give
-notice of material changes to our sub-processors where required.
+We do **not** currently engage any analytics/advertising sub-processor, and we
+use **no** third-party behavioural tracking. Transactional/auth email is handled
+by Supabase; we engage no separate email sub-processor. (Google Analytics,
+PostHog, Resend and similar are **not** in use as of the effective date; if we
+introduce any such processor we will update this list and, where non-essential,
+seek consent first.)
+
+The authoritative, dated register is maintained in the Subprocessor List
+(`docs/compliance/14-subprocessor-list.md`). An up-to-date list is available on
+request from **dpo@remynest.com** [CONFIRM provisioned]. We will give notice of
+material changes to our sub-processors where required.
 
 ## 14. Changes to this Policy
 

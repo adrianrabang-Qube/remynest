@@ -29,6 +29,11 @@ create table if not exists public.reminder_local_confirmations (
   primary key (reminder_id, user_id)
 );
 
+-- GDPR/erasure note (RC3, Art 17): these rows carry user_id but have NO FK cascade
+-- to auth.users, and this table postdates the delete_user_account RPC — so they are
+-- NOT removed on account deletion. OPEN ITEM: enroll this table in the deletion RPC
+-- (or add ON DELETE CASCADE) when the RPC is next revised.
+
 create index if not exists reminder_local_confirmations_confirmed_idx
   on public.reminder_local_confirmations (confirmed_at);
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 import RemyNestLogo from "@/components/brand/RemyNestLogo";
+import { logger, errorMessage } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -142,13 +143,11 @@ export default async function OnboardingPage() {
         }
       );
 
-    console.log(
-      "PROFILE UPSERT ERROR:"
-    );
-
-    console.log(error);
-
     if (error) {
+      logger.error(
+        "[onboarding] profile upsert failed",
+        errorMessage(error)
+      );
       throw new Error(
         error.message
       );

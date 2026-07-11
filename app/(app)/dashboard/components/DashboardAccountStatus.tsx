@@ -10,13 +10,7 @@ type DashboardAccountStatusProps = {
 
 export default function DashboardAccountStatus({
   currentPlan,
-  isPremium = false,
 }: DashboardAccountStatusProps) {
-  console.info("[DashboardAccountStatus] props", {
-    currentPlan,
-    isPremium,
-  });
-
   const normalizedPlan = currentPlan?.trim().toUpperCase();
 
   const native = useIsNativePlatform();

@@ -34,6 +34,10 @@ export interface GdprExportPayload {
   caregiverInvitesReceived: unknown[];
   memoryClusters: unknown[];
   deviceRegistrations: unknown[];
+  people: unknown[];
+  aiUsage: unknown[];
+  memoryIntelligence: unknown[];
+  storageLedger: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -83,6 +87,21 @@ export async function collectUserData(
 ): Promise<GdprExportPayload> {
   const db = supabaseAdmin;
 
+  // RC3 — COVERED USER-OWNED TABLES (keep this list in sync when a new table
+  // holding a data subject's personal data ships, so the Art 15/20 export never
+  // silently drops a category):
+  //   profiles                (id)                       memories               (user_id)
+  //   memory_profiles         (created_by_account_id)    reminders              (user_id)
+  //   profile_relationships   (caregiver_account_id)     caregiver_invites      (invited_by_account_id / email)
+  //   memory_clusters         (user_id)                  device_registrations   (user_id)
+  //   people                  (created_by_account_id)    ai_usage               (user_id)
+  //   memory_intelligence     (user_id)                  storage_ledger         (user_id)
+  // memory_person_links is intentionally omitted: it is pure join metadata
+  // reconstructable from the exported `people` + `memories`. Media is exported
+  // as references only (the private bucket needs signed URLs — see the route).
+  // ai_usage/memory_intelligence/storage_ledger are operator-gated tables; a
+  // missing relation resolves to `{ data: null }` (never throws), so the export
+  // degrades to an empty array rather than failing.
   const [
     profileRes,
     memoryProfilesRes,
@@ -92,6 +111,10 @@ export async function collectUserData(
     invitesSentRes,
     clustersRes,
     devicesRes,
+    peopleRes,
+    aiUsageRes,
+    memoryIntelligenceRes,
+    storageLedgerRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -101,6 +124,10 @@ export async function collectUserData(
     db.from("caregiver_invites").select("*").eq("invited_by_account_id", userId),
     db.from("memory_clusters").select("*").eq("user_id", userId),
     db.from("device_registrations").select("*").eq("user_id", userId),
+    db.from("people").select("*").eq("created_by_account_id", userId),
+    db.from("ai_usage").select("*").eq("user_id", userId),
+    db.from("memory_intelligence").select("*").eq("user_id", userId),
+    db.from("storage_ledger").select("*").eq("user_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -113,7 +140,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -124,6 +151,10 @@ export async function collectUserData(
     caregiverInvitesReceived: invitesReceivedRes.data ?? [],
     memoryClusters: clustersRes.data ?? [],
     deviceRegistrations: devicesRes.data ?? [],
+    people: peopleRes.data ?? [],
+    aiUsage: aiUsageRes.data ?? [],
+    memoryIntelligence: memoryIntelligenceRes.data ?? [],
+    storageLedger: storageLedgerRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -137,6 +168,10 @@ export async function collectUserData(
     caregiverInvitesReceived: payload.caregiverInvitesReceived.length,
     memoryClusters: payload.memoryClusters.length,
     deviceRegistrations: payload.deviceRegistrations.length,
+    people: payload.people.length,
+    aiUsage: payload.aiUsage.length,
+    memoryIntelligence: payload.memoryIntelligence.length,
+    storageLedger: payload.storageLedger.length,
     mediaReferences: payload.mediaReferences.length,
   };
 

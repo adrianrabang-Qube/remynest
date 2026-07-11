@@ -83,13 +83,19 @@ re-introduced data scheduled for deletion is re-deleted promptly.
 On account deletion we also issue deletion to, or rely on data-processing terms with,
 our sub-processors that hold related data, including:
 
-- **Supabase** (database, authentication, storage) — deletion of records and media;
-- **OpenAI** — API content is not retained for training; transient processing data is
-  handled per OpenAI's retention terms for API data;
-- **OneSignal** — removal/deactivation of push tokens and device records;
-- **payment processor** — billing records are retained only as legally required (see
-  Section 7);
-- **error/diagnostics provider** — logs age out per the 90-day log retention.
+- **Supabase** (database, authentication, storage) — deletion of the database records
+  and stored media, and deletion of the Supabase auth user;
+- **OpenAI** — API content is not retained for model training; transient processing
+  data is handled per OpenAI's retention terms for API data;
+- **OneSignal** — the local device/registration records are deleted from our database.
+  NOTE (accuracy): deletion of the device at OneSignal itself is a tracked follow-up
+  — until it ships, the push identifier may persist at OneSignal per its retention terms;
+- **Stripe** (payment processor) — billing records are retained by Stripe only as
+  legally required (see Section 7). NOTE: automatic subscription cancellation / Stripe
+  customer deletion on account deletion is a tracked follow-up; **cancel any active
+  subscription before deleting your account** to stop future charges;
+- **error/diagnostics provider (Sentry)** — diagnostics are PII-scrubbed and age out per
+  the provider's log-retention window.
 
 ## 7. Data we may retain after deletion (and why)
 

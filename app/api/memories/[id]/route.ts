@@ -265,6 +265,10 @@ export async function PUT(
   return Response.json({ success: true });
 }
 
+// GDPR note (Art 5(1)(e)/17): this deletes the memory ROW (user_id-scoped) but does
+// NOT remove its attachment objects from the private bucket — those bytes are swept
+// only at full account deletion. Per-memory storage erasure + an orphan-sweeper are
+// tracked follow-ups (see lib/storage/object-info.ts). Do not assume media is gone here.
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }

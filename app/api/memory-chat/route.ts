@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { retrieveMemoryContext } from "@/lib/retrieve-memory-context";
 import { PROMPT_SAFETY_PREAMBLE } from "@/lib/constants/disclaimers";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { logger, errorMessage } from "@/lib/logger";
 
 const MEMORY_CHAT_TAG =
   "memory-chat-engine";
@@ -27,7 +28,9 @@ function logMemoryChatStage(
   stage: string,
   metadata?: unknown
 ) {
-  console.info(
+  // RC3 — dev-only narration (logger.debug is a no-op in production) so routine
+  // AI-chat stage logs never accumulate in prod logs (Art 5(1)(c)).
+  logger.debug(
     `[${MEMORY_CHAT_TAG}] ${stage}`,
     metadata || {}
   );
@@ -37,9 +40,10 @@ function logMemoryChatError(
   stage: string,
   error: unknown
 ) {
-  console.error(
+  // Message only — never the raw error object (may carry row values / PII).
+  logger.error(
     `[${MEMORY_CHAT_TAG}] ${stage}`,
-    error
+    errorMessage(error)
   );
 }
 

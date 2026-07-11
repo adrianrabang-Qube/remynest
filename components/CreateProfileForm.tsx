@@ -97,12 +97,27 @@ export default function CreateProfileForm({
           <label className="block text-sm font-medium mb-2">
             Date of Birth
           </label>
+          {/* GDPR data minimisation: date_of_birth is NOT persisted by
+              createProfile (it inserts name fields only). Kept as an optional
+              UI field; do not start storing it without a lawful-basis review. */}
           <input
             type="date"
             name="date_of_birth"
             className="w-full border rounded-xl p-3"
           />
         </div>
+
+        {/* Art 6/14: this creates a record about a third party (the care
+            recipient), so surface the authority representation at the point of
+            collection. Informational only — does not gate submission. */}
+        <p className="text-xs text-charcoal-muted">
+          By adding a person, you confirm you are authorised to store
+          information about them. See our{" "}
+          <a href="/privacy" className="underline">
+            Privacy Policy
+          </a>
+          .
+        </p>
 
         {error && (
           <p className="text-sm text-red-600" role="alert">

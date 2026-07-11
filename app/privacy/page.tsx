@@ -76,6 +76,9 @@ export default function PrivacyPage() {
         Memory content may constitute special-category (health) data. AI
         features generate non-diagnostic reflections only and do not provide
         medical advice, diagnosis, or treatment. See our in-app AI notices.
+        AI does not make automated decisions that produce legal or similarly
+        significant effects about you (no Article&nbsp;22 GDPR decision-making),
+        and your content is not used to train third-party AI models.
       </p>
 
       <H>Sharing</H>
@@ -103,10 +106,11 @@ export default function PrivacyPage() {
         Subject to applicable law, you may request access, rectification,
         erasure, restriction, objection, and data portability, and may
         withdraw consent. You can download your data at any time from
-        Profile → Privacy &amp; GDPR → Export. Account deletion requests can
-        be made by contacting <strong>admin@remynest.com</strong> while
-        self-service deletion is being finalized. You may also complain to
-        your local data-protection authority.
+        Profile → Settings → Export my data, and you can permanently delete
+        your account and associated data yourself at any time from Profile →
+        Settings → Delete account (or by contacting{" "}
+        <strong>admin@remynest.com</strong>). You may also complain to your
+        local data-protection authority.
       </p>
 
       <H>Security</H>

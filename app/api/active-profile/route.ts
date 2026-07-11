@@ -9,7 +9,7 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 
 import { createClient } from "@/lib/supabase/server";
 import { userCanAccessProfile } from "@/lib/profile-ownership";
-import { logger } from "@/lib/logger";
+import { logger, errorMessage } from "@/lib/logger";
 
 // =========================
 // GET ACTIVE PROFILE
@@ -67,7 +67,7 @@ export async function GET() {
       profile,
     });
   } catch (error) {
-    console.error(error);
+    logger.error("[active-profile] request failed", errorMessage(error));
 
     return NextResponse.json(
       {
@@ -133,7 +133,7 @@ export async function POST(
       success: true,
     });
   } catch (error) {
-    console.error(error);
+    logger.error("[active-profile] request failed", errorMessage(error));
 
     return NextResponse.json(
       {

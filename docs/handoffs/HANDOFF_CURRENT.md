@@ -15,18 +15,39 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the **RC2 follow-up: memory-EDIT
-kept-attachment storage-quota bypass FIX** (the RC2 deferred HIGH). `PUT /api/memories/[id]` no longer trusts
-the client-reported `size` of KEPT attachments — both edit branches re-derive each kept attachment's size from
-authoritative storage metadata (`getStorageObjectInfo`) before the ledger-projected `memories.attachments` is
-persisted, so the storage-quota bypass is closed. Verified tsc/lint/build green + focused adversarial review
-(HIGH FULLY ELIMINATED; residuals are pre-existing + orthogonal). Before that: **RC2 — Security Hardening**.
-**Remaining:** product decision on Ask Remy / `memory-chat` AI quota gating. RC2 PASSES → ready for RC3
-(GDPR & Privacy Compliance). `main` auto-deploys to production on push (this fix is committed locally, unpushed).
-Authoritative detail: master state → PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was **RC3 — GDPR & Privacy Compliance**
+(compliance-hardening only; NO feature/behaviour change; every feature preserved). A 10-dimension
+multi-agent source audit (70/100 baseline → ~80 after) drove a low-risk code+doc hardening set:
+GDPR **export completeness** (`people`/`ai_usage`/`memory_intelligence`/`storage_ledger`), **Sentry PII
+scrubbing** (`sendDefaultPii:false` + non-dropping `beforeSend`), **PII log minimisation** (raw error
+objects → message-only via new `logger.errorMessage()`), **transparency-copy** fixes (privacy page
+deletion-is-live + Art 22; cookies per-cookie table; care-profile authority note), **subprocessor-list
+accuracy** (removed GA/PostHog/Resend — not in code), and **6 new compliance docs** (ROPA, Subprocessor
+List, Retention, Incident Response, Responsible Disclosure, DPIA) + an RC3 report. Verified tsc/lint/build
+green + a main-loop 5-lens self-review (behaviour preserved, 0 blocking; the multi-agent review workflow
+hit the subagent session limit and was completed inline). **Remaining (roadmap — behaviour/feature/legal,
+not this pass):** Stripe/OneSignal processor-side erasure on account delete; storage orphan removal +
+orphan-sweep cron; care-profile/DOB **rectification** endpoint; **AI opt-out** toggle; live-legal-page↔docs
+reconciliation + **legal entity/DPO/jurisdiction/DPA/OpenAI-ZDR** ([CONFIRM] markers throughout
+`docs/compliance/*`); the cognitive-insights disclose-or-remove decision. Plus the earlier open item:
+product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploys to production on push
+(RC3 is committed locally, unpushed). Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC3 — GDPR & Privacy Compliance hardening** (compliance-only; no feature/behaviour change).
+  10-dimension multi-agent audit → low-risk code+doc hardening. **Code:** export widened
+  (`lib/gdpr/collect-user-data.ts` + `people`/`ai_usage`/`memory_intelligence`/`storage_ledger`,
+  owner-scoped, schemaVersion 1.1, operator-gated tables degrade to `[]`); `lib/observability/sentry-privacy.ts`
+  (`sendDefaultPii:false` + a `beforeSend` that strips cookies/headers/body + redacts emails, never drops
+  events) in all 3 Sentry configs; `logger.errorMessage()` + raw-error-object → message-only logging across
+  dashboard/actions + active-profile/profile/timeline/build-relationships/memory-chat/onboarding + removed a
+  client plan-log; privacy/cookies/CreateProfileForm copy. **Docs:** privacy-policy §13 subprocessor
+  accuracy; deletion-policy processor-gap disclosure; export-report refresh; `docs/compliance/13–18`
+  (ROPA/Subprocessor/Retention/Incident/Disclosure/DPIA, DRAFT) + `RC3-GDPR-AUDIT-REPORT.md`;
+  data-classification comments across deletion/storage/media/AI + 2 migrations. Verified tsc/lint/build green
+  + main-loop 5-lens self-review (0 blocking, behaviour preserved). Roadmap items recorded in CLAUDE.md +
+  master state (do NOT re-flag as new defects).
 - **RC2 follow-up — memory-EDIT kept-attachment storage-quota bypass FIXED** (surgical security fix; closes the
   RC2 deferred HIGH). The ledger trigger projects each attachment's `->>'size'` from `memories.attachments`, so
   `PUT /api/memories/[id]` trusting the CLIENT-reported `size` of KEPT attachments let a client under-count the

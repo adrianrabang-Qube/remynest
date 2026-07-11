@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { buildRelationships } from "@/lib/build-relationships";
+import { logger, errorMessage } from "@/lib/logger";
 
 export async function POST(
   req: Request
@@ -50,11 +51,10 @@ export async function POST(
 
   } catch (error) {
 
-    console.log(
-      "❌ BUILD RELATIONSHIPS ERROR"
+    logger.error(
+      "[build-relationships] failed",
+      errorMessage(error)
     );
-
-    console.log(error);
 
     return NextResponse.json(
       {

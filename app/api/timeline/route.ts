@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { logger, errorMessage } from "@/lib/logger";
 
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories } from "@/lib/memory-media-signing";
@@ -76,7 +77,7 @@ export async function GET(request: Request) {
         .range(offset, offset + limit - 1);
 
     if (error) {
-      console.log(error);
+      logger.error("[timeline] fetch failed", errorMessage(error));
 
       return NextResponse.json(
         {
@@ -96,7 +97,7 @@ export async function GET(request: Request) {
       })
     );
   } catch (error) {
-    console.log(error);
+    logger.error("[timeline] request failed", errorMessage(error));
 
     return NextResponse.json(
       {

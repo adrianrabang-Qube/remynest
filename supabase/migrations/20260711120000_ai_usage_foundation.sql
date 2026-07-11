@@ -19,6 +19,11 @@
 --    degrades gracefully if this migration is not yet applied (inserts/reads are
 --    wrapped and never break AI execution), so deploying the code is a no-op
 --    until the operator applies this migration.
+--  * DATA CLASSIFICATION (GDPR Art 5(1)(c)): METADATA ONLY — provider/model/token
+--    counts/cost/latency/status/ids. NO prompt text, memory content, or PHI.
+--  * RETENTION (Art 5(1)(e)): rows cascade-delete with the user, but there is NO
+--    TTL/rollup yet — add a purge/aggregate policy before scale. Rows are included
+--    in the GDPR export (lib/gdpr/collect-user-data.ts).
 -- =====================================================================
 
 create table if not exists public.ai_usage (

@@ -9,6 +9,10 @@
 
 Every table keyed to a single user, and the ownership column used to scope it:
 
+> **RC3 update (2026-07-11, schemaVersion 1.1):** the collector was widened to
+> include `people`, `ai_usage`, `memory_intelligence`, and `storage_ledger`
+> (previously omitted). See the refreshed table below.
+
 | Source | Ownership key | In export |
 |---|---|---|
 | `profiles` (account profile) | `id = user.id` | ✅ `profile` |
@@ -20,10 +24,17 @@ Every table keyed to a single user, and the ownership column used to scope it:
 | `caregiver_invites` (received) | `email = user.email` | ✅ `caregiverInvitesReceived` |
 | `memory_clusters` | `user_id = user.id` | ✅ `memoryClusters` |
 | `device_registrations` | `user_id = user.id` | ✅ `deviceRegistrations` |
-| Media (Storage) | from `memories.cover_image_url` + `memories.attachments[]` | ✅ `mediaReferences` (URLs/paths, not binaries) |
+| `people` (names/aliases/roles) | `created_by_account_id = user.id` | ✅ `people` (RC3) |
+| `ai_usage` (AI usage metadata) | `user_id = user.id` | ✅ `aiUsage` (RC3; operator-gated table) |
+| `memory_intelligence` (per-memory signals) | `user_id = user.id` | ✅ `memoryIntelligence` (RC3; operator-gated table) |
+| `storage_ledger` (file-size accounting) | `user_id = user.id` | ✅ `storageLedger` (RC3; operator-gated table) |
+| Media (Storage) | from `memories.cover_image_url` + `memories.attachments[]` | ✅ `mediaReferences` (URLs/paths, not binaries — Art 20 binary-delivery is a tracked enhancement) |
+| `memory_person_links` | join of exported `people` × `memories` | ⚪ omitted — reconstructable from `people` + `memories` |
 
 `auth.users` itself is not duplicated; the account identity is captured under
-`account` (`userId`, `email`).
+`account` (`userId`, `email`). Operator-gated tables (`ai_usage`,
+`memory_intelligence`, `storage_ledger`) degrade to an empty array if their
+migration is not yet applied (the read resolves to `{ data: null }`, never throws).
 
 ---
 

@@ -1732,6 +1732,44 @@ the ledger's `DISTINCT ON (attachment_id)` dedup (a duplicate-`id` under-count t
 this size fix — a ledger-architecture item, out of scope). **Do NOT** re-trust the client kept `size`, move the
 kept-size re-derivation into the shared media pipeline, or change the ledger/quota/attachment-schema/upload flow.
 
+**RC3 — GDPR & Privacy Compliance hardening (authoritative, 2026-07-11 — compliance-hardening ONLY,
+NO feature/behaviour change; every feature preserved):** a 10-dimension multi-agent source audit
+(score 70/100 baseline → ~80 after this pass) drove a LOW-RISK, clearly-correct code+doc hardening set.
+**Implemented (code):** **(1)** GDPR **export completeness** — `lib/gdpr/collect-user-data.ts` now also
+exports `people`, `ai_usage`, `memory_intelligence`, `storage_ledger` (owner-scoped, additive,
+schemaVersion 1.1; the operator-gated tables degrade to `[]` because supabase-js returns `{data:null}`
+on a missing relation, never throws) — closes the Art 15/20 `people` omission. **(2)** **Sentry PII
+scrubbing** — new `lib/observability/sentry-privacy.ts` (`sendDefaultPii:false` + a `beforeSend` that
+strips request cookies/headers/body and redacts emails, **never dropping events**) wired into all three
+`sentry.*.config.ts`. **(3)** **PII log minimisation** — new `logger.errorMessage()`; raw error
+**objects** (a Postgres `.details` can echo row PII e.g. an invitee email) replaced with message-only
+logs across `dashboard/actions.ts`, `active-profile`/`profile`/`timeline`/`build-relationships`/
+`memory-chat` routes + `onboarding`; a client console log of the plan removed from `DashboardAccountStatus`;
+AI-chat narration dev-gated (`logger.debug`). **(4)** **Transparency copy** — `app/privacy/page.tsx`
+corrected (self-service deletion IS live — was "being finalized"; +Art 22 no-ADM/no-training line);
+`app/cookies/page.tsx` per-cookie transparency list; `components/CreateProfileForm.tsx` a **non-blocking**
+authority-attestation note (Art 6/14 at third-party collection). **Implemented (docs):** privacy-policy
+§13 subprocessor table corrected (removed the GA/PostHog + Resend rows that are **NOT** in the code — no
+analytics SDK exists; Supabase sends auth email; de-hedged Stripe/Sentry; OneSignal data expanded to
+notification content); deletion policy discloses the processor-side erasure gaps; export report refreshed;
+**six NEW `docs/compliance/13–18`** authored (ROPA, Subprocessor List, Data Retention, Incident Response,
+Responsible Disclosure, DPIA — all DRAFT, grounded in the implementation, `[CONFIRM]` markers); plus
+`docs/compliance/RC3-GDPR-AUDIT-REPORT.md`. Data-classification/retention/erasure-gap **comments** added
+across the deletion/storage/media/cookie/AI-usage files + two migrations. Verified: tsc/lint/build green +
+main-loop 5-lens self-review (GDPR/DPO/healthcare/Apple/Google — behaviour preserved, no blocking finding;
+the multi-agent review workflow itself hit the subagent session limit and was completed inline).
+**ROADMAP — intentionally NOT done in RC3 (behaviour/feature/legal; do NOT re-flag as a NEW defect):**
+Stripe subscription-cancel + customer-delete AND OneSignal device-delete on account deletion (Art 17
+processor-side — interim: policy tells users to cancel first); per-memory-delete + edit-removed-attachment
+storage orphan removal + an orphan-sweep cron; `auth_pending` retry cron; `reminder_local_confirmations`
+enrolment in the deletion RPC; `ai_usage` TTL/rollup; care-profile-name + own-DOB/country **rectification**
+endpoint (Art 16); granular **AI opt-out** toggle (Art 21); export **media binaries/signed URLs** (Art 20);
+live-legal-page↔`docs/compliance` reconciliation + **legal entity/DPO/jurisdiction** resolution + executed
+**DPA** + OpenAI **ZDR** confirmation; `security.txt` (needs a one-line middleware allowlist); the
+cognitive/Alzheimer-risk **insights** disclose-or-remove decision (also an App-Store risk). **Do NOT**
+re-trust raw error objects in logs, remove the Sentry scrubbing, re-add analytics/Resend to the
+subprocessor list, make the export non-owner-scoped, or gate care-profile submission on the authority note.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

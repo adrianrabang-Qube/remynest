@@ -78,9 +78,14 @@ export async function getStorageObjectInfo(
 
 /**
  * Best-effort cleanup of objects we just rejected (e.g. an over-quota batch). NOTE: this
- * only cleans the batch in hand — there is no background orphan-sweeper yet, so an upload
- * that is never attached to a memory still occupies bucket space the ledger does not count
- * (see docs/features/media-system.md "direct-to-storage" follow-ups).
+ * only cleans the batch in hand — there is no background orphan-sweeper yet.
+ *
+ * ORPHAN SOURCES (GDPR Art 5(1)(e) storage limitation — all cleaned only at full account
+ * deletion today; a scheduled orphan-sweep is the planned remediation):
+ *   1. abandoned uploads — a signed-URL upload that is never attached to a memory row;
+ *   2. edit-removed attachments — an attachment dropped during a memory PUT;
+ *   3. single-memory deletes — DELETE /api/memories/[id] removes the row but not its bytes.
+ * (see docs/features/media-system.md "direct-to-storage" follow-ups.)
  */
 export async function removeStorageObjects(
   supabase: SupabaseClient,

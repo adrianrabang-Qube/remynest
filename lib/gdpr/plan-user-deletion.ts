@@ -11,7 +11,15 @@ import { supabaseAdmin } from "@/utils/supabase/admin";
  * unresolved decisions (soft-vs-hard delete → schema; shared-profile policy).
  */
 
-/** Canonical deletion order: children → parents → auth user. */
+/**
+ * Canonical deletion order: children → parents → auth user.
+ *
+ * RC3 erasure note: `people` / `memory_person_links` / `ai_usage` /
+ * `memory_intelligence` / `storage_ledger` rows are removed via FK cascade on the
+ * final auth-user delete (all reference auth.users on delete cascade). The one
+ * open erasure item is `reminder_local_confirmations` (no cascade, not in the RPC)
+ * — enroll it when the delete_user_account RPC is next revised.
+ */
 export const DELETION_ORDER = [
   "storage_media",
   "memory_clusters",

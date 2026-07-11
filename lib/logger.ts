@@ -10,6 +10,23 @@
  */
 const isProd = process.env.NODE_ENV === "production";
 
+/**
+ * Extract a safe, PII-minimised string from an unknown thrown/returned error.
+ *
+ * Prefer this over logging a raw error object: Supabase `PostgrestError`s carry
+ * `.details`/`.hint` that can echo ROW VALUES (e.g. an invitee email on a
+ * unique-violation), so logging the whole object risks leaking PII/PHI into
+ * production logs (Art 5(1)(c) data minimisation). This returns `.message` only.
+ */
+export function errorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === "object" && "message" in e) {
+    const m = (e as { message?: unknown }).message;
+    if (typeof m === "string") return m;
+  }
+  return "unknown";
+}
+
 export const logger = {
   debug: (...args: unknown[]): void => {
     if (!isProd) console.debug(...args);

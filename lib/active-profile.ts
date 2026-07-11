@@ -4,6 +4,9 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { userCanAccessProfile } from "@/lib/profile-ownership";
 
+// STRICTLY-NECESSARY functional cookie (GDPR/ePrivacy): stores only the selected
+// workspace context (personal Nest vs a care profile id). No analytics, marketing,
+// or cross-site tracking. Set httpOnly + secure(prod) + sameSite=lax below.
 const COOKIE_NAME =
   "remynest-active-context";
 
