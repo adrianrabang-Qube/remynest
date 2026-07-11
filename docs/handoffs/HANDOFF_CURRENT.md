@@ -15,14 +15,27 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was the Conversation Provider Migration (a
-pure, types-only, behaviour-preserving migration of the provider abstraction from `ConversationOutput` to
-`ConversationRequest` → `ConversationResponse`; deferred provider still throws; `ConversationOutput`
-`@deprecated` but retained). `main` auto-deploys to production on push. Authoritative detail: master state →
-PROJECT STATUS.
+Readiness**. No implementation task is active — the last work was the OpenAI Provider Adapter (the FIRST real
+production provider behind the provider abstraction; official OpenAI SDK isolated + env-gated + DORMANT —
+nothing invokes it yet; deferred providers preserved). `main` auto-deploys to production on push.
+Authoritative detail: master state → PROJECT STATUS.
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **OpenAI Provider Adapter** (the FIRST real production provider) — `lib/remy/providers/openai-provider.ts`
+  (new) `OpenAIProvider implements ConversationProviderAdapter`, registered for `"openai"` in
+  `provider-registry.ts`. PURE EXECUTION layer: sends `request.prompt.full` to OpenAI EXACTLY as supplied (no
+  rewrite/inject/reorder/enrich), passes `request.citations` through unchanged, returns a `ConversationResponse`
+  (text/provider/model/usage/status/citations/metadata); NO intelligence. The official OpenAI SDK + network +
+  env + async are ISOLATED in the adapter (SDK was already a dependency — no `package.json` change);
+  construction is side-effect-free (env/client lazy). SDK/network errors are wrapped in `ProviderError` (no
+  leak); no retries/timeouts/fallbacks yet. DORMANT — nothing invokes it (server-side, env-gated on
+  `OPENAI_API_KEY`); the deterministic pipeline and app runtime are unchanged. `getConversationProvider("openai")`
+  now returns the real adapter; deferred providers preserved for all other names. Only `provider-registry.ts` +
+  the new adapter changed; everything else (incl. `family-types.ts`/`ConversationRequest`/`ConversationResponse`
+  and `package.json`) byte-unchanged. Independent MULTI-AGENT adversarial review CLEAN (7 lenses, 0 findings).
+  **Known follow-up STILL OPEN:** reconcile `ConversationProvider` (5) ↔ `ProviderName` (8) before a real
+  adapter for the divergent providers. tsc/lint/build green.
 - **Conversation Provider Migration** (provider abstraction type-migration) — PURE, types-only,
   behaviour-preserving migration of the provider abstraction from the legacy `ConversationOutput` to
   `ConversationRequest` → `ConversationResponse`. The `ConversationProviderAdapter` interface is now
@@ -246,8 +259,9 @@ Biography Engine (`984f4b6`), the Conversation Foundation Engine (`96ee7b7`), th
 Understanding Engine (`3489d40`), the Answer Planning Engine (`45f9314`), the Answer Assembly Engine
 (`c46a4f2`), the Conversation Rendering Engine (`74b96d1`), the Conversation Composer Engine (`0c8c91f`), the
 Conversation Verbalizer Engine (`ce058dc`), the Conversation Provider Interface (`544f714`), the
-Conversation Request Engine (`ff11123`), and the Conversation Provider Migration on top. **Not pushed** —
-pushing auto-deploys to prod, so it is an operator decision. tsc/lint/build green.
+Conversation Request Engine (`ff11123`), the Conversation Provider Migration (`04c65c2`), and the OpenAI
+Provider Adapter on top. **Not pushed** — pushing auto-deploys to prod, so it is an operator decision.
+tsc/lint/build green.
 
 ## Next priorities
 Single next task (master state → **NEXT RECOMMENDED TASK**): **UGC report/block + EULA abuse clause
@@ -262,7 +276,8 @@ steps (apply prod migrations, set Vercel env, push commits, legal jurisdiction, 
 store assets + submission). Full ENG/PRODUCT/LEGAL/OPERATOR split: master state → CURRENT LAUNCH BLOCKERS.
 
 ## Recent commits
-- *(HEAD)* feat(remy): Conversation Provider Migration — migrate provider abstraction to request/response
+- *(HEAD)* feat(remy): OpenAI Provider Adapter — first real production provider (isolated SDK, dormant)
+- `04c65c2` feat(remy): Conversation Provider Migration — migrate provider abstraction to request/response
 - `ff11123` feat(remy): Conversation Request Engine — dedicated provider request/response model
 - `544f714` feat(remy): Conversation Provider Interface — provider abstraction layer
 - `ce058dc` feat(remy): Conversation Verbalizer Engine — provider boundary and natural language generation

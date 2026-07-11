@@ -1355,6 +1355,48 @@ the deferred provider return a value instead of throwing (behaviour must stay pr
 implement a real provider here, re-add `ConversationOutput` as the provider input, or remove
 `ConversationOutput` before the removal phase.
 
+**Remy — OpenAI Provider Adapter (authoritative, 2026-07-11 — extends the ONE platform; the FIRST real
+production provider):** `lib/remy/providers/openai-provider.ts` is the first production implementation of
+`ConversationProviderAdapter`, registered in `provider-registry.ts` for `"openai"` (every OTHER name still
+maps to the `DeferredProvider` stub, preserved — still throws). **`OpenAIProvider` is a PURE EXECUTION
+layer:** it receives the immutable `ConversationRequest` (built by the deterministic request engine), sends
+`request.prompt.full` to OpenAI **EXACTLY as supplied** (a single `user` message — **NO rewriting / injecting
+intelligence / reordering / enriching**), passes `request.citations` through **UNCHANGED**, and returns a
+`ConversationResponse` (`text` / `provider:"openai"` / `model` / `usage` / `status:"generated"` / `citations`
+/ `metadata`). It does **NO intelligence** (no retrieve/rank/reason/score/plan/render/compose/chronology) —
+the deterministic Remy intelligence pipeline is entirely upstream and **UNCHANGED**. **The official OpenAI
+SDK + network + env + async are ISOLATED inside `openai-provider.ts`** (the ONLY `"openai"` import in the
+Remy provider layer; the OpenAI SDK was already a project dependency, used by `lib/openai.ts`/`app/api/
+memory-chat` — **NO `package.json` change**). **Construction is side-effect-free** (constructor reads no env /
+creates no client; `resolveApiKey`/`resolveModel` read `process.env.OPENAI_MODEL`/`OPENAI_API_KEY` lazily;
+`new OpenAI({ apiKey })` is created inside `generateConversation`) so the registry stays deterministic and
+makes NO network call at load. **Error handling:** missing `OPENAI_API_KEY` → `ProviderError("invalid-request")`
+before any call; SDK/network failures are caught and converted via `toProviderError` (429→`rate-limited`,
+≥500→`provider-failure`, else `invalid-request`; unknown→`provider-failure`) — **the raw SDK exception is
+NEVER leaked** (a new generic-message `ProviderError` is thrown). **No retries/timeouts/fallbacks yet** (later
+phases). **The adapter is DORMANT** — nothing in `app/`/`lib/`/`components/` outside the provider layer
+invokes it (server-side, env-gated), so it changes **no runtime behaviour** of the app; it is infrastructure
+ready for a FUTURE activation phase (activation — wiring a provider into a user-facing flow — is a SEPARATE
+approved phase, NOT to be built without explicit approval). **Enum handling (no mapping layer):** the
+response's `provider`/`metadata.provider` use the `ConversationProvider`-typed literal `PROVIDER_TAG =
+"openai"` (`"openai"` ∈ BOTH the `ConversationProvider` [5-val] and `ProviderName` [8-val] unions); `this.name`
+stays `ProviderName`. **Pre-work (enum unification):** investigated and **PRESERVED** the existing design —
+full unification needs either a core→providers dependency inversion or a breaking change to
+`ConversationProvider`'s members, neither "without changing public architecture"; OpenAI needs no unification,
+and NO temporary mapping layer was introduced. **STILL-OPEN follow-up:** reconcile `ConversationProvider` ↔
+`ProviderName` before a real adapter for gemini/azure-openai/ollama/lm-studio/custom-enterprise is built. Only
+`provider-registry.ts` + the new `openai-provider.ts` changed; `family-types.ts` (`ConversationRequest`/
+`ConversationResponse` unchanged), the request/verbalizer/composer/rendering/significance engines,
+`RemyRelationship`, `index.ts`, `conversation-provider.ts`, `provider-types.ts`, `provider-errors.ts`, and
+`package.json` are byte-unchanged; still exactly one `RemyMomentChip`. Verified tsc/lint/build + independent
+MULTI-AGENT adversarial review CLEAN (7 lenses — provider-correctness / sdk-correctness / error-handling /
+architecture-purity / regressions / platform-integrity / future-multi-provider-readiness — 0 findings). **Do
+NOT** invoke this provider from RemyRelationship/UI/significance (activation is a future approved phase), add
+intelligence/retrieval/ranking to the provider, rewrite/modify the prompt or citations, un-isolate the SDK
+(network/SDK stays ONLY in `openai-provider.ts`), read env / create the client at construction, add a new
+dependency, or leak SDK exceptions. **A second real adapter** (Anthropic/Gemini/…) implements the SAME
+interface and must first reconcile the two provider-identifier enums.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

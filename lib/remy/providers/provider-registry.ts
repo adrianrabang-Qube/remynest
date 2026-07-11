@@ -1,16 +1,20 @@
 /**
  * Remy Platform (v2) — CONVERSATION PROVIDER REGISTRY (pure, deterministic).
  *
- * The deterministic registry of conversation providers. NO provider is implemented: every supported
- * name maps to the `DeferredProvider` stub, whose `generateConversation` simply THROWS
- * "Provider not implemented." A future phase replaces a name's stub with a real adapter (the ONLY place
- * a `fetch` / SDK / real LLM call may ever live).
+ * The deterministic registry of conversation providers. As of Phase 22, "openai" maps to the REAL
+ * `OpenAIProvider` (which isolates the OpenAI SDK / network); every OTHER supported name still maps to the
+ * `DeferredProvider` stub, whose `generateConversation` simply THROWS "Provider not implemented." A future
+ * phase replaces the remaining stubs with real adapters (each adapter is the ONLY place a `fetch` / SDK /
+ * real LLM call may live).
  *
- * PURE: type-only imports (+ the local error factory); no React/DOM/Supabase/fetch/timers/clock/Date/
- * Math.random/persistence/network/async.
+ * This registry module itself is PURE (no network/async): resolving/constructing providers is
+ * side-effect-free — the OpenAI adapter reads env + creates its client lazily inside `generateConversation`,
+ * never at construction — so `getConversationProvider`/`listProviders`/`isProviderImplemented` are
+ * deterministic and make no network call.
  */
 import type { ConversationRequest, ConversationResponse } from "@/lib/remy/core/family-types";
 import type { ConversationProviderAdapter } from "./conversation-provider";
+import { OpenAIProvider } from "./openai-provider";
 import { notImplementedError } from "./provider-errors";
 import type {
   ProviderConfiguration,
@@ -76,10 +80,14 @@ export class DeferredProvider implements ConversationProviderAdapter {
   }
 }
 
-/** Every supported provider maps to a deferred stub (none implemented). Deterministic + frozen shape. */
+/**
+ * The provider registry. "openai" now resolves to the REAL `OpenAIProvider` (Phase 22); every other name
+ * still maps to a `DeferredProvider` stub (none implemented). Construction is side-effect-free (no env
+ * read / no network / no client), so the registry stays deterministic. Frozen shape.
+ */
 const REGISTRY: Readonly<Record<ProviderName, ConversationProviderAdapter>> = {
   deferred: new DeferredProvider("deferred"),
-  openai: new DeferredProvider("openai"),
+  openai: new OpenAIProvider(),
   anthropic: new DeferredProvider("anthropic"),
   gemini: new DeferredProvider("gemini"),
   "azure-openai": new DeferredProvider("azure-openai"),
