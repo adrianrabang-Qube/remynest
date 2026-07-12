@@ -9,6 +9,7 @@ import { getRemyConnections } from "@/lib/remy/connections";
 import { getRemyLifeChapters } from "@/lib/remy/life-chapters";
 
 import { EMPTY_RESULTS, type SearchHit, type SearchResults } from "@/components/search/types";
+import { captureError } from "@/lib/observability/capture";
 
 /**
  * Global keyword search (Search V2). One request fans out across every indexed
@@ -165,8 +166,11 @@ export async function POST(request: Request) {
       );
 
     return NextResponse.json(results);
-  } catch {
-    // Expected business failure — return structured empty results, never throw.
+  } catch (error) {
+    // Returns structured empty results (never throws) — but a systemic failure (DB
+    // down / query error) previously rendered as "no results" with zero signal.
+    // LA4 review: capture it so a real search outage is observable. Response unchanged.
+    captureError(error, { route: "search.global" });
     return NextResponse.json(EMPTY_RESULTS satisfies SearchResults);
   }
 }

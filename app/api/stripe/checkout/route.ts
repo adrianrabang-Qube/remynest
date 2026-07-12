@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { logger } from "@/lib/logger";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 import { stripe } from "@/lib/stripe";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
@@ -149,13 +150,11 @@ export async function POST(
       url: session.url,
     });
   } catch (error: unknown) {
-    console.error("❌ STRIPE CHECKOUT ERROR");
-
-    if (error instanceof Error) {
-      console.error("MESSAGE:", error.message);
-    }
-
-    console.error(error);
+    // LA4 review: observability only (billing logic + 500 response unchanged). Log
+    // message-only (was a raw console.error(error)) + capture the handled 500 so a
+    // Stripe/server outage on this revenue route is alertable.
+    logger.error("[stripe/checkout] failed", errorMessage(error));
+    captureError(error, { route: "stripe.checkout" });
 
     return NextResponse.json(
       {

@@ -18,17 +18,22 @@ Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App
 Readiness**. No implementation task is active — the last work was **LA4 — Production Observability & Failure
 Recovery** (behaviour-preserving; no UI/logic/billing/AI/schema change; frozen reminder + Stripe billing
 untouched). The gap: handled API 500s only produced Sentry *breadcrumbs*, not error *events*, so production
-failures were undiagnosable/unalertable. Fixes (observability-only): added a Sentry **`onRequestError`** hook
-(`instrumentation.ts`) capturing uncaught server request errors + a new env-gated, PII-scrubbed, never-throws
-**`captureError()`** helper (`lib/observability/capture.ts`) applied to **15 key API catch sites** (memories
-list/create/[id]/search, timeline, gdpr export/delete, send-notification, profile, build-relationships,
-active-profile, memory-chat, cron top-level, story-narration) — handled 500s + previously-silent AI failures
-now become Sentry events, correlated by route/requestId; fixed 2 residual raw-`PostgrestError` PII logs.
-Reliability observability 78→~86. tsc/lint/build green + 6-lens self-review (main-loop — the multi-agent run
-hit the subagent session limit). **OPERATOR ACTIVATION: set the Sentry DSN + alert rules + an uptime monitor
-on /api/health** (LA4 is inert until then). Before it: LA3 perf; LA2 a11y; LA1 clinical; **RC5 — CERTIFIED
-FOR APP STORE + PRODUCTION**. `main` auto-deploys on push (LA4 committed locally, unpushed). Full detail:
-`docs/LA4-RELIABILITY-REPORT.md`. Remaining launch gates are OPERATOR/infra only (Sentry DSN/alerts; Xcode
+failures were undiagnosable/unalertable. Fixes (observability-only): a new env-gated, PII-scrubbed,
+never-throws **`captureError()`** helper (`lib/observability/capture.ts`) applied to **15 key API catch sites**
+(memories list/create/[id]/search, timeline, gdpr export/delete, send-notification, profile,
+build-relationships, active-profile, memory-chat, cron top-level, story-narration) — handled 500s +
+previously-silent AI failures now become Sentry events, correlated by route/requestId; fixed 2 residual
+raw-`PostgrestError` PII logs. (A Sentry **`onRequestError`** hook was also added to `instrumentation.ts` but
+the review found it **INERT on Next 14.2.5** — it's a Next-15 API, kept forward-compatible; the 15
+`captureError` catch-sites are the actual coverage today.) Reliability observability 78→~86. The formal
+**6-lens multi-agent review** then VERIFIED it correct/PII-safe/regression-free (**SOUND-WITH-FIXES,
+reliability 86, 0 defect**) and drove **6 same-class follow-up fixes**: memories/search `logSearchError`
+raw-PII→`errorMessage` (HIGH), Ask Remy chat `captureError`, Stripe checkout/portal/cancel `captureError`,
+upload-url + search/global silent-failure `captureError`, cron `logReminderError` raw-PII→`errorMessage`.
+tsc/lint/build green (re-verified). **OPERATOR ACTIVATION: set the Sentry DSN + alert rules + an uptime
+monitor on /api/health** (LA4 is inert until then). Before it: LA3 perf; LA2 a11y; LA1 clinical; **RC5 —
+CERTIFIED FOR APP STORE + PRODUCTION**. `main` auto-deploys on push (LA4 committed locally, unpushed). Full
+detail: `docs/LA4-RELIABILITY-REPORT.md`. Remaining launch gates are OPERATOR/infra only (Sentry DSN/alerts; Xcode
 privacy-manifest wiring + rebuild; backups + Storage-bucket backup + test restore; the operator DB indexes;
 prod env/migrations). A 6-specialist multi-agent audit (perf 72→~82) drove 9 safe fixes: **stripped the dead
 pgvector `embedding`** (~15-29KB/row) from the 4 hot memory reads (feed/timeline API/timeline page/search) via
@@ -105,11 +110,15 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
 - **LA4 — Production Observability & Failure Recovery** (behaviour-preserving; observability-only; no
-  UI/logic/billing/AI/schema change). Added a Sentry `onRequestError` hook + an env-gated PII-scrubbed
-  never-throws `captureError()` helper applied to 15 key API catch sites so handled 500s + silent AI failures
-  become Sentry events (route/requestId-correlated); fixed 2 residual raw-error PII logs. Operator activation:
-  set the Sentry DSN + alerts + an uptime monitor. tsc/lint/build green + 6-lens self-review (main-loop —
-  subagent limit hit). Report: `docs/LA4-RELIABILITY-REPORT.md`.
+  UI/logic/billing/AI/schema change; multi-agent-VERIFIED **SOUND-WITH-FIXES**, reliability 86, 0 defect).
+  Added an env-gated PII-scrubbed never-throws `captureError()` helper applied to 15 key API catch sites so
+  handled 500s + silent AI failures become Sentry events (route/requestId-correlated); fixed 2 residual
+  raw-error PII logs. (A Sentry `onRequestError` hook was added too but is **INERT on Next 14.2.5** — a Next-15
+  API, kept forward-compatible; the 15 `captureError` sites are the actual coverage.) The formal 6-lens
+  multi-agent review then drove **6 same-class follow-up fixes**: memories/search raw-PII→`errorMessage`, Ask
+  Remy chat capture, Stripe checkout/portal/cancel captures, upload-url + search/global silent-failure
+  captures, cron raw-PII→`errorMessage`. Operator activation: set the Sentry DSN + alerts + an uptime monitor.
+  tsc/lint/build green (re-verified). Report: `docs/LA4-RELIABILITY-REPORT.md`.
 - **LA3 — Performance & Scalability Hardening** (behaviour-preserving; no contract/logic/security/billing/AI
   change). 6-specialist audit (72→~82) → 9 safe fixes: dead-embedding strip on the 4 hot memory reads
   (`stripEmbedding` in `memory-media-signing.ts`); memories-feed memoization (useMemo/useCallback/React.memo);

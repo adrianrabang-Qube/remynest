@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
+import { captureError } from "@/lib/observability/capture";
 import {
   retrieveAskResults,
   type AskRetrievalResults,
@@ -325,7 +326,11 @@ export async function answerAskRemy(
     const answer = await answerAskQuestion(trimmed, context, mode, options?.history ?? []);
     if (!answer) return { answer: null, count, failed: true, ...structured };
     return { answer, count, failed: false, ...structured };
-  } catch {
+  } catch (error) {
+    // LA4 review: the PRIMARY live Ask Remy chat path swallowed OpenAI outages/429/
+    // timeouts silently. Capture it so the failure is observable (env-gated); the
+    // structured degrade return is byte-unchanged.
+    captureError(error, { route: "remy.ask" });
     return { answer: null, count, failed: true, ...structured };
   }
 }

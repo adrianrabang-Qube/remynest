@@ -7,6 +7,7 @@ import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 import { captureError } from "@/lib/observability/capture";
+import { errorMessage } from "@/lib/logger";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -292,7 +293,7 @@ export async function POST(req: Request) {
         "semantic-search-error",
         {
           requestId,
-          error,
+          error: errorMessage(error),
         }
       );
 
@@ -353,7 +354,7 @@ export async function POST(req: Request) {
         "search-scope-error",
         {
           requestId,
-          error: scopeError,
+          error: errorMessage(scopeError),
         }
       );
 
@@ -429,7 +430,7 @@ export async function POST(req: Request) {
       "search-engine-error",
       {
         requestId,
-        error,
+        error: errorMessage(error),
       }
     );
     captureError(error, { route: "memories.search", requestId });

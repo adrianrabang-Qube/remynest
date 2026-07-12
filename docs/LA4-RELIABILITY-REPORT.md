@@ -27,9 +27,11 @@ failures, webhook replay, cron/background failures, resource cleanup, and unhand
 ## 3. Improvements Implemented (all behaviour-preserving, observability-only)
 
 1. **`onRequestError` added to `instrumentation.ts`** (`export const onRequestError = Sentry.captureRequestError`,
-   the Sentry App-Router hook) — Next.js now sends **uncaught server request errors** (Server Components,
-   route handlers, nested server rendering, and any unhandled webhook throw) to Sentry. Previously those
-   reached the error boundary but never became Sentry events.
+   the Sentry App-Router hook for uncaught server errors). **CORRECTION (post-implementation review):** the
+   hook was introduced in **Next.js 15**; the deployed runtime is **Next 14.2.5, which never invokes it**, so
+   it is currently **INERT** (harmless — never throws, silences the Sentry build warning, and auto-activates
+   on a future Next 15 upgrade). The **actual** server-error coverage today is the explicit `captureError(...)`
+   calls in the API route catch blocks (below). Activating the hook = a Next 15 upgrade (separate, out of scope).
 2. **New env-gated `captureError(error, { route, requestId })` helper** (`lib/observability/capture.ts`) —
    turns a HANDLED server error into a real Sentry event with route + requestId correlation tags. It is
    ENV-GATED (no-op without a DSN), PII-SCRUBBED (passes the existing `beforeSend`; tags are ids/route only),
@@ -68,7 +70,7 @@ Verified: `tsc` clean · `npm run lint` 0 errors · `npm run build` green.
 | Failure class | Reaches Sentry | Via |
 |---|---|---|
 | Client crashes / render errors | ✅ | 4 error boundaries (`captureException`) |
-| Uncaught server request errors (RSC/routes/webhook throw) | ✅ | `onRequestError` (new) |
+| Uncaught server request errors (RSC/routes/webhook throw) | ⏳ (Next 15) | `onRequestError` (inert on Next 14.2.5; forward-compatible) |
 | Handled 500s in 15 key routes (DB/provider/unexpected) | ✅ | `captureError` (new; route+requestId tagged) |
 | AI narration failure (previously silent) | ✅ | `captureError` (new) |
 | Cron top-level crash | ✅ | `captureError` (new) |
@@ -105,6 +107,37 @@ are operator activation (Sentry DSN + alerts + uptime monitor) and the documente
 
 ---
 
-*Validation: `npx tsc --noEmit` clean · `npm run lint` 0 errors · `npm run build` green. The 6-lens audit was
-performed in the main loop (the multi-agent run hit the subagent session limit). Identical behaviour
-preserved; frozen reminder + Stripe billing logic untouched; all captures PII-scrubbed and env-gated.*
+## Post-implementation multi-agent review + follow-up (2026-07-12)
+
+The formal 6-lens review (SRE / backend / Next.js / Supabase / prod-ops / security) ran and **verified LA4 is
+correct, behaviour-preserving, PII-safe, and regression-free** — verdict **SOUND-WITH-FIXES**, reliability
+**86/100**, **no defect or regression** (`captureError` never throws + is env-gated + PII-scrubbed; all 15
+captures sit on genuine 500 paths with id-only tags; no double-capture; the create-route capture is after the
+400 branch; the 2 PII-log fixes are real). It corrected one claim and found six same-class residuals — **all
+applied in this follow-up commit** (behaviour-preserving, observability-only):
+
+1. **`logSearchError` raw-error PII** (`memories/search`) — the 3 call sites logged a raw `PostgrestError`
+   (`.details`/`.hint` can echo memory titles/content) → reduced to `errorMessage(error)`; the `captureError`
+   keeps the raw error for the stack. *(Highest-priority — same class LA4 claimed to eliminate, in a file LA4
+   edited; flagged by 3 lenses.)*
+2. **Ask Remy chat capture** (`ask-action.ts`) — the PRIMARY live chat path swallowed OpenAI outages silently
+   (bare `catch {}`) → binds the error + `captureError` (structured degrade unchanged). LA4 had covered only
+   the secondary story path.
+3. **Stripe checkout / portal / cancel captures** — handled 500s on the revenue routes were breadcrumb-only →
+   `captureError` + message-only logs (billing logic + 500 responses byte-unchanged).
+4. **`upload-url` silent 500** — the media-pipeline pre-signing choke point returned a bare 500 with zero
+   signal → log + `captureError`.
+5. **`search/global` silent `EMPTY_RESULTS`** — a systemic failure rendered as "no results" with no signal →
+   `captureError` (still returns `EMPTY_RESULTS`).
+6. **cron `logReminderError` raw-error PII** — 2 sites (`reminder-fetch-error`, `cron-engine-error`) logged a
+   raw error (reminder titles in `.details`) → `errorMessage(error)` (log-format only; frozen scheduling
+   untouched; the top-level `captureError` keeps the raw error).
+
+Re-validated: `tsc` clean · `lint` 0 errors · `build` green.
+
+---
+
+*Validation: `npx tsc --noEmit` clean · `npm run lint` 0 errors · `npm run build` green. The initial audit +
+implementation were done in the main loop (the first multi-agent run hit the subagent session limit); the
+formal 6-lens review then ran and confirmed the work + drove the six follow-up fixes above. Identical
+behaviour preserved; frozen reminder + Stripe billing logic untouched; all captures PII-scrubbed and env-gated.*

@@ -5,6 +5,8 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { enforceUploadQuota } from "@/lib/storage/upload-guard";
 import { isAllowedAttachmentMime } from "@/lib/memory-media";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 const BUCKET = "memory-media";
 
@@ -133,6 +135,11 @@ export async function POST(req: Request) {
       .from(BUCKET)
       .createSignedUploadUrl(storagePath);
     if (error || !data) {
+      // LA4 review: this pre-signing choke point for the whole media-upload pipeline
+      // returned a bare 500 with zero signal. Log + capture so a Storage outage is
+      // observable (response/flow unchanged).
+      logger.error("[memory-upload] signed-url failed", errorMessage(error));
+      captureError(error, { route: "memories.upload-url" });
       return NextResponse.json(
         { error: "Could not create upload URL" },
         { status: 500 },

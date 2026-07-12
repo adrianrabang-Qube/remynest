@@ -1948,8 +1948,12 @@ frozen reminder + Stripe billing logic untouched):** closed the systemic observa
 blocks logged via `logger.error(errorMessage(e))`, which only writes a Sentry console BREADCRUMB (not an
 error EVENT), so **handled 500s were invisible/unalertable in Sentry**; and `instrumentation.ts` had no
 `onRequestError`. **(1)** added `export const onRequestError = Sentry.captureRequestError` to
-`instrumentation.ts` (the Sentry App-Router hook; captures uncaught server request errors — Server
-Components, route handlers, nested server rendering, and any unhandled Stripe-webhook throw). **(2)** added
+`instrumentation.ts` (the Sentry App-Router hook for uncaught server errors). **CORRECTION (post-impl
+multi-agent review):** `onRequestError` was introduced in **Next.js 15**; the deployed runtime is **Next
+14.2.5, which NEVER invokes it**, so the hook is currently **INERT** (harmless — never throws, silences the
+Sentry build warning, forward-compatible: auto-activates on a future Next 15 upgrade). **The ACTUAL
+server-error coverage today is the explicit `captureError(...)` catch-site calls below** (not the hook); do
+NOT claim `onRequestError` covers webhook/RSC throws on this runtime. **(2)** added
 `lib/observability/capture.ts` **`captureError(error, { route?, requestId? })`** — turns a HANDLED server
 error into a real Sentry event with route+requestId correlation tags. **Invariants (must stay):** ENV-GATED
 (Sentry is a no-op without a DSN → this is a no-op then), PII-SCRUBBED (passes the existing `beforeSend`;
@@ -1964,15 +1968,29 @@ bare `catch {}` that swallowed AI failures silently). **The Stripe webhook billi
 touched** — its `writeFailed→500` retry path is already logged, and unexpected exceptions are covered by
 `onRequestError`; do NOT add a per-retry capture there (noise) or change the 500-retry. **(4)** fixed 2
 residual raw-`PostgrestError` PII logs (`memories/[id]`, `gdpr/delete-account`): `console.error("…", error)`
-→ `logger.error("…", errorMessage(error))` + `captureError`. Verified tsc/lint/build green + main-loop 6-lens
-self-review (the multi-agent audit hit the subagent session limit). **OPERATOR ACTIVATION (LA4 is inert
-until done):** set the Sentry DSN (+ `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` for source maps),
-configure Sentry alert rules, add an uptime monitor on `/api/health`. **RECOMMEND (roadmap — need a new
-table/cron, do NOT drop-in):** a Stripe per-event idempotency/ordering ledger (dedup by `event.id`); an
-unattended `auth_pending` deletion retry cron; an orphan-object storage sweep cron; `reminder_local_confirmations`
-deletion enrolment; an `ai_usage` TTL/rollup. **Do NOT** make `captureError` throw/block, pass PHI/PII as
-tags, remove the `onRequestError` hook, capture on the webhook's controlled retry path, or log raw error
-objects. See `docs/LA4-RELIABILITY-REPORT.md`.
+→ `logger.error("…", errorMessage(error))` + `captureError`. **POST-IMPLEMENTATION REVIEW + FOLLOW-UP
+(authoritative):** the formal **6-lens multi-agent review** then ran (SRE/backend/Next.js/Supabase/prod-ops/
+security) and **verified LA4 correct, behaviour-preserving, PII-safe, regression-free** — verdict
+**SOUND-WITH-FIXES**, reliability **86/100**, **0 defect/regression** (`captureError` never throws + env-gated
++ PII-scrubbed; all captures on genuine 500 paths; no double-capture). It corrected the `onRequestError`
+claim above and found six SAME-CLASS residuals, **all applied in the follow-up commit** (behaviour-preserving,
+observability-only): **(a)** `memories/search` `logSearchError` 3 sites logged a raw `PostgrestError` (PII in
+`.details`/`.hint`) → `errorMessage(error)` (the existing `captureError` keeps the raw stack) — HIGHEST
+priority (same class LA4 targeted, in a file LA4 edited); **(b)** **Ask Remy chat** (`ask-action.ts`) — the
+PRIMARY live chat swallowed OpenAI outages in a bare `catch {}` → bind + `captureError` (structured degrade
+unchanged); **(c)** Stripe **checkout/portal/cancel** handled-500s → `captureError` + message-only logs
+(billing logic + 500 responses byte-unchanged); **(d)** `memories/upload-url` silent 500 → log + `captureError`;
+**(e)** `search/global` silent `EMPTY_RESULTS` → `captureError` (response unchanged); **(f)** cron
+`logReminderError` 2 sites (`reminder-fetch-error`, `cron-engine-error`) raw-error PII → `errorMessage(error)`
+(log-format only; frozen scheduling untouched; top-level `captureError` keeps the raw error). Re-verified
+tsc/lint/build green. **OPERATOR ACTIVATION (LA4 is inert until done):** set the Sentry DSN (+ `SENTRY_ORG`/
+`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` for source maps), configure Sentry alert rules, add an uptime monitor on
+`/api/health`. **RECOMMEND (roadmap — need a new table/cron, do NOT drop-in):** a Stripe per-event
+idempotency/ordering ledger (dedup by `event.id`); an unattended `auth_pending` deletion retry cron; an
+orphan-object storage sweep cron; `reminder_local_confirmations` deletion enrolment; an `ai_usage` TTL/rollup.
+**Do NOT** make `captureError` throw/block, pass PHI/PII as tags, remove the `onRequestError` hook, capture on
+the webhook's controlled retry path, log raw error objects, or re-claim `onRequestError` is active on Next
+14.2.5. See `docs/LA4-RELIABILITY-REPORT.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

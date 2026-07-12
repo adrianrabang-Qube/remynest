@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { authorizeCronRequest } from "@/lib/cron-auth";
 import { nextOccurrence } from "@/lib/reminders/recurrence";
 import { captureError } from "@/lib/observability/capture";
+import { errorMessage } from "@/lib/logger";
 
 const REMINDER_CRON_TAG =
   "reminder-cron-engine";
@@ -335,7 +336,7 @@ export async function GET(req: Request) {
         {
           requestId,
 
-          error,
+          error: errorMessage(error),
         }
       );
 
@@ -714,7 +715,7 @@ export async function GET(req: Request) {
       {
         requestId,
 
-        error,
+        error: errorMessage(error),
       }
     );
     // LA4: observability only — capture a top-level cron crash to Sentry so a failed

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,8 @@ export async function POST(request: Request) {
       .single();
 
     if (profileError) {
-      console.error("[stripe/portal] profile lookup failed", profileError);
+      logger.error("[stripe/portal] profile lookup failed", errorMessage(profileError));
+      captureError(profileError, { route: "stripe.portal.profile-lookup" });
       return NextResponse.json(
         { error: "Failed to load billing profile" },
         { status: 500 }
@@ -66,7 +69,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("[stripe/portal] failed to create portal session", error);
+    logger.error("[stripe/portal] failed to create portal session", errorMessage(error));
+    captureError(error, { route: "stripe.portal" });
     return NextResponse.json(
       { error: "Failed to open billing portal" },
       { status: 500 }

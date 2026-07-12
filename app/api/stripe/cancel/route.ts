@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export const dynamic = "force-dynamic";
 
@@ -85,7 +87,8 @@ export async function POST() {
       currentPeriodEnd,
     });
   } catch (error) {
-    console.error("[stripe/cancel] failed", error);
+    logger.error("[stripe/cancel] failed", errorMessage(error));
+    captureError(error, { route: "stripe.cancel" });
     return NextResponse.json(
       { error: "Subscription cancellation failed" },
       { status: 500 },
