@@ -15,7 +15,23 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA4 — Production Observability & Failure
+Readiness**. No implementation task is active — the last work was **LA5 — Apple App Store & Google Play
+Compliance** (store-review compliance audit + SAFE fixes only; behaviour-preserving; no architecture/
+logic/subscription/schema change; frozen reminder untouched). A 6-lens multi-agent audit (Apple/Play/
+Mobile/Privacy/Healthcare/Security; 28→21 adversarially-verified findings) scored **Apple ~74→~80,
+Play 57**, then drove safe fixes (independently reviewed: behaviour preserved by all 6 lenses, **0
+blocking regressions**, 1 must-fix + 3 nits all applied): **completed de-medicalization** (deleted the
+fabricated cognitive-decline scoring + the "Routine Changes" card; neutralized "Memory Activity"
+`cognitiveActivity`→`loggingActivity`); **dropped health-app positioning** (JSON-LD `HealthApplication`
+→`LifestyleApplication`; removed "cognitive-care" copy); **Apple-1.2 EULA zero-tolerance abuse clause**;
+**de-drugged the reminder placeholder**; **Sentry processor disclosure** + **cancel-before-delete
+caveat** + **data-rights contact → `admin@` across all legal pages**; **Android `allowBackup=false`**.
+**iOS = DO NOT SUBMIT yet** — the CRITICAL **UGC report/block MECHANISM** (Apple 1.2, a feature) + the
+`/terms` **governing-law jurisdiction** (legal/counsel) must land first. **Google Play = deferred/not
+submittable** (no FCM/signing, versionCode 1). tsc/lint/build green (re-verified). `main` auto-deploys
+on push (LA5 committed locally, unpushed). Full detail: `docs/LA5-STORE-COMPLIANCE-REPORT.md`.
+
+Before LA5, the last work was **LA4 — Production Observability & Failure
 Recovery** (behaviour-preserving; no UI/logic/billing/AI/schema change; frozen reminder + Stripe billing
 untouched). The gap: handled API 500s only produced Sentry *breadcrumbs*, not error *events*, so production
 failures were undiagnosable/unalertable. Fixes (observability-only): a new env-gated, PII-scrubbed,
@@ -109,6 +125,17 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA5 — Apple App Store & Google Play Compliance** (store-review compliance audit + SAFE fixes only;
+  behaviour-preserving; no architecture/logic/subscription/schema change; frozen reminder untouched;
+  multi-agent-VERIFIED — behaviour preserved by all 6 lenses, 0 blocking regressions). 6-lens audit
+  (28→21 verified) → Apple ~74→~80, Play 57. Fixes: completed de-medicalization (deleted
+  `cognitiveDeclineSignals.ts` + the Routine-Changes card; neutralized Memory-Activity
+  `cognitiveActivity`→`loggingActivity`); JSON-LD `LifestyleApplication` + dropped "cognitive-care";
+  Apple-1.2 EULA abuse clause; de-drugged reminder placeholder; Sentry disclosure + cancel-before-delete
+  caveat + data-rights contact→admin@ across all legal pages; Android `allowBackup=false`. Review: 1
+  must-fix (contact reconciliation) + 3 nits all applied. tsc/lint/build green. Still open: UGC
+  report/block MECHANISM (CRITICAL, feature); `/terms` jurisdiction (legal); mailboxes (operator).
+  Report: `docs/LA5-STORE-COMPLIANCE-REPORT.md`.
 - **LA4 — Production Observability & Failure Recovery** (behaviour-preserving; observability-only; no
   UI/logic/billing/AI/schema change; multi-agent-VERIFIED **SOUND-WITH-FIXES**, reliability 86, 0 defect).
   Added an env-gated PII-scrubbed never-throws `captureError()` helper applied to 15 key API catch sites so

@@ -46,7 +46,7 @@ const softwareApplicationLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: SITE_NAME,
-  applicationCategory: "HealthApplication",
+  applicationCategory: "LifestyleApplication",
   operatingSystem: "Web, iOS, Android",
   url: SITE_URL,
   description: SITE_DESCRIPTION,

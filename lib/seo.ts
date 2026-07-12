@@ -14,7 +14,7 @@ export const SITE_TAGLINE = "A calm home for your memories";
 export const SITE_TITLE = `${SITE_NAME} — ${SITE_TAGLINE}`;
 
 export const SITE_DESCRIPTION =
-  "RemyNest is a calm, private memory-preservation and cognitive-care companion — capture meaningful memories, set gentle reminders, and share care with family.";
+  "RemyNest is a calm, private memory-preservation companion — capture meaningful memories, set gentle reminders, and share care with family.";
 
 /** Default social share image (served from /public). */
 export const SITE_OG_IMAGE = "/logo.png";

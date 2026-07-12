@@ -66,9 +66,9 @@ export default function PrivacyPage() {
       <p>
         We share data with providers who process it on our behalf: Supabase
         (hosting, database, authentication, storage), OpenAI (AI features),
-        Stripe (billing), OneSignal (push notifications), and Vercel
-        (application hosting). Each processes data only to provide their
-        service to us.
+        Stripe (billing), OneSignal (push notifications), Vercel
+        (application hosting), and Sentry (crash and performance diagnostics).
+        Each processes data only to provide their service to us.
       </p>
 
       <H>AI features &amp; health-related data</H>
@@ -109,7 +109,9 @@ export default function PrivacyPage() {
         Profile → Settings → Export my data, and you can permanently delete
         your account and associated data yourself at any time from Profile →
         Settings → Delete account (or by contacting{" "}
-        <strong>admin@remynest.com</strong>). You may also complain to your
+        <strong>admin@remynest.com</strong>). If you have a paid subscription,
+        please cancel it before deleting your account, as deleting your account
+        does not automatically cancel billing. You may also complain to your
         local data-protection authority.
       </p>
 

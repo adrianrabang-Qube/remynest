@@ -24,13 +24,7 @@ interface BehavioralAnalyticsCardProps {
   inactivityDetection: {
     inactiveDays: number;
     inactivityLevel: string;
-    cognitiveActivity: string;
-  };
-
-  declineSignals: {
-    declineRisk: string;
-    monitoringLevel: string;
-    interventionSuggested: boolean;
+    loggingActivity: string;
   };
 }
 
@@ -40,7 +34,6 @@ const BehavioralAnalyticsCard = memo(
   streakAnalysis,
   emotionalVolatility,
   inactivityDetection,
-  declineSignals,
 }: BehavioralAnalyticsCardProps) {
 
   return (
@@ -192,7 +185,7 @@ const BehavioralAnalyticsCard = memo(
           </p>
 
           <p className="text-4xl font-bold text-[#243428] mt-3">
-            {inactivityDetection.cognitiveActivity}
+            {inactivityDetection.loggingActivity}
           </p>
 
           <div className="mt-6 space-y-3 text-sm text-gray-600">
@@ -221,47 +214,12 @@ const BehavioralAnalyticsCard = memo(
 
         </div>
 
-        {/* ROUTINE CHANGES */}
-
-        <div className="rounded-3xl border bg-[#fff8f6] p-6">
-
-          <p className="text-sm text-gray-500">
-            Routine Changes
-          </p>
-
-          {/* LA1: neutral (was clinical red) — this reflects logging-routine
-              consistency, not a clinical decline warning. */}
-          <p className="text-4xl font-bold text-[#243428] mt-3">
-            {declineSignals.declineRisk}
-          </p>
-
-          <div className="mt-6 space-y-3 text-sm text-gray-600">
-
-            <div className="flex justify-between">
-              <span>
-                Check-in Level
-              </span>
-
-              <span className="font-medium">
-                {declineSignals.monitoringLevel}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span>
-                Extra Support
-              </span>
-
-              <span className="font-medium">
-                {declineSignals.interventionSuggested
-                  ? "Suggested"
-                  : "Not Required"}
-              </span>
-            </div>
-
-          </div>
-
-        </div>
+        {/* LA5: the "Routine Changes" card (declineRisk / Check-in Level / Extra
+            Support) was removed — it surfaced a pseudo-clinical cognitive-decline
+            risk/monitoring/intervention score synthesized from journaling
+            patterns, which the app must never present (completes LA1's
+            de-medicalization; see the CLAUDE.md health rule). The honest routine,
+            adherence, emotional-tone, and activity views above are unchanged. */}
 
       </div>
 

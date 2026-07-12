@@ -38,7 +38,8 @@ export default function ContactPage() {
       <h1 className="text-3xl font-semibold">Contact RemyNest</h1>
       <p className="mt-3 text-neutral-600">
         We&apos;d love to hear from organizations, partners, and investors who
-        share our mission of preserving memories and supporting cognitive care.
+        share our mission of preserving memories and supporting families
+        affected by memory loss.
       </p>
 
       {/* General Contact */}

@@ -11,12 +11,13 @@ cognitive/insights layer. **Strictly non-diagnostic** (disclaimers required).
 - Embeddings: `lib/embeddings.ts` → `memories.embedding` (pgvector).
 - Chat (RAG): `/api/memory-chat` + `lib/retrieve-memory-context.ts` (retrieves
   relevant memories as context). System prompt is non-diagnostic.
-- Insights / cognitive engine: `app/(app)/insights` driven by
-  `lib/analytics/*` (memoryFrequency, streakAnalysis, emotionalVolatility,
-  behavioralPatterns, inactivityDetection, cognitiveDeclineSignals) and
-  `lib/cognition/*` (cognitionScore, attentionEngine, continuityEngine,
-  driftEngine, riskAnalysis, sleepRecoveryEngine, wearableEngine),
-  `lib/insights/generateInsightSummary.ts`, `lib/data/insights.ts`.
+- Insights: `app/(app)/insights` driven by `lib/analytics/*` (memoryFrequency,
+  streakAnalysis, emotionalVolatility, behavioralPatterns, inactivityDetection)
+  and `lib/cognition/*` (cognitionScore, driftEngine — used only to feed the
+  non-diagnostic plain-language summary; no score/chart is shown),
+  `lib/insights/generateInsightSummary.ts`, `lib/data/insights.ts`. The
+  fabricated cognitive-decline/biometric/Alzheimer-risk surfaces were removed
+  (LA1 + LA5 de-medicalization) — do NOT reintroduce pseudo-clinical scoring.
 - Disclaimers: `lib/constants/disclaimers.ts`, `components/ai/AIDisclaimer.tsx`,
   `components/insights/*`.
 

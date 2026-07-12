@@ -55,8 +55,10 @@ export default function CookiesPage() {
       <H>Third-party services</H>
       <p>
         Some features rely on third parties that may set their own cookies
-        or storage when used: Stripe (secure payments) and OneSignal (push
-        notifications, which require your explicit opt-in).
+        or storage when used: Stripe (secure payments), OneSignal (push
+        notifications, which require your explicit opt-in), and Sentry (crash
+        and performance diagnostics). These are used to operate and secure the
+        service, not for advertising or cross-site tracking.
       </p>
 
       <H>No advertising or cross-site tracking</H>

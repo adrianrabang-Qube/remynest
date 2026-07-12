@@ -36,8 +36,8 @@ export default function AccountDeletionPage() {
         </ol>
         <p className="mt-3 text-neutral-600">
           If you cannot access the app, email{" "}
-          <a className="text-blue-600" href="mailto:privacy@remynest.com">
-            privacy@remynest.com
+          <a className="text-blue-600" href="mailto:admin@remynest.com">
+            admin@remynest.com
           </a>{" "}
           from your registered address and we will action your request.
         </p>
@@ -88,14 +88,19 @@ export default function AccountDeletionPage() {
           out within 30 days. Limited records may be retained where required by
           law (for example, billing/tax records).
         </p>
+        <p className="mt-2 text-neutral-700">
+          If you have a paid subscription, please cancel it before deleting your
+          account &mdash; deleting your account does not automatically cancel
+          billing.
+        </p>
       </section>
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold">Contact</h2>
         <p className="mt-2 text-neutral-700">
           Privacy:{" "}
-          <a className="text-blue-600" href="mailto:privacy@remynest.com">
-            privacy@remynest.com
+          <a className="text-blue-600" href="mailto:admin@remynest.com">
+            admin@remynest.com
           </a>{" "}
           · See our{" "}
           <Link className="text-blue-600" href="/privacy">

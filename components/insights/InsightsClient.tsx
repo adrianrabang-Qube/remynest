@@ -93,7 +93,6 @@ import { analyzeBehavioralPatterns } from "@/lib/analytics/behavioralPatterns";
 import { analyzeReminderStreaks } from "@/lib/analytics/streakAnalysis";
 import { analyzeEmotionalVolatility } from "@/lib/analytics/emotionalVolatility";
 import { detectInactivityPatterns } from "@/lib/analytics/inactivityDetection";
-import { analyzeCognitiveDeclineSignals } from "@/lib/analytics/cognitiveDeclineSignals";
 
 import { Memory } from "@/lib/types/memory";
 import { Reminder } from "@/lib/types/reminder";
@@ -339,26 +338,10 @@ export default function InsightsClient({
 
     }, [memories]);
 
-  const declineSignals =
-    useMemo(() => {
-
-      return analyzeCognitiveDeclineSignals({
-
-        volatilityScore:
-          emotionalVolatility.volatilityScore,
-
-        inactiveDays:
-          inactivityDetection.inactiveDays,
-
-        activityScore:
-          behavioralPatterns.activityScore,
-      });
-
-    }, [
-      emotionalVolatility,
-      inactivityDetection,
-      behavioralPatterns,
-    ]);
+  // LA5: the fabricated "cognitive-decline risk" scoring (declineRisk /
+  // monitoringLevel / interventionSuggested, synthesized from journaling
+  // patterns) was removed — it is pseudo-clinical prediction the app must never
+  // present (completes LA1's de-medicalization; see the CLAUDE.md health rule).
 
   // =====================================
   // AI INSIGHT INTERPRETATION
@@ -449,7 +432,6 @@ export default function InsightsClient({
             streakAnalysis={streakAnalysis}
             emotionalVolatility={emotionalVolatility}
             inactivityDetection={inactivityDetection}
-            declineSignals={declineSignals}
           />
 
           {/* REAL-DATA VIEWS ONLY (see the de-medicalization note above) —

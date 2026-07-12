@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Terms of Service",
   description:
-    "The terms governing your use of RemyNest's memory-preservation and cognitive-care services.",
+    "The terms governing your use of RemyNest's memory-preservation and family memory-sharing services.",
   path: "/terms",
 });
 
@@ -54,6 +54,24 @@ export default function TermsPage() {
         Do not misuse the service, attempt to bypass security or access
         controls, upload unlawful content, or use the service to harm
         others.
+      </p>
+
+      <H>Objectionable content &amp; abusive behavior</H>
+      <p>
+        RemyNest has <strong>zero tolerance</strong> for objectionable,
+        abusive, harassing, threatening, hateful, or unlawful content, and
+        for abusive behavior toward other people who use the service
+        (including caregivers and family members you share content with). You
+        agree not to post such content or behave in such a way.
+      </p>
+      <p>
+        If you encounter objectionable content or abusive behavior, you can
+        report it to <strong>admin@remynest.com</strong>. We review reports
+        and act on them &mdash; typically within 24 hours &mdash; and we may
+        remove content and suspend or permanently terminate the accounts of
+        offending users without prior notice. If someone you invited abuses
+        their access, you can remove their access at any time from the
+        workspace&rsquo;s &ldquo;Manage care profiles&rdquo; controls.
       </p>
 
       <H>Subscriptions &amp; billing</H>

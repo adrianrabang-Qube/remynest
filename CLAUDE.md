@@ -1992,6 +1992,54 @@ orphan-object storage sweep cron; `reminder_local_confirmations` deletion enrolm
 the webhook's controlled retry path, log raw error objects, or re-claim `onRequestError` is active on Next
 14.2.5. See `docs/LA4-RELIABILITY-REPORT.md`.
 
+**LA5 — Apple App Store & Google Play Compliance (authoritative, 2026-07-12 — store-review compliance
+audit + SAFE fixes ONLY; NO architecture/business-logic/subscription/schema change; frozen reminder
+engine untouched):** a 6-lens multi-agent audit (Apple / Google Play / Mobile / Privacy-GDPR /
+Healthcare / Security; 28 raw findings → **21 survived adversarial per-finding verification**) scored
+**Apple ~74→~80, Play 57**, then drove a safe, behaviour-preserving fix set (independently
+multi-agent-reviewed: behaviour preserved by all 6 lenses, **0 blocking regressions**, 1 must-fix + 3
+nits all applied). **Authoritative outcomes (do NOT reverse):** **(1) De-medicalization is COMPLETE.**
+Two residual pseudo-clinical surfaces were removed: the fabricated **cognitive-decline scoring**
+(`declineRisk`/`monitoringLevel`/`interventionSuggested` synthesized from journaling patterns) —
+`lib/analytics/cognitiveDeclineSignals.ts` **deleted** + the "Routine Changes" card
+(`BehavioralAnalyticsCard.tsx`) + the `declineSignals` useMemo/import/prop (`InsightsClient.tsx`)
+removed; and the **"Memory Activity"** card's `cognitiveActivity` ("Declining"/"Reduced", from
+days-since-last-memory) renamed to **`loggingActivity`** with neutral values ("Quiet"/"Quieter"/"No
+entries yet", `lib/analytics/inactivityDetection.ts`). The honest routine/adherence/emotional-tone/
+activity views + the non-diagnostic AI summary remain. This completes LA1 — **do NOT reintroduce any
+pseudo-clinical cognitive-score/decline/monitoring/intervention surface** (reaffirms the existing
+health rule). **(2) The product is NOT positioned as a health app.** JSON-LD `applicationCategory` is
+**`LifestyleApplication`** (was `HealthApplication`, `app/page.tsx`) and **"cognitive-care" copy was
+dropped** from `lib/seo.ts` `SITE_DESCRIPTION`, the `/terms` metadata, and `/contact`. **Do NOT
+reintroduce `HealthApplication` or "cognitive-care"/diagnostic positioning** in reviewer-loadable
+metadata (reduces Apple 5.1.3 / health-app scrutiny; the app disclaims being a medical device). **(3)
+Apple 1.2 (UGC) — the EULA half is DONE, the MECHANISM is still the CRITICAL blocker.** A zero-tolerance
+**"Objectionable content & abusive behavior"** clause (report to `admin@remynest.com`, ~24h action,
+remove/terminate, revoke invited access) was added to `/terms`. **The in-app report-content +
+block-user MECHANISM (Apple 1.2) is STILL the #1 iOS-submission blocker** — a separate engineering
+feature (moderation queue + block/eject beyond owner-only `revokeCaregiver`); shared memories =
+cross-account UGC. **Do NOT submit to iOS until it ships.** **(4) The reminder title placeholder is
+de-medicalized** — "Donepezil 10 mg — with breakfast" → **"Morning medication — with breakfast"**
+(`app/(app)/reminders/page.tsx`; presentation/copy only under the LA-precedent — the FROZEN
+scheduling/form/delivery logic is byte-unchanged; no named prescription/dose). **(5) Data-rights /
+deletion contact = `admin@remynest.com` across ALL live legal pages.** `lib/contact.ts` `privacy` +
+`dpo` now resolve to `admin@` (the single currently-monitored mailbox) so `/privacy`,
+`/account-deletion`, `/terms`, `/cookies`, and `/support` all name ONE working contact; **Sentry** is
+now disclosed as a processor (`/privacy` + `/cookies`), and a **cancel-subscription-before-delete**
+caveat is on `/privacy` + `/account-deletion` (deletion does not cancel Stripe — a LOCKED roadmap
+feature). Repoint `privacy@`/`dpo@` once the operator provisions dedicated mailboxes. **(6) Android
+`allowBackup="false"`** (`AndroidManifest.xml`) — PHI data-safety hardening; **Android remains a
+DECIDED post-iOS deferral** (no FCM/`google-services.json`, `versionCode 1`, no release signing → not
+submittable). **STILL OPEN (do NOT re-flag as NEW — tracked):** the UGC report/block mechanism
+(CRITICAL, feature); the `/terms` **governing-law jurisdiction** placeholder (`app/terms/page.tsx` —
+LEGAL/counsel, do NOT fabricate a jurisdiction); provisioning real `support@`/`privacy@`/`dpo@`/
+`security@` mailboxes + naming the controller legal entity/DPO (operator/legal); the Health/Sensitive
+ASC-label + Play Data-Safety declaration decision (product); processor-side Stripe-cancel/OneSignal-
+delete on account deletion (LOCKED RC3 roadmap). **Do NOT** reintroduce `HealthApplication`/
+"cognitive-care"/pseudo-clinical scoring, name a prescription+dose in reminder copy, revert the
+data-rights contact to an unprovisioned alias, or submit to iOS before the report/block mechanism +
+jurisdiction land. See `docs/LA5-STORE-COMPLIANCE-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

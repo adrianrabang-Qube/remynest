@@ -5,7 +5,11 @@ interface InactivityDetectionResult {
 
   inactivityLevel: string;
 
-  cognitiveActivity: string;
+  // LA5: describes memory-LOGGING frequency (days since the last memory), NOT
+  // cognition. Renamed from `cognitiveActivity` + neutralized values so it can
+  // never read as a pseudo-clinical cognitive-decline signal (see the CLAUDE.md
+  // health rule; completes LA1/LA5 de-medicalization).
+  loggingActivity: string;
 }
 
 export function detectInactivityPatterns(
@@ -17,7 +21,7 @@ export function detectInactivityPatterns(
     return {
       inactiveDays: 999,
       inactivityLevel: "Critical",
-      cognitiveActivity: "Inactive",
+      loggingActivity: "No entries yet",
     };
   }
 
@@ -61,7 +65,7 @@ export function detectInactivityPatterns(
   let inactivityLevel =
     "Low";
 
-  let cognitiveActivity =
+  let loggingActivity =
     "Active";
 
   if (
@@ -71,8 +75,8 @@ export function detectInactivityPatterns(
     inactivityLevel =
       "High";
 
-    cognitiveActivity =
-      "Declining";
+    loggingActivity =
+      "Quiet";
   }
 
   else if (
@@ -82,13 +86,13 @@ export function detectInactivityPatterns(
     inactivityLevel =
       "Moderate";
 
-    cognitiveActivity =
-      "Reduced";
+    loggingActivity =
+      "Quieter";
   }
 
   return {
     inactiveDays,
     inactivityLevel,
-    cognitiveActivity,
+    loggingActivity,
   };
 }
