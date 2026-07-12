@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { signMemories } from "@/lib/memory-media-signing";
+import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 import { logger, errorMessage } from "@/lib/logger";
 
 export { POST } from "./create/route";
@@ -245,10 +245,12 @@ export async function GET(
       }
     );
 
-    const signedData = await signMemories(data ?? [], {
-      variant: "thumb",
-      maxImagesPerMemory: 4,
-    });
+    const signedData = stripEmbedding(
+      await signMemories(data ?? [], {
+        variant: "thumb",
+        maxImagesPerMemory: 4,
+      })
+    );
 
     return NextResponse.json({
       data: signedData,

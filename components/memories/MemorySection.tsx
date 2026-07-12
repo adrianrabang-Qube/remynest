@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import MemoryCard from "@/components/MemoryCard";
 import CompactMemoryRow, {
   type MemoryRowData,
@@ -18,7 +20,7 @@ interface MemorySectionProps<T extends MemoryRowData> {
  * MemoryCard stack unchanged. Generic over the caller's memory type so the
  * edit handler hands back the full record (not just the row's subset).
  */
-export default function MemorySection<T extends MemoryRowData>({
+function MemorySectionInner<T extends MemoryRowData>({
   label,
   memories,
   onEdit,
@@ -58,3 +60,12 @@ export default function MemorySection<T extends MemoryRowData>({
     </section>
   );
 }
+
+// LA3 (perf): memoize so a search keystroke on the memories page (which re-renders
+// the parent) does not re-render/reconcile every section + card when the props are
+// unchanged. The parent now passes stable group arrays (useMemo) + stable handlers
+// (useCallback), so the shallow prop compare skips re-render. The `as typeof …` cast
+// preserves the generic call signature for callers (React.memo otherwise erases it).
+const MemorySection = memo(MemorySectionInner) as typeof MemorySectionInner;
+
+export default MemorySection;

@@ -6,6 +6,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -732,73 +733,65 @@ function MemoriesPageContent() {
   // guards against an accidental one-tap deletion of irreplaceable data — important
   // for the app's older-adult / cognitively-impaired audience. Client-only; the delete
   // API/mutation is unchanged.
-  const handleDelete = (id: string) => {
-    if (
-      typeof window !== "undefined" &&
-      !window.confirm(
-        "Delete this memory permanently? This can’t be undone."
-      )
-    ) {
-      return;
-    }
-    deleteMutation.mutate(id);
-  };
-
-  // =========================
-  // SORT
-  // =========================
-  const normalizedMemories =
-  normalizeMemoryArray(
-    memories
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (
+        typeof window !== "undefined" &&
+        !window.confirm(
+          "Delete this memory permanently? This can’t be undone."
+        )
+      ) {
+        return;
+      }
+      deleteMutation.mutate(id);
+    },
+    [deleteMutation]
   );
 
-const sortedMemories = [
-  ...normalizedMemories,
-].sort(
-    (a, b) =>
-      effectiveSortValue(b) -
-      effectiveSortValue(a)
+  const handleEdit = useCallback(
+    (m: Memory) => setEditingMemory(m),
+    []
   );
 
   // =========================
-  // GROUPING
+  // SORT + GROUPING
   // =========================
-  const now = new Date();
+  // LA3 (perf): memoize the sort + today/thisWeek/earlier grouping so a search
+  // keystroke (searchQuery state lives in this component) no longer re-runs an
+  // O(n log n) sort + O(n) regroup over the whole aggregated array. Output is
+  // identical — the page only re-renders on data/state change anyway; combined with
+  // the stable handlers + React.memo(MemorySection) the list stops reconciling per key.
+  const { today, thisWeek, earlier } = useMemo(() => {
+    const sorted = [...normalizeMemoryArray(memories)].sort(
+      (a, b) => effectiveSortValue(b) - effectiveSortValue(a)
+    );
 
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startOfWeek = new Date(startOfToday);
+    startOfWeek.setDate(startOfWeek.getDate() - 7);
 
-  const startOfWeek = new Date(
-    startOfToday
-  );
+    const today: Memory[] = [];
+    const thisWeek: Memory[] = [];
+    const earlier: Memory[] = [];
 
-  startOfWeek.setDate(
-    startOfWeek.getDate() - 7
-  );
-
-  const today: Memory[] = [];
-  const thisWeek: Memory[] = [];
-  const earlier: Memory[] = [];
-
-  sortedMemories.forEach(
-    (memory) => {
-      const date =
-        resolveEffectiveDate(memory);
-
+    sorted.forEach((memory) => {
+      const date = resolveEffectiveDate(memory);
       if (date >= startOfToday) {
         today.push(memory);
-      } else if (
-        date >= startOfWeek
-      ) {
+      } else if (date >= startOfWeek) {
         thisWeek.push(memory);
       } else {
         earlier.push(memory);
       }
-    }
-  );
+    });
+
+    return { today, thisWeek, earlier };
+  }, [memories]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 p-4 md:space-y-6 md:p-6">
@@ -892,7 +885,7 @@ const sortedMemories = [
           <MemorySection
             label={`Search results · ${searchResults.length} found`}
             memories={searchResults}
-            onEdit={(m) => setEditingMemory(m)}
+            onEdit={handleEdit}
             onDelete={handleDelete}
           />
         )}
@@ -922,7 +915,9 @@ const sortedMemories = [
 
       {/* Empty */}
       {!isLoading &&
-        normalizedMemories.length === 0 && (
+        today.length === 0 &&
+        thisWeek.length === 0 &&
+        earlier.length === 0 && (
           <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
             <RemyStage context="memories.empty" size={128} className="mx-auto mb-2" />
             <p className="text-charcoal-soft">No memories yet.</p>
@@ -944,7 +939,7 @@ const sortedMemories = [
         <MemorySection
           label="Today"
           memories={today}
-          onEdit={(m) => setEditingMemory(m)}
+          onEdit={handleEdit}
           onDelete={handleDelete}
         />
       )}
@@ -954,7 +949,7 @@ const sortedMemories = [
         <MemorySection
           label="This Week"
           memories={thisWeek}
-          onEdit={(m) => setEditingMemory(m)}
+          onEdit={handleEdit}
           onDelete={handleDelete}
         />
       )}
@@ -964,7 +959,7 @@ const sortedMemories = [
         <MemorySection
           label="Earlier"
           memories={earlier}
-          onEdit={(m) => setEditingMemory(m)}
+          onEdit={handleEdit}
           onDelete={handleDelete}
         />
       )}

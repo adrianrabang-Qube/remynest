@@ -59,25 +59,10 @@ export async function retrieveMemoryContext(userId: string, query: string) {
       return [];
     }
 
-    const memoryIds = scopedMatches.map((memory: MemoryMatch) => memory.id);
-
-    // ---- Related memories (best-effort) ----
-    const { error: relationshipError } = await supabase
-      .from("memory_relationships")
-      .select("memory_id")
-      .in("memory_id", memoryIds);
-    if (relationshipError) {
-      logger.error("[memory-chat] relationship fetch failed", relationshipError.message);
-    }
-
-    // ---- Cluster items (best-effort) ----
-    const { error: clusterError } = await supabase
-      .from("memory_cluster_items")
-      .select("memory_id")
-      .in("memory_id", memoryIds);
-    if (clusterError) {
-      logger.error("[memory-chat] cluster fetch failed", clusterError.message);
-    }
+    // LA3 (perf): two SELECTs (memory_relationships + memory_cluster_items) previously
+    // ran here but only their `error` was ever read — the fetched rows were discarded and
+    // the function returns `scopedMatches` computed above. Removed the two dead round-trips
+    // per memory-chat turn (behaviour-identical: the returned context is unchanged).
 
     logger.debug("[memory-chat] context built", { count: scopedMatches.length });
     return scopedMatches;

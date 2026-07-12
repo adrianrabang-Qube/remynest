@@ -3,7 +3,7 @@ import Link from "next/link";
 import { RemyStage } from "@/lib/remy";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveContext } from "@/lib/active-profile";
-import { signMemories } from "@/lib/memory-media-signing";
+import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 import {
   effectiveSortValue,
   formatMemoryGroupLabel,
@@ -306,10 +306,14 @@ export default async function TimelinePage({
   // SIGN ONLY THE VISIBLE (RENDERED) MEMORIES
   // =====================================
 
-  const signedVisible = await signMemories(visibleMemories, {
-    variant: "thumb",
-    maxImagesPerMemory: 4,
-  });
+  // LA3 (perf): strip the unused pgvector `embedding` so it is not serialized into
+  // the RSC Flight payload the mobile WebView parses (no timeline client reads it).
+  const signedVisible = stripEmbedding(
+    await signMemories(visibleMemories, {
+      variant: "thumb",
+      maxImagesPerMemory: 4,
+    })
+  );
 
   // =====================================
   // GROUPING (signed, visible)

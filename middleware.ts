@@ -62,6 +62,10 @@ function logMiddlewareStage(
   stage: string,
   metadata?: unknown
 ) {
+  // LA3 (perf/RC2 standard): dev-only — this fires on every non-bypassed request in
+  // the edge runtime; routine request-started/completed narration should not stream
+  // to prod logs. Errors still log (logMiddlewareError → console.error).
+  if (process.env.NODE_ENV === "production") return;
   console.info(
     `[${MIDDLEWARE_TAG}] ${stage}`,
     metadata || {}

@@ -15,9 +15,20 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA2 — Accessibility & Inclusive Design
-Readiness** (WCAG 2.2 AA pass; presentation/aria/semantic/contrast/client-confirm only, no logic/data/
-architecture change; dark mode still deferred; frozen reminder engine logic untouched). A 7-dimension
+Readiness**. No implementation task is active — the last work was **LA3 — Performance & Scalability
+Hardening** (behaviour-preserving optimization; no contract/logic/security/billing/AI change; frozen reminder
+engine untouched). A 6-specialist multi-agent audit (perf 72→~82) drove 9 safe fixes: **stripped the dead
+pgvector `embedding`** (~15-29KB/row) from the 4 hot memory reads (feed/timeline API/timeline page/search) via
+a runtime `stripEmbedding()` (verified only the memory-DETAIL page reads `.embedding`); **memoized the
+memories feed** (useMemo sort+grouping + useCallback handlers + React.memo MemorySection — no per-keystroke
+re-sort/reconcile); **parallelized the `(app)` layout data waterfall** (Promise.all, fallbacks preserved);
+removed 2 dead memory-chat round-trips; memoized the Toast context; dev-gated middleware logs. tsc/lint/build
+green + 6-lens self-review. **DB indexes (memories composite, pgvector ANN, pg_trgm, profile_relationships)
+are OPERATOR recommendations** — schema is dashboard-managed; SQL in the report. Before it: LA2 a11y; LA1
+clinical; **RC5 — CERTIFIED FOR APP STORE + PRODUCTION**. `main` auto-deploys on push (LA3 committed locally,
+unpushed). Full detail: `docs/LA3-PERFORMANCE-REPORT.md`. The remaining launch gates are OPERATOR/infra only
+(Xcode privacy-manifest wiring + rebuild; backups + Storage-bucket backup + test restore; the operator DB
+indexes; prod env/migrations). A 7-dimension
 multi-agent audit (a11y 68→~84) cleared the **4 Level-A blockers**: keyboard-reachable media upload
 (`AttachmentManager` `hidden`→`sr-only`), announced toasts (`ToastProvider` live region), labeled primary
 forms (CreateProfile/InviteCaregiver/MemoryDate/reminders), and a **memory-delete confirmation** — plus a
@@ -80,6 +91,12 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA3 — Performance & Scalability Hardening** (behaviour-preserving; no contract/logic/security/billing/AI
+  change). 6-specialist audit (72→~82) → 9 safe fixes: dead-embedding strip on the 4 hot memory reads
+  (`stripEmbedding` in `memory-media-signing.ts`); memories-feed memoization (useMemo/useCallback/React.memo);
+  2 dead memory-chat round-trips removed; layout waterfall → Promise.all; Toast context memoized; middleware
+  logs dev-gated. tsc/lint/build green + 6-lens self-review. DB indexes are operator recommendations (schema
+  dashboard-managed). Report: `docs/LA3-PERFORMANCE-REPORT.md`.
 - **LA2 — Accessibility & Inclusive Design Readiness** (WCAG 2.2 AA pass; presentation/aria/semantic/
   contrast/client-confirm only — no logic/data/architecture change). 7-dimension audit (68→~84) cleared 4
   Level-A blockers (keyboard media upload, toast live region, primary-form labels, memory-delete confirm) +

@@ -6,6 +6,7 @@ import {
   useState,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react";
 
 type Toast = {
@@ -44,8 +45,12 @@ export default function ToastProvider({
     }, 3000);
   }, []);
 
+  // LA3 (perf): stable context value so useToast() consumers don't re-render on each
+  // toast add / ~3s auto-removal (showToast is already a stable useCallback).
+  const value = useMemo(() => ({ showToast }), [showToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={value}>
       {children}
 
       {/* LA2 (WCAG 4.1.3 Status Messages): a persistent polite live region so the

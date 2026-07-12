@@ -192,6 +192,22 @@ async function signTransforms(
  * are not mutated. `storagePath` is preserved so client round-trips (edit) never
  * persist a transient signed/render URL.
  */
+/**
+ * LA3 (perf): drop the heavy pgvector `embedding` column (~1536 floats, 15-29KB/row)
+ * from rows before they are serialized to a CLIENT that does not read it (the memory
+ * feed / timeline / search). Runtime field-strip only — NOT a select-list change, so no
+ * dashboard-managed column can be accidentally dropped. Behaviour-identical for every
+ * real consumer (verified: only the memory-detail server page reads `.embedding`, and it
+ * does NOT go through this path). Do NOT use on the detail/related-memories path.
+ */
+export function stripEmbedding<T extends object>(rows: T[]): T[] {
+  return rows.map((row) => {
+    const clone = { ...row } as Record<string, unknown>;
+    delete clone.embedding;
+    return clone as unknown as T;
+  });
+}
+
 export async function signMemories<T extends MemoryLike>(
   memories: T[] | null | undefined,
   options: SignOptions = {}

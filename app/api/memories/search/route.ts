@@ -5,7 +5,7 @@ import { generateEmbedding } from "@/lib/embeddings";
 import { checkPremium } from "@/lib/premium";
 import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { signMemories } from "@/lib/memory-media-signing";
+import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -419,7 +419,9 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json(
-      await signMemories(normalizedResults)
+      // LA3 (perf): drop the unused embedding vector; keep `similarity` (the client
+      // uses it for ranking). Behaviour-identical for the search UI.
+      stripEmbedding(await signMemories(normalizedResults))
     );
   } catch (error) {
     logSearchError(

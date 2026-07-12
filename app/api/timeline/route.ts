@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logger, errorMessage } from "@/lib/logger";
 
 import { resolveActiveProfileId } from "@/lib/context-resolver";
-import { signMemories } from "@/lib/memory-media-signing";
+import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 
 export async function GET(request: Request) {
   try {
@@ -91,10 +91,12 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json(
-      await signMemories(data || [], {
-        variant: "thumb",
-        maxImagesPerMemory: 4,
-      })
+      stripEmbedding(
+        await signMemories(data || [], {
+          variant: "thumb",
+          maxImagesPerMemory: 4,
+        })
+      )
     );
   } catch (error) {
     logger.error("[timeline] request failed", errorMessage(error));

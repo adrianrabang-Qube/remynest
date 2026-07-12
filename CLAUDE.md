@@ -1908,6 +1908,40 @@ test. **Do NOT** re-add `outline-none` without a focus ring, use `text-gray-400`
 reintroduce a page-level `<main>` inside the `(app)` layout, or remove the memory-delete confirm. See
 `docs/LA2-ACCESSIBILITY-REPORT.md`.
 
+**LA3 — Performance & Scalability Hardening (authoritative, 2026-07-12 — behaviour-preserving optimization;
+NO change to API contracts / business logic / security / billing / AI behaviour; frozen reminder engine
+untouched):** a 6-specialist multi-agent audit (perf 72→~82) drove 9 safe optimizations. **(1) Dead pgvector
+`embedding` stripped from the 4 hot memory reads.** `select("*")` on `memories` pulled the ~1536-float
+embedding (~15-29KB/row) into responses that NEVER read it (feed, timeline API, timeline RSC page,
+`/api/memories/search`). Added a runtime **`stripEmbedding()`** helper in `lib/memory-media-signing.ts`
+(clone + `delete embedding` — a RUNTIME field-strip, NOT a select-list change, so no dashboard-managed column
+can be accidentally dropped) applied at those 4 sites. **VERIFIED the ONLY `.embedding` consumer is the
+memory-DETAIL page** (`memories/[id]` related-memories vector search) + the enrichment builders — none go
+through the stripped paths. **Do NOT strip embedding on the detail/related-memories path**, and do NOT
+replace `select("*")` on the dashboard-managed `memories` table with a blind explicit column list. **(2)
+Memories-feed memoization** (`app/(app)/memories/page.tsx`): the sort + today/thisWeek/earlier grouping were
+in the component body (re-run O(n log n) on every search keystroke since `searchQuery` lives there) → wrapped
+in one `useMemo([memories])`; `handleDelete`/`handleEdit` are `useCallback`; **`MemorySection` is
+`React.memo`** with a generic-preserving `as typeof MemorySectionInner` cast. Keystrokes no longer re-sort or
+reconcile the list. **(3)** removed 2 DEAD DB round-trips per memory-chat turn (`lib/retrieve-memory-context.ts`
+— the `memory_relationships` + `memory_cluster_items` SELECTs only read `error`; rows were discarded and the
+returned context is computed above them). **(4)** parallelized the `(app)/layout.tsx` server data waterfall
+(`Promise.all` of the 4 independent reads — identity/accessible/name/count — after the cheap active-profile
+cookie read; every degrade-to-default fallback preserved via two-arg `.then`). **(5)** memoized the
+ToastProvider context value. **(6)** dev-gated the edge-middleware request narration (`logMiddlewareStage`
+returns early in production; errors still log). Verified tsc/lint/build green + 6-lens self-review
+(React/Next/Supabase/DB/frontend/backend — behaviour preserved, 0 regressions). **OPERATOR DB (recommended,
+NOT applied — schema is dashboard-managed; the exact `CREATE INDEX CONCURRENTLY` SQL is in the report):**
+composite `memories(memory_profile_id,created_at,id)` + `(user_id,…)` for the feed/timeline hot path; a
+pgvector HNSW ANN index on `embedding` for `match_memories`; `pg_trgm` GIN on the global-search text columns;
+a `profile_relationships(caregiver_account_id,memory_profile_id,invite_status)` scoping index. **LARGER
+(recommend, do NOT drop-in):** a shared `cache()`-wrapped `getSessionUser()` to dedupe the duplicate
+`auth.getUser()` on CARE reads (must not weaken the cookie-forgery gate); a SECURITY-DEFINER RPC for the
+people-enrichment per-person aggregate; the durable explicit-column selects excluding embedding (operator,
+against the real schema). **Do NOT** re-introduce embedding into the feed/timeline/search responses, un-memoize
+the memories feed, or serialize `select("*")` full rows to the client on hot reads. See
+`docs/LA3-PERFORMANCE-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

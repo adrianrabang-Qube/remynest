@@ -51,62 +51,72 @@ export default async function AppLayout({
     redirect("/login?deleted=1");
   }
 
-  // Single source of truth for navbar identity (same resolver as /settings).
-  const identity = await resolveAccountIdentity();
-
-  // Workspace context (reuses the existing active-context cookie) for the global
-  // indicator + banner.
-  const activeProfileId = await resolveActiveProfileId();
-  let activeProfileName: string | null = null;
-  if (activeProfileId) {
-    const { data } = await supabase
-      .from("memory_profiles")
-      .select("preferred_name, profile_name")
-      .eq("id", activeProfileId)
-      .maybeSingle();
-    activeProfileName =
-      data?.preferred_name || data?.profile_name || "Care profile";
-  }
-  const workspace = {
-    isMyNest: !activeProfileId,
-    activeProfileName,
-  };
-
-  // RLS-scoped accessible care profiles for the global Workspace Selector (top
-  // bar, every screen). Reuses the same loader the dashboard uses; failures
-  // degrade to an empty list (selector still offers "My Nest").
   type AccessibleProfile = {
     id: string;
     profile_name?: string | null;
     preferred_name?: string | null;
   };
-  let workspaceProfiles: { id: string; name: string }[] = [];
-  try {
-    const accessible = (await getAccessibleProfiles()) as AccessibleProfile[];
-    workspaceProfiles = (accessible ?? []).map((profile) => ({
+
+  // Workspace context (reuses the existing active-context cookie). This cheap cookie
+  // read gates the two workspace-scoped queries below, so resolve it first.
+  const activeProfileId = await resolveActiveProfileId();
+
+  // LA3 (perf): the four remaining reads are independent of each other, so run them
+  // CONCURRENTLY instead of as a serial waterfall on every authenticated navigation.
+  // Each keeps its original degrade-to-default, so the data + fallbacks are identical:
+  //  - identity (navbar), accessible care profiles (selector; → [] on error),
+  //  - the active care-profile name (only when a care profile is active),
+  //  - the RLS-scoped memory head-count (Nest evolution stage; → 0 on error).
+  const memoryCountQuery = activeProfileId
+    ? supabase
+        .from("memories")
+        .select("id", { count: "exact", head: true })
+        .eq("memory_profile_id", activeProfileId)
+    : supabase
+        .from("memories")
+        .select("id", { count: "exact", head: true })
+        .is("memory_profile_id", null)
+        .eq("user_id", user.id);
+
+  const [identity, accessible, nameRow, memoryCount] = await Promise.all([
+    // Single source of truth for navbar identity (same resolver as /settings).
+    resolveAccountIdentity(),
+    // RLS-scoped accessible care profiles for the global Workspace Selector (→ [] on error).
+    (getAccessibleProfiles() as Promise<AccessibleProfile[]>).catch(
+      () => [] as AccessibleProfile[]
+    ),
+    // Active care-profile name (only when a care profile is active) → null on error.
+    // Two-arg then handles rejection (the Supabase builder is a thenable, not a Promise).
+    activeProfileId
+      ? supabase
+          .from("memory_profiles")
+          .select("preferred_name, profile_name")
+          .eq("id", activeProfileId)
+          .maybeSingle()
+          .then(
+            (r) => r.data as { preferred_name?: string | null; profile_name?: string | null } | null,
+            () => null
+          )
+      : Promise.resolve(
+          null as { preferred_name?: string | null; profile_name?: string | null } | null
+        ),
+    // RLS-scoped memory head-count → 0 on error.
+    memoryCountQuery.then((r) => r.count ?? 0, () => 0),
+  ]);
+
+  const activeProfileName: string | null = activeProfileId
+    ? nameRow?.preferred_name || nameRow?.profile_name || "Care profile"
+    : null;
+  const workspace = {
+    isMyNest: !activeProfileId,
+    activeProfileName,
+  };
+  const workspaceProfiles: { id: string; name: string }[] = (accessible ?? []).map(
+    (profile) => ({
       id: profile.id,
       name: profile.preferred_name || profile.profile_name || "Care profile",
-    }));
-  } catch {
-    workspaceProfiles = [];
-  }
-
-  // REAL memory count for the active workspace — drives the Nest's evolution stage (Tiny →
-  // Sanctuary). Cheap indexed head-count (no rows fetched), RLS-scoped; degrades to 0 on any error
-  // so a failed count never breaks the nav. My Nest = null-profile owned by user_id; care = profile.
-  let memoryCount = 0;
-  try {
-    const countQuery = supabase
-      .from("memories")
-      .select("id", { count: "exact", head: true });
-    const scoped = activeProfileId
-      ? countQuery.eq("memory_profile_id", activeProfileId)
-      : countQuery.is("memory_profile_id", null).eq("user_id", user.id);
-    const { count } = await scoped;
-    memoryCount = count ?? 0;
-  } catch {
-    memoryCount = 0;
-  }
+    })
+  );
 
   return (
     // Remy companion provider (foundation). Wraps the shell so the Floating layer + future
