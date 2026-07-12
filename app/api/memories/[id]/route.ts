@@ -13,6 +13,8 @@ import {
   removeStorageObjects,
 } from "@/lib/storage/object-info";
 import { validateAndResolveMemoryDate } from "@/lib/memories/memory-date";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export async function PUT(
   req: Request,
@@ -258,7 +260,8 @@ export async function PUT(
     .eq("user_id", user.id);
 
   if (error) {
-    console.error("[memories/:id] mutation failed", error);
+    logger.error("[memories/:id] mutation failed", errorMessage(error));
+    captureError(error, { route: "memories.mutate" });
     return new Response("Memory request failed", { status: 500 });
   }
 
@@ -289,7 +292,8 @@ export async function DELETE(
     .eq("user_id", user.id);
 
   if (error) {
-    console.error("[memories/:id] mutation failed", error);
+    logger.error("[memories/:id] mutation failed", errorMessage(error));
+    captureError(error, { route: "memories.mutate" });
     return new Response("Memory request failed", { status: 500 });
   }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     logger.error("[profile-update] failed", errorMessage(error));
+    captureError(error, { route: "profile.update" });
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 },

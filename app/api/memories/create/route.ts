@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { userCanWriteProfile } from "@/lib/profile-ownership";
@@ -729,6 +730,7 @@ cover_image_url:
         error: errorMessage(error),
       }
     );
+    captureError(error, { route: "memories.create" });
 
     return NextResponse.json(
       {

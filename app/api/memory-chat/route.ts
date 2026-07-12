@@ -7,6 +7,7 @@ import { retrieveMemoryContext } from "@/lib/retrieve-memory-context";
 import { PROMPT_SAFETY_PREAMBLE } from "@/lib/constants/disclaimers";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 const MEMORY_CHAT_TAG =
   "memory-chat-engine";
@@ -339,6 +340,7 @@ ${memoryContext}
       "memory-chat-engine-error",
       error
     );
+    captureError(error, { route: "memory-chat" });
 
     return NextResponse.json(
       {

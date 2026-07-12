@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildRelationships } from "@/lib/build-relationships";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 // RC4: relationship-building can run long on larger graphs.
 export const maxDuration = 60;
@@ -58,6 +59,7 @@ export async function POST(
       "[build-relationships] failed",
       errorMessage(error)
     );
+    captureError(error, { route: "build-relationships" });
 
     return NextResponse.json(
       {

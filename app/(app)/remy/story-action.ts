@@ -7,6 +7,7 @@ import {
   type StorySnapshot,
 } from "@/lib/remy/story-pipeline";
 import { executeConversationWithUsage } from "@/lib/remy/execute-conversation-with-usage";
+import { captureError } from "@/lib/observability/capture";
 import type { DatedMemory, FamilyPerson } from "@/lib/remy/core/family-types";
 import { resolveAiEntitlement, type AiEntitlement } from "@/lib/ai/usage/entitlements";
 import { canExecuteConversation, type ConversationGateResult } from "@/lib/ai/usage/quota";
@@ -254,8 +255,11 @@ export async function narrateStoryConversation(): Promise<StoryConversationResul
       status: text ? "generated" : "unavailable",
       memoryCount: snapshot.memoryCount,
     };
-  } catch {
+  } catch (error) {
     // Provider/network/auth/context failure (incl. an unconfigured OPENAI_API_KEY) → safe, non-throwing degrade.
+    // LA4: capture it so an otherwise-silent AI narration failure is observable (env-gated;
+    // behaviour unchanged — still degrades to "unavailable").
+    captureError(error, { route: "remy.story-narration" });
     return { text: null, status: "unavailable", memoryCount: 0 };
   }
 }

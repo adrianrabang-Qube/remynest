@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { authorizeCronRequest } from "@/lib/cron-auth";
 import { nextOccurrence } from "@/lib/reminders/recurrence";
+import { captureError } from "@/lib/observability/capture";
 
 const REMINDER_CRON_TAG =
   "reminder-cron-engine";
@@ -716,6 +717,10 @@ export async function GET(req: Request) {
         error,
       }
     );
+    // LA4: observability only — capture a top-level cron crash to Sentry so a failed
+    // tick (which returns success:false and is retried next minute) is alertable. The
+    // frozen scheduling/delivery logic is unchanged.
+    captureError(error, { route: "cron.send-due-reminders", requestId });
 
     return NextResponse.json({
       success: false,

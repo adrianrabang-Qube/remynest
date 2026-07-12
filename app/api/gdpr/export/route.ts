@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { collectUserData } from "@/lib/gdpr/collect-user-data";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export const dynamic = "force-dynamic";
 // RC4: give the full-account data aggregation headroom so a large export returns
@@ -67,6 +68,7 @@ export async function GET() {
       "[gdpr-export] export failed",
       errorMessage(error)
     );
+    captureError(error, { route: "gdpr.export" });
 
     return NextResponse.json(
       { error: "Export failed" },

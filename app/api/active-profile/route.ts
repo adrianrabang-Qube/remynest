@@ -10,6 +10,7 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { createClient } from "@/lib/supabase/server";
 import { userCanAccessProfile } from "@/lib/profile-ownership";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 // =========================
 // GET ACTIVE PROFILE
@@ -68,6 +69,7 @@ export async function GET() {
     });
   } catch (error) {
     logger.error("[active-profile] request failed", errorMessage(error));
+    captureError(error, { route: "active-profile" });
 
     return NextResponse.json(
       {
@@ -134,6 +136,7 @@ export async function POST(
     });
   } catch (error) {
     logger.error("[active-profile] request failed", errorMessage(error));
+    captureError(error, { route: "active-profile" });
 
     return NextResponse.json(
       {

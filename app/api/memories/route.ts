@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export { POST } from "./create/route";
 
@@ -285,6 +286,7 @@ export async function GET(
         error: errorMessage(error),
       }
     );
+    captureError(error, { route: "memories.list", requestId });
 
     return NextResponse.json(
       {

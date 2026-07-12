@@ -1942,6 +1942,38 @@ against the real schema). **Do NOT** re-introduce embedding into the feed/timeli
 the memories feed, or serialize `select("*")` full rows to the client on hot reads. See
 `docs/LA3-PERFORMANCE-REPORT.md`.
 
+**LA4 — Production Observability & Failure Recovery (authoritative, 2026-07-12 — behaviour-preserving;
+observability-only; NO change to UI / business logic / subscriptions-billing / AI behaviour / DB schema;
+frozen reminder + Stripe billing logic untouched):** closed the systemic observability gap — API-route catch
+blocks logged via `logger.error(errorMessage(e))`, which only writes a Sentry console BREADCRUMB (not an
+error EVENT), so **handled 500s were invisible/unalertable in Sentry**; and `instrumentation.ts` had no
+`onRequestError`. **(1)** added `export const onRequestError = Sentry.captureRequestError` to
+`instrumentation.ts` (the Sentry App-Router hook; captures uncaught server request errors — Server
+Components, route handlers, nested server rendering, and any unhandled Stripe-webhook throw). **(2)** added
+`lib/observability/capture.ts` **`captureError(error, { route?, requestId? })`** — turns a HANDLED server
+error into a real Sentry event with route+requestId correlation tags. **Invariants (must stay):** ENV-GATED
+(Sentry is a no-op without a DSN → this is a no-op then), PII-SCRUBBED (passes the existing `beforeSend`;
+**pass ONLY ids/route strings as tags, NEVER PHI/PII** — memory content/titles/names/emails), and NEVER
+THROWS / NEVER BLOCKS (try/catch-wrapped, fire-and-forget) so observability can never break a request. Use it
+ALONGSIDE `logger.error(errorMessage(e))` (log + capture — pass the RAW error to `captureError` for the
+stack, the message to the log). **(3)** applied at 15 key catch sites (responses byte-unchanged): memories
+list/create/[id]/search, timeline, gdpr export/delete-account (plan+delete), send-notification, profile,
+build-relationships, active-profile×2, memory-chat, the reminder **cron** top-level crash (observability
+only — the FROZEN scheduling/delivery/lease/retry logic is unchanged), and the **story-narration** action (a
+bare `catch {}` that swallowed AI failures silently). **The Stripe webhook billing logic was deliberately NOT
+touched** — its `writeFailed→500` retry path is already logged, and unexpected exceptions are covered by
+`onRequestError`; do NOT add a per-retry capture there (noise) or change the 500-retry. **(4)** fixed 2
+residual raw-`PostgrestError` PII logs (`memories/[id]`, `gdpr/delete-account`): `console.error("…", error)`
+→ `logger.error("…", errorMessage(error))` + `captureError`. Verified tsc/lint/build green + main-loop 6-lens
+self-review (the multi-agent audit hit the subagent session limit). **OPERATOR ACTIVATION (LA4 is inert
+until done):** set the Sentry DSN (+ `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` for source maps),
+configure Sentry alert rules, add an uptime monitor on `/api/health`. **RECOMMEND (roadmap — need a new
+table/cron, do NOT drop-in):** a Stripe per-event idempotency/ordering ledger (dedup by `event.id`); an
+unattended `auth_pending` deletion retry cron; an orphan-object storage sweep cron; `reminder_local_confirmations`
+deletion enrolment; an `ai_usage` TTL/rollup. **Do NOT** make `captureError` throw/block, pass PHI/PII as
+tags, remove the `onRequestError` hook, capture on the webhook's controlled retry path, or log raw error
+objects. See `docs/LA4-RELIABILITY-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

@@ -6,6 +6,7 @@ import { checkPremium } from "@/lib/premium";
 import { canUseSemanticSearch } from "@/lib/billing/usage-limits";
 import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { signMemories, stripEmbedding } from "@/lib/memory-media-signing";
+import { captureError } from "@/lib/observability/capture";
 
 const SEARCH_TAG =
   "memory-search-engine";
@@ -431,6 +432,7 @@ export async function POST(req: Request) {
         error,
       }
     );
+    captureError(error, { route: "memories.search", requestId });
 
     return NextResponse.json(
       {

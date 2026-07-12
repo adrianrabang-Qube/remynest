@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { authorizeCronRequest } from "@/lib/cron-auth";
 import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export async function GET(req: Request) {
   const denied = authorizeCronRequest(req);
@@ -95,6 +96,7 @@ export async function GET(req: Request) {
 
   } catch (err) {
     logger.error("[send-notification] error", errorMessage(err));
+    captureError(err, { route: "send-notification" });
 
     // RC2: generic client error — never serialize the raw exception to the response.
     return NextResponse.json(

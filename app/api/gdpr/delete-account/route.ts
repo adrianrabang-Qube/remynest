@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { planUserDeletion } from "@/lib/gdpr/plan-user-deletion";
 import { executeUserDeletion } from "@/lib/gdpr/execute-user-deletion";
+import { logger, errorMessage } from "@/lib/logger";
+import { captureError } from "@/lib/observability/capture";
 
 export const dynamic = "force-dynamic";
 // RC4: cascading deletes + recursive storage cleanup can run long on large accounts.
@@ -39,7 +41,8 @@ export async function GET() {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
-    console.error("[gdpr-deletion] plan failed", error);
+    logger.error("[gdpr-deletion] plan failed", errorMessage(error));
+    captureError(error, { route: "gdpr.delete-account.plan" });
     return NextResponse.json(
       { error: "Failed to build deletion plan" },
       { status: 500 },
@@ -129,7 +132,8 @@ export async function DELETE(request: Request) {
       { status: result.status === "completed" ? 200 : 202 },
     );
   } catch (error) {
-    console.error("[gdpr-deletion] delete failed", error);
+    logger.error("[gdpr-deletion] delete failed", errorMessage(error));
+    captureError(error, { route: "gdpr.delete-account" });
     return NextResponse.json(
       { error: "Account deletion failed" },
       { status: 500 },
