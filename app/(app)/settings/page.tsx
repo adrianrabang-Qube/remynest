@@ -81,6 +81,22 @@ export default async function SettingsPage() {
           <PrivacyLinksSection />
         </ProfileSection>
 
+        <ProfileSection id="safety" title="Safety &amp; Reporting">
+          <Link
+            href="/settings/safety"
+            className="flex items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white p-5 shadow-soft transition hover:bg-sand/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+          >
+            <span className="min-w-0">
+              <span className="block font-medium text-charcoal">Report or block someone</span>
+              <span className="block text-sm text-charcoal-muted">
+                Report abusive behaviour or content, block a user, or leave a care
+                workspace.
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
+          </Link>
+        </ProfileSection>
+
         <ProfileSection id="delete-account" title="Danger Zone">
           <DeleteAccountSection />
         </ProfileSection>

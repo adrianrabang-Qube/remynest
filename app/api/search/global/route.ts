@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     let memoryQuery = supabase
       .from("memories")
       .select(
-        "id, title, content, ai_title, ai_summary, ai_category, created_at, memory_date, memory_date_precision",
+        "id, user_id, title, content, ai_title, ai_summary, ai_category, created_at, memory_date, memory_date_precision",
       )
       .or(
         [
@@ -102,6 +102,10 @@ export async function POST(request: Request) {
         preview: m.ai_summary || m.content || undefined,
         meta: m.ai_category ?? undefined,
         href: `/memories/${m.id}`,
+        // LA5.1: a care-workspace memory authored by SOMEONE ELSE is reportable
+        // shared content (Apple 1.2). Own memories / My Nest are not.
+        reportableMemoryId:
+          activeProfileId && m.user_id && m.user_id !== user.id ? m.id : undefined,
       }),
     );
 

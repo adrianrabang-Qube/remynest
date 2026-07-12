@@ -12,6 +12,9 @@ import {
   type SearchResults,
 } from "./types";
 import { Remy, RemyStage } from "@/lib/remy";
+import ReportDialog from "@/components/moderation/ReportDialog";
+import { reportContent } from "@/app/(app)/settings/safety/actions";
+import type { ReportReason } from "@/lib/moderation/config";
 
 const RECENT_KEY = "remynest:recent-searches";
 const RECENT_MAX = 6;
@@ -60,6 +63,11 @@ export default function SearchView() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [recent, setRecent] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // LA5.1: report a shared memory (Apple 1.2) — set from a result row's Report button.
+  const [reportTarget, setReportTarget] = useState<{
+    memoryId: string;
+    title: string;
+  } | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -334,7 +342,13 @@ export default function SearchView() {
                 {!isCollapsed && (
                   <ul className="overflow-hidden rounded-2xl border border-sand-deep/60 bg-white shadow-soft">
                     {group.hits.map((hit) => (
-                      <SearchResultRow key={`${hit.type}-${hit.id}`} hit={hit} />
+                      <SearchResultRow
+                        key={`${hit.type}-${hit.id}`}
+                        hit={hit}
+                        onReport={(memoryId, title) =>
+                          setReportTarget({ memoryId, title })
+                        }
+                      />
                     ))}
                   </ul>
                 )}
@@ -342,6 +356,21 @@ export default function SearchView() {
             );
           })}
         </div>
+      )}
+
+      {reportTarget && (
+        <ReportDialog
+          title="Report this memory"
+          subject="this memory"
+          onClose={() => setReportTarget(null)}
+          onSubmit={(reason: ReportReason, description: string) =>
+            reportContent({
+              memoryId: reportTarget.memoryId,
+              reason,
+              description,
+            })
+          }
+        />
       )}
     </div>
   );

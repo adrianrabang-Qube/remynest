@@ -38,6 +38,8 @@ export interface GdprExportPayload {
   aiUsage: unknown[];
   memoryIntelligence: unknown[];
   storageLedger: unknown[];
+  moderationReports: unknown[];
+  userBlocks: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -96,6 +98,10 @@ export async function collectUserData(
   //   memory_clusters         (user_id)                  device_registrations   (user_id)
   //   people                  (created_by_account_id)    ai_usage               (user_id)
   //   memory_intelligence     (user_id)                  storage_ledger         (user_id)
+  //   moderation_reports      (reporter_account_id)      user_blocks            (blocker_account_id)
+  // LA5.1: only the reports the user FILED + the blocks they SET are their personal
+  // data (reporter/blocker-own). Reports ABOUT the user are deliberately NOT exported
+  // (that would leak the reporter's identity and defeat the safety design).
   // memory_person_links is intentionally omitted: it is pure join metadata
   // reconstructable from the exported `people` + `memories`. Media is exported
   // as references only (the private bucket needs signed URLs — see the route).
@@ -115,6 +121,8 @@ export async function collectUserData(
     aiUsageRes,
     memoryIntelligenceRes,
     storageLedgerRes,
+    moderationReportsRes,
+    userBlocksRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -128,6 +136,9 @@ export async function collectUserData(
     db.from("ai_usage").select("*").eq("user_id", userId),
     db.from("memory_intelligence").select("*").eq("user_id", userId),
     db.from("storage_ledger").select("*").eq("user_id", userId),
+    // LA5.1 — operator-gated (probe-safe): a missing relation resolves to { data: null }.
+    db.from("moderation_reports").select("*").eq("reporter_account_id", userId),
+    db.from("user_blocks").select("*").eq("blocker_account_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -140,7 +151,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.1",
+    schemaVersion: "1.2",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -155,6 +166,8 @@ export async function collectUserData(
     aiUsage: aiUsageRes.data ?? [],
     memoryIntelligence: memoryIntelligenceRes.data ?? [],
     storageLedger: storageLedgerRes.data ?? [],
+    moderationReports: moderationReportsRes.data ?? [],
+    userBlocks: userBlocksRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -172,6 +185,8 @@ export async function collectUserData(
     aiUsage: payload.aiUsage.length,
     memoryIntelligence: payload.memoryIntelligence.length,
     storageLedger: payload.storageLedger.length,
+    moderationReports: payload.moderationReports.length,
+    userBlocks: payload.userBlocks.length,
     mediaReferences: payload.mediaReferences.length,
   };
 

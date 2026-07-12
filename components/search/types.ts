@@ -16,6 +16,12 @@ export interface SearchHit {
   preview?: string;
   meta?: string;
   href: string;
+  /**
+   * LA5.1 (Apple 1.2): present ONLY for a memory shared into a care workspace that
+   * the viewer can see but did NOT author — the id to report as objectionable
+   * content. Absent for the viewer's own memories and all non-memory hits.
+   */
+  reportableMemoryId?: string;
 }
 
 export interface SearchResults {

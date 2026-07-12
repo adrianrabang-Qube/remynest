@@ -29,6 +29,8 @@ export const RATE_LIMITS = {
   export: { limit: 5, windowMs: 300_000 },
   /** Account deletion (rare, destructive). */
   deleteAccount: { limit: 5, windowMs: 300_000 },
+  /** Moderation report submissions (LA5.1) — low legitimate frequency; throttles report spam. */
+  report: { limit: 8, windowMs: 300_000 },
 } as const;
 
 export type RateLimitPreset = keyof typeof RATE_LIMITS;

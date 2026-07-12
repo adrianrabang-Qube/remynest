@@ -15,7 +15,25 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA5 — Apple App Store & Google Play
+Readiness**. No implementation task is active — the last work was **LA5.1 — Apple Guideline 1.2 UGC
+moderation** (CLOSES the CRITICAL LA5 iOS blocker; maintains the existing architecture; NOT a social
+platform). Implemented the minimum production-ready **report / block / leave** framework: migration
+`moderation_reports` + `user_blocks` (RLS insert-own + **select-own only**, no update/delete → status
+service-role only; reporter identity never exposed; FKs reported/memory→SET NULL; **no must-have-target
+CHECK** — it would abort a reported user's account delete = Art 17 regression); session-derived,
+never-throw, service-role-scoped server actions (`reportUser`/`reportContent`/`blockUser`/`unblockUser`/
+`leaveWorkspace`/`listSafetyOverview`, authorized by `getSharedCarePeopleIds`, rate-limited + dedup);
+block enforcement on `inviteCaregiver` + `acceptInvite` (either direction; never removes care access);
+**Safety Center** `/settings/safety` + Settings link + portaled/focus-trapped `ReportDialog` + a
+**Report button on care-context search results**; GDPR export enrolled (v1.2) + co-caregiver emails
+masked. **6-lens multi-agent review — all `satisfiesApple12=true`; the 1 BLOCKING defect (FK SET-NULL ×
+a must-have-target CHECK) + high-value nits ALL fixed.** tsc/lint/build green. **NO remaining
+ENGINEERING blocker for iOS on Apple 1.2.** **OPERATOR (required to activate):** apply
+`20260712120000_moderation_foundation.sql` before iOS submission + run the deletion regression.
+`main` auto-deploys on push (LA5.1 committed locally, unpushed). Full detail:
+`docs/LA5.1-APPLE-1.2-MODERATION-REPORT.md` + `docs/features/moderation.md`.
+
+Before LA5.1, the last work was **LA5 — Apple App Store & Google Play
 Compliance** (store-review compliance audit + SAFE fixes only; behaviour-preserving; no architecture/
 logic/subscription/schema change; frozen reminder untouched). A 6-lens multi-agent audit (Apple/Play/
 Mobile/Privacy/Healthcare/Security; 28→21 adversarially-verified findings) scored **Apple ~74→~80,
@@ -125,6 +143,17 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA5.1 — Apple Guideline 1.2 UGC moderation** (CLOSES the CRITICAL LA5 iOS blocker; existing
+  architecture maintained; NOT a social platform; multi-agent-VERIFIED — 6 lenses all
+  `satisfiesApple12=true`, 1 blocking defect + nits ALL fixed). Report/block/leave framework:
+  `moderation_reports` + `user_blocks` migration (RLS insert/select-own only, no update/delete;
+  reported/memory FKs SET NULL; **no must-have-target CHECK** — would abort a reported user's
+  delete = Art 17 regression); session-derived never-throw actions gated by `getSharedCarePeopleIds`
+  (rate-limited + dedup); block enforcement on invite create + accept (never removes care access);
+  Safety Center `/settings/safety` + ReportDialog + Report on care-search results; GDPR export (v1.2)
+  + email masking. **NO remaining engineering blocker for iOS on Apple 1.2.** OPERATOR: apply the
+  moderation migration before submission. tsc/lint/build green. Report:
+  `docs/LA5.1-APPLE-1.2-MODERATION-REPORT.md`; feature: `docs/features/moderation.md`.
 - **LA5 — Apple App Store & Google Play Compliance** (store-review compliance audit + SAFE fixes only;
   behaviour-preserving; no architecture/logic/subscription/schema change; frozen reminder untouched;
   multi-agent-VERIFIED — behaviour preserved by all 6 lenses, 0 blocking regressions). 6-lens audit

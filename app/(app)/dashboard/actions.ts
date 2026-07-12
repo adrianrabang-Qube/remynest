@@ -277,6 +277,34 @@ export async function inviteCaregiver({
     };
   }
 
+  // LA5.1 (Apple 1.2): a block in EITHER direction between the owner and the invitee
+  // prevents a NEW caregiver invitation — the concrete "prevent further interaction"
+  // enforcement. Existing care access is untouched (block never removes a relationship;
+  // that is the explicit revoke/leave path). Fail-OPEN if the moderation table isn't
+  // applied yet (no blocks can exist pre-activation), so this can never break invites.
+  const { data: blocks } = await supabaseAdmin
+    .from("user_blocks")
+    .select("id")
+    .or(
+      `and(blocker_account_id.eq.${user.id},blocked_account_id.eq.${caregiver.id}),` +
+        `and(blocker_account_id.eq.${caregiver.id},blocked_account_id.eq.${user.id})`,
+    )
+    .limit(1);
+
+  if (blocks && blocks.length > 0) {
+    console.warn("[dashboard] invite_blocked_by_block", {
+      userId: user.id,
+      memoryProfileId,
+    });
+    // Neutral phrasing: don't confirm to the inviter that the OTHER party blocked them
+    // (an owner who didn't create the block could otherwise infer it). If they blocked
+    // the invitee, the conditional hint lets them resolve it.
+    return {
+      error:
+        "This invitation can't be completed right now. If you've blocked this person, remove the block from Settings → Safety to invite them.",
+    };
+  }
+
   const { error: inviteError } =
     await supabase
       .from("caregiver_invites")
@@ -587,6 +615,31 @@ export async function acceptInvite(
     throw new Error(
       "This invitation is not addressed to you."
     );
+  }
+
+  // LA5.1 (Apple 1.2): also enforce the block at ACCEPT time, not just at invite
+  // creation — a pending invite that predates a block must not become interaction.
+  // A block in EITHER direction between the accepter and the inviter blocks it.
+  // Fail-OPEN if the moderation table isn't applied yet.
+  const inviterId = invite.invited_by_account_id;
+  if (typeof inviterId === "string" && inviterId) {
+    const { data: blocks } = await supabaseAdmin
+      .from("user_blocks")
+      .select("id")
+      .or(
+        `and(blocker_account_id.eq.${user.id},blocked_account_id.eq.${inviterId}),` +
+          `and(blocker_account_id.eq.${inviterId},blocked_account_id.eq.${user.id})`,
+      )
+      .limit(1);
+    if (blocks && blocks.length > 0) {
+      console.warn("[dashboard] accept_invite_blocked_by_block", {
+        userId: user.id,
+        inviteId,
+      });
+      throw new Error(
+        "This invitation can't be accepted while a block is in place between your accounts.",
+      );
+    }
   }
 
   const { error: relationshipError } =

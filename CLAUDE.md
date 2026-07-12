@@ -2040,6 +2040,50 @@ delete on account deletion (LOCKED RC3 roadmap). **Do NOT** reintroduce `HealthA
 data-rights contact to an unprovisioned alias, or submit to iOS before the report/block mechanism +
 jurisdiction land. See `docs/LA5-STORE-COMPLIANCE-REPORT.md`.
 
+**LA5.1 — Apple Guideline 1.2 UGC moderation (authoritative, 2026-07-12 — CLOSES the CRITICAL LA5
+iOS blocker; maintains the existing architecture; NOT a social platform):** implemented the minimum
+production-ready **report / block / leave** framework and multi-agent-verified it (6 lenses — Apple /
+Security / Healthcare / Supabase / Next.js / GDPR — **all `satisfiesApple12 = true`**; 1 blocking
+defect + nits, all fixed). **NO remaining ENGINEERING blocker exists for iOS submission on 1.2.**
+**Data model (operator-applied migration `20260712120000_moderation_foundation.sql`, additive/
+reversible/probe-gated):** `moderation_reports` (report a user OR shared content; RLS **insert-own +
+select-own ONLY**, NO update/delete policy → status is service-role only; a reported user can NEVER
+read reports about them / the reporter's identity) + `user_blocks` (RLS own-only; a blocked user
+can't discover who blocked them). FKs: reporter/blocker → CASCADE, reported/memory → **SET NULL**.
+**CRITICAL migration invariant (do NOT reintroduce):** there is deliberately **NO "must-have-target"
+CHECK** on `moderation_reports` — such a CHECK is re-evaluated on the FK SET-NULL update and would
+ABORT the account/memory delete, permanently stranding a reported user's auth/email PII (a GDPR Art
+17 + account-deletion regression the review caught). **Server actions** (`app/(app)/settings/safety/
+actions.ts`, structured/never-throw, SESSION-derived actor, service-role reads scoped to the viewer's
+own access, degrade if tables absent): `reportUser`, `reportContent`, `blockUser`, `unblockUser`,
+`leaveWorkspace`, `listSafetyOverview`. **Authorization boundary = `getSharedCarePeopleIds`** (you can
+only report/block someone you share a care workspace with — prevents probing arbitrary ids; the
+`.or()` block-check interpolates only DB/session UUIDs, non-injectable). Rate-limited (`report`
+preset) + duplicate-report guard. **Block enforcement is at the invitation path** (concrete "prevent
+further interaction"): `inviteCaregiver` (create) AND `acceptInvite` (accept) reject a blocked pairing
+in EITHER direction (fail-open pre-activation); a block **never removes existing care access** (that's
+the explicit owner **revoke** / caregiver **leave** path — "preserve legitimate caregiver
+relationships unless explicitly removed"). **UI:** `/settings/safety` **Safety Center** (report/block/
+unblock people you share care with + leave a workspace) + a Settings link + a shared portaled/
+focus-trapped `ReportDialog` + a **Report button on care-context search results** (`SearchResultRow` —
+sibling of the row link, no nesting; reportable rows are non-navigational since `/memories/[id]` is
+user_id-scoped and 404s for other authors). **Cross-user content surfaces (corrected):** the feed
+(`/api/memories`) + detail (`/memories/[id]`) are `user_id`-scoped, but BOTH **global search** AND the
+**care Timeline** are `memory_profile_id`-scoped (all authors) — content-report is wired on search; a
+Timeline per-item Report affordance is a documented **follow-up** (1.2 is already satisfied). **GDPR:**
+the user's OWN reports (`reporter_account_id`) + blocks (`blocker_account_id`) are enrolled in the
+export (`collect-user-data.ts` v1.2; reports ABOUT a user are NOT exported); the Safety Center **masks**
+co-caregiver emails. **Privacy is NOT a social platform** — no public profiles/feeds/comments/
+messaging/likes; records are admin-ready but there is NO admin UI/dashboard. **OPERATOR (required to
+activate before iOS submission):** apply the migration in the Supabase SQL editor (code degrades to
+"unavailable" until then), then run the deletion regression (report a user → delete that user →
+confirm `auth.admin.deleteUser` succeeds). **Known accepted limitation:** the share-care boundary is
+app-layer (server actions), not RLS-encoded — a direct PostgREST insert could plant moderation noise
+(not a leak); matches the repo's app-layer-authz-over-RLS pattern. **Do NOT** add a "must-have-target"
+CHECK to `moderation_reports`, expose reporter identity to the reported user, trust a client-supplied
+actor id, let a block auto-remove care access, or build social/feed/dashboard surfaces. See
+`docs/features/moderation.md` + `docs/LA5.1-APPLE-1.2-MODERATION-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
