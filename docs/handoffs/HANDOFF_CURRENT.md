@@ -19,7 +19,32 @@ operator go-live**. *(Git reconciliation 2026-07-13: the previously-unpushed RC2
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Remy AVATAR asset tier — "Remy IS the button" (2026-07-13,
+The most recent work is the **Production Polish Pass — "feels premium" (2026-07-13,
+presentation-only; no logic/routing/architecture change; frozen surfaces untouched):**
+**(1) Global toast FIXED + rebranded** (`ToastProvider` — the app-wide "Memory saved" channel
+referenced a **nonexistent `animate-slide-in` class**, so toasts popped in unanimated; now
+`animate-toastIn` [gentle 280ms settle, reduced-motion-safe], brand `bg-sage-deep rounded-2xl
+shadow-soft-lg` [white contrast 8:1, up from green-700's 5.3:1], safe-area-aware placement
+[never under the notch], `max-w` wrap; exit animation deliberately NOT added — would need
+lifecycle changes). **(2) "More" drawer entrance motion** (`MobileNavDrawer` popped in with no
+animation → scrim fade 200ms + panel slide-in on the iOS sheet curve 320ms, CSS-only,
+entrance-only [close still unmounts immediately — behaviour preserved], reduced-motion-safe;
+close button `×` glyph 32px → lucide `X` at 44px + sage focus ring; the drawer is a SIBLING of
+the blurred header, so no portal needed). **(3) Platform CSS polish** (`globals.css`):
+`text-size-adjust: 100%` (no iOS landscape font inflation), `touch-action: manipulation` on
+interactive elements (no double-tap-zoom misfires/tap delay), brand sage `::selection`, and a
+reduced-motion guard for ALL utility animations (float/fadeUp/slideIn/slideOut/toastIn/
+scrimIn/drawerIn/remy-fade-in — previously unguarded). **(4) Bottom-nav tabs + More** got
+inset sage `focus-visible` rings (were ring-less). **(5) Nest first-wake preload** — hidden,
+inert, same-size `<Remy assetVariant="avatar">` instances warm the wake-choreography frames
+(idle/wink/welcome/goodbye ≈ 350KB once per session), so the first wake sequence never
+pops/flashes. **Deferred (recorded, not regressions):** toast exit animation (lifecycle);
+route/tab transitions (RSC-boundary risk); MediaThumb blur-up fade (touches the signed-URL
+fallback path — needs its own verified pass); theme-color sage→sand (sage is a deliberate
+documented brand decision — do not re-litigate); active-tab indicator animation (subjective).
+tsc clean · lint 0 errors · build 67/67 green.
+
+Before that: the **Remy AVATAR asset tier — "Remy IS the button" (2026-07-13,
 asset-architecture + presentation only; no logic/routing/behaviour change; supersedes the earlier
 post-cert `size 40→48` polish, which enlarged the box but could not fix the composition).** Root
 cause: all 17 expression PNGs are 1536×1024 **landscape scene** illustrations (transparent

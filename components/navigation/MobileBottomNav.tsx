@@ -39,7 +39,7 @@ function Tab({
       href={href}
       onClick={() => haptic("light")}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition ${
+      className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage ${
         active ? "text-sage" : "text-charcoal-muted hover:text-sage"
       }`}
     >
@@ -120,7 +120,7 @@ function BottomNavContent({ onOpenMore, memoryCount }: MobileBottomNavProps) {
             onOpenMore();
           }}
           aria-haspopup="dialog"
-          className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium transition ${
+          className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage ${
             moreActive ? "text-sage" : "text-charcoal-muted hover:text-sage"
           }`}
         >

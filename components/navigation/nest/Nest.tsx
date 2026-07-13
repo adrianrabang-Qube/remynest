@@ -134,6 +134,18 @@ export default function Nest({
         </span>
       </FloatingCompanionButton>
 
+      {/* Warm the wake-choreography artwork so Remy's FIRST wake never pops: hidden, inert
+          <Remy> instances at the live size generate the exact same optimized-image URLs as
+          the choreography beats (waking→idle, peeking→wink, emerging/greeting→welcome,
+          returningHome→goodbye), so every frame is already cached when the sequence plays.
+          Zero-size + overflow-hidden + aria-hidden → no layout, no a11y, no interaction. */}
+      <span aria-hidden className="pointer-events-none absolute h-0 w-0 overflow-hidden">
+        <Remy state="idle" assetVariant="avatar" size={48} decorative />
+        <Remy state="wink" assetVariant="avatar" size={48} decorative />
+        <Remy state="welcome" assetVariant="avatar" size={48} decorative />
+        <Remy state="goodbye" assetVariant="avatar" size={48} decorative />
+      </span>
+
       {/* The menu is a CONSEQUENCE of Remy greeting — Remy offers the actions while greeting. */}
       <NestMenu
         open={presentsActions}

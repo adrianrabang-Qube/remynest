@@ -55,17 +55,20 @@ export default function ToastProvider({
 
       {/* LA2 (WCAG 4.1.3 Status Messages): a persistent polite live region so the
           app-wide success/error channel ("Memory saved", "Person added", errors) is
-          announced to screen-reader users. */}
+          announced to screen-reader users. Placement is safe-area-aware so a toast
+          never sits under the iOS status bar / notch. (`animate-toastIn` — the old
+          `animate-slide-in` class never existed, so toasts popped in unanimated;
+          `bg-sage-deep` is the brand token, 8:1 with white — up from green-700's 5.3:1.) */}
       <div
         role="status"
         aria-live="polite"
         aria-atomic="true"
-        className="fixed top-5 right-5 space-y-2 z-50"
+        className="fixed right-[max(1.25rem,env(safe-area-inset-right))] top-[max(1.25rem,env(safe-area-inset-top))] z-50 space-y-2"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="bg-green-700 text-white px-4 py-2 rounded shadow-lg animate-slide-in"
+            className="animate-toastIn max-w-[calc(100vw-2.5rem)] rounded-2xl bg-sage-deep px-5 py-3 text-[15px] font-medium text-white shadow-soft-lg sm:max-w-sm"
           >
             {toast.message}
           </div>

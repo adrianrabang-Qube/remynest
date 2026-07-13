@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 
 import ProfileHub from "@/components/profile/ProfileHub";
 import { useFocusTrap } from "@/lib/a11y/use-focus-trap";
@@ -82,7 +83,7 @@ export default function MobileNavDrawer({
       aria-label="Menu"
     >
       <div
-        className="absolute inset-0 bg-charcoal/40"
+        className="animate-scrimIn absolute inset-0 bg-charcoal/40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -90,7 +91,7 @@ export default function MobileNavDrawer({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl"
+        className="animate-drawerIn absolute right-0 top-0 flex h-full w-[88%] max-w-sm flex-col bg-white shadow-2xl"
       >
         {/* Full-height drawer (top-0): pad the header for the status bar / notch
             so "Menu" + close never sit under it (env() is 0 on web → no-op there). */}
@@ -102,9 +103,9 @@ export default function MobileNavDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-charcoal-muted transition hover:bg-sand"
+            className="-mr-1.5 flex h-11 w-11 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
           >
-            ×
+            <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
 

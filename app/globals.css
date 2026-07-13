@@ -45,6 +45,10 @@ html {
   /* LA2 (WCAG 2.4.11 Focus Not Obscured): keep tabbed/anchored targets below the
      sticky translucent app headers so focus never lands hidden behind them. */
   scroll-padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+  /* Keep the calibrated type scale stable when iOS rotates to landscape
+     (Safari/WKWebView otherwise inflates text unpredictably). */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -91,6 +95,25 @@ body {
  */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Instant, zoom-proof taps: interactive elements opt out of double-tap-to-zoom so
+   rapid taps (nav tabs, toggles, "Done" buttons) never trigger an accidental zoom
+   or a tap delay. `manipulation` still allows panning and pinch-zoom. */
+a,
+button,
+label,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Brand text selection — a warm sage wash instead of the default OS blue. */
+::selection {
+  background: rgba(79, 107, 91, 0.22);
+  color: var(--text);
 }
 
 @media (hover: none) {
@@ -375,6 +398,67 @@ p {
 
 .animate-slideIn {
   animation: slideIn 0.25s ease-out forwards;
+}
+
+/* Global toast entrance — a gentle settle (small rise + fade), iOS-banner-like.
+   Referenced by ToastProvider (the app-wide "Memory saved" feedback channel). */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-toastIn {
+  animation: toastIn 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* "More" drawer entrance — scrim fades while the panel slides in from the right
+   on the iOS sheet curve. Entrance-only (closing stays immediate: the drawer
+   unmounts on close, and delaying unmount would change behaviour). */
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-scrimIn {
+  animation: scrimIn 200ms ease-out;
+}
+
+@keyframes drawerIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-drawerIn {
+  animation: drawerIn 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Reduced motion: the utility animations above (and the legacy hero/toast ones)
+   settle instantly — every `from` state ends at the element's natural state. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-fadeUp,
+  .animate-slideIn,
+  .animate-slideOut,
+  .animate-toastIn,
+  .animate-scrimIn,
+  .animate-drawerIn,
+  .remy-fade-in {
+    animation: none;
+  }
 }
 
 /* ── Remy Avatar — smooth crossfade between moods ── */
