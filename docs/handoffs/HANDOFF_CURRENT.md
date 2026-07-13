@@ -15,7 +15,22 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA6 — Disaster Recovery & Business
+Readiness**. No implementation task is active — the last work was **LA7 — Final Production Launch
+Readiness Audit** (verification pass; NO runtime/product/architecture change). The final full-system audit
+across every subsystem + the ~24 critical end-to-end flows returned **NO remaining ENGINEERING blockers
+for production deployment** (Overall ~90 · Engineering ~96 · Infra ~88 · Deploy ~90). The 9-lens audit +
+7-lens review both hit the subagent session limit → completed **inline** (repo precedent RC3/LA4/LA6).
+**One config-drift finding FIXED:** `.env.example` documented the WRONG Stripe price-id names
+(`STRIPE_PRICE_PREMIUM` vs the real `STRIPE_{PREMIUM,FAMILY,ENTERPRISE}_{MONTHLY,YEARLY}_PRICE_ID` ×6) +
+omitted the store URLs → corrected `.env.example` + reconciled `check-production-env.mjs` (checkout
+already validates + 400s on an unset price, so config not a crash). **Deferred (LOW):** 3 caller-less API
+routes (send-notification/build-relationships/timeline; not removed — unseen-caller risk). Residual is
+**operator/legal/product only** (push the 14 unpushed commits, apply migrations, set prod env, backups +
+monitoring; `/terms` jurisdiction + controller entity/DPO; submission package). tsc/lint/build green.
+`main` auto-deploys on push (LA7 committed locally, unpushed). Full detail:
+`docs/LA7-LAUNCH-READINESS-REPORT.md`.
+
+Before LA7, the last work was **LA6 — Disaster Recovery & Business
 Continuity** (documentation-first; NO runtime/product/architecture change). Produced the operational
 DR/BC layer complementing the existing backup docs + the GDPR breach policy: **`docs/DISASTER_RECOVERY_PLAN.md`**
 (dependency map, RTO/RPO objectives, SPOF analysis, backup strategy, ownership, severity model,
@@ -157,6 +172,12 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA7 — Final Production Launch Readiness Audit** (verification pass; NO runtime/product/architecture
+  change; audit + review completed inline [subagent limit], repo precedent). Full-system audit → **NO
+  remaining engineering blockers for production deployment** (Overall ~90 · Eng ~96 · Infra ~88 · Deploy
+  ~90). Fixed the `.env.example` Stripe price-id + store-URL drift + reconciled `check-production-env.mjs`.
+  Deferred 3 caller-less API routes as LOW post-launch cleanup. Residual = operator/legal/product only.
+  tsc/lint/build green. Report: `docs/LA7-LAUNCH-READINESS-REPORT.md`.
 - **LA6 — Disaster Recovery & Business Continuity** (documentation-first; NO runtime/product/
   architecture change). Operational DR/BC layer: `docs/DISASTER_RECOVERY_PLAN.md` (dependency map,
   RTO/RPO, SPOF, backup strategy, ownership, severity, automation) + `docs/runbooks/` (index + 5

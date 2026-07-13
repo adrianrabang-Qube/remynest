@@ -30,6 +30,12 @@ const REQUIRED = [
   ["NEXT_PUBLIC_ONESIGNAL_APP_ID", "OneSignal app id (push init)"],
   ["ONESIGNAL_API_KEY", "OneSignal REST key (cron push)"],
   ["CRON_SECRET", "Reminder cron auth — cron fails CLOSED (401) if unset"],
+  // Launch-tier price ids (lib/billing/plans.ts reads these EXACT names). Without them
+  // the premium-upgrade flow can't resolve a price → checkout is broken for that plan.
+  ["STRIPE_PREMIUM_MONTHLY_PRICE_ID", "Premium monthly checkout price"],
+  ["STRIPE_PREMIUM_YEARLY_PRICE_ID", "Premium yearly checkout price"],
+  ["STRIPE_FAMILY_MONTHLY_PRICE_ID", "Family monthly checkout price"],
+  ["STRIPE_FAMILY_YEARLY_PRICE_ID", "Family yearly checkout price"],
 ];
 
 // RECOMMENDED: degrades to a no-op / optional feature if missing (does not fail the check).
@@ -41,6 +47,10 @@ const RECOMMENDED = [
   ["SENTRY_AUTH_TOKEN", "Source-map upload auth"],
   ["TOMBSTONE_USER_ID", "GDPR retain-mode deletion path only"],
   ["MEMORY_IMAGE_TRANSFORMS_ENABLED", "Thumbnail transforms gate (default OFF)"],
+  ["STRIPE_ENTERPRISE_MONTHLY_PRICE_ID", "Enterprise monthly (post-launch tier)"],
+  ["STRIPE_ENTERPRISE_YEARLY_PRICE_ID", "Enterprise yearly (post-launch tier)"],
+  ["NEXT_PUBLIC_APP_STORE_URL", "/download iOS button (empty if unset)"],
+  ["NEXT_PUBLIC_PLAY_STORE_URL", "/download Android button (empty if unset)"],
 ];
 
 function present(key) {

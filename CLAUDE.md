@@ -2112,6 +2112,32 @@ Security) hit the subagent session limit → completed inline (repo precedent). 
 migrations have rollback blocks, re-flag PITR/Storage-residual as NEW blockers, make the env-check script
 print values, or treat LA6 as a code/behaviour change. See `docs/LA6-DISASTER-RECOVERY-REPORT.md`.
 
+**LA7 — Final Production Launch Readiness Audit (authoritative, 2026-07-13 — verification pass; NO
+runtime/product/architecture change):** the final full-system audit before RC certification, across every
+subsystem + the ~24 critical end-to-end flows. **Determination: RemyNest has NO remaining ENGINEERING
+blockers for production deployment** (Engineering readiness ~96/100; Overall ~90/100 — the gap is
+operator/legal/product activation, not code). The 9-lens audit + 7-lens review both hit the subagent
+session limit → completed **inline** (repo precedent RC3/LA4/LA6) against the actual code. **One real
+config-drift finding, FIXED:** `.env.example` documented the **wrong Stripe price-id names**
+(`STRIPE_PRICE_PREMIUM`/`STRIPE_PRICE_FAMILY`) while the code (`lib/billing/plans.ts`) reads the 6 real
+`STRIPE_{PREMIUM,FAMILY,ENTERPRISE}_{MONTHLY,YEARLY}_PRICE_ID`, and it omitted `NEXT_PUBLIC_APP_STORE_URL`/
+`_PLAY_STORE_URL` (read by `/download`) — an operator following it would misconfigure checkout. Corrected
+`.env.example` + reconciled `scripts/check-production-env.mjs` (launch-tier price ids REQUIRED; Enterprise
++ store URLs RECOMMENDED). Checkout already **validates + returns a clean 400** ("Invalid billing
+configuration") when a price is unset, so this was config, never a crash. **Deferred (documented, NOT
+removed):** 3 API routes with no in-repo caller — `/api/send-notification`, `/api/build-relationships`
+(the *function* is live via enrichment; the *route* isn't), `/api/timeline` — are auth-gated + harmless;
+RC2 already audited routes, and removing routes in the final pre-launch pass risks an unseen caller, so
+they're a LOW post-launch cleanup, not a blocker. **Correctly-categorized residuals (do NOT re-flag as
+engineering blockers):** OPERATOR (push the unpushed commits — main auto-deploys; apply the probe-gated
+migrations; set prod env incl. the corrected price-id names; Storage backup + test restore; uptime +
+Sentry alerts; restore drill; mailboxes), LEGAL (`/terms` jurisdiction; controller entity/DPO), PRODUCT
+(App-Store submission package; Health/Sensitive data declaration). Non-blocking eng follow-ups
+(memory-edit authz parity, Ask-Remy quota-gating, Stripe idempotency ledger, auth_pending cron,
+orphan-sweep, distributed rate-limit) stay documented. tsc/lint/build green. **Do NOT** re-add the wrong
+`STRIPE_PRICE_*` names, remove the 3 dead-route candidates without verifying callers, or re-flag operator/
+legal/product residuals as engineering blockers. See `docs/LA7-LAUNCH-READINESS-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +
