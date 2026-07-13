@@ -19,7 +19,23 @@ operator go-live**. *(Git reconciliation 2026-07-13: the previously-unpushed RC2
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Final QA Pass — verified defects only (2026-07-13):** walked the
+The most recent work is the **Storage Capacity Architecture — composed entitlement (2026-07-13,
+behaviour-preserving; no Stripe/schema/UI change):** the operator proposed splitting storage into
+independently-purchasable packs; a principal-architect evaluation (vs iCloud+/Google One/Dropbox/
+OneDrive/Proton/Evernote/Notion/ChatGPT) concluded the INSTINCT is right (storage demand shouldn't
+force a Premium→Family features upsell) but shipping a second consumer purchase dimension at launch
+is wrong (mature products keep ONE dimension; boosters only appear post-PMF as a single SKU; extra
+3.1.1 surface; the lapsed-pack "pay or lose memories" state must be designed first). **Chosen
+architecture: capacity-as-composed-entitlement** — new `lib/storage/capacity.ts`
+(`resolveStorageCapacity(tier, extraGrants)`, pure/sync/never-throws) sums capacity GRANTS (plan base
+today; future storage-pack/promotion/grandfathered grants plug into the `extraGrants` seam);
+`getStorageUsage` now derives `limitBytes` from it (byte-identical today) and exposes the additive
+`StorageUsage.capacity` breakdown. Storage-pack SKUs are a **deferred post-launch product decision**
+(operator approval + usage-data trigger; grants attach to the plan owner only). CLAUDE.md
+"Single source of truth" note superseded (2026-07-13) + `docs/features/storage-ledger.md` updated.
+tsc clean · lint 0 errors · build 67/67.
+
+Before that: the **Final QA Pass — verified defects only (2026-07-13):** walked the
 critical journeys adversarially (Apple-review / elderly-user / caregiver / shared-device lenses) and
 fixed FIVE verified defects, deferring one: **(A/B, HIGH — frozen-surface, proven-defect carve-out)**
 the reminder create/toggle/delete forms had NO pending guard; React queues same-form server-action

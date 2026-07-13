@@ -2190,14 +2190,28 @@ capacity*. At the limit: uploads are **blocked** → the usage UI reflects **ful
 capacity → the **storage-upgrade modal** appears → the user is **directed to storage
 plans**. **All future media types (audio/voice/documents/PDF) MUST reuse the same
 byte-based storage-accounting architecture** (`storage_ledger` + `enforceUploadQuota`).
-**Single source of truth (authoritative, 2026-06-23):** `subscription_plan →
-BILLING_PLANS → storageGB → storage quota`. Storage is **bundled with subscription
-tiers** (NOT standalone add-ons; do not create storage-only Stripe products). Launch
-tiers: **FREE 1 GB · PREMIUM 25 GB · FAMILY 100 GB** (enterprise later). The limit comes
-from `lib/billing/plans.ts` `storageGB`; `getStorageUsage` resolves the user's plan via
-`resolveSubscription(profile)`. The **per-file 25 MB cap is REMOVED** — any supported
-media size uploads as long as `used < plan_limit`; the only bounds are the Supabase
-object size limit + the total quota. Do not reintroduce a per-file size gate.
+**Single source of truth (authoritative, 2026-07-13 — supersedes the 2026-06-23 wording;
+capacity is now a COMPOSED ENTITLEMENT):** storage capacity = the **sum of grants**, resolved
+ONLY in **`lib/storage/capacity.ts`** (`resolveStorageCapacity(tier, extraGrants)` — pure,
+sync, never throws): today exactly ONE grant exists per user — the plan's included storage
+(`subscription_plan → BILLING_PLANS.storageGB → the "plan" grant`), so enforcement is
+byte-identical to the old direct lookup; `getStorageUsage` exposes the composition as
+`StorageUsage.capacity` (additive). Future capacity sources (**"storage-pack" booster SKU ·
+"promotion" · "grandfathered"**) are GRANTS plugged into the `extraGrants` seam — a webhook
+writes a grant row, `getStorageUsage` fetches + passes it; no redesign. **PRODUCT GATE
+(operator-decided 2026-07-13 after a principal-architect evaluation):** independent
+storage-pack SKUs are **deliberately NOT shipped** — consumer products converge on ONE
+purchase dimension; a booster (à la Proton/OneDrive, ONE SKU max) is a **deferred post-launch
+product decision requiring operator approval + real usage data** (trigger: meaningful share of
+Premium users >80% quota who don't want Family), and must solve the lapsed-pack
+data-retention state (grace/read-only — NEVER "pay or lose memories") before shipping. Do
+**not** create storage-only Stripe products without that approval; grants attach to the PLAN
+OWNER (the payer), never to individual family members (pool capacity = owner's composed
+total; pool usage already sums `memberUserIds`). Launch tiers unchanged: **FREE 1 GB ·
+PREMIUM 25 GB · FAMILY 100 GB** (enterprise unlimited). The **per-file 25 MB cap is
+REMOVED** — any supported media size uploads as long as `used < capacity`; the only bounds
+are the Supabase object size limit + the composed quota. Do not reintroduce a per-file size
+gate, add a second capacity-resolution path, or make `resolveStorageCapacity` impure/async.
 
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:

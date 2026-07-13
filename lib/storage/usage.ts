@@ -1,8 +1,10 @@
 import { supabaseAdmin } from "@/utils/supabase/admin";
-import { BILLING_PLANS, type BillingPlan } from "@/lib/billing/plans";
+import { type BillingPlan } from "@/lib/billing/plans";
 import { resolveSubscription } from "@/lib/billing/resolve-subscription";
-
-const BYTES_PER_GB = 1024 * 1024 * 1024;
+import {
+  resolveStorageCapacity,
+  type StorageCapacity,
+} from "./capacity";
 
 export interface StorageUsage {
   usedBytes: number;
@@ -10,8 +12,14 @@ export interface StorageUsage {
   remainingBytes: number;
   /** Whole-number percentage 0..100. */
   percentUsed: number;
-  /** The user's billing plan — capacity comes from BILLING_PLANS[tier].storageGB. */
+  /** The user's billing plan — the base capacity grant comes from this tier. */
   tier: BillingPlan;
+  /**
+   * The composed capacity behind `limitBytes` (plan grant + any future add-on/
+   * promo/grandfathered grants — see lib/storage/capacity.ts). Additive field:
+   * today it always holds exactly the plan grant.
+   */
+  capacity: StorageCapacity;
   attachmentCount: number;
   /** Users summed into this figure — [userId] today, all members for a family pool. */
   memberUserIds: string[];
@@ -19,14 +27,11 @@ export interface StorageUsage {
   degraded: boolean;
 }
 
-function storageGbToBytes(gb: number | "unlimited"): number {
-  return gb === "unlimited" ? Number.MAX_SAFE_INTEGER : gb * BYTES_PER_GB;
-}
-
 /**
- * Resolve a user's plan from their subscription — the SINGLE source of truth for
- * storage capacity: `subscription_plan -> BILLING_PLANS -> storageGB -> quota`
- * (storage is bundled with subscription tiers, not sold standalone). On a
+ * Resolve a user's plan from their subscription. The plan supplies the BASE
+ * capacity grant; total capacity is composed in `resolveStorageCapacity`
+ * (lib/storage/capacity.ts — the single capacity source of truth:
+ * `subscription_plan -> plan grant [+ future grants] -> quota`). On a
  * profile-read failure, defaults to FREE (the safe minimum capacity).
  */
 export async function resolveStorageTier(
@@ -88,7 +93,10 @@ export async function getStorageUsage(
     0
   );
 
-  const limitBytes = storageGbToBytes(BILLING_PLANS[tier].storageGB);
+  // Composed capacity (plan grant only today — extraGrants is the seam a future
+  // storage-pack/promo grant read plugs into, fetched alongside the reads above).
+  const capacity = resolveStorageCapacity(tier);
+  const limitBytes = capacity.totalBytes;
   const remainingBytes = Math.max(0, limitBytes - usedBytes);
   const percentUsed =
     limitBytes > 0
@@ -103,6 +111,7 @@ export async function getStorageUsage(
     remainingBytes,
     percentUsed,
     tier,
+    capacity,
     attachmentCount,
     memberUserIds,
     degraded: !!error,

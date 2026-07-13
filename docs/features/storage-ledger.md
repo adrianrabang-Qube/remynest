@@ -113,7 +113,21 @@ or "manage/subscribe on the web" steering text** — only a neutral free-up-spac
 message. (The task's literal native example *"Manage your subscription on the web"*
 was intentionally **not** used — it would violate the 3.1.3 anti-steering rule.)
 
+## Capacity = composed entitlement (2026-07-13)
+Capacity is no longer a direct `plan → storageGB` lookup: **`lib/storage/capacity.ts`**
+(`resolveStorageCapacity(tier, extraGrants)`) composes the limit as the **sum of grants** —
+today exactly one (the plan's included storage), so enforcement is byte-identical.
+`StorageUsage.capacity` (additive field) exposes the grant breakdown for future UI.
+Future sources — a **storage-pack booster SKU** (deferred product decision; operator
+approval + usage data required; must solve the lapsed-pack retention state first),
+**promotions**, **grandfathered** allocations — plug in as grants via the `extraGrants`
+seam (webhook writes a grant row → `getStorageUsage` fetches + passes it). Grants attach
+to the **plan owner** only; pool capacity = the owner's composed total. Do not add a
+second capacity-resolution path. Authoritative rationale: CLAUDE.md → "Single source of
+truth (2026-07-13)".
+
 ## Not in scope (future)
-Plan pricing changes / new Stripe products (e.g. a STARTER price); storage-plan
+Plan pricing changes / new Stripe products (e.g. a STARTER price — and storage-pack
+SKUs remain gated on the product decision above); storage-plan
 mapping from billing (`resolveStorageTier` still defaults FREE); `storage_pools`
 membership tables + per-profile family reporting UI.
