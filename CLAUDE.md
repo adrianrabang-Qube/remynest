@@ -638,6 +638,30 @@ never hardcode an `<img>`/`next/image` for Remy elsewhere. **Do NOT** re-introdu
 master/production/archive sub-folders, hardcode an asset path outside the registry, or modify
 `remy_master_v1.png`. See `public/assets/remy/README.md`.
 
+**Remy asset pipeline — TWO RENDER TIERS per expression (authoritative, 2026-07-13 — extends the
+flat-folder pipeline; the "Remy IS the button" fix):** every expression asset now ships in two tiers
+of the SAME approved artwork, resolved through the ONE registry: **scene** (`remy_<expr>.png`, the
+approved 1536×1024 landscape illustrations — transparent background; the character often shares the
+canvas with props/speech art [welcome/goodbye are full marketing scenes]) for heroes/stages/empty
+states/celebrations (≳120px), and **avatar** (`remy_avatar_<expr>.png`, 256×256 square, transparent,
+character at ~86% fill with crest headroom for the float bob) for navigation + compact surfaces
+(≲100px). **Root cause this fixes:** rendering scene art `object-contain` in a small square letterboxes
+1536×1024 → the bird was a ~15px speck inside the 48px Nest FAB ("white circle with a tiny bird").
+**Avatars are derived MECHANICALLY (crop + scale ONLY — never redrawn/recolored/reinterpreted)** from
+the same approved masters (`remy_master_v1.png` untouched), so the character identity is byte-derived
+from approved art. Architecture: `RemyAsset.avatarSrc` (optional) + `RemyAssetVariant`
+("scene"|"avatar") + `resolveRemyAssetSrc()` in the SOLE registry (`asset-registry.ts` still the only
+owner of paths); the single `<Remy>` renderer takes `assetVariant` (default **"scene"** — every
+existing consumer unchanged) with **automatic scene fallback** when an avatar is missing (a future
+expression can never break). Adopted by the four compact surfaces: **Nest** (48px FAB — Remy now fills
+the circle), **NestMenu** greeting (44px), **RemyMomentChip** (40px), **FloatingCompanionLayer**
+(64px). RemyStage/RemyCelebration/error pages stay scene-tier (correct at their sizes). Avatar files
+are 50–160KB vs 2.3–3.2MB scenes (the nav no longer decodes a 1.5-megapixel source for a 48px button).
+Future surfaces (widgets, Live Activities, Dynamic Island, watchOS, VisionOS) consume the avatar tier
+via the same registry keys. **Do NOT** render scene-tier art on a ≲100px surface, hardcode an avatar
+path outside the registry, remove the scene fallback, produce an avatar by redrawing (crop/scale of
+the approved export only), or flip any existing consumer's default away from "scene".
+
 **Remy is an application-wide PLATFORM SERVICE, not a page feature (authoritative, 2026-07-04 —
 v2, supersedes v1):** Remy is a first-class capability like auth/analytics/theme/router. Pipeline:
 `Public API → Event Bus → Brain → Emotion Engine → Policy Engine → Animation/Voice Engines →
@@ -702,10 +726,12 @@ reachable from the tap flow, and **no deferred AI/voice/Rive/Lottie was built**.
 routing ONLY** — billing/auth/caregiver+access_level/reconcile/reminders(scheduling/native/OneSignal)/
 memory/search/workspace/active-profile all byte-unchanged; verified tsc/lint/build green + independent
 adversarial review CLEAN (all 15 verdicts YES). **Known constraints (flagged):** the "Remy Design
-Bible" is **not in the repo** (external — visuals scoped to existing approved assets + CSS), and the
-Remy PNGs have **opaque backgrounds**, so the clean white `variant="nest"` pedestal is the nest vessel
-and dedicated per-stage nest art awaits transparent assets (a future registry-only drop, no code
-change). **Do NOT** reintroduce the "+" FAB, add a `menuOpen`/menu STATE (the menu derives from a
+Bible" is **not in the repo** (external — visuals scoped to existing approved assets + CSS).
+*(CORRECTED 2026-07-13: the Remy PNGs do NOT have opaque backgrounds — they are transparent-background
+character art on a 1536×1024 landscape canvas; the stale opaque claim came from previewing raw RGB
+without alpha. The white `variant="nest"` pedestal remains the nest vessel; the AVATAR asset tier —
+see the "Remy asset pipeline — TWO RENDER TIERS" note — is what makes Remy fill it. Dedicated
+per-stage nest art remains a future registry-only drop.)* **Do NOT** reintroduce the "+" FAB, add a `menuOpen`/menu STATE (the menu derives from a
 behaviour's `presentsActions`), fork a second renderer/provider/registry/brain/policy/event-bus, build
 a second state machine in the nav layer, add a Remy expression/behaviour that isn't drawn through the
 single `<Remy>` renderer, un-portal the sheet, drop `withContext`, or build the deferred live/AI content.

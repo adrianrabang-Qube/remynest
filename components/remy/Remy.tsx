@@ -2,7 +2,9 @@ import Image from "next/image";
 
 import {
   getRemyAsset,
+  resolveRemyAssetSrc,
   type RemyAssetKey,
+  type RemyAssetVariant,
 } from "@/lib/remy/companion/asset-registry";
 import type { RemyExpression } from "@/lib/remy/core/presentation";
 import type { RemyEmotion } from "@/lib/remy/core/emotion";
@@ -69,6 +71,15 @@ export const REMY_VARIANTS = Object.keys(VARIANT_TO_KEY) as RemyVariant[];
 export interface RemyProps {
   /** Which expression to show. Default "idle". */
   state?: RemyVariant;
+  /**
+   * Which RENDER TIER of the artwork to draw (registry-resolved; path still lives ONLY in
+   * the registry). `"scene"` (default) = the full 1536×1024 illustration — heroes, stages,
+   * empty states (≳ 120px). `"avatar"` = the square, character-filling 256×256 export of the
+   * SAME approved art — navigation and compact surfaces (≲ 100px), where scene art would
+   * letterbox the character down to a fraction of the box. Falls back to scene automatically
+   * when an expression has no avatar export.
+   */
+  assetVariant?: RemyAssetVariant;
   /** Rendered box size in px (square). Default 120. */
   size?: number;
   /** How the art fits its box. "contain" (default) shows the whole frame; "cover" fills + crops. */
@@ -107,6 +118,7 @@ const MOTION_BY_EMOTION: Partial<Record<RemyEmotion, string>> = {
 
 export function Remy({
   state = "idle",
+  assetVariant = "scene",
   size = 120,
   fit = "contain",
   className,
@@ -118,6 +130,7 @@ export function Remy({
   reactionKey,
 }: RemyProps) {
   const asset = getRemyAsset(VARIANT_TO_KEY[state]);
+  const src = resolveRemyAssetSrc(asset, assetVariant);
   const label = decorative ? "" : alt ?? asset.label;
 
   // The sprite plays exactly one animation at a time: sleep (resting), the feeling's reaction,
@@ -143,6 +156,7 @@ export function Remy({
       style={{ width: size, height: size }}
       data-remy-variant={state}
       data-remy-kind={asset.kind}
+      data-remy-tier={assetVariant}
       data-remy-emotion={emotion}
     >
       <span
@@ -150,7 +164,7 @@ export function Remy({
         className={["remy__sprite absolute inset-0", reactionClass].filter(Boolean).join(" ")}
       >
         <Image
-          src={asset.src}
+          src={src}
           alt={label}
           fill
           sizes={`${size}px`}

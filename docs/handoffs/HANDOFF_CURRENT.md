@@ -10,15 +10,37 @@
 > CLAUDE.md authoritative notes and slimmed to this continuation doc on 2026-07-09. The full prior
 > history remains in git.)*
 
-Last Updated: 2026-07-11
+Last Updated: 2026-07-13
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **CERTIFIED — awaiting
-operator go-live**. *(Post-cert UI polish, presentation-only, doesn't affect the RC certification:*
-*the bottom-nav center **Nest** avatar was enlarged from `size={40}` → `size={48}` so Remy fills the*
-*48px FAB [`components/navigation/nest/Nest.tsx`] — wrapped in a circular clip so the enlarged 3:2*
-*frame's corners trim cleanly; `fit` stays `contain` [the assets are landscape scenes — `idle`/`sleeping`/`welcome` — so `cover` is unsafe]; navigation/click/animation/state/a11y/hit-target/safe-area + the `.nest` halo/motes all unchanged; tsc/lint/build green. A true circular fill needs square/transparent per-stage nest art — a registry-only asset swap, no code, per the CLAUDE.md Nest note.)* No implementation task is active — the last work was the **RC FINAL RELEASE CANDIDATE
+operator go-live**. *(Git reconciliation 2026-07-13: the previously-unpushed RC2→RC-certification
+commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
+work is live in production. "Unpushed" claims in older entries below are historical.)*
+
+The most recent work is the **Remy AVATAR asset tier — "Remy IS the button" (2026-07-13,
+asset-architecture + presentation only; no logic/routing/behaviour change; supersedes the earlier
+post-cert `size 40→48` polish, which enlarged the box but could not fix the composition).** Root
+cause: all 17 expression PNGs are 1536×1024 **landscape scene** illustrations (transparent
+background — the old "opaque backgrounds" claim was stale; `welcome`/`goodbye` are full marketing
+scenes with speech-bubble text), so `object-contain` in the 48px Nest FAB letterboxed the bird to a
+~15px speck ("white circle with a tiny bird"). Fix (correct long-term architecture, not a CSS
+scale): a **second render tier per expression** — `remy_avatar_<expr>.png`, 256×256 square,
+transparent, character at ~86% fill with crest headroom for the 4px float bob — **derived
+mechanically (crop + scale only, never redrawn)** from the same approved masters
+(`remy_master_v1.png` untouched) and registered in the ONE asset registry (`RemyAsset.avatarSrc` +
+`RemyAssetVariant` + `resolveRemyAssetSrc()` with automatic scene fallback). The single `<Remy>`
+renderer gained `assetVariant` (default `"scene"` — every existing consumer unchanged). Adopted on
+the four compact surfaces: **Nest** (48px FAB), **NestMenu greeting** (44px), **RemyMomentChip**
+(40px), **FloatingCompanionLayer** (64px); RemyStage/RemyCelebration/error pages correctly stay
+scene-tier. Nest choreography/behaviour/evolution/time-of-day/halo/particles/a11y/routing all
+byte-unchanged (one prop per surface). Avatar files are 50–160KB vs 2.3–3.2MB scenes. All 17 avatars
+visually verified on mock-FAB contact sheets; scene-heavy poses hand-tuned via crop overrides.
+tsc clean · lint 0 errors · production build green. Authoritative: CLAUDE.md "Remy asset pipeline —
+TWO RENDER TIERS" + `public/assets/remy/README.md`.
+
+Before that, the last work was the **RC FINAL RELEASE CANDIDATE
 CERTIFICATION** (independent verification; NO code change — certification docs only). Validation GREEN
 (tsc/lint/build); the critical production invariants were verified intact with no regression
 (protect-by-default auth, private `memory-media`, purchase gating, the LA5.1 Art-17 migration fix, Stripe

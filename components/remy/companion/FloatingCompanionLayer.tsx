@@ -53,6 +53,7 @@ export default function FloatingCompanionLayer() {
         >
           <Remy
             state={presentation.expression}
+            assetVariant="avatar"
             emotion={emotion}
             reactionKey={reactionKey}
             float

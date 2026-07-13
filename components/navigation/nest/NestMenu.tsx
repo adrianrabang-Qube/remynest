@@ -128,6 +128,7 @@ export default function NestMenu({
           >
             <Remy
               state={greeting.expression}
+              assetVariant="avatar"
               emotion={greeting.emotion}
               reactionKey="nest-greeting"
               size={44}

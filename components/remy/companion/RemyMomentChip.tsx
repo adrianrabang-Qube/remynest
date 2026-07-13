@@ -53,6 +53,7 @@ export default function RemyMomentChip({
           >
             <RemyRenderer
               state={expression}
+              assetVariant="avatar"
               emotion={emotion}
               reactionKey={reactionKey}
               size={40}

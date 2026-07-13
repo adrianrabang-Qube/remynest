@@ -111,18 +111,19 @@ export default function Nest({
             <i className={styles.particle} />
             <i className={styles.particle} />
           </span>
-          {/* Remy fills the FAB circle: the avatar box now spans the full 48px button
-              (was an under-sized 40px that left a wide white ring), so the bird is the
-              primary element instead of floating in white. A circular clip on THIS
-              wrapper only (not `.nest`) trims the enlarged frame's corners cleanly and
-              keeps the ambient halo + motes — which live on `.nest` — unclipped. `fit`
-              stays `contain` (never crops the character; safe for the landscape frames),
-              and the ~8px top/bottom letterbox gives the 4px float bob headroom so no
-              part of the animation is clipped. Sizes off the FAB (`h-12 w-12`), so it
-              scales with the button on every device. */}
+          {/* Remy IS the button: the AVATAR tier (`assetVariant="avatar"`) draws the square,
+              character-filling 256px export of the same approved art, so the bird fills the
+              48px circle (~86% of it) instead of a landscape scene letterboxing them down to
+              a ~15px speck. The circular clip on THIS wrapper only (not `.nest`) trims any
+              square-crop edges cleanly and keeps the ambient halo + motes — which live on
+              `.nest` — unclipped. `fit` stays `contain` (never distorts), the avatar's built-in
+              ~7% crest headroom absorbs the 4px float bob, and a missing avatar export falls
+              back to scene art safely inside this same clip. Sizes off the FAB (`h-12 w-12`),
+              so it scales with the button on every device. */}
           <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full">
             <Remy
               state={displayExpression}
+              assetVariant="avatar"
               emotion={displayEmotion}
               reactionKey={behavior}
               float={isResting}
