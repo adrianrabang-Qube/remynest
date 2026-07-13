@@ -14,8 +14,21 @@ Last Updated: 2026-07-11
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
-Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA7 — Final Production Launch
+Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **CERTIFIED — awaiting
+operator go-live**. No implementation task is active — the last work was the **RC FINAL RELEASE CANDIDATE
+CERTIFICATION** (independent verification; NO code change — certification docs only). Validation GREEN
+(tsc/lint/build); the critical production invariants were verified intact with no regression
+(protect-by-default auth, private `memory-media`, purchase gating, the LA5.1 Art-17 migration fix, Stripe
+500-on-writeFailed, no committed secrets, `.env.example`↔code). An independent **7-lens multi-agent
+certification (Senior Staff / Principal SW / Security / SRE / Mobile / Privacy / Platform — 8 agents, 0
+errors) returned ALL GO/96; board decision GO, overall 96/100, ZERO verified engineering blockers.**
+**DECISION: RemyNest Release Candidate is CERTIFIED for production deployment.** Residual = operator (push
+the 14 commits, apply migrations, set prod env, Storage backup + test restore, uptime/Sentry alerts) /
+legal (`/terms` jurisdiction, controller entity/DPO) / product (submission package, Health-data
+declaration) — none engineering. `main` auto-deploys on push (certification committed locally, unpushed).
+Full detail: `docs/RC-FINAL-CERTIFICATION.md`.
+
+Before the RC certification, the last work was **LA7 — Final Production Launch
 Readiness Audit** (verification pass; NO runtime/product/architecture change). The final full-system audit
 across every subsystem + the ~24 critical end-to-end flows returned **NO remaining ENGINEERING blockers
 for production deployment** (Overall ~90 · Engineering ~96 · Infra ~88 · Deploy ~90). The 9-lens audit +
@@ -172,6 +185,11 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **RC — FINAL RELEASE CANDIDATE CERTIFICATION** (independent verification; NO code change — certification
+  docs only). Validation green; invariants verified intact (no regression); independent 7-lens multi-agent
+  certification (8 agents, 0 errors) — ALL GO/96, board GO, overall 96/100, **ZERO verified engineering
+  blockers**. **RemyNest Release Candidate is CERTIFIED for production deployment.** Residual =
+  operator/legal/product go-live only. Report: `docs/RC-FINAL-CERTIFICATION.md`.
 - **LA7 — Final Production Launch Readiness Audit** (verification pass; NO runtime/product/architecture
   change; audit + review completed inline [subagent limit], repo precedent). Full-system audit → **NO
   remaining engineering blockers for production deployment** (Overall ~90 · Eng ~96 · Infra ~88 · Deploy
