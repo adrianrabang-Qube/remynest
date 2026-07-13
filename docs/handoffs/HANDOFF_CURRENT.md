@@ -15,7 +15,16 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **CERTIFIED — awaiting
-operator go-live**. *(Git reconciliation 2026-07-13: the previously-unpushed RC2→RC-certification
+operator go-live**. *(Branch archival & engineering-history pass, 2026-07-13, documentation-only — no
+branches/tags/code/history changed, nothing pushed: created **`docs/PROJECT_HISTORY.md`** [the permanent
+evolution timeline genesis 2026-04-15 → production RC 2026-07-13 + the branch archive + tag audit +
+active-development policy]. Branch classification: `main` = the SOLE active production branch [==
+origin/main == `b1b004c`, in sync]; the 7 non-main branches are PRESERVED as historical reference [6
+fully merged; `cognition-v2` superseded — its native-local-notifications feature is on main via a later
+CocoaPods reimplementation]. Policy recorded: all future work branches from `main`; historical branches
+never receive new development. 13 existing tags reviewed [accurate; not modified], 3 additional milestone
+tags recommended for the untagged June-July production programme [operator to create].)*
+*(Git reconciliation 2026-07-13: the previously-unpushed RC2→RC-certification
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
