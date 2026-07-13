@@ -2173,6 +2173,25 @@ orphan-sweep, distributed rate-limit) stay documented. tsc/lint/build green. **D
 `STRIPE_PRICE_*` names, remove the 3 dead-route candidates without verifying callers, or re-flag operator/
 legal/product residuals as engineering blockers. See `docs/LA7-LAUNCH-READINESS-REPORT.md`.
 
+**Remy's Activities — platform (authoritative, 2026-07-13; operator-commissioned post-certification):**
+the permanent first-party home for RemyNest activities. **`lib/activities/registry.ts` is the SINGLE
+source of truth** — `Activity` model (slug/title/tagline/description/status/href/Icon); **`status` IS
+the feature flag** (`available` → tappable card with required href · `coming-soon` · `future`); pages
+hardcode NO activity. Surfaces: `/activities` landing (RSC, registry-driven, `<RemyStage
+context="welcome">` intro, brand skeleton, empty branch) + `/activities/puzzles` (the **Phase-1 mount
+point** — an honest intro shell until Memory Puzzles is approved+built; no dead controls). Navigation =
+one additive row in the Library `SECTIONS` list (NOT a bottom-nav tab — 5 slots locked; NOT a Nest menu
+item — 5 items by design). **Registry status flips are RELEASE decisions** (`main` auto-deploys).
+**Positioning rule (extends LA1/LA5): activities are "gentle ways to spend time with your memories" —
+NEVER cognitive-training/brain-health/clinical claims.** Current registry: Memory Puzzles (available →
+mount point) · Memory Match, Story Builder (coming-soon) · Music Memories, Family Activities (future).
+**Memory Puzzles gameplay/engine/schema are NOT built** — the approved architecture (memory-backed
+images, crop-as-metadata, DOM-tile engine, puzzles/puzzle_progress/puzzle_completions schema,
+`puzzle.completed` platform event, AI-reflection seam) awaits explicit operator approval for Phase 1.
+Do NOT hardcode activity lists in pages, add a second registry, promise dates on `future` items, ship
+an `available` activity without a real destination, or build puzzle gameplay without approval. See
+`docs/features/activities.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

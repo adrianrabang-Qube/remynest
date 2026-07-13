@@ -11,6 +11,7 @@ import {
   BookOpen,
   ChevronRight,
   Search,
+  Puzzle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -23,10 +24,12 @@ interface LibrarySection {
 }
 
 /**
- * The six Library destinations. Collections/Connections/Chapters keep their own
- * routes; Story/Biography/Memory Book now have dedicated /library/* routes.
+ * The Library destinations. Collections/Connections/Chapters keep their own
+ * routes; Story/Biography/Memory Book have dedicated /library/* routes;
+ * Remy's Activities (2026-07-13) is the activities-platform home.
  */
 const SECTIONS: LibrarySection[] = [
+  { key: "activities", label: "Remy's Activities", description: "Gentle ways to spend time with your memories", href: "/activities", icon: Puzzle },
   { key: "collections", label: "Collections", description: "Themed groups of related memories", href: "/collections", icon: BookHeart },
   { key: "connections", label: "Connections", description: "Memories that connect to each other", href: "/connections", icon: Sparkles },
   { key: "chapters", label: "Chapters", description: "The periods that shaped your life", href: "/chapters", icon: Clock },

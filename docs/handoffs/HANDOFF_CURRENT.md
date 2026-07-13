@@ -28,7 +28,25 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Storage Capacity Architecture — composed entitlement (2026-07-13,
+The most recent work is **Remy's Activities — the activities PLATFORM (2026-07-13,
+operator-commissioned; platform ONLY — no gameplay/engine/schema):** a registry-driven landing page
+`/activities` (serif header, `<RemyStage context="welcome">` Remy introduction, "Ready to enjoy" +
+"What Remy is preparing" shelves, brand skeleton, empty branch) built on
+**`lib/activities/registry.ts`** — the single source of truth (`Activity` model; **status IS the
+feature flag**: available/coming-soon/future; status flips are release decisions since `main`
+auto-deploys). `components/activities/ActivityCard.tsx` renders all three statuses (available =
+whole-card link + sage focus ring; others = non-interactive with gold-ink/muted badges).
+`/activities/puzzles` is the **Phase-1 mount point** (honest intro shell — "Remy is setting up the
+puzzle table"; no dead controls). Navigation: one additive row in the Library `SECTIONS` list.
+Registry: Memory Puzzles (available) · Memory Match, Story Builder (coming-soon) · Music Memories,
+Family Activities (future). Copy follows the de-medicalization rule ("gentle ways to spend time with
+your memories"). tsc clean · lint 0 errors · build 69/69 (2 new routes). **STOPPED per the task's
+gate: Phase 1 (Memory Puzzles gameplay, per the approved 2026-07-13 architecture) awaits explicit
+operator approval.** NOTE for the operator: until Phase 1 ships, the puzzles card is `available` per
+spec but leads to the intro shell — flipping it to `coming-soon` is a one-word registry change if
+preferred before the next production push. See `docs/features/activities.md`.
+
+Before that: the **Storage Capacity Architecture — composed entitlement (2026-07-13,
 behaviour-preserving; no Stripe/schema/UI change):** the operator proposed splitting storage into
 independently-purchasable packs; a principal-architect evaluation (vs iCloud+/Google One/Dropbox/
 OneDrive/Proton/Evernote/Notion/ChatGPT) concluded the INSTINCT is right (storage demand shouldn't
