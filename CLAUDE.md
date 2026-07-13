@@ -2084,6 +2084,34 @@ CHECK to `moderation_reports`, expose reporter identity to the reported user, tr
 actor id, let a block auto-remove care access, or build social/feed/dashboard surfaces. See
 `docs/features/moderation.md` + `docs/LA5.1-APPLE-1.2-MODERATION-REPORT.md`.
 
+**LA6 — Disaster Recovery & Business Continuity (authoritative, 2026-07-12 — documentation-first;
+NO runtime/product/architecture change):** produced the operational DR/BC layer that complements (does
+NOT duplicate) the existing backup docs + the GDPR breach policy (`compliance/16`). **New:**
+`docs/DISASTER_RECOVERY_PLAN.md` (master plan — dependency map, RTO/RPO table, SPOF analysis, backup
+strategy, ownership, severity model, automation roadmap) + `docs/runbooks/` (index + 5 scenario
+runbooks: database-and-storage-recovery, deployment-and-migration-rollback, dependency-outages,
+secrets-and-credential-rotation, operational-incident-response) + **`scripts/check-production-env.mjs`**
+(operator env-integrity check — recovery automation; **never prints secret values**; fails non-zero on a
+missing REQUIRED var; REQUIRED set mirrors `.env.example`). Reconciled two stale snapshots
+(`OPERATIONAL_READINESS_REPORT.md` [Sentry/cron-auth/health since done], `HEALTHCHECK_REPORT.md` [SHA
+removed in RC2]) with current-state banners. **Verified-accurate DR facts (do not re-derive):** the
+reminder cron self-heals (lease/reclaim + fails closed 401); the Stripe webhook is idempotent + 500-retry
+so a backlog self-drains; **iOS reminders fire device-local without OneSignal/cron/APNs** (the key
+availability fallback); `/api/health` is liveness-only (no SHA); the in-memory rate limiter fails open.
+**CORRECTED a false claim the inline review caught (record so it isn't re-overclaimed):** only **2 of 13
+migrations have a `-- ROLLBACK` block** (`20260711140000_memory_intelligence` + `20260712120000_
+moderation`); the other 11 need manual DDL reversal or a restore, and only the **additive feature**
+migrations are probe-gated (core/structural ones are not). **DR posture (LOCKED/accepted, NOT new
+blockers):** Postgres RPO ≤24h (daily backups; **PITR intentionally deferred, cost**); the **`memory-media`
+Storage backup + test restore is the HIGH residual** (Postgres backups don't cover Storage — the #1
+post-launch DR item); single Vercel+Supabase region is an accepted launch posture. **OPERATOR activation
+(no code):** confirm Pro-tier daily backups + run a restore drill; enact the Storage backup + test
+restore; configure the uptime monitor (`/api/health`) + Sentry alert rules; keep an encrypted offline
+secrets copy + run `check-production-env.mjs` pre-deploy. The 6-lens review (SRE/Cloud/DR/Supabase/DevOps/
+Security) hit the subagent session limit → completed inline (repo precedent). **Do NOT** claim all
+migrations have rollback blocks, re-flag PITR/Storage-residual as NEW blockers, make the env-check script
+print values, or treat LA6 as a code/behaviour change. See `docs/LA6-DISASTER-RECOVERY-REPORT.md`.
+
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
 **CONTENT + behavior** — **real Rive/Lottie animations + final artwork, emotional reactions +

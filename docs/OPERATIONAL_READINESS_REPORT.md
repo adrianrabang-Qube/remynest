@@ -4,6 +4,16 @@
 **Type:** Audit only. No code, schema, or production-data changes.
 **Severity:** P0 = launch blocker · P1 = must-fix · P2 = should-fix.
 
+> **⚠️ HISTORICAL SNAPSHOT (2026-06-05) — partially superseded (LA6, 2026-07-12).** Several
+> P0/P1 items below have since been resolved and this report was NOT rewritten (it is a dated
+> audit record). Current state: **Sentry IS integrated** (client/server/edge configs +
+> `instrumentation.ts` + PII scrubbing; RC3/RC4/LA4 — item #2 done, env-gated on a DSN),
+> **cron auth exists** (`CRON_SECRET`, fails closed — item #3 done), a **`/api/health`
+> liveness probe exists** (item #6 done), and error handling was hardened (RC2/LA4 — item #4).
+> **Still open (operator):** the uptime monitor (#1) + Sentry alert rules must be configured;
+> a staging project (#8) is a roadmap item. For the authoritative operational posture see
+> [`DISASTER_RECOVERY_PLAN.md`](DISASTER_RECOVERY_PLAN.md) + [`runbooks/`](runbooks/README.md).
+
 ---
 
 ## Launch-risk summary

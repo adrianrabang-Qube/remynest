@@ -4,6 +4,13 @@
 **Scope:** Add a public liveness health endpoint for uptime monitoring.
 No data/schema/billing/Stripe/OneSignal/cron-auth/Sentry-config changes.
 
+> **⚠️ HISTORICAL SNAPSHOT (2026-06-05) — one detail superseded (RC2/LA6).** The payload
+> below shows a `commit` (SHA) field; **RC2 removed it** (revision-fingerprinting hardening),
+> so `GET /api/health` now returns only `{ status, service, timestamp }`. The design remains
+> **liveness-only** (no downstream calls) — the deliberate, still-current choice (see
+> [`runbooks/operational-incident-response.md`](runbooks/operational-incident-response.md) for
+> how it's used in triage). A deep readiness variant remains an intentionally-unbuilt option.
+
 ---
 
 ## 1. What was added

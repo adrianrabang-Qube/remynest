@@ -15,7 +15,21 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **App Store Submission
-Readiness**. No implementation task is active — the last work was **LA5.1 — Apple Guideline 1.2 UGC
+Readiness**. No implementation task is active — the last work was **LA6 — Disaster Recovery & Business
+Continuity** (documentation-first; NO runtime/product/architecture change). Produced the operational
+DR/BC layer complementing the existing backup docs + the GDPR breach policy: **`docs/DISASTER_RECOVERY_PLAN.md`**
+(dependency map, RTO/RPO objectives, SPOF analysis, backup strategy, ownership, severity model,
+automation roadmap) + **`docs/runbooks/`** (index + 5 runbooks: db/storage recovery, deploy/migration
+rollback, dependency outages, secrets/rotation, operational incident response) + **`scripts/check-production-env.mjs`**
+(operator env-integrity check; never prints values) + reconciled 2 stale snapshots. **DR ~82 / BC ~80.**
+The 6-lens review (SRE/Cloud/DR/Supabase/DevOps/Security) hit the subagent session limit → completed
+inline (repo precedent) and **FIXED a false claim** (only 2 of 13 migrations have rollback blocks, not
+all; probe-gating scoped to additive migrations). tsc/lint/build green. **No new engineering launch
+blocker;** residual is OPERATOR/infra (now with runbooks): `memory-media` Storage backup + test restore
+(HIGH), uptime/Sentry-alert activation, restore drill, offline secrets copy. `main` auto-deploys on push
+(LA6 committed locally, unpushed). Full detail: `docs/LA6-DISASTER-RECOVERY-REPORT.md`.
+
+Before LA6, the last work was **LA5.1 — Apple Guideline 1.2 UGC
 moderation** (CLOSES the CRITICAL LA5 iOS blocker; maintains the existing architecture; NOT a social
 platform). Implemented the minimum production-ready **report / block / leave** framework: migration
 `moderation_reports` + `user_blocks` (RLS insert-own + **select-own only**, no update/delete → status
@@ -143,6 +157,14 @@ product decision on Ask Remy / `memory-chat` AI quota gating. `main` auto-deploy
 
 ## Completed work
 Authoritative list: master state → **VERIFIED COMPLETE**. Most recent tasks (newest first):
+- **LA6 — Disaster Recovery & Business Continuity** (documentation-first; NO runtime/product/
+  architecture change). Operational DR/BC layer: `docs/DISASTER_RECOVERY_PLAN.md` (dependency map,
+  RTO/RPO, SPOF, backup strategy, ownership, severity, automation) + `docs/runbooks/` (index + 5
+  scenario runbooks) + `scripts/check-production-env.mjs` (env-integrity check; never prints values) +
+  reconciled 2 stale snapshots. DR ~82 / BC ~80. Inline 6-lens review (subagent limit) fixed a false
+  claim (only 2 of 13 migrations have rollback blocks). No new engineering blocker; residual is
+  OPERATOR (Storage backup + test restore [HIGH], uptime/alert activation, restore drill). tsc/lint/
+  build green. Report: `docs/LA6-DISASTER-RECOVERY-REPORT.md`.
 - **LA5.1 — Apple Guideline 1.2 UGC moderation** (CLOSES the CRITICAL LA5 iOS blocker; existing
   architecture maintained; NOT a social platform; multi-agent-VERIFIED — 6 lenses all
   `satisfiesApple12=true`, 1 blocking defect + nits ALL fixed). Report/block/leave framework:
