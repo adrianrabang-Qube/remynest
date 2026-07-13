@@ -20,6 +20,11 @@ type ToastContextType = {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+// Monotonic toast ids. `Date.now()` collided when two toasts fired in the same
+// millisecond (duplicate React keys; the shared removal timeout then dismissed
+// both toasts at once).
+let toastSeq = 0;
+
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) {
@@ -36,7 +41,7 @@ export default function ToastProvider({
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((message: string) => {
-    const id = Date.now();
+    const id = ++toastSeq;
 
     setToasts((prev) => [...prev, { id, message }]);
 

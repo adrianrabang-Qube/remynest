@@ -15,6 +15,8 @@
 
 import { useMemo, useState } from "react";
 
+import PendingSubmitButton from "@/components/reminders/PendingSubmitButton";
+
 export type ReminderRecord = {
   id: string;
   title: string;
@@ -158,6 +160,12 @@ function ReminderCard({
         <div className="flex flex-col items-end gap-2 shrink-0">
           <StateChip state={state} />
           <div className="flex items-center gap-2">
+            {/* QA fix (2026-07-13, proven defect — freeze-compliant UI guard): both buttons
+                disable while their action is pending. Without it, a double-tap on a
+                recurring "Done for today" advanced the series TWICE (nextOccurrenceAfter
+                always advances ≥1 step, and React queues same-form submissions
+                sequentially) — a daily medication reminder silently skipped a day.
+                Actions/fields byte-unchanged. */}
             <form action={toggleAction}>
               <input type="hidden" name="id" value={r.id} />
               <input
@@ -165,8 +173,7 @@ function ReminderCard({
                 name="completed"
                 value={String(Boolean(r.completed))}
               />
-              <button
-                type="submit"
+              <PendingSubmitButton
                 className={`text-xs px-3 py-1 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
                   r.completed
                     ? "border border-sand-deep text-charcoal-soft hover:bg-sand-deep/40"
@@ -178,17 +185,16 @@ function ReminderCard({
                   : r.recurring && r.frequency
                     ? "Done for today"
                     : "Mark complete"}
-              </button>
+              </PendingSubmitButton>
             </form>
             <form action={deleteAction}>
               <input type="hidden" name="id" value={r.id} />
-              <button
-                type="submit"
+              <PendingSubmitButton
                 className="text-xs px-3 py-1 rounded-full bg-rose-50 text-rose-600/90 hover:bg-rose-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
                 aria-label="Delete reminder"
               >
                 Delete
-              </button>
+              </PendingSubmitButton>
             </form>
           </div>
         </div>

@@ -286,6 +286,8 @@ function MemoriesPageContent() {
     data: memories = [],
     isLoading,
     isFetching,
+    isError,
+    refetch,
   } = useQuery<Memory[]>({
     queryKey: [
   "memories",
@@ -913,8 +915,31 @@ function MemoriesPageContent() {
           </div>
         )}
 
+      {/* Load failure (QA fix 2026-07-13): a failed fetch previously fell through to the
+          "No memories yet" empty state — telling an offline user their memories were gone
+          and offering a create CTA. Renders only when there is no cached data to show
+          (with cached data the feed stays up while React Query retries in background). */}
+      {!isLoading && isError && memories.length === 0 && (
+        <div className="rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
+          <p className="text-charcoal-soft">
+            We couldn&apos;t load your memories right now.
+          </p>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            They&apos;re safe — check your connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
       {/* Empty */}
       {!isLoading &&
+        !isError &&
         today.length === 0 &&
         thisWeek.length === 0 &&
         earlier.length === 0 && (

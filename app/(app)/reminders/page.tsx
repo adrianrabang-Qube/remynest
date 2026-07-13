@@ -3,6 +3,7 @@ import { resolveActiveProfileId } from "@/lib/context-resolver";
 import { userCanWriteProfile } from "@/lib/profile-ownership";
 import { redirect } from "next/navigation";
 import ReminderDateTimeField from "@/components/reminders/ReminderDateTimeField";
+import PendingSubmitButton from "@/components/reminders/PendingSubmitButton";
 import ReminderCenter, {
   type ReminderRecord,
 } from "@/components/reminders/ReminderCenter";
@@ -691,12 +692,12 @@ export default async function RemindersPage({
             </select>
           </div>
 
-          <button
-            type="submit"
-            className="rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
+          {/* QA fix (2026-07-13, proven defect — freeze-compliant UI guard): disables while
+              the create action is pending so a double-tap can't create duplicate reminders
+              (and duplicate iOS notifications). Action/fields/form-key byte-unchanged. */}
+          <PendingSubmitButton className="rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-white">
             Create Reminder
-          </button>
+          </PendingSubmitButton>
         </div>
       </form>
       </details>

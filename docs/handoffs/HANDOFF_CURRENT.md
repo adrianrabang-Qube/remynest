@@ -19,7 +19,28 @@ operator go-live**. *(Git reconciliation 2026-07-13: the previously-unpushed RC2
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Production Polish Pass — "feels premium" (2026-07-13,
+The most recent work is the **Final QA Pass — verified defects only (2026-07-13):** walked the
+critical journeys adversarially (Apple-review / elderly-user / caregiver / shared-device lenses) and
+fixed FIVE verified defects, deferring one: **(A/B, HIGH — frozen-surface, proven-defect carve-out)**
+the reminder create/toggle/delete forms had NO pending guard; React queues same-form server-action
+submissions sequentially and `nextOccurrenceAfter` always advances ≥1 step, so a double-tap on
+"Done for today" advanced a recurring series TWICE (daily medication reminder silently skipped a
+day) and double-tap Create made duplicates → new `PendingSubmitButton` (`useFormStatus`
+disabled-while-pending) wraps all three submit buttons; actions/fields/form-key/scheduling
+byte-unchanged. **(C, LOW)** toast ids used `Date.now()` — same-millisecond toasts collided
+(duplicate React keys, both dismissed early) → module counter. **(D, HIGH privacy)** logout is SPA
+navigation and the QueryClient lives in the ROOT layout with staleTime 60s, so the next account to
+log in on a shared device was served the PREVIOUS user's cached memories → `queryClient.clear()` on
+logout AND on login success. **(E, MED)** a failed memories-feed fetch fell through to "No memories
+yet" + a create CTA (terrifying + misleading offline) → dedicated error card with Retry (renders
+only when no cached data; cached feed stays up during background retries). **(F, DEFERRED —
+documented, do not silently ship)** deep links: the middleware bounces unauthenticated users to
+`/login` with no return destination, and login always lands on `/home` — the fix needs an
+open-redirect-safe relative-path `next` param through the auth-critical middleware + LoginClient;
+post-launch item, not worth last-minute risk in the certified auth path. tsc clean · lint 0 errors ·
+build 67/67. **Engineering verdict: no remaining launch-blocking defects.**
+
+Before that: the **Production Polish Pass — "feels premium" (2026-07-13,
 presentation-only; no logic/routing/architecture change; frozen surfaces untouched):**
 **(1) Global toast FIXED + rebranded** (`ToastProvider` — the app-wide "Memory saved" channel
 referenced a **nonexistent `animate-slide-in` class**, so toasts popped in unanimated; now

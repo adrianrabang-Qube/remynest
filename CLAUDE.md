@@ -184,6 +184,15 @@ no-op until activated. **Still frozen/out-of-scope + unfixed:** the cron recurri
 certainty (needs an iOS Notification Service Extension — operator/native). Do **not** re-flag
 the four fixed items; a future reminder change still requires a proven defect first.
 
+**Reminder QA fix — double-tap dispatch guard (authoritative, 2026-07-13; freeze-compliant under the
+proven-defect carve-out):** final-QA PROVED (from code) that the reminder forms had no pending guard —
+React queues same-form server-action submissions sequentially and `nextOccurrenceAfter` always advances
+≥1 step, so a double-tap on a recurring "Done for today" advanced the series TWICE (a daily medication
+reminder silently skipped a day) and a double-tap on Create made duplicate reminders. Fix is UI-layer
+ONLY: `components/reminders/PendingSubmitButton.tsx` (`useFormStatus` disabled-while-pending) now wraps
+the create/toggle/delete submit buttons — the server actions, form fields, form-reset `key`, scheduling,
+and native sync are byte-unchanged. Do NOT remove these guards or replace them with logic-layer dedup.
+
 **Two authoritative standards (Production Sprint 2, 2026-07-07):** **(A) The Stripe webhook
 MUST return non-2xx when a required DB write fails.** `app/api/stripe/webhook/route.ts`
 returns **HTTP 500** if any `profiles` write errors (so Stripe retries the whole event);

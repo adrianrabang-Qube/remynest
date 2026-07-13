@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { haptic, hapticWarning } from "@/lib/haptics";
 
 export default function LoginClient() {
   const supabase = createClient();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +34,11 @@ export default function LoginClient() {
       setError(error.message);
       return;
     }
+
+    // QA fix (2026-07-13): drop any client cache from a previous session BEFORE
+    // entering the app — belt-and-braces with the logout-side clear, so a fresh
+    // sign-in on a shared device can never render another account's cached data.
+    queryClient.clear();
 
     // Keep the button in its loading state through the navigation (no flash back).
     router.push("/home");
