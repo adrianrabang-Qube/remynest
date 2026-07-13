@@ -113,15 +113,29 @@ export default function Nest({
           </span>
           {/* Remy IS the button: the AVATAR tier (`assetVariant="avatar"`) draws the square,
               character-filling 256px export of the same approved art, so the bird fills the
-              48px circle (~86% of it) instead of a landscape scene letterboxing them down to
-              a ~15px speck. The circular clip on THIS wrapper only (not `.nest`) trims any
-              square-crop edges cleanly and keeps the ambient halo + motes — which live on
-              `.nest` — unclipped. `fit` stays `contain` (never distorts), the avatar's built-in
-              ~7% crest headroom absorbs the 4px float bob, and a missing avatar export falls
-              back to scene art safely inside this same clip. Sizes off the FAB (`h-12 w-12`),
-              so it scales with the button on every device. */}
-          <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full">
+              48px circle instead of a landscape scene letterboxing it to a ~15px speck. The
+              circular clip on THIS wrapper only (not `.nest`) trims any square-crop edges
+              cleanly and keeps the ambient halo + motes — which live on `.nest` — unclipped.
+              `fit` stays `contain` (never distorts); a missing avatar export falls back to
+              scene art safely inside this same clip.
+
+              OPTICAL CENTERING (not mathematical): the avatar art composes the character HIGH
+              in its square — the crest sits at the asset's top edge with more empty margin
+              below the feet — so a geometrically-centred 48px fill puts the crest at the
+              circle's top edge, and the 4px (~8%) upward float bob then lifts it PAST that edge
+              (top-heavy; worse on small phones where the FAB draws more of the eye). The fix
+              lives HERE (the Nest surface — never in the shared `<Remy>` renderer other
+              surfaces depend on): `items-start` + a PROPORTIONAL top margin on the avatar
+              (`mt-[8%]` ≈ 8% of the FAB, via `<Remy>`'s documented className margin API — NOT a
+              translateY, and NOT on the float's animated transform, so the bob is untouched and
+              stays centred on the re-seated bird). This biases Remy's optical centre below the
+              geometric centre: the crest keeps clearance across the whole float (≈6.8px at rest,
+              ≈2.8px at the bob peak) while the feet stay visible (≈2px above the bottom). Being a
+              % of the box, it scales with the FAB on every device and survives avatar art
+              evolving to a lower composition (the margin simply becomes a no-op). */}
+          <span className="flex h-12 w-12 items-start justify-center overflow-hidden rounded-full">
             <Remy
+              className="mt-[8%]"
               state={displayExpression}
               assetVariant="avatar"
               emotion={displayEmotion}
