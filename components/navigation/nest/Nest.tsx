@@ -111,14 +111,25 @@ export default function Nest({
             <i className={styles.particle} />
             <i className={styles.particle} />
           </span>
-          <Remy
-            state={displayExpression}
-            emotion={displayEmotion}
-            reactionKey={behavior}
-            float={isResting}
-            size={40}
-            decorative
-          />
+          {/* Remy fills the FAB circle: the avatar box now spans the full 48px button
+              (was an under-sized 40px that left a wide white ring), so the bird is the
+              primary element instead of floating in white. A circular clip on THIS
+              wrapper only (not `.nest`) trims the enlarged frame's corners cleanly and
+              keeps the ambient halo + motes — which live on `.nest` — unclipped. `fit`
+              stays `contain` (never crops the character; safe for the landscape frames),
+              and the ~8px top/bottom letterbox gives the 4px float bob headroom so no
+              part of the animation is clipped. Sizes off the FAB (`h-12 w-12`), so it
+              scales with the button on every device. */}
+          <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full">
+            <Remy
+              state={displayExpression}
+              emotion={displayEmotion}
+              reactionKey={behavior}
+              float={isResting}
+              size={48}
+              decorative
+            />
+          </span>
         </span>
       </FloatingCompanionButton>
 

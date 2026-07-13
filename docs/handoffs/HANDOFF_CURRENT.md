@@ -15,7 +15,10 @@ Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
 Launch-scope build **~90%** complete; overall **~70%**. Current milestone: **CERTIFIED — awaiting
-operator go-live**. No implementation task is active — the last work was the **RC FINAL RELEASE CANDIDATE
+operator go-live**. *(Post-cert UI polish, presentation-only, doesn't affect the RC certification:*
+*the bottom-nav center **Nest** avatar was enlarged from `size={40}` → `size={48}` so Remy fills the*
+*48px FAB [`components/navigation/nest/Nest.tsx`] — wrapped in a circular clip so the enlarged 3:2*
+*frame's corners trim cleanly; `fit` stays `contain` [the assets are landscape scenes — `idle`/`sleeping`/`welcome` — so `cover` is unsafe]; navigation/click/animation/state/a11y/hit-target/safe-area + the `.nest` halo/motes all unchanged; tsc/lint/build green. A true circular fill needs square/transparent per-stage nest art — a registry-only asset swap, no code, per the CLAUDE.md Nest note.)* No implementation task is active — the last work was the **RC FINAL RELEASE CANDIDATE
 CERTIFICATION** (independent verification; NO code change — certification docs only). Validation GREEN
 (tsc/lint/build); the critical production invariants were verified intact with no regression
 (protect-by-default auth, private `memory-media`, purchase gating, the LA5.1 Art-17 migration fix, Stripe
