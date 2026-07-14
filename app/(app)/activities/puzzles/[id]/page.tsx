@@ -7,6 +7,7 @@ import {
   userCanAccessProfile,
 } from "@/lib/profile-ownership";
 import { getPuzzleWithProgress } from "@/lib/puzzles/queries";
+import PuzzlePlayer from "@/components/puzzles/play/PuzzlePlayer";
 
 export const metadata: Metadata = { title: "Memory Puzzle" };
 export const dynamic = "force-dynamic";
@@ -71,12 +72,11 @@ export default async function PuzzlePlayPage({
         </h1>
       </header>
 
-      {/* Phase 1C mounts the play engine here. */}
-      <div className="mt-6 rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
-        <p className="text-charcoal-soft">
-          Your puzzle is ready — the board opens in the next update.
-        </p>
-      </div>
+      <PuzzlePlayer
+        puzzle={data.puzzle}
+        initialPlacements={data.placements}
+        imageUrl={data.imageUrl}
+      />
     </div>
   );
 }
