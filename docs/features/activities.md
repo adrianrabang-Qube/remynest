@@ -29,9 +29,13 @@ and Family Activities are announced placeholders.
   presentation, server-compatible).
 - **Remy integration:** the landing intro uses `<RemyStage context="welcome">`
   (the platform's in-place surface — no new expression/renderer/vocabulary).
-- **Navigation:** one additive row in the Library hub's static `SECTIONS` list
-  (`LibraryView` — its designed extension point). Deliberately NOT a bottom-nav
-  tab (5 slots are locked) and NOT a Nest menu item yet (5 items by design).
+- **Navigation (corrected 2026-07-14):** a first-class `NAV_ITEMS` entry
+  (`/activities`, `mobile:"drawer"`) — visible in the mobile "More" drawer and
+  the desktop top-nav — plus the Library `SECTIONS` row (its description now
+  includes "Memory puzzles" so the hub search matches). The original
+  Library-row-only placement shipped to production undiscoverable: two levels
+  deep and absent from every menu. Still NOT a bottom-nav tab (5 slots locked)
+  and NOT a Nest menu item (5 items by design).
 
 ## Rules
 - **Positioning (LA1/LA5 de-medicalization):** activities are "gentle ways to

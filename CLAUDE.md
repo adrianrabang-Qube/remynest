@@ -2179,9 +2179,13 @@ source of truth** — `Activity` model (slug/title/tagline/description/status/hr
 the feature flag** (`available` → tappable card with required href · `coming-soon` · `future`); pages
 hardcode NO activity. Surfaces: `/activities` landing (RSC, registry-driven, `<RemyStage
 context="welcome">` intro, brand skeleton, empty branch) + `/activities/puzzles` (the **Phase-1 mount
-point** — an honest intro shell until Memory Puzzles is approved+built; no dead controls). Navigation =
-one additive row in the Library `SECTIONS` list (NOT a bottom-nav tab — 5 slots locked; NOT a Nest menu
-item — 5 items by design). **Registry status flips are RELEASE decisions** (`main` auto-deploys).
+point** — an honest intro shell until Memory Puzzles is approved+built; no dead controls). Navigation
+(CORRECTED 2026-07-14 — the Library-hub row ALONE proved undiscoverable in production: two levels deep,
+absent from every menu, and Library search didn't match "puzzle"): a first-class **`NAV_ITEMS` entry**
+(`/activities`, `mobile:"drawer"`) exposes Activities in the mobile "More" drawer AND the desktop
+top-nav (context-threaded via the shared `withContext`), PLUS the Library `SECTIONS` row (description
+now includes "Memory puzzles" so the hub search finds it). Still NOT a bottom-nav tab (5 slots locked)
+and NOT a Nest menu item (5 items by design). **Registry status flips are RELEASE decisions** (`main` auto-deploys).
 **Positioning rule (extends LA1/LA5): activities are "gentle ways to spend time with your memories" —
 NEVER cognitive-training/brain-health/clinical claims.** Current registry: Memory Puzzles (available →
 mount point) · Memory Match, Story Builder (coming-soon) · Music Memories, Family Activities (future).

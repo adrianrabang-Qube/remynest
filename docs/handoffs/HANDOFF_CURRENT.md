@@ -28,7 +28,19 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Memory Puzzles — Activity #1 (2026-07-14, Phases 1A–1D COMPLETE, four
+The most recent work is the **Activities discoverability fix (2026-07-14):** production had the
+puzzle code deployed but NO menu exposed it — the only entry was the Library-hub row (two levels deep:
+More → Library → row), and Library search didn't match "puzzle". Fix: an additive `NAV_ITEMS` entry
+(`/activities`, `mobile:"drawer"`, Puzzle icon, after Library) → appears in the mobile "More" drawer +
+desktop top-nav with `?context=` threading automatic; Library row description now includes "Memory
+puzzles" (hub search matches). Locked decisions preserved (no bottom-nav tab, no Nest menu item, no
+My Nest drawer row, portals untouched). Journey: More/desktop-nav → Activities → Memory Puzzles →
+Create a puzzle. tsc/lint/build green. Also in this session: the **post-implementation puzzle audit**
+(7 verified gameplay defects fixed + 2 hardening refinements, committed `6be12b1` — replay reset via
+seed key, completion cancels the pending autosave, touch-scrollable tray, 8px drag threshold,
+post-drag click suppression w/ next-tick disarm, drag-preview pre-positioning, picker pagination).
+
+Before that: **Memory Puzzles — Activity #1 (2026-07-14, Phases 1A–1D COMPLETE, four
 commits, approved architecture as contract):** **(1A)** migration `20260714090000_remys_puzzles.sql`
 (OPERATOR STEP — probe-gated; hub degrades calmly until applied): puzzles/puzzle_progress/
 puzzle_completions, RLS owner-scoped + service-role care access after app-layer authz, no

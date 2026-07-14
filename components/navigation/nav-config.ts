@@ -11,6 +11,7 @@ import {
   Library,
   Search,
   Users,
+  Puzzle,
 } from "lucide-react";
 
 /** Where an item sits in the mobile hybrid nav. */
@@ -43,6 +44,10 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/memories/new", label: "New", icon: Plus, mobile: "new" },
   { href: "/timeline", label: "Timeline", icon: Clock, mobile: "drawer" },
   { href: "/library", label: "Library", icon: Library, mobile: "drawer" },
+  // Remy's Activities (2026-07-14): the activities platform home (Memory
+  // Puzzles). Drawer + desktop entry — the Library-hub row alone left the
+  // feature undiscoverable (two levels deep, invisible in every menu).
+  { href: "/activities", label: "Activities", icon: Puzzle, mobile: "drawer" },
   { href: "/reminders", label: "Reminders", icon: Bell, mobile: "drawer" },
   { href: "/insights", label: "Insights", icon: Sparkles, mobile: "drawer" },
 ];

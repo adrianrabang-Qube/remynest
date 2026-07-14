@@ -29,7 +29,7 @@ interface LibrarySection {
  * Remy's Activities (2026-07-13) is the activities-platform home.
  */
 const SECTIONS: LibrarySection[] = [
-  { key: "activities", label: "Remy's Activities", description: "Gentle ways to spend time with your memories", href: "/activities", icon: Puzzle },
+  { key: "activities", label: "Remy's Activities", description: "Memory puzzles and other gentle ways to enjoy your photos", href: "/activities", icon: Puzzle },
   { key: "collections", label: "Collections", description: "Themed groups of related memories", href: "/collections", icon: BookHeart },
   { key: "connections", label: "Connections", description: "Memories that connect to each other", href: "/connections", icon: Sparkles },
   { key: "chapters", label: "Chapters", description: "The periods that shaped your life", href: "/chapters", icon: Clock },
