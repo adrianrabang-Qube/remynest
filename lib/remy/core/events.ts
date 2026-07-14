@@ -59,6 +59,9 @@ export type RemyEventName =
   | "screen.dates"
   // achievement — a memory milestone was crossed (drives the celebration surface)
   | "milestone.reached"
+  // activities — a Remy's Activities moment (2026-07-14: Memory Puzzles completion;
+  // also the future Companion-Intelligence "revisited memory" signal)
+  | "puzzle.completed"
   // declarative context lifecycle (emitted by <RemyStage>/useRemyContext)
   | "context.enter"
   | "context.exit";

@@ -7,9 +7,20 @@ import {
   useRef,
   useState,
 } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lightbulb, RotateCcw, Star, Trash2 } from "lucide-react";
+import {
+  BookHeart,
+  Eye,
+  EyeOff,
+  Lightbulb,
+  MessageCircle,
+  RotateCcw,
+  Star,
+  Trash2,
+} from "lucide-react";
 
+import { Remy } from "@/lib/remy";
 import { haptic, hapticSuccess } from "@/lib/haptics";
 import {
   cropBackground,
@@ -176,7 +187,7 @@ export default function PuzzlePlayer({
     [persist],
   );
 
-  // ---- completion (recorded once; the moment itself is Phase 1D) ----
+  // ---- completion ----
   const completionRecorded = useRef(false);
   useEffect(() => {
     if (!complete || completionRecorded.current) return;
@@ -188,6 +199,9 @@ export default function PuzzlePlayer({
       /* no-op */
     }
     void recordPuzzleCompletion(puzzle.id);
+    // Remy celebrates through the ONE platform (semantic event — the platform
+    // decides the feeling/expression; the floating companion reacts).
+    Remy.emit("puzzle.completed", { puzzleId: puzzle.id });
   }, [complete, puzzle.id]);
 
   // ---- drag (pointer capture on the tray tile; floating tile follows) ----
@@ -358,6 +372,17 @@ export default function PuzzlePlayer({
           />
         )}
 
+        {/* Completion: the seams dissolve into the original photograph (the tile
+            outlines already drop at `complete`; this whole-photo layer fades over
+            them so the board becomes the memory again). Reduced motion: instant. */}
+        {complete && (
+          <div
+            aria-hidden
+            className="animate-photoReveal absolute inset-0 z-10"
+            style={{ backgroundImage: bgImage, ...cropBackground(puzzle.crop, boardPx) }}
+          />
+        )}
+
         {/* Slots + placed pieces */}
         <div
           className="absolute inset-0 grid"
@@ -493,11 +518,53 @@ export default function PuzzlePlayer({
         />
       )}
 
-      {/* Completion (Phase 1D replaces this with the full moment). */}
+      {/* Completion moment (Phase 1D): the board above has dissolved into the
+          photograph; Remy has celebrated via the platform event. Gentle words,
+          no "You win". */}
       {complete && (
-        <p className="mt-4 text-center text-charcoal-soft">
-          You pieced this memory back together.
-        </p>
+        <section
+          aria-label="Puzzle complete"
+          className="mt-6 rounded-3xl border border-sand-deep/70 bg-white p-6 text-center shadow-soft"
+        >
+          <p className="font-serif text-xl font-semibold text-charcoal">
+            You pieced this memory back together.
+          </p>
+          <p className="mt-1 text-sm text-charcoal-muted">
+            Take a moment with it — it&apos;s a lovely one.
+          </p>
+          <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
+            {puzzle.memory_id && (
+              <Link
+                href={`/memories/${puzzle.memory_id}`}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+              >
+                <BookHeart className="h-4 w-4" aria-hidden />
+                Open this memory
+              </Link>
+            )}
+            {/* REFLECTION SEAM (architecture only — approved plan §9): a future
+                phase replaces this link with the server-authoritative prompt
+                "Would you like to tell me about this memory?" wired to the
+                EXISTING Ask Remy layer with this puzzle's memory as context
+                (quota-gated like the chat). Until then it opens Ask Remy. */}
+            <Link
+              href="/remy"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            >
+              <MessageCircle className="h-4 w-4" aria-hidden />
+              Talk with Remy
+            </Link>
+            <button
+              type="button"
+              onClick={onReplay}
+              disabled={busy}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-60"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden />
+              Play again
+            </button>
+          </div>
+        </section>
       )}
     </div>
   );

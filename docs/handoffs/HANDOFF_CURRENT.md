@@ -28,7 +28,26 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Remy's Activities — the activities PLATFORM (2026-07-13,
+The most recent work is **Memory Puzzles — Activity #1 (2026-07-14, Phases 1A–1D COMPLETE, four
+commits, approved architecture as contract):** **(1A)** migration `20260714090000_remys_puzzles.sql`
+(OPERATOR STEP — probe-gated; hub degrades calmly until applied): puzzles/puzzle_progress/
+puzzle_completions, RLS owner-scoped + service-role care access after app-layer authz, no
+duration/score columns; pure `lib/puzzles/` core; server actions (structured/never-throw,
+session-derived, authorize against the puzzle's OWN context; create verifies the image belongs to
+the source memory's attachments); GDPR export v1.3. **(1B)** hub shelves (Continue/Ready/Favourites/
+Finished; batch-signed crop thumbnails) + create wizard (memory picker / new-photo-creates-a-memory
+via the existing direct-to-storage pipeline / pan+keyboard square crop / difficulty cards). **(1C)**
+DOM-tile sprite engine — one decode, rAF drag, magnetic correct-slot-only snap, tap/keyboard slot
+buttons (playable without dragging), ghost outline, hint, debounced autosave + seed-checked
+localStorage mirror, resume/replay/favourite/delete, haptics, reduced-motion-safe, no timers/scores.
+**(1D)** completion: board dissolves into the photograph (photoReveal), `Remy.emit("puzzle.completed")`
+(new platform event → celebrating), "You pieced this memory back together.", Open this memory /
+Talk with Remy (REFLECTION SEAM — future phase swaps in the server-authoritative memory prompt on
+the existing Ask Remy layer) / Play again. Known caveat: Open-this-memory hits the user_id-scoped
+`/memories/[id]` (cross-caregiver 404 — pre-existing posture). All four phases tsc/lint/build green.
+**OPERATOR: apply the puzzles migration to activate.**
+
+Before that: **Remy's Activities — the activities PLATFORM (2026-07-13,
 operator-commissioned; platform ONLY — no gameplay/engine/schema):** a registry-driven landing page
 `/activities` (serif header, `<RemyStage context="welcome">` Remy introduction, "Ready to enjoy" +
 "What Remy is preparing" shelves, brand skeleton, empty branch) built on

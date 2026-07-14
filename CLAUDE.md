@@ -2185,12 +2185,24 @@ item — 5 items by design). **Registry status flips are RELEASE decisions** (`m
 **Positioning rule (extends LA1/LA5): activities are "gentle ways to spend time with your memories" —
 NEVER cognitive-training/brain-health/clinical claims.** Current registry: Memory Puzzles (available →
 mount point) · Memory Match, Story Builder (coming-soon) · Music Memories, Family Activities (future).
-**Memory Puzzles gameplay/engine/schema are NOT built** — the approved architecture (memory-backed
-images, crop-as-metadata, DOM-tile engine, puzzles/puzzle_progress/puzzle_completions schema,
-`puzzle.completed` platform event, AI-reflection seam) awaits explicit operator approval for Phase 1.
-Do NOT hardcode activity lists in pages, add a second registry, promise dates on `future` items, ship
-an `available` activity without a real destination, or build puzzle gameplay without approval. See
-`docs/features/activities.md`.
+**Memory Puzzles (Activity #1) SHIPPED 2026-07-14 (Phases 1A–1D, approved architecture):** a puzzle
+is a VIEW over a memory (image server-verified against the memory's OWN attachments; crop is
+METADATA — no derivative image; deleting a puzzle never touches the memory/media; new-photo uploads
+CREATE A MEMORY FIRST via the existing direct-to-storage pipeline, so quota/ledger/signing/GDPR are
+inherited). Data: `puzzles`/`puzzle_progress`/`puzzle_completions` (migration `20260714090000`,
+OPERATOR-APPLIED, probe-gated — calm setting-up state until applied; RLS owner-scoped, care access =
+service-role actions after `userCanAccessProfile`/`userCanWriteProfile`; NO duration/score columns —
+never add them); GDPR export v1.3. Engine: pure `lib/puzzles/` math (seeded shuffle, exact pixel
+tile/crop background geometry) + DOM-tile sprite board (ONE image decode; rAF drag; MAGNETIC
+correct-slot-only snapping — calm by design; tap/keyboard slot buttons = fully playable without
+dragging; ghost/hint; debounced autosave + seed-checked localStorage mirror; no timers/scores).
+Completion: photoReveal dissolve + **`Remy.emit("puzzle.completed")`** (new platform event →
+celebrating; also the future Companion-Intelligence revisited-memory signal) + the **AI REFLECTION
+SEAM** (the "Talk with Remy" link in `PuzzlePlayer` — a future approved phase swaps it for the
+server-authoritative "tell me about this memory" prompt on the EXISTING Ask Remy layer; do NOT build
+new AI paths for it). Do NOT hardcode activity lists in pages, add a second registry, promise dates
+on `future` items, add timers/scores/pressure to any activity, duplicate the upload/quota pipeline,
+or bypass the memory-attachment verification on puzzle creation. See `docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

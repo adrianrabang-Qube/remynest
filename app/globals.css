@@ -446,6 +446,20 @@ p {
   animation: drawerIn 320ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* Memory Puzzles — the completed board dissolves into the original photograph. */
+@keyframes photoReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-photoReveal {
+  animation: photoReveal 900ms ease-in-out;
+}
+
 /* Reduced motion: the utility animations above (and the legacy hero/toast ones)
    settle instantly — every `from` state ends at the element's natural state. */
 @media (prefers-reduced-motion: reduce) {
@@ -456,6 +470,7 @@ p {
   .animate-toastIn,
   .animate-scrimIn,
   .animate-drawerIn,
+  .animate-photoReveal,
   .remy-fade-in {
     animation: none;
   }

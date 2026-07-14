@@ -42,9 +42,32 @@ and Family Activities are announced placeholders.
   `future` items.
 - An `available` activity MUST have a real, non-dead-end `href`.
 
-## Future (per approved plan, awaiting go-ahead)
-Phase 1 fills `/activities/puzzles` with the puzzle hub + create flow + play
-engine (see the approved Memory Puzzles architecture: memory-backed images,
-crop-as-metadata, DOM-tile engine, `puzzles`/`puzzle_progress`/`puzzle_completions`
-schema — operator-applied migration; `puzzle.completed` Remy event; reflection
-seam for future AI).
+## Memory Puzzles — Activity #1 (SHIPPED 2026-07-14, Phases 1A–1D)
+Built exactly per the approved architecture:
+- **Data (1A):** migration `20260714090000_remys_puzzles.sql` (OPERATOR-APPLIED;
+  probe-gated — the hub shows a calm setting-up state until applied): `puzzles` +
+  `puzzle_progress` + `puzzle_completions`, RLS owner-scoped, care access via
+  service-role actions after `userCanAccessProfile`/`userCanWriteProfile`; no
+  duration/score columns. GDPR export enrolled (schemaVersion 1.3). Pure core in
+  `lib/puzzles/` (seeded shuffle, exact pixel tile/crop math). A puzzle is a VIEW
+  over a memory: image server-verified against the memory's own attachments;
+  crop is metadata; deleting a puzzle never touches the memory/media.
+- **Create (1B):** wizard at `/activities/puzzles/new` — existing-memory picker
+  (paginated /api/memories; untransformed URL for crop math) or new photo via
+  the EXISTING direct-to-storage pipeline that creates a memory first
+  (quota/ledger inherited) → pan/keyboard square crop → difficulty (Gentle 9 →
+  Expert 100, soft estimates).
+- **Engine (1C):** DOM-tile sprite board (one decode), pointer-capture drag with
+  rAF floating tile, MAGNETIC correct-slot-only snapping, tap/keyboard slot
+  buttons (fully playable without dragging), ghost outline, hint, debounced
+  autosave + localStorage mirror (seed-checked), resume/replay/favourite/delete,
+  haptics, reduced-motion-safe, no timers/scores.
+- **Completion (1D):** board dissolves into the photograph (`photoReveal`),
+  `Remy.emit("puzzle.completed")` (new platform event → celebrating), copy
+  "You pieced this memory back together.", buttons Open this memory / Talk with
+  Remy (the REFLECTION SEAM — a future phase swaps this link for the
+  server-authoritative "tell me about this memory" prompt on the existing Ask
+  Remy layer) / Play again.
+- **Known caveat:** "Open this memory" uses the user_id-scoped `/memories/[id]`
+  route — a caregiver opening ANOTHER author's memory 404s there (pre-existing
+  memory-detail authz posture; not changed by puzzles).
