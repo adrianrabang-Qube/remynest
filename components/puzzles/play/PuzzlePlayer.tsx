@@ -65,11 +65,16 @@ import {
 
 const AUTOSAVE_MS = 800;
 const TRAY_TILE = 64; // px — comfortably ≥ the 44px floor
+// A press must travel this far before it becomes a DRAG — below it, it's a tap
+// (select). Without the threshold, natural finger jitter during a tap started a
+// phantom drag ("it slid back to the tray" on a plain tap).
+const DRAG_THRESHOLD_PX = 8;
 
 type DragState = {
   piece: number;
   pointerId: number;
-  el: HTMLElement | null;
+  startX: number;
+  startY: number;
 };
 
 function localKey(puzzleId: string) {
@@ -198,6 +203,11 @@ export default function PuzzlePlayer({
     } catch {
       /* no-op */
     }
+    // Cancel any pending debounced autosave BEFORE recording: the final
+    // placement schedules a save, completion deletes the progress row, and the
+    // stale timer would then re-upsert a full progress row — stranding the
+    // finished puzzle on the "Continue playing" shelf forever.
+    if (saveTimer.current) clearTimeout(saveTimer.current);
     void recordPuzzleCompletion(puzzle.id);
     // Remy celebrates through the ONE platform (semantic event — the platform
     // decides the feeling/expression; the floating companion reacts).
@@ -206,19 +216,41 @@ export default function PuzzlePlayer({
 
   // ---- drag (pointer capture on the tray tile; floating tile follows) ----
   const drag = useRef<DragState | null>(null);
-  const floatRef = useRef<HTMLDivElement>(null);
+  const floatRef = useRef<HTMLDivElement | null>(null);
+  const lastPoint = useRef<{ x: number; y: number } | null>(null);
+  // A completed drag still dispatches a click on the source button; without
+  // suppression that click re-SELECTED the just-placed piece, leaving every
+  // slot tap answering "Not quite" until the selection was cleared.
+  const suppressClick = useRef(false);
   const raf = useRef(0);
   const [dragging, setDragging] = useState<number | null>(null);
 
-  const moveFloat = useCallback((x: number, y: number) => {
-    cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => {
-      const el = floatRef.current;
-      if (el) {
-        el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -60%)`;
-      }
-    });
+  const applyFloat = useCallback((el: HTMLElement, x: number, y: number) => {
+    el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -60%)`;
   }, []);
+
+  const moveFloat = useCallback(
+    (x: number, y: number) => {
+      lastPoint.current = { x, y };
+      cancelAnimationFrame(raf.current);
+      raf.current = requestAnimationFrame(() => {
+        if (floatRef.current) applyFloat(floatRef.current, x, y);
+      });
+    },
+    [applyFloat],
+  );
+
+  // Position the floating tile the instant it MOUNTS (the first rAF can fire
+  // before the element exists, which flashed the tile at the viewport origin).
+  const floatMountRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      floatRef.current = el;
+      if (el && lastPoint.current) {
+        applyFloat(el, lastPoint.current.x, lastPoint.current.y);
+      }
+    },
+    [applyFloat],
+  );
 
   const endDrag = useCallback(
     (clientX: number, clientY: number) => {
@@ -454,18 +486,38 @@ export default function PuzzlePlayer({
                     }`}
                     aria-pressed={selected === piece}
                     onClick={() => {
+                      // A finished drag still emits a click on this button —
+                      // never let it re-select the piece that was just placed.
+                      if (suppressClick.current) {
+                        suppressClick.current = false;
+                        return;
+                      }
                       setSelected((s) => (s === piece ? null : piece));
                       void haptic("light");
                     }}
                     onPointerDown={(e) => {
                       // Primary-pointer drag only; taps still fire onClick.
                       if (!e.isPrimary) return;
-                      drag.current = { piece, pointerId: e.pointerId, el: e.currentTarget };
+                      drag.current = {
+                        piece,
+                        pointerId: e.pointerId,
+                        startX: e.clientX,
+                        startY: e.clientY,
+                      };
+                      lastPoint.current = { x: e.clientX, y: e.clientY };
                       e.currentTarget.setPointerCapture(e.pointerId);
                     }}
                     onPointerMove={(e) => {
                       const d = drag.current;
                       if (!d || d.pointerId !== e.pointerId) return;
+                      // Below the threshold this is still a tap, not a drag.
+                      if (
+                        dragging == null &&
+                        Math.hypot(e.clientX - d.startX, e.clientY - d.startY) <
+                          DRAG_THRESHOLD_PX
+                      ) {
+                        return;
+                      }
                       if (dragging == null) {
                         setDragging(piece); // drag actually started (moved)
                         void haptic("light");
@@ -474,10 +526,23 @@ export default function PuzzlePlayer({
                     }}
                     onPointerUp={(e) => {
                       if (drag.current?.pointerId !== e.pointerId) return;
-                      if (dragging != null) endDrag(e.clientX, e.clientY);
-                      else drag.current = null; // plain tap — onClick handles selection
+                      if (dragging != null) {
+                        // Arm click suppression for the click this pointerup
+                        // dispatches — and DISARM on the next tick in case the
+                        // browser suppressed that click itself after the drag
+                        // (otherwise the flag would swallow the next real tap).
+                        suppressClick.current = true;
+                        setTimeout(() => {
+                          suppressClick.current = false;
+                        }, 0);
+                        endDrag(e.clientX, e.clientY);
+                      } else {
+                        drag.current = null; // plain tap — onClick handles selection
+                      }
                     }}
                     onPointerCancel={() => {
+                      // Also fires when the browser takes over for tray
+                      // scrolling (touch-action: pan-x) — drop the drag cleanly.
                       drag.current = null;
                       setDragging(null);
                     }}
@@ -488,7 +553,7 @@ export default function PuzzlePlayer({
                       ...tileBackground(puzzle.crop, cols, piece, TRAY_TILE * cols),
                       opacity: hidden ? 0.25 : 1,
                     }}
-                    className={`touch-none rounded-xl border shadow-soft transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                    className={`[touch-action:pan-x] rounded-xl border shadow-soft transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
                       selected === piece
                         ? "border-sage ring-2 ring-sage"
                         : isHint
@@ -506,7 +571,7 @@ export default function PuzzlePlayer({
       {/* Floating drag tile (rAF-driven transform; no re-render per move). */}
       {dragging != null && (
         <div
-          ref={floatRef}
+          ref={floatMountRef}
           aria-hidden
           className="pointer-events-none fixed left-0 top-0 z-[70] rounded-xl border border-white/70 shadow-soft-lg"
           style={{

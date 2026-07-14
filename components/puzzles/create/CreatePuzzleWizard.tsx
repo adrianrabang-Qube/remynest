@@ -64,35 +64,52 @@ export default function CreatePuzzleWizard() {
   const [error, setError] = useState("");
 
   // ---- Step 1: image ----
+  const PICKER_PAGE = 50;
   const [images, setImages] = useState<PickerAttachment[]>([]);
   const [loadingImages, setLoadingImages] = useState(true);
+  const [pickerOffset, setPickerOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [chosen, setChosen] = useState<PickerAttachment | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  // Paged (matches the feed API's server pagination): older memories stay
+  // reachable via "Show more" instead of a hard first-page cap.
+  const loadPage = useCallback(
+    async (offset: number): Promise<boolean> => {
+      setError(""); // a retried "Show more" must not keep a stale banner
       try {
-        const res = await fetch("/api/memories?limit=50&offset=0", {
-          cache: "no-store",
-        });
+        const res = await fetch(
+          `/api/memories?limit=${PICKER_PAGE}&offset=${offset}`,
+          { cache: "no-store" },
+        );
         if (!res.ok) throw new Error();
         const data = await res.json();
         const list = Array.isArray(data) ? data : (data?.memories ?? []);
         const found = (list as unknown[]).flatMap((m) =>
           extractImages(m as Parameters<typeof extractImages>[0]),
         );
-        if (!cancelled) setImages(found);
+        setImages((prev) => (offset === 0 ? found : [...prev, ...found]));
+        setPickerOffset(offset + PICKER_PAGE);
+        setHasMore((list as unknown[]).length === PICKER_PAGE);
+        return true;
       } catch {
-        if (!cancelled) setError("We couldn't load your photos right now.");
-      } finally {
-        if (!cancelled) setLoadingImages(false);
+        setError("We couldn't load your photos right now.");
+        return false;
       }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await loadPage(0);
+      if (!cancelled) setLoadingImages(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadPage]);
 
   const onUpload = useCallback(async (file: File | undefined) => {
     if (!file) return;
@@ -246,30 +263,41 @@ export default function CreatePuzzleWizard() {
                 </p>
               </div>
             ) : (
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {images.map((img, i) => (
+              <>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {images.map((img, i) => (
+                    <button
+                      key={`${img.memoryId}-${i}`}
+                      type="button"
+                      onClick={() => {
+                        void haptic("light");
+                        setChosen(img);
+                        setStep("crop");
+                      }}
+                      aria-label={`Use photo from “${img.memoryTitle || "memory"}”`}
+                      className="aspect-square overflow-hidden rounded-2xl border border-sand-deep/60 bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- signed, short-lived
+                          URLs; next/image optimization would re-proxy already-optimized variants */}
+                      <img
+                        src={img.thumbUrl}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+                {hasMore && (
                   <button
-                    key={`${img.memoryId}-${i}`}
                     type="button"
-                    onClick={() => {
-                      void haptic("light");
-                      setChosen(img);
-                      setStep("crop");
-                    }}
-                    aria-label={`Use photo from “${img.memoryTitle || "memory"}”`}
-                    className="aspect-square overflow-hidden rounded-2xl border border-sand-deep/60 bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                    onClick={() => void loadPage(pickerOffset)}
+                    className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element -- signed, short-lived
-                        URLs; next/image optimization would re-proxy already-optimized variants */}
-                    <img
-                      src={img.thumbUrl}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
+                    Show more photos
                   </button>
-                ))}
-              </div>
+                )}
+              </>
             )
           ) : (
             <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-3xl border border-dashed border-sand-deep bg-white p-10 text-center shadow-soft transition focus-within:ring-2 focus-within:ring-sage hover:border-sage/40">

@@ -72,7 +72,12 @@ export default async function PuzzlePlayPage({
         </h1>
       </header>
 
+      {/* Keyed by id + shuffle seed: "Play again" bumps the seed server-side and
+          router.refresh() delivers new props — but client state (the placed set)
+          survives a prop change, so without the key the finished board never
+          reset. The key remounts the player with the fresh, empty progress. */}
       <PuzzlePlayer
+        key={`${data.puzzle.id}:${data.puzzle.shuffle_seed}`}
         puzzle={data.puzzle}
         initialPlacements={data.placements}
         imageUrl={data.imageUrl}
