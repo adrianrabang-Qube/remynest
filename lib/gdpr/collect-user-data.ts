@@ -40,6 +40,8 @@ export interface GdprExportPayload {
   storageLedger: unknown[];
   moderationReports: unknown[];
   userBlocks: unknown[];
+  puzzles: unknown[];
+  puzzleCompletions: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -123,6 +125,8 @@ export async function collectUserData(
     storageLedgerRes,
     moderationReportsRes,
     userBlocksRes,
+    puzzlesRes,
+    puzzleCompletionsRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -139,6 +143,9 @@ export async function collectUserData(
     // LA5.1 — operator-gated (probe-safe): a missing relation resolves to { data: null }.
     db.from("moderation_reports").select("*").eq("reporter_account_id", userId),
     db.from("user_blocks").select("*").eq("blocker_account_id", userId),
+    // Memory Puzzles (2026-07-14) — operator-gated (probe-safe): missing relation → { data: null }.
+    db.from("puzzles").select("*").eq("user_id", userId),
+    db.from("puzzle_completions").select("*").eq("user_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -151,7 +158,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.2",
+    schemaVersion: "1.3",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -168,6 +175,8 @@ export async function collectUserData(
     storageLedger: storageLedgerRes.data ?? [],
     moderationReports: moderationReportsRes.data ?? [],
     userBlocks: userBlocksRes.data ?? [],
+    puzzles: puzzlesRes.data ?? [],
+    puzzleCompletions: puzzleCompletionsRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -187,6 +196,8 @@ export async function collectUserData(
     storageLedger: payload.storageLedger.length,
     moderationReports: payload.moderationReports.length,
     userBlocks: payload.userBlocks.length,
+    puzzles: payload.puzzles.length,
+    puzzleCompletions: payload.puzzleCompletions.length,
     mediaReferences: payload.mediaReferences.length,
   };
 
