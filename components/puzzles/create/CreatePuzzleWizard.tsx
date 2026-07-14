@@ -72,19 +72,31 @@ export default function CreatePuzzleWizard() {
   const [uploading, setUploading] = useState(false);
   const [chosen, setChosen] = useState<PickerAttachment | null>(null);
 
+  const [pickerFailed, setPickerFailed] = useState(false);
+
   // Paged (matches the feed API's server pagination): older memories stay
   // reachable via "Show more" instead of a hard first-page cap.
   const loadPage = useCallback(
     async (offset: number): Promise<boolean> => {
-      setError(""); // a retried "Show more" must not keep a stale banner
+      setError(""); // a retried load must not keep a stale banner
+      setPickerFailed(false);
       try {
         const res = await fetch(
           `/api/memories?limit=${PICKER_PAGE}&offset=${offset}`,
-          { cache: "no-store" },
+          // Bounded: a hung request must settle into the error state, never
+          // leave the picker on permanent skeletons.
+          { cache: "no-store", signal: AbortSignal.timeout(15_000) },
         );
         if (!res.ok) throw new Error();
         const data = await res.json();
-        const list = Array.isArray(data) ? data : (data?.memories ?? []);
+        // The memories API responds { data: signedMemories, metadata } — `data.data`
+        // is the list (reading `data.memories` here was the production "No photos in
+        // your memories yet" defect). Bare-array kept as a defensive fallback only.
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
         const found = (list as unknown[]).flatMap((m) =>
           extractImages(m as Parameters<typeof extractImages>[0]),
         );
@@ -93,12 +105,19 @@ export default function CreatePuzzleWizard() {
         setHasMore((list as unknown[]).length === PICKER_PAGE);
         return true;
       } catch {
+        setPickerFailed(true);
         setError("We couldn't load your photos right now.");
         return false;
       }
     },
     [],
   );
+
+  const retryPicker = useCallback(async () => {
+    setLoadingImages(true);
+    await loadPage(0);
+    setLoadingImages(false);
+  }, [loadPage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,7 +144,10 @@ export default function CreatePuzzleWizard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: file.name.replace(/\.[^.]+$/, "") || "Puzzle photo",
-          content: "",
+          // The create API requires non-empty content (kept intact — a global
+          // validation this flow must satisfy, not weaken). An empty string
+          // here was the production "Content required" defect.
+          content: "A photo added for a memory puzzle.",
           attachments,
         }),
       });
@@ -254,6 +276,24 @@ export default function CreatePuzzleWizard() {
                     className="aspect-square animate-pulse rounded-2xl bg-sand-deep/40 motion-reduce:animate-none"
                   />
                 ))}
+              </div>
+            ) : pickerFailed && images.length === 0 ? (
+              /* A failed load is an ERROR, not an empty archive — never tell a
+                 user with photos that they have none. */
+              <div className="mt-4 rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
+                <p className="text-charcoal-soft">
+                  We couldn&apos;t load your photos right now.
+                </p>
+                <p className="mt-1 text-sm text-charcoal-muted">
+                  Your memories are safe — check your connection and try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void retryPicker()}
+                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                >
+                  Try again
+                </button>
               </div>
             ) : images.length === 0 ? (
               <div className="mt-4 rounded-3xl border border-sand-deep/70 bg-white p-8 text-center shadow-soft">
