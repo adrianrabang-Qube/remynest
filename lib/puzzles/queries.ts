@@ -12,11 +12,16 @@ import type { PuzzleProgressRecord, PuzzleRecord } from "./types";
 
 const SIGNED_TTL_SECONDS = 60 * 60; // play-session length; refreshed per visit
 
+export type PuzzleSummary = PuzzleRecord & {
+  placedCount: number;
+  imageUrl: string | null;
+};
+
 export interface PuzzleListing {
-  inProgress: PuzzleRecord[];
-  favourites: PuzzleRecord[];
-  finished: PuzzleRecord[];
-  fresh: PuzzleRecord[];
+  inProgress: PuzzleSummary[];
+  favourites: PuzzleSummary[];
+  finished: PuzzleSummary[];
+  fresh: PuzzleSummary[];
   /** False when the migration hasn't been applied yet (operator-gated). */
   available: boolean;
 }
@@ -46,23 +51,49 @@ export async function listPuzzles(
   const rows = (data ?? []) as PuzzleRecord[];
   const ids = rows.map((r) => r.id);
   const progressByPuzzle = new Map<string, number>();
+  const urlByPath = new Map<string, string>();
+
   if (ids.length > 0) {
-    const { data: prog } = await supabaseAdmin
-      .from("puzzle_progress")
-      .select("puzzle_id, placed_count")
-      .in("puzzle_id", ids);
+    // One progress read + ONE batched sign for every card thumbnail.
+    const paths = [
+      ...new Set(
+        rows
+          .map((r) => toStoragePath(r.image_path))
+          .filter(Boolean) as string[],
+      ),
+    ];
+    const [{ data: prog }, signed] = await Promise.all([
+      supabaseAdmin
+        .from("puzzle_progress")
+        .select("puzzle_id, placed_count")
+        .in("puzzle_id", ids),
+      paths.length > 0
+        ? supabaseAdmin.storage
+            .from("memory-media")
+            .createSignedUrls(paths, SIGNED_TTL_SECONDS)
+        : Promise.resolve({ data: null }),
+    ]);
     for (const p of prog ?? []) {
       progressByPuzzle.set(String(p.puzzle_id), Number(p.placed_count ?? 0));
     }
+    (signed.data ?? []).forEach((s, i) => {
+      if (s?.signedUrl) urlByPath.set(paths[i], s.signedUrl);
+    });
   }
 
-  const inProgress = rows.filter((r) => (progressByPuzzle.get(r.id) ?? 0) > 0);
-  const finished = rows.filter(
-    (r) => r.completed_count > 0 && (progressByPuzzle.get(r.id) ?? 0) === 0,
+  const summaries: PuzzleSummary[] = rows.map((r) => ({
+    ...r,
+    placedCount: progressByPuzzle.get(r.id) ?? 0,
+    imageUrl: urlByPath.get(toStoragePath(r.image_path) ?? "") ?? null,
+  }));
+
+  const inProgress = summaries.filter((r) => r.placedCount > 0);
+  const finished = summaries.filter(
+    (r) => r.completed_count > 0 && r.placedCount === 0,
   );
-  const favourites = rows.filter((r) => r.favourite);
-  const fresh = rows.filter(
-    (r) => r.completed_count === 0 && (progressByPuzzle.get(r.id) ?? 0) === 0,
+  const favourites = summaries.filter((r) => r.favourite);
+  const fresh = summaries.filter(
+    (r) => r.completed_count === 0 && r.placedCount === 0,
   );
   return { inProgress, favourites, finished, fresh, available: true };
 }
