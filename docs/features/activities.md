@@ -72,6 +72,36 @@ Built exactly per the approved architecture:
   Remy (the REFLECTION SEAM — a future phase swaps this link for the
   server-authoritative "tell me about this memory" prompt on the existing Ask
   Remy layer) / Play again.
+## Story Builder — Activity #2 (SHIPPED 2026-07-15)
+A story is an ORDERED VIEW over 2–12 existing memories ("moments") — nothing
+copied, nothing generated (no AI narrative, no scores, no timers, no sharing).
+- **Data:** migration `20260715090000_story_builder.sql` (OPERATOR STEP —
+  probe-gated; the hub shows a calm setting-up state until applied): ONE
+  `stories` table (`memory_ids` = ordered jsonb of memory uuids; RLS
+  owner-scoped; care access via service-role actions after
+  `userCanAccessProfile`/`userCanWriteProfile`; reversible rollback block).
+  GDPR export enrolled (schemaVersion 1.4). Deleting a story never touches
+  memories/media (the delete confirm says so).
+- **Save-time invariant:** every referenced memory is server-verified to
+  belong to the story's OWN workspace (exact-count check in
+  `memoriesBelongToWorkspace`); reads re-scope by the same workspace, so a
+  planted foreign id can never resolve.
+- **Flow:** `/activities/stories` hub (one honest "Your stories" list — a
+  saved story has no meaningful in-progress state, so deliberately NO status
+  shelves) → `new` wizard (memory picker over the existing paginated
+  /api/memories [`data.data` shape, settle-always with retry]; photo thumb or
+  serif text tile; selection order = story order; title) → `[id]` reader (the
+  "memory book": signed MEDIUM images via `signMemories`, serif titles,
+  dates) → `[id]/edit` (title/order/remove via the SHARED `MomentOrderList`).
+- **Accessibility:** reordering is BUTTON-driven (Move earlier/later, ≥44px,
+  position-aware labels, aria-live) — never drag-only (no drag in v1);
+  text-base inputs; reduced-motion-safe skeletons.
+- **Deferred from v1 (do not treat as defects):** adding/re-picking moments in
+  edit (edit = title/order/remove), touch drag reordering (additive later),
+  hub story thumbnails, print/export (the existing Memory Book export is the
+  future seam), any Remy platform event for story completion.
+
+## Memory Puzzles caveats
 - **Known caveat:** "Open this memory" uses the user_id-scoped `/memories/[id]`
   route — a caregiver opening ANOTHER author's memory 404s there (pre-existing
   memory-detail authz posture; not changed by puzzles).

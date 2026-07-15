@@ -28,7 +28,22 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Activities discoverability fix (2026-07-14):** production had the
+The most recent work is **Story Builder — Activity #2 (2026-07-15, COMPLETE):** a story = an
+ORDERED VIEW over 2–12 existing memories. ONE additive probe-gated table (`stories`, migration
+**`20260715090000_story_builder.sql` — OPERATOR STEP, apply in the SQL editor**; RLS owner-scoped;
+reversible). Mirrors every puzzle contract: session-derived actor, structured never-throw actions,
+authorize against the story's OWN context (write = `userCanWriteProfile`), service-role scoped reads,
+**save-time exact-count verification that every memory belongs to the story's workspace**, signed
+private media (MEDIUM via `signMemories`), GDPR export v1.4, deleting a story never touches
+memories/media. Surfaces: hub (one honest "Your stories" list, calm empty + pre-migration states) →
+select→arrange wizard (picker over `/api/memories` `data.data`, settle-always + retry + Show more;
+photo thumb or serif text tile; selection order = story order; title input) → "memory book" reader →
+edit (title/order/remove via the ONE shared button-driven `MomentOrderList` — Move earlier/later,
+≥44px, aria-live; never drag-only). Registry: story-builder flipped `coming-soon`→`available`
+(`/activities/stories`). Deferred from v1: re-picking moments in edit, touch drag, hub thumbnails,
+print/export, Remy story events. tsc/lint/build green (72/72; 4 new routes).
+
+Before that: the **Activities discoverability fix (2026-07-14):** production had the
 puzzle code deployed but NO menu exposed it — the only entry was the Library-hub row (two levels deep:
 More → Library → row), and Library search didn't match "puzzle". Fix: an additive `NAV_ITEMS` entry
 (`/activities`, `mobile:"drawer"`, Puzzle icon, after Library) → appears in the mobile "More" drawer +

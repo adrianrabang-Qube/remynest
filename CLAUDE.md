@@ -2208,7 +2208,17 @@ SEAM** (the "Talk with Remy" link in `PuzzlePlayer` — a future approved phase 
 server-authoritative "tell me about this memory" prompt on the EXISTING Ask Remy layer; do NOT build
 new AI paths for it). Do NOT hardcode activity lists in pages, add a second registry, promise dates
 on `future` items, add timers/scores/pressure to any activity, duplicate the upload/quota pipeline,
-or bypass the memory-attachment verification on puzzle creation. See `docs/features/activities.md`.
+or bypass the memory-attachment verification on puzzle creation. **Story Builder (Activity #2)
+SHIPPED 2026-07-15:** a story is an ORDERED VIEW over 2–12 existing memories (`stories` table,
+`memory_ids` ordered jsonb; migration `20260715090000`, OPERATOR-APPLIED, probe-gated; GDPR export
+v1.4; deleting a story never touches memories/media). Save-time invariant: every referenced memory is
+server-verified against the story's OWN workspace (exact-count `memoriesBelongToWorkspace`); reads
+re-scope identically. Flow: hub (one honest "Your stories" list — NO fake status shelves) →
+select→arrange wizard (picker over the existing /api/memories `data.data` shape; selection order =
+story order) → reader (signed MEDIUM via `signMemories`) → edit (title/order/remove via the ONE
+shared `MomentOrderList`). Reordering is BUTTON-driven (Move earlier/later, ≥44px, aria-live) —
+never drag-only. NO AI narrative/scores/timers/sharing; do NOT bypass the story
+workspace-membership verification on save. See `docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
