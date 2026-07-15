@@ -325,6 +325,8 @@ export default async function MemoryPage({
                       <audio
                         src={url}
                         controls
+                        preload="metadata"
+                        aria-label={`Play voice recording: ${name}`}
                         className="w-full"
                       />
                       <div className="text-xs text-gray-500 mt-3">

@@ -30,7 +30,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>RemyNest uses your camera so you can capture photos and videos to add to your memories.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>RemyNest uses your microphone to record sound when you capture a video for your memories.</string>
+	<string>RemyNest records with your microphone only when you start a voice memory or capture a video for your memories.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>RemyNest needs permission to save photos and videos to your library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

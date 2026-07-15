@@ -28,7 +28,26 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Music Memories Spotify link import (2026-07-15, IMPORT-ONLY):** an
+The most recent work is **Voice Memory v1 (2026-07-15 — operator-approved NARROW lift of the voice
+deferral):** in-app private voice recordings in the EXISTING memory-creation flow (not an activity,
+no schema/migration — the attachments pipeline already allowlists audio/*). Browser-native
+`getUserMedia`+`MediaRecorder` only (iOS→AAC/mp4 .m4a, Android/Chrome→Opus/webm; NO plugin/pod —
+if the operator's real-device pass fails, that's a STOP-and-report decision gate). Flow: Record
+(mic starts only on tap) → live state w/ elapsed + 5:00 auto-stop + Stop/Discard → listen-back
+(local object URL) / Re-record / Remove → rides the normal memory Save (existing title+content
+validation untouched; direct-to-storage upload w/ quota; voice file appended to the picked files).
+Mic tracks stop IMMEDIATELY on Stop/Discard/error/unmount; permission-denied/unsupported/interrupt
+states are calm + recoverable; no audio in logs; no autoplay. Feed: branded "Voice memory" chip
+(`MediaThumb`); detail: pre-existing inline `<audio controls>` + preload/aria label. GDPR: audio
+attachments already ride memories export (mediaReferences includes all attachment types — verified,
+no gap). `Info.plist` mic copy now covers voice memories. **OPERATOR steps: (1) native rebuild to
+ship the new mic-permission string; (2) add "Audio Data" (user content, linked, app-functionality
+only, NOT tracking) to `PrivacyInfo.xcprivacy` + App Store privacy answers before the next
+submission; (3) real-iPhone confirmation of record→playback in the TestFlight WebView.** Deferred:
+transcription, AI audio features, audio FILE uploads, sharing/downloads, Music Memories tie-in.
+tsc/lint/build green (77/77).
+
+Before that: the **Music Memories Spotify link import (2026-07-15, IMPORT-ONLY):** an
 optional Add/Edit field prefills editable song details from a pasted track link. Security: strict
 pure validation (`lib/music-memories/spotify.ts` — https; hosts exactly open.spotify.com
 [track-only, intl-prefix ok] / spotify.link [slug]; ≤200 chars; 24 runtime assertions PASSED) BEFORE

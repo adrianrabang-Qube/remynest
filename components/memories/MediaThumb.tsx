@@ -74,12 +74,25 @@ export default function MediaThumb({
     );
   }
 
-  const badge =
-    type === "audio"
-      ? "♪ Audio"
-      : type === "document"
-        ? "PDF / Doc"
-        : "File";
+  // Voice Memory v1: audio gets a compact branded chip instead of the generic
+  // gray badge (presentation only — the placeholder contract is unchanged).
+  if (type === "audio") {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-sand px-2 text-center">
+        <span
+          aria-hidden
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sage shadow-soft"
+        >
+          ♪
+        </span>
+        <span className="text-xs font-medium text-charcoal-soft">
+          Voice memory
+        </span>
+      </div>
+    );
+  }
+
+  const badge = type === "document" ? "PDF / Doc" : "File";
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-gray-100 px-2 text-center text-xs font-medium text-gray-600">

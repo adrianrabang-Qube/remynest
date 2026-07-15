@@ -2289,6 +2289,28 @@ REMOVED** — any supported media size uploads as long as `used < capacity`; the
 are the Supabase object size limit + the composed quota. Do not reintroduce a per-file size
 gate, add a second capacity-resolution path, or make `resolveStorageCapacity` impure/async.
 
+**Voice Memory v1 (authoritative, 2026-07-15 — operator-approved narrow lift of the voice deferral):**
+user-initiated PRIVATE voice recordings inside the EXISTING memory-creation flow — NOT a new
+activity, NOT a schema change. `components/memories/VoiceRecorderField.tsx` uses browser-native
+`getUserMedia` + `MediaRecorder` ONLY (iOS 14.3+ WKWebView → AAC `audio/mp4` .m4a; Chrome/Android →
+Opus `audio/webm`; first-supported preference — **no Capacitor plugin/pod/bridge**; if a real-device
+test ever proves the web API insufficient, STOP and report the decision gate rather than adding a
+dependency). The recording becomes a plain `File` appended to `CreateMemoryForm`'s existing
+direct-to-storage upload (quota, owner-scoped paths, private bucket, signing, GDPR export
+mediaReferences, account-delete — ALL inherited; the server MIME allowlist already accepted
+`audio/*`; the picker's image/video accept-list is UNCHANGED — recordings are the only audio
+source). **Privacy invariants (do NOT weaken):** recording starts only on the user's tap; every mic
+track stops IMMEDIATELY on Stop/Discard/error/unmount; 5-minute auto-stop limit; local-object-URL
+preview only until Save; no audio bytes in logs/analytics/error reports; no autoplay anywhere
+(detail plays via the pre-existing inline `<audio controls preload="metadata">`; feed shows a
+branded "Voice memory" chip in `MediaThumb`). Title+content requirements ride the EXISTING memory
+validation (nothing weakened). `Info.plist` `NSMicrophoneUsageDescription` copy updated to cover
+voice memories (**operator: native rebuild to ship the new string; add "Audio Data" —
+user-content, linked, app-functionality-only, no tracking — to `PrivacyInfo.xcprivacy` + the App
+Store privacy answers before the next submission**). Still deferred: transcription, AI
+summaries/tags of audio, audio file uploads, sharing/downloads, Music Memories integration. Do NOT
+add a recording plugin, autoplay audio, log audio, or leave a mic track running.
+
 ## Mandatory documentation maintenance (Definition of Done)
 A task is **not complete** until, in the **same commit**:
 - `docs/handoffs/HANDOFF_CURRENT.md` is updated;

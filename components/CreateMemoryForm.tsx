@@ -21,6 +21,7 @@ import {
 } from "@/lib/memories/memory-date";
 
 import AttachmentManager from "@/components/memories/AttachmentManager";
+import VoiceRecorderField from "@/components/memories/VoiceRecorderField";
 import {
   uploadAttachmentsDirect,
   UploadQuotaError,
@@ -134,6 +135,10 @@ export default function CreateMemoryForm() {
 
   const [files, setFiles] =
     useState<File[]>([]);
+
+  // Voice Memory v1 — a single in-app recording, uploaded through the SAME
+  // direct-to-storage pipeline as picked files (quota/paths/signing inherited).
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
   // =====================================
   // NORMALIZED INPUTS
@@ -269,12 +274,14 @@ export default function CreateMemoryForm() {
 
         let response: Response;
 
-        if (files.length > 0) {
+        const uploadFiles = voiceFile ? [...files, voiceFile] : files;
+
+        if (uploadFiles.length > 0) {
           // Direct-to-storage: upload files STRAIGHT to Supabase Storage (no bytes
           // through the API route → no ~4.5 MB limit), then create with JSON metadata.
           let newAttachments;
           try {
-            newAttachments = await uploadAttachmentsDirect(files);
+            newAttachments = await uploadAttachmentsDirect(uploadFiles);
           } catch (uploadErr) {
             if (uploadErr instanceof UploadQuotaError) {
               setStorageFull(uploadErr.quota as UploadQuotaPayload);
@@ -390,6 +397,8 @@ export default function CreateMemoryForm() {
 
         setFiles([]);
 
+        setVoiceFile(null);
+
         // A new memory may have added attachments — refresh storage usage so the
         // card/banner reflect it immediately (no storage-accounting change).
         queryClient.invalidateQueries({
@@ -429,6 +438,7 @@ export default function CreateMemoryForm() {
       normalizedContent,
       resolvedMemoryDate,
       files,
+      voiceFile,
       router,
       queryClient,
       showToast,
@@ -589,6 +599,8 @@ export default function CreateMemoryForm() {
         <label className="text-sm font-medium text-gray-700">
           Photos
         </label>
+        <VoiceRecorderField file={voiceFile} onChange={setVoiceFile} />
+
         <AttachmentManager
           files={files}
           onFilesChange={setFiles}
