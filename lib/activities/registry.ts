@@ -90,8 +90,9 @@ export const ACTIVITIES: Activity[] = [
     title: "Family Activities",
     tagline: "Things to do together",
     description:
-      "Shared activities for visits — made for doing, not scrolling.",
-    status: "future",
+      "Together Time — look back through a few favourite memories, side by side.",
+    status: "available",
+    href: "/activities/family",
     Icon: Users,
   },
 ];

@@ -46,6 +46,7 @@ export interface GdprExportPayload {
   matchGames: unknown[];
   matchGameCompletions: unknown[];
   songMemories: unknown[];
+  togetherTimes: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -135,6 +136,7 @@ export async function collectUserData(
     matchGamesRes,
     matchGameCompletionsRes,
     songMemoriesRes,
+    togetherTimesRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -161,6 +163,8 @@ export async function collectUserData(
     db.from("match_game_completions").select("*").eq("user_id", userId),
     // Music Memories (2026-07-15) — operator-gated (probe-safe): missing relation → { data: null }.
     db.from("song_memories").select("*").eq("user_id", userId),
+    // Together Time (2026-07-15) — operator-gated (probe-safe): missing relation → { data: null }.
+    db.from("together_times").select("*").eq("user_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -173,7 +177,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.7",
+    schemaVersion: "1.8",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -196,6 +200,7 @@ export async function collectUserData(
     matchGames: matchGamesRes.data ?? [],
     matchGameCompletions: matchGameCompletionsRes.data ?? [],
     songMemories: songMemoriesRes.data ?? [],
+    togetherTimes: togetherTimesRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -221,6 +226,7 @@ export async function collectUserData(
     matchGames: payload.matchGames.length,
     matchGameCompletions: payload.matchGameCompletions.length,
     songMemories: payload.songMemories.length,
+    togetherTimes: payload.togetherTimes.length,
     mediaReferences: payload.mediaReferences.length,
   };
 

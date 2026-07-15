@@ -179,6 +179,42 @@ memory never touches memories/media.
   Phase 3 (separate decision): external music-app links (anti-steering
   review posture). Rejected: streaming catalogs, autoplay, mic recording.
 
+## Family Activities: Together Time — Activity #5 (SHIPPED 2026-07-15)
+A Together Time is a PRIVATE reusable set: an ordered view over **3–8 existing
+memories** run one moment at a time with **fixed, deterministic, non-AI
+prompts** (four operator-approved lines in `lib/together-time/types.ts`,
+assigned by moment index — never in the database, never generated). **Sets
+only — NO session history/completion state**, no sharing/invites/live sync
+(suitable side-by-side or over an ordinary call), no timers/scores. Deleting a
+set never touches memories, media, or Voice Memory recordings.
+- **Data:** migration `20260715210000_together_time.sql` (OPERATOR STEP —
+  probe-gated; hub shows "Remy is setting up the family room" until applied):
+  ONE `together_times` table (title default ''; ordered `memory_ids`;
+  nullable `last_opened_at` for hub ordering; RLS owner-scoped; reversible).
+  GDPR export v1.8.
+- **`last_opened_at` is BEST-EFFORT (locked):** the player fires one
+  `markTogetherTimeOpened` on mount and IGNORES the result — write-permitted
+  users bump the ordering; a read-only caregiver runs a set with zero errors
+  and zero forced writes.
+- **Moment loader is DEDICATED (locked):** `getTogetherMoments` extracts the
+  first signed image AND the first signed audio (Voice Memory) attachment per
+  memory — Story Builder's image-only loader is untouched. Player renders
+  photo (signed MEDIUM) + title + original words + `<audio controls>` (user-
+  initiated, never autoplay) + the fixed prompt + "Moment X of Y" (aria-live;
+  focus moves to the moment heading on Previous/Next; no slide animations).
+- **Degradation:** deleted memories drop out (workspace-re-scoped fetch);
+  remaining moments still play; zero remaining → calm edit/create guidance.
+- **Copy rule:** "a gentle way to look back together" — never
+  therapy/assessment/treatment language.
+- **Deferred (each operator-gated):** voice-note capture during Together
+  Time, a printable "This is Me"-style sheet, custom per-moment prompts.
+  Rejected: live sync/multiplayer, share links, AI prompts, session
+  recording/notes, gamification.
+
+**ACTIVITIES ROSTER COMPLETE — FEATURE PAUSE (2026-07-15):** all five activity
+cards are now live. After Together Time's post-ship QA pass, feature work
+PAUSES and the project moves to iOS App Store launch preparation.
+
 ## Memory Puzzles caveats
 - **Known caveat:** "Open this memory" uses the user_id-scoped `/memories/[id]`
   route — a caregiver opening ANOTHER author's memory 404s there (pre-existing

@@ -2248,7 +2248,20 @@ canonical track URL (`song_memories.spotify_url`, migration `20260715180000`, OP
 probe-gated — pre-application song writes retry WITHOUT the column so manual entry never breaks);
 GDPR v1.7. NO OAuth/account/tokens/credentials, NO iframe/player/preview/artwork/external-link CTA —
 the detail page shows a TEXT-ONLY "Details imported from Spotify" indicator. Do NOT widen the allowed
-hosts/paths, fetch user-supplied hosts, render/persist oEmbed html, or add Spotify credentials. See
+hosts/paths, fetch user-supplied hosts, render/persist oEmbed html, or add Spotify credentials.
+**Family Activities: Together Time (Activity #5) SHIPPED 2026-07-15:** a PRIVATE reusable set — an
+ordered view over 3–8 existing memories run one moment at a time with FIXED deterministic non-AI
+prompts (four approved lines in `lib/together-time/types.ts`, index-assigned — never in the DB, never
+generated). SETS ONLY: no session history/completion state, no sharing/invites/live sync, no
+timers/scores. `together_times` (migration `20260715210000`, OPERATOR-APPLIED, probe-gated; GDPR
+v1.8; delete never touches memories/media/voice). `last_opened_at` = hub ordering, bumped
+BEST-EFFORT (player ignores the result — read-only caregivers run sets with no forced write). The
+moment loader is DEDICATED (`getTogetherMoments`: first signed image + first signed AUDIO per
+memory — Story Builder's image-only loader untouched); playback via user-initiated `<audio controls>`,
+never autoplay. Deleted memories drop out calmly. Copy: "a gentle way to look back together" — never
+therapy/assessment language. **ALL FIVE ACTIVITY CARDS ARE NOW LIVE — after Together Time's post-ship
+QA, FEATURE WORK PAUSES for iOS App Store launch preparation.** Do NOT add session history, sharing,
+live sync, AI prompts, or reword the fixed prompt set. See
 `docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the

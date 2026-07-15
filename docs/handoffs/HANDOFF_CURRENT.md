@@ -28,7 +28,24 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **Voice Memory discoverability fix (2026-07-15):** the Nest
+The most recent work is **Together Time — Family Activities, Activity #5 (2026-07-15, COMPLETE;
+the FINAL activity card):** a private reusable set = ordered view over 3–8 existing memories, run
+one moment at a time with the four FIXED operator-approved non-AI prompts (index-assigned in code).
+Probe-gated migration **`20260715210000_together_time.sql` — OPERATOR STEP** (`together_times`:
+title/ordered memory_ids/nullable last_opened_at; RLS owner-scoped; reversible). Locked decisions
+honoured: sets only (no session history); `last_opened_at` bumped BEST-EFFORT (player ignores the
+result — read-only caregivers run sets with zero errors/writes); DEDICATED moment loader
+(`getTogetherMoments` — first signed image + first signed AUDIO per memory; Story Builder's loader
+untouched). Player: signed photo + words + user-initiated `<audio controls>` (never autoplay) +
+fixed prompt + aria-live "Moment X of Y" + heading focus on Previous/Next + no slide animations.
+Save-time exact-count workspace verification (reused helper); deleted memories degrade calmly;
+GDPR v1.8; registry family-activities `future`→`available` (`/activities/family`). Deferred
+(operator-gated): in-session voice capture, printable sheet, custom prompts. Rejected: live
+sync/sharing/AI prompts/session notes. tsc/lint/build green (79/79; 4 new routes).
+**ACTIVITIES ROSTER COMPLETE — after the post-ship QA pass, FEATURE WORK PAUSES and the project
+moves to iOS App Store launch preparation.**
+
+Before that: the **Voice Memory discoverability fix (2026-07-15):** the Nest
 quick-action sheet gained an operator-approved SIXTH row — "Record a voice memory / Save a moment in
 your own words" (Mic icon, directly below "Add a memory") → `/memories/new?voice=1`, context-threaded
 for care workspaces. The flag only makes `CreateMemoryForm` render the EXISTING recorder at the top
