@@ -101,6 +101,36 @@ copied, nothing generated (no AI narrative, no scores, no timers, no sharing).
   hub story thumbnails, print/export (the existing Memory Book export is the
   future seam), any Remy platform event for story completion.
 
+## Memory Match — Activity #3 (SHIPPED 2026-07-15)
+A game is a VIEW over existing photo memories: each chosen photo becomes one
+PAIR (two cards). No timers, scores, streaks, leaderboards, AI, sharing, or
+billing. Deleting a game never touches memories/media.
+- **Data:** migration `20260715120000_memory_match.sql` (OPERATOR STEP —
+  probe-gated; hub shows "Remy is setting up the matching table" until
+  applied): `match_games` (ordered `photos` jsonb of {memoryId, path}; pairs ∈
+  {3,4,6,8}; shuffle_seed) + `match_game_progress` (matched pair indexes —
+  flipped-but-unmatched is deliberately ephemeral) + `match_game_completions`.
+  RLS owner-scoped; reversible rollback block. GDPR export v1.5.
+- **Create verification (puzzle pattern):** every photo's memory is fetched
+  SCOPED BY the active workspace and the path must be one of that memory's own
+  image attachments/cover (canonical `toStoragePath` comparison) — a planted
+  foreign reference cannot save. All later actions authorize against the
+  game's OWN context.
+- **Board:** deck = the ONE seeded shuffle (`shuffledTrayOrder`, reused from
+  the puzzle core — deterministic resume). Tap-only (tap IS the complete
+  interaction); match → stays revealed (medium haptic); miss → both visible
+  ~1.4s then turn back (announced); state-aware card labels + aria-live;
+  Reduce Motion keeps the delay, drops the transition. Autosave = debounced
+  write + seed-checked localStorage mirror, CANCELLED on completion (the
+  puzzle-audit lesson); board keyed by id+seed so replay remounts fresh.
+- **Completion:** warm copy, `Remy.emit("match.completed")` (new platform
+  event → celebrating), Play again + Delete + back.
+- **Hub shelves (real data only):** Continue playing (saved matched pairs) ·
+  Ready to play · Finished games.
+- **Deferred from v1:** flip animation polish (3D card turn), per-card memory
+  links, mixed photo+text card fronts, any Companion-Intelligence hook beyond
+  the platform event.
+
 ## Memory Puzzles caveats
 - **Known caveat:** "Open this memory" uses the user_id-scoped `/memories/[id]`
   route — a caregiver opening ANOTHER author's memory 404s there (pre-existing

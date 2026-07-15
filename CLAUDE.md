@@ -2218,7 +2218,17 @@ select→arrange wizard (picker over the existing /api/memories `data.data` shap
 story order) → reader (signed MEDIUM via `signMemories`) → edit (title/order/remove via the ONE
 shared `MomentOrderList`). Reordering is BUTTON-driven (Move earlier/later, ≥44px, aria-live) —
 never drag-only. NO AI narrative/scores/timers/sharing; do NOT bypass the story
-workspace-membership verification on save. See `docs/features/activities.md`.
+workspace-membership verification on save. **Memory Match (Activity #3) SHIPPED 2026-07-15:** a game
+is a VIEW over existing photo memories — each chosen photo = one PAIR; `match_games`/`match_game_progress`/
+`match_game_completions` (migration `20260715120000`, OPERATOR-APPLIED, probe-gated; GDPR v1.5; delete
+never touches memories/media). Create verifies every photo against its memory's OWN attachments scoped
+by the active workspace (canonical `toStoragePath`, the puzzle pattern); actions authorize against the
+game's own context. Board: tap-only (no dragging anywhere), deck from the ONE seeded shuffle
+(`shuffledTrayOrder` reused from the puzzle core), miss shows both cards ~1.4s then flips back
+(aria-live announced; Reduce Motion keeps the delay), autosave debounced + seed-checked localStorage
+mirror + CANCELLED on completion, board keyed by id+seed for replay. Completion emits
+**`Remy.emit("match.completed")`** (→ celebrating). Sizes locked to {3,4,6,8} pairs — never add
+timers/scores/streaks/leaderboards. See `docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's

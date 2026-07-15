@@ -28,7 +28,23 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Story Builder — Activity #2 (2026-07-15, COMPLETE):** a story = an
+The most recent work is **Memory Match — Activity #3 (2026-07-15, COMPLETE):** a gentle photo-pair
+game; a game = a VIEW over existing photo memories (each chosen photo = one pair). Probe-gated
+migration **`20260715120000_memory_match.sql` — OPERATOR STEP** (`match_games` w/ ordered
+photos jsonb + pairs ∈ {3,4,6,8} + shuffle_seed · `match_game_progress` matched-pairs ·
+`match_game_completions`; RLS owner-scoped; reversible). Puzzle-pattern security: create verifies
+every photo against its memory's own attachments scoped by the ACTIVE workspace; all actions
+authorize against the game's own context; GDPR v1.5; delete keeps memories/media. Surfaces: hub
+(honest shelves: Continue playing / Ready to play / Finished; calm empty + pre-migration states) →
+size→photos wizard (exact-count selection; settle-always picker w/ retry + Show more) → tap-only
+board (seeded deck via the reused `shuffledTrayOrder`; match stays up w/ medium haptic; miss shows
+both ~1.4s then flips back, announced; state-aware card labels; Reduce Motion keeps the delay;
+autosave debounced + seed-checked local mirror + cancelled on completion; board keyed id+seed) →
+warm completion (`Remy.emit("match.completed")` → celebrating; Play again / Delete). Registry:
+memory-match `coming-soon`→`available` (`/activities/match`). Deferred: 3D flip polish, per-card
+memory links, text-card fronts. tsc/lint/build green (74/74; 3 new routes).
+
+Before that: **Story Builder — Activity #2 (2026-07-15, COMPLETE):** a story = an
 ORDERED VIEW over 2–12 existing memories. ONE additive probe-gated table (`stories`, migration
 **`20260715090000_story_builder.sql` — OPERATOR STEP, apply in the SQL editor**; RLS owner-scoped;
 reversible). Mirrors every puzzle contract: session-derived actor, structured never-throw actions,
