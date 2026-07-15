@@ -50,6 +50,8 @@ const MOMENT_EMOTION: Partial<Record<RemyEventName, RemyEmotion>> = {
   "milestone.reached": "celebrating",
   // A memory puzzle came back together — a gentle celebration.
   "puzzle.completed": "celebrating",
+  // Every pair found in a Memory Match game — a gentle celebration.
+  "match.completed": "celebrating",
 };
 
 export function emotionForContext(key: RemyContextKey): RemyEmotion {

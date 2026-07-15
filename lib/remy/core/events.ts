@@ -62,6 +62,8 @@ export type RemyEventName =
   // activities — a Remy's Activities moment (2026-07-14: Memory Puzzles completion;
   // also the future Companion-Intelligence "revisited memory" signal)
   | "puzzle.completed"
+  // 2026-07-15: Memory Match (Activity #3) completion
+  | "match.completed"
   // declarative context lifecycle (emitted by <RemyStage>/useRemyContext)
   | "context.enter"
   | "context.exit";

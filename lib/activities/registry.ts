@@ -61,7 +61,8 @@ export const ACTIVITIES: Activity[] = [
     tagline: "Find the pairs among your photos",
     description:
       "A gentle matching game made from your own pictures.",
-    status: "coming-soon",
+    status: "available",
+    href: "/activities/match",
     Icon: Copy,
   },
   {
