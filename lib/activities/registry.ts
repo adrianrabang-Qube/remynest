@@ -70,7 +70,8 @@ export const ACTIVITIES: Activity[] = [
     tagline: "Arrange moments into a story",
     description:
       "Put memories in order and watch a story take shape.",
-    status: "coming-soon",
+    status: "available",
+    href: "/activities/stories",
     Icon: BookOpenText,
   },
   {

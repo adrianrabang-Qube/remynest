@@ -42,6 +42,7 @@ export interface GdprExportPayload {
   userBlocks: unknown[];
   puzzles: unknown[];
   puzzleCompletions: unknown[];
+  stories: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -127,6 +128,7 @@ export async function collectUserData(
     userBlocksRes,
     puzzlesRes,
     puzzleCompletionsRes,
+    storiesRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -146,6 +148,8 @@ export async function collectUserData(
     // Memory Puzzles (2026-07-14) — operator-gated (probe-safe): missing relation → { data: null }.
     db.from("puzzles").select("*").eq("user_id", userId),
     db.from("puzzle_completions").select("*").eq("user_id", userId),
+    // Story Builder (2026-07-15) — operator-gated (probe-safe): missing relation → { data: null }.
+    db.from("stories").select("*").eq("user_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -158,7 +162,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.3",
+    schemaVersion: "1.4",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -177,6 +181,7 @@ export async function collectUserData(
     userBlocks: userBlocksRes.data ?? [],
     puzzles: puzzlesRes.data ?? [],
     puzzleCompletions: puzzleCompletionsRes.data ?? [],
+    stories: storiesRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -198,6 +203,7 @@ export async function collectUserData(
     userBlocks: payload.userBlocks.length,
     puzzles: payload.puzzles.length,
     puzzleCompletions: payload.puzzleCompletions.length,
+    stories: payload.stories.length,
     mediaReferences: payload.mediaReferences.length,
   };
 
