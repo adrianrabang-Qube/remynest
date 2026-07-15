@@ -66,6 +66,20 @@ export default function MatchBoard({
     [cardPhotos],
   );
 
+  // QA fix (2026-07-15, proven defect): face-down cards render no <img>, so a
+  // photo was fetched on its FIRST flip — on slow networks the reveal showed a
+  // blank card, and a mismatched second photo could flip back (1.4s window)
+  // before it ever rendered. Warm every signed card image once on mount
+  // (≤8 urls) so flips reveal instantly.
+  useEffect(() => {
+    for (const p of cardPhotos) {
+      if (p.imageUrl) {
+        const img = new window.Image();
+        img.src = p.imageUrl;
+      }
+    }
+  }, [cardPhotos]);
+
   const [matched, setMatched] = useState<ReadonlySet<number>>(() => {
     const initial = new Set(initialMatched);
     if (typeof window !== "undefined") {
