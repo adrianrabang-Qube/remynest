@@ -599,8 +599,12 @@ sprite (`components/remy/avatar/*`, `public/remy/remy-blueprint.png`) to sage, a
 'class'` + `.dark` vars) — do **not** flip dark UI on broadly until components are
 audited. Icons/OG auto-wire via `app/{icon.svg,apple-icon.tsx,opengraph-image.tsx}`.
 See `docs/brand/brand-guidelines.md`. **Pending (staged):** raster exports
-(store/Play/social/true-square PWA), the 17px/scale migration across ~544 small-text
-sites, dark-UI rollout.
+(social/true-square PWA), the 17px/scale migration across ~544 small-text
+sites, dark-UI rollout. **(2026-07-15: the iOS store icon + splash are DONE — the Capacitor template
+icon/splash in the Xcode catalog were replaced with the branded nest icon (opaque 1024²) and a
+Warm-Sand nest-mark splash; iPhone-only v1 (`TARGETED_DEVICE_FAMILY=1`, iPad deferred);
+`PrivacyInfo.xcprivacy` now declares Audio Data AND is actually bundled via target membership. Do not
+reintroduce the template assets; screenshot spec lives at `docs/launch/APP_STORE_SCREENSHOTS.md`.)**
 
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch

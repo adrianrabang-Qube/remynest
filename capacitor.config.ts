@@ -43,7 +43,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 1500,
-      backgroundColor: '#ffffff',
+      backgroundColor: '#F5F1EA', // Warm Sand — matches the branded splash image
       showSpinner: false,
     },
   },

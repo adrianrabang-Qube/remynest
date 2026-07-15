@@ -28,7 +28,29 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Together Time — Family Activities, Activity #5 (2026-07-15, COMPLETE;
+The most recent work is the **iOS launch visual/privacy asset preparation (2026-07-15, iPhone-only
+v1):** **(1)** the Capacitor TEMPLATE app icon (blue X — shipped on TestFlight Builds ≤17!) was
+replaced in `AppIcon.appiconset` with the approved RemyNest nest-and-gold-egg icon (flattened from
+`public/brand/store/app-store-icon-1024.png` to opaque no-alpha 1024², single-size catalog — one file
+covers all sizes; legibility verified at 58–116px). **(2)** the template splash was replaced with a
+branded 2732² opaque splash (Warm Sand `#F5F1EA`, first-party nest mark centered at 20% width —
+crop-safe on all iPhones) across all three `Splash.imageset` files + splash `backgroundColor` set to
+sand in BOTH `capacitor.config.ts` and the generated `ios/App/App/capacitor.config.json` (no full cap
+sync needed; next sync regenerates identically). **(3)** `PrivacyInfo.xcprivacy` gained the **Audio
+Data** declaration (user content · linked · app-functionality · no tracking; existing 8 types
+untouched) AND — the RC4 gap — **real Xcode target membership** (PBXBuildFile/FileReference/group/
+Resources entries added to project.pbxproj; the manifest was previously NOT bundled). **(4)**
+**iPhone-only v1**: `TARGETED_DEVICE_FAMILY "1,2"→1` in both configurations — iPad support + iPad
+screenshots are DEFERRED to a deliberate future release. **(5)** screenshot capture package at
+`docs/launch/APP_STORE_SCREENSHOTS.md` (8-frame real-app narrative + captions, 6.9"/6.5" specs,
+no-alpha validation, capture rules incl. no-Spotify-frames; App Preview video deferred). **Git
+hygiene:** the operator's unstaged Build-17 bump in project.pbxproj was preserved — only the
+PrivacyInfo-membership + device-family hunks were patch-filter staged (verified: staged diff contains
+no CURRENT_PROJECT_VERSION; unstaged diff is exactly the two version hunks). **Remaining operator
+steps:** bump to Build 18 when archiving → TestFlight upload → ASC privacy answers (Audio Data) →
+capture/upload screenshots → never claim iPad. NO archive/upload/push/migration happened.
+
+Before that: **Together Time — Family Activities, Activity #5 (2026-07-15, COMPLETE;
 the FINAL activity card):** a private reusable set = ordered view over 3–8 existing memories, run
 one moment at a time with the four FIXED operator-approved non-AI prompts (index-assigned in code).
 Probe-gated migration **`20260715210000_together_time.sql` — OPERATOR STEP** (`together_times`:
