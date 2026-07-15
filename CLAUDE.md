@@ -277,8 +277,10 @@ relocated. **Known remaining limit:** media bytes still proxy through the functi
 **Responsive nav breakpoint = `lg` (authoritative, 2026-06-24):** the mobile↔desktop nav
 swap is gated at **`lg` (1024px)**, NOT `md` (768px) — landscape iPhones (~844–932px) must
 keep the touch nav. `AppNavbar` `hidden lg:flex`; `MobileTopBar`/`MobileBottomNav`/
-`MobileNavDrawer` `lg:hidden`; `WorkspaceSelector` drawer `max-lg:`/`lg:`; `<main>` `pb-24
-lg:pb-6`. Do not revert these to `md`.
+`MobileNavDrawer` `lg:hidden`; `WorkspaceSelector` drawer `max-lg:`/`lg:`; `<main>`
+`pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pb-6` (2026-07-15: was `pb-24`, which left ~6px of
+clearance over the fixed bottom nav on notched iPhones — completion buttons were covered). Do not
+revert these to `md`.
 
 **Project Polaris — UX refactor, Pass 1 shipped (authoritative, 2026-07-08):** an app-wide
 "calmer, simpler, Apple-quality, lower-cognitive-load" redesign; **presentation ONLY** — no

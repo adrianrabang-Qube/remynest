@@ -151,12 +151,14 @@ export default async function AppLayout({
           <WorkspaceBanner activeProfileName={activeProfileName} />
         )}
 
-        {/* Mobile: tighter px-4 gutters + pb-24 to clear the fixed bottom nav.
-            md+ restores the original px-6 / py-6. */}
+        {/* Mobile: tighter px-4 gutters + safe-area-aware clearance for the
+            fixed bottom nav. The extra breathing room keeps the final action on
+            long flows (such as puzzle completion) reachable above the home
+            indicator on every iPhone size. md+ restores the original layout. */}
         <main
           id="main-content"
           tabIndex={-1}
-          className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-24 md:px-6 lg:pb-6 focus:outline-none"
+          className="mx-auto w-full max-w-[1600px] px-4 pt-6 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:px-6 lg:pb-6 focus:outline-none"
         >
           {children}
         </main>

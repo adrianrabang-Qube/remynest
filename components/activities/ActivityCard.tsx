@@ -38,9 +38,9 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     <>
       {iconBadge}
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span
-            className={`block truncate text-[17px] font-semibold ${
+            className={`block min-w-0 text-[17px] font-semibold leading-snug ${
               status === "future" ? "text-charcoal-soft" : "text-charcoal"
             }`}
           >
@@ -58,7 +58,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
             </span>
           )}
         </span>
-        <span className="mt-0.5 block text-sm text-charcoal-muted">
+        <span className="mt-0.5 block text-sm leading-snug text-charcoal-muted">
           {tagline}
         </span>
       </span>
@@ -69,7 +69,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     return (
       <Link
         href={href}
-        className="flex items-center gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="flex items-center gap-3 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage sm:gap-4"
       >
         {body}
         <span
@@ -83,7 +83,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
   }
 
   return (
-    <div className="flex items-center gap-4 rounded-3xl border border-sand-deep/50 bg-white/70 p-4">
+    <div className="flex items-center gap-3 rounded-3xl border border-sand-deep/50 bg-white/70 p-4 sm:gap-4">
       {body}
     </div>
   );
