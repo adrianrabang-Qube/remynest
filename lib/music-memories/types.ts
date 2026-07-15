@@ -20,6 +20,10 @@ export interface SongMemoryRecord {
   note: string;
   /** Ordered linked memory uuids (may be empty — links are optional). */
   memory_ids: string[];
+  /** Canonical Spotify track URL when imported ("" = manual entry; column is
+   *  probe-gated — absent pre-migration, normalized to ""). Never rendered as
+   *  a link/player — a text-only source indicator only. */
+  spotify_url: string;
   created_at: string;
   updated_at: string;
 }

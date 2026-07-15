@@ -31,6 +31,8 @@ export const RATE_LIMITS = {
   deleteAccount: { limit: 5, windowMs: 300_000 },
   /** Moderation report submissions (LA5.1) — low legitimate frequency; throttles report spam. */
   report: { limit: 8, windowMs: 300_000 },
+  /** Music Memories Spotify link import (oEmbed metadata lookups). */
+  spotifyImport: { limit: 10, windowMs: 60_000 },
 } as const;
 
 export type RateLimitPreset = keyof typeof RATE_LIMITS;

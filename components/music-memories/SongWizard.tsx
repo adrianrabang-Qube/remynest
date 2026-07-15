@@ -13,6 +13,7 @@ import {
   SONG_TITLE_MAX,
 } from "@/lib/music-memories/types";
 import { createSongMemory } from "@/app/(app)/activities/music/actions";
+import SpotifyImportField from "@/components/music-memories/SpotifyImportField";
 
 /**
  * Music Memories create wizard: song DETAILS (title required; artist/era/note
@@ -65,6 +66,7 @@ export default function SongWizard() {
   const [artist, setArtist] = useState("");
   const [era, setEra] = useState("");
   const [note, setNote] = useState("");
+  const [spotifyUrl, setSpotifyUrl] = useState(""); // import-only source metadata
 
   // ---- optional linking ----
   const [memories, setMemories] = useState<PickerMemory[]>([]);
@@ -139,6 +141,7 @@ export default function SongWizard() {
       era,
       note,
       memoryIds: selectedIds,
+      spotifyUrl,
     });
     if (result.ok && result.songId) {
       void hapticSuccess();
@@ -151,7 +154,7 @@ export default function SongWizard() {
         ? "Music Memories isn't quite ready yet — please try again soon."
         : "We couldn't save this song. Please check the title and try again.",
     );
-  }, [saving, title, artist, era, note, selectedIds, router]);
+  }, [saving, title, artist, era, note, selectedIds, spotifyUrl, router]);
 
   const canContinue = title.trim().length > 0;
 
@@ -195,6 +198,14 @@ export default function SongWizard() {
 
       {step === "details" && (
         <section className="mt-6 space-y-4">
+          <SpotifyImportField
+            spotifyUrl={spotifyUrl}
+            onImported={({ title: imported, spotifyUrl: url }) => {
+              setTitle(imported);
+              setSpotifyUrl(url);
+            }}
+            onClear={() => setSpotifyUrl("")}
+          />
           <div>
             <label htmlFor="song-title" className="block text-sm font-medium text-charcoal-soft">
               Song title

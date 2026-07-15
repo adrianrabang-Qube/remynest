@@ -31,6 +31,8 @@ function normalizeSong(row: Record<string, unknown>): SongMemoryRecord {
   return {
     ...(row as unknown as SongMemoryRecord),
     memory_ids: normalizeLinkedMemoryIds(row.memory_ids),
+    // Probe-gated column: absent until the spotify migration is applied.
+    spotify_url: typeof row.spotify_url === "string" ? row.spotify_url : "",
   };
 }
 

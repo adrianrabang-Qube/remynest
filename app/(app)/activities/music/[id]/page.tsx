@@ -82,6 +82,13 @@ export default async function SongDetailPage({
               {[song.artist, song.era].filter(Boolean).join(" · ")}
             </p>
           )}
+          {song.spotify_url && (
+            /* Text-only source indicator — deliberately NOT a link, player,
+               artwork, or embed (import-only scope). */
+            <p className="mt-1 text-xs text-charcoal-muted">
+              Details imported from Spotify
+            </p>
+          )}
         </div>
       </header>
 

@@ -12,6 +12,7 @@ import {
   SONG_TITLE_MAX,
 } from "@/lib/music-memories/types";
 import { updateSongMemory } from "@/app/(app)/activities/music/actions";
+import SpotifyImportField from "@/components/music-memories/SpotifyImportField";
 import MomentOrderList, {
   type MomentListItem,
 } from "@/components/stories/MomentOrderList";
@@ -27,7 +28,13 @@ export default function SongEditor({
   initialMoments,
 }: {
   songId: string;
-  initial: { title: string; artist: string; era: string; note: string };
+  initial: {
+    title: string;
+    artist: string;
+    era: string;
+    note: string;
+    spotifyUrl: string;
+  };
   initialMoments: MomentListItem[];
 }) {
   const router = useRouter();
@@ -35,6 +42,7 @@ export default function SongEditor({
   const [artist, setArtist] = useState(initial.artist);
   const [era, setEra] = useState(initial.era);
   const [note, setNote] = useState(initial.note);
+  const [spotifyUrl, setSpotifyUrl] = useState(initial.spotifyUrl);
   const [moments, setMoments] = useState(initialMoments);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +78,7 @@ export default function SongEditor({
       era,
       note,
       memoryIds: moments.map((m) => m.id),
+      spotifyUrl,
     });
     if (result.ok) {
       void hapticSuccess();
@@ -78,7 +87,7 @@ export default function SongEditor({
     }
     setSaving(false);
     setError("We couldn't save your changes. Please check the title and try again.");
-  }, [saving, songId, title, artist, era, note, moments, router]);
+  }, [saving, songId, title, artist, era, note, moments, spotifyUrl, router]);
 
   const canSave = title.trim().length > 0 && !saving;
   const inputClass =
@@ -95,6 +104,15 @@ export default function SongEditor({
           {error}
         </p>
       )}
+
+      <SpotifyImportField
+        spotifyUrl={spotifyUrl}
+        onImported={({ title: imported, spotifyUrl: url }) => {
+          setTitle(imported);
+          setSpotifyUrl(url);
+        }}
+        onClear={() => setSpotifyUrl("")}
+      />
 
       <div>
         <label htmlFor="edit-song-title" className="block text-sm font-medium text-charcoal-soft">

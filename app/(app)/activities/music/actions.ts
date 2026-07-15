@@ -15,6 +15,7 @@ import {
   normalizeSongFields,
   type SongMemoryRecord,
 } from "@/lib/music-memories/types";
+import { normalizeSpotifyUrl } from "@/lib/music-memories/spotify";
 
 /**
  * Music Memories — server actions (Story Builder conventions): STRUCTURED
@@ -40,6 +41,19 @@ function isMissingRelation(
     !!error &&
     (error.code === "42P01" ||
       /relation .* does not exist/i.test(error.message ?? ""))
+  );
+}
+
+/** 42703 = undefined_column — the probe-gate for the ADDITIVE spotify_url
+ *  migration: when it isn't applied yet, writes RETRY without the field so
+ *  manual song entry keeps working (the import just isn't persisted). */
+function isMissingColumn(
+  error: { code?: string; message?: string } | null,
+): boolean {
+  return (
+    !!error &&
+    (error.code === "42703" ||
+      /column .* does not exist/i.test(error.message ?? ""))
   );
 }
 
@@ -100,6 +114,7 @@ export async function createSongMemory(input: {
   era: string;
   note: string;
   memoryIds: unknown;
+  spotifyUrl?: unknown;
 }): Promise<SongActionResult> {
   const user = await sessionUser();
   if (!user) return { ok: false, reason: "unauthenticated" };
@@ -117,16 +132,29 @@ export async function createSongMemory(input: {
     return { ok: false, reason: "forbidden" };
   }
 
-  const { data, error } = await supabaseAdmin
+  const spotifyUrl = normalizeSpotifyUrl(input.spotifyUrl);
+  const baseRow: Record<string, unknown> = {
+    user_id: user.id,
+    memory_profile_id: profileId,
+    ...fields,
+    memory_ids: memoryIds,
+  };
+  const rowWithImport = spotifyUrl
+    ? { ...baseRow, spotify_url: spotifyUrl }
+    : baseRow;
+  let { data, error } = await supabaseAdmin
     .from("song_memories")
-    .insert({
-      user_id: user.id,
-      memory_profile_id: profileId,
-      ...fields,
-      memory_ids: memoryIds,
-    })
+    .insert(rowWithImport)
     .select("id")
     .single();
+  if (error && spotifyUrl && isMissingColumn(error)) {
+    // spotify_url migration not applied yet — save the song without it.
+    ({ data, error } = await supabaseAdmin
+      .from("song_memories")
+      .insert(baseRow)
+      .select("id")
+      .single());
+  }
   if (error || !data) {
     return { ok: false, reason: isMissingRelation(error) ? "unavailable" : "invalid" };
   }
@@ -143,6 +171,7 @@ export async function updateSongMemory(input: {
   era: string;
   note: string;
   memoryIds: unknown;
+  spotifyUrl?: unknown;
 }): Promise<SongActionResult> {
   const user = await sessionUser();
   if (!user) return { ok: false, reason: "unauthenticated" };
@@ -162,14 +191,22 @@ export async function updateSongMemory(input: {
     return { ok: false, reason: "forbidden" };
   }
 
-  const { error } = await supabaseAdmin
+  const basePatch = {
+    ...fields,
+    memory_ids: memoryIds,
+    updated_at: new Date().toISOString(),
+  };
+  // "" clears a previous import; a canonical URL sets it (probe-gated retry).
+  let { error } = await supabaseAdmin
     .from("song_memories")
-    .update({
-      ...fields,
-      memory_ids: memoryIds,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ ...basePatch, spotify_url: normalizeSpotifyUrl(input.spotifyUrl) })
     .eq("id", input.songId);
+  if (error && isMissingColumn(error)) {
+    ({ error } = await supabaseAdmin
+      .from("song_memories")
+      .update(basePatch)
+      .eq("id", input.songId));
+  }
   if (error) return { ok: false, reason: "invalid" };
 
   revalidatePath("/activities/music");

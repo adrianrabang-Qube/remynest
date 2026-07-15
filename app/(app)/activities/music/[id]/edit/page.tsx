@@ -77,6 +77,7 @@ export default async function EditSongPage({
           artist: song.artist,
           era: song.era,
           note: song.note,
+          spotifyUrl: song.spotify_url,
         }}
         initialMoments={moments.map((m) => ({
           id: m.id,
