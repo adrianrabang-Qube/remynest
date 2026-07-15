@@ -91,7 +91,15 @@ function normalizeInput(
     .slice(0, maxLength);
 }
 
-export default function CreateMemoryForm() {
+export default function CreateMemoryForm({
+  voiceFirst = false,
+}: {
+  /** Voice-discoverability entry (?voice=1): render the EXISTING recorder
+   *  prominently at the top of the form. Never auto-starts the microphone —
+   *  the user still explicitly taps Record. Everything else is unchanged
+   *  (same validation, same upload, same reset). */
+  voiceFirst?: boolean;
+} = {}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -456,9 +464,15 @@ export default function CreateMemoryForm() {
         </h2>
 
         <p className="text-gray-500 text-sm mt-1">
-          Save something important.
+          {voiceFirst
+            ? "Record it in your own words, then add a title and a note."
+            : "Save something important."}
         </p>
       </div>
+
+      {voiceFirst && (
+        <VoiceRecorderField file={voiceFile} onChange={setVoiceFile} />
+      )}
 
       <label htmlFor="memory-title" className="sr-only">
         Memory title
@@ -599,7 +613,9 @@ export default function CreateMemoryForm() {
         <label className="text-sm font-medium text-gray-700">
           Photos
         </label>
-        <VoiceRecorderField file={voiceFile} onChange={setVoiceFile} />
+        {!voiceFirst && (
+          <VoiceRecorderField file={voiceFile} onChange={setVoiceFile} />
+        )}
 
         <AttachmentManager
           files={files}

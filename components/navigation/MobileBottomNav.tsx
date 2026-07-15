@@ -56,6 +56,12 @@ function BottomNavContent({ onOpenMore, memoryCount }: MobileBottomNavProps) {
   const withContext = (path: string) =>
     context ? `${path}?context=${context}` : path;
 
+  // Voice quick action: the SAME new-memory route in voice-first mode. Built
+  // here (not via withContext) because it already carries a query param.
+  const voiceHref = context
+    ? `${MOBILE_NEW_ACTION.href}?voice=1&context=${context}`
+    : `${MOBILE_NEW_ACTION.href}?voice=1`;
+
   const [home, dashboard, memories] = MOBILE_PRIMARY_NAV;
 
   // "More" reflects the active state of any drawer-hosted route.
@@ -91,6 +97,7 @@ function BottomNavContent({ onOpenMore, memoryCount }: MobileBottomNavProps) {
         <Nest
           remyHref={withContext("/remy")}
           memoryHref={withContext(MOBILE_NEW_ACTION.href)}
+          voiceMemoryHref={voiceHref}
           reminderHref={withContext("/reminders")}
           searchHref={withContext("/search")}
           insightsHref={withContext("/insights")}

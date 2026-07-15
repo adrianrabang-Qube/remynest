@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, MessageCircle, Pencil, Search, Sparkles } from "lucide-react";
+import { Bell, MessageCircle, Mic, Pencil, Search, Sparkles } from "lucide-react";
 
 import {
   resolveNestStage,
@@ -40,6 +40,8 @@ import styles from "./nest.module.css";
 export interface NestProps {
   remyHref: string;
   memoryHref: string;
+  /** Voice-first entry into the SAME new-memory flow (?voice=1). */
+  voiceMemoryHref: string;
   reminderHref: string;
   searchHref: string;
   insightsHref: string;
@@ -50,6 +52,7 @@ export interface NestProps {
 export default function Nest({
   remyHref,
   memoryHref,
+  voiceMemoryHref,
   reminderHref,
   searchHref,
   insightsHref,
@@ -81,6 +84,9 @@ export default function Nest({
   const items: NestMenuItem[] = [
     { href: remyHref, label: "Ask Remy", hint: "Talk through a memory", Icon: MessageCircle },
     { href: memoryHref, label: "Add a memory", hint: "Save a moment or photo", Icon: Pencil },
+    // 2026-07-15: voice discoverability (operator-approved sixth row) — the same
+    // create-memory flow opened voice-first; recording still starts only on tap.
+    { href: voiceMemoryHref, label: "Record a voice memory", hint: "Save a moment in your own words", Icon: Mic },
     { href: reminderHref, label: "Add a reminder", hint: "A gentle nudge for later", Icon: Bell },
     { href: searchHref, label: "Search memories", hint: "Find a moment or person", Icon: Search },
     { href: insightsHref, label: "Insights", hint: "See what Remy noticed", Icon: Sparkles },

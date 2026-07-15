@@ -724,10 +724,12 @@ the behaviour-driven Remy via the **single `<Remy state>` renderer** (no hardcod
 persistent stage-aware nest, `NestMenu.tsx` is the portaled sheet Remy presents **while greeting**. The
 parallel `nest-state-machine.ts` (menuOpen states) and `nest-animations.ts` were **DELETED**. Default
 state = Remy **asleep in the nest** (`resting`→`sleeping` expression + float + gold glow); tapping
-**wakes** Remy who peeks, climbs out, greets, and only THEN presents 5 EXISTING routes — Ask Remy
-(`/remy`), Add a memory (`/memories/new` via `MOBILE_NEW_ACTION.href`), Add a reminder (`/reminders`),
-Search (`/search`), Insights (`/insights`) — each `withContext()`-threaded (care routing unchanged;
-Search+Insights also stay in the "More" drawer). Choosing an action sends Remy **home** → resting.
+**wakes** Remy who peeks, climbs out, greets, and only THEN presents 6 EXISTING routes (2026-07-15:
+the operator approved a SIXTH row for voice discoverability) — Ask Remy (`/remy`), Add a memory
+(`/memories/new` via `MOBILE_NEW_ACTION.href`), **Record a voice memory (`/memories/new?voice=1` —
+the SAME form opened voice-first; recording still starts only on the user's tap)**, Add a reminder
+(`/reminders`), Search (`/search`), Insights (`/insights`) — each context-threaded (care routing
+unchanged; Search+Insights also stay in the "More" drawer). Choosing an action sends Remy **home** → resting.
 The overlay is `createPortal(document.body)` (backdrop-blur containing-block invariant). **Future-ready
 WITHOUT rewrite:** voice/AI/celebrations/memory-found/reminder/search/insights reactions, Golden
 Feather, seasonal themes, Nest evolution, accessories, emotion, physical companion/Watch/Widgets/CarPlay
@@ -2307,7 +2309,11 @@ branded "Voice memory" chip in `MediaThumb`). Title+content requirements ride th
 validation (nothing weakened). `Info.plist` `NSMicrophoneUsageDescription` copy updated to cover
 voice memories (**operator: native rebuild to ship the new string; add "Audio Data" —
 user-content, linked, app-functionality-only, no tracking — to `PrivacyInfo.xcprivacy` + the App
-Store privacy answers before the next submission**). Still deferred: transcription, AI
+Store privacy answers before the next submission**). **Entry points (2026-07-15):** the create-memory form's
+recorder section, plus the Nest quick-action row "Record a voice memory" → `/memories/new?voice=1`
+(`CreateMemoryForm voiceFirst` renders the SAME recorder at the top — no parallel page/model; the
+query flag changes layout only and can never bypass the required title+content validation). Still
+deferred: transcription, AI
 summaries/tags of audio, audio file uploads, sharing/downloads, Music Memories integration. Do NOT
 add a recording plugin, autoplay audio, log audio, or leave a mic track running.
 

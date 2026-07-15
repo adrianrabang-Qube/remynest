@@ -28,7 +28,15 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Voice Memory v1 (2026-07-15 — operator-approved NARROW lift of the voice
+The most recent work is the **Voice Memory discoverability fix (2026-07-15):** the Nest
+quick-action sheet gained an operator-approved SIXTH row — "Record a voice memory / Save a moment in
+your own words" (Mic icon, directly below "Add a memory") → `/memories/new?voice=1`, context-threaded
+for care workspaces. The flag only makes `CreateMemoryForm` render the EXISTING recorder at the top
+(`voiceFirst` prop; page h1 becomes "New voice memory") — no parallel page/model, no auto-recording
+(mic starts only on the explicit Record tap), validation/upload/reset/back-navigation unchanged, and
+plain "Add a memory" still opens the ordinary blank flow. tsc/lint/build green (77/77).
+
+Before that: **Voice Memory v1 (2026-07-15 — operator-approved NARROW lift of the voice
 deferral):** in-app private voice recordings in the EXISTING memory-creation flow (not an activity,
 no schema/migration — the attachments pipeline already allowlists audio/*). Browser-native
 `getUserMedia`+`MediaRecorder` only (iOS→AAC/mp4 .m4a, Android/Chrome→Opus/webm; NO plugin/pod —
