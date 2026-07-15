@@ -131,6 +131,35 @@ billing. Deleting a game never touches memories/media.
   links, mixed photo+text card fronts, any Companion-Intelligence hook beyond
   the platform event.
 
+## Music Memories — Activity #4 (SHIPPED 2026-07-15, v1 "The songs of your life")
+A song memory is user-typed song METADATA (title required; artist/era/note
+optional) plus an ORDERED, OPTIONAL set of linked existing memories. **NO
+audio of any kind in v1** — no upload, playback, recording, mic permission,
+streaming, catalog, or external music links (audio is a separately approved
+future phase; the attachment pipeline was NOT modified). Deleting a song
+memory never touches memories/media.
+- **Data:** migration `20260715150000_music_memories.sql` (OPERATOR STEP —
+  probe-gated; hub shows "Remy is setting up the music room" until applied):
+  ONE `song_memories` table (title/artist/era/note + ordered `memory_ids`
+  jsonb, may be empty; RLS owner-scoped; reversible). GDPR export v1.6.
+- **Reuse, not duplication:** linked-memory rendering and save-time workspace
+  verification REUSE Story Builder's structurally generic helpers
+  (`getStoryMoments`, `memoriesBelongToWorkspace`) and the shared
+  `MomentOrderList` — imports only; Story Builder itself byte-untouched.
+  Links are optional: empty is valid; non-empty sets get the exact-count
+  workspace check.
+- **Flow:** hub ("Your songs" — one honest list) → details→optional-link
+  wizard (text-base inputs; picker over /api/memories `data.data`,
+  settle-always + retry; selection order preserved; "save without links"
+  path) → detail (song + note + linked memories w/ signed thumbs/text
+  fallback + a gentle non-clinical reflection prompt) → edit (details +
+  link order/removal) → delete (view only; confirm says memories are kept).
+- **Deferred Phase 2 (operator-gated — the documented audio deferral):**
+  user-owned audio attached to song cards + a minimal player (client accept
+  flip + <audio> over signed URLs; playback-only, no new permissions).
+  Phase 3 (separate decision): external music-app links (anti-steering
+  review posture). Rejected: streaming catalogs, autoplay, mic recording.
+
 ## Memory Puzzles caveats
 - **Known caveat:** "Open this memory" uses the user_id-scoped `/memories/[id]`
   route — a caregiver opening ANOTHER author's memory 404s there (pre-existing

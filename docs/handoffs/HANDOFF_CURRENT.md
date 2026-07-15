@@ -28,7 +28,20 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Memory Match — Activity #3 (2026-07-15, COMPLETE):** a gentle photo-pair
+The most recent work is **Music Memories — Activity #4 (2026-07-15, COMPLETE; v1 "The songs of your
+life" — NO audio):** a song memory = typed metadata (title required; artist/era/note optional) +
+ordered OPTIONAL linked memories. Probe-gated migration **`20260715150000_music_memories.sql` —
+OPERATOR STEP** (ONE `song_memories` table; RLS owner-scoped; reversible). Story Builder's generic
+helpers reused by import only (`getStoryMoments`/`memoriesBelongToWorkspace`/shared
+`MomentOrderList`); optional links get the exact-count workspace check when present; GDPR v1.6.
+Surfaces: hub ("Your songs", calm empty + music-room pre-migration states) → details→optional-link
+wizard (text-base inputs, settle-always picker, save-without-links path) → detail (song + note +
+linked memories + gentle reflection prompt) → edit (details + link order/removal) → delete (view
+only). Registry: music-memories `future`→`available` (`/activities/music`). Audio upload/playback
+remains the documented deferral — Phase 2/3 need separate operator approval. tsc/lint/build green
+(76/76; 4 new routes).
+
+Before that: **Memory Match — Activity #3 (2026-07-15, COMPLETE):** a gentle photo-pair
 game; a game = a VIEW over existing photo memories (each chosen photo = one pair). Probe-gated
 migration **`20260715120000_memory_match.sql` — OPERATOR STEP** (`match_games` w/ ordered
 photos jsonb + pairs ∈ {3,4,6,8} + shuffle_seed · `match_game_progress` matched-pairs ·

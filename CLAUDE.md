@@ -2228,7 +2228,16 @@ game's own context. Board: tap-only (no dragging anywhere), deck from the ONE se
 (aria-live announced; Reduce Motion keeps the delay), autosave debounced + seed-checked localStorage
 mirror + CANCELLED on completion, board keyed by id+seed for replay. Completion emits
 **`Remy.emit("match.completed")`** (→ celebrating). Sizes locked to {3,4,6,8} pairs — never add
-timers/scores/streaks/leaderboards. See `docs/features/activities.md`.
+timers/scores/streaks/leaderboards. **Music Memories (Activity #4) SHIPPED 2026-07-15 (v1 "The songs
+of your life"):** a song memory = user-typed metadata (title/artist/era/note) + ordered OPTIONAL
+linked memories (`song_memories`, migration `20260715150000`, OPERATOR-APPLIED, probe-gated; GDPR
+v1.6; delete never touches memories/media). **NO audio in v1** — the audio-upload deferral stands;
+the attachment pipeline is untouched; Phase 2 (user-owned audio + minimal player) and Phase 3
+(external music links) each require separate operator approval. Reuses Story Builder's generic
+helpers (`getStoryMoments`/`memoriesBelongToWorkspace`/`MomentOrderList`) by IMPORT ONLY — Story
+Builder byte-untouched; optional links get the exact-count workspace check when present. Copy stays
+non-clinical (reflection prompts are conversational — never "music therapy"). See
+`docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the
 blanket 2026-06-23 deferral to EXCLUDE the foundation above):** the Remy companion's
