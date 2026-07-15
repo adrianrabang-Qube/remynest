@@ -154,6 +154,25 @@ memory never touches memories/media.
   path) → detail (song + note + linked memories w/ signed thumbs/text
   fallback + a gentle non-clinical reflection prompt) → edit (details +
   link order/removal) → delete (view only; confirm says memories are kept).
+- **Spotify link import (2026-07-15, import-only):** an optional Add/Edit
+  field prefills EDITABLE details from a pasted track link via Spotify's
+  official oEmbed endpoint ONLY. Strict pre-network validation (https; host
+  exactly `open.spotify.com` [/track/<22-char id>, optional intl-xx prefix] or
+  `spotify.link` [single slug]; ≤200 chars; no userinfo/port); the server
+  contacts only `open.spotify.com/oembed` (8s timeout, redirect:"manual",
+  auth-gated, `spotifyImport` rate limit) — spotify.link short links are
+  resolved BY Spotify inside oEmbed, never fetched by us; the oEmbed html is
+  string-parsed for the canonical track id and DISCARDED (never rendered,
+  persisted, or returned). Persisted artifact: ONLY the canonical
+  `https://open.spotify.com/track/<id>` in `song_memories.spotify_url`
+  (migration `20260715180000_music_memories_spotify.sql` — OPERATOR STEP;
+  additive/probe-gated: pre-application, song writes RETRY without the column
+  so manual entry never breaks and the import is simply not persisted). UI:
+  "We'll ask Spotify for this song's public title. No Spotify account is
+  connected."; a text-only "Details imported from Spotify" indicator — NO
+  iframe/player/preview/artwork/external-link CTA/OAuth. GDPR v1.7. Rules:
+  never widen the hosts/paths, never fetch user-supplied hosts, never render
+  or store oEmbed html.
 - **Deferred Phase 2 (operator-gated — the documented audio deferral):**
   user-owned audio attached to song cards + a minimal player (client accept
   flip + <audio> over signed URLs; playback-only, no new permissions).

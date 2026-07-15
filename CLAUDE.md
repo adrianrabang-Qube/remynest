@@ -2236,7 +2236,17 @@ the attachment pipeline is untouched; Phase 2 (user-owned audio + minimal player
 (external music links) each require separate operator approval. Reuses Story Builder's generic
 helpers (`getStoryMoments`/`memoriesBelongToWorkspace`/`MomentOrderList`) by IMPORT ONLY — Story
 Builder byte-untouched; optional links get the exact-count workspace check when present. Copy stays
-non-clinical (reflection prompts are conversational — never "music therapy"). See
+non-clinical (reflection prompts are conversational — never "music therapy"). **Spotify link import
+(2026-07-15, IMPORT-ONLY):** a pasted track link prefills editable details via Spotify's official
+oEmbed ONLY (`POST /api/music/spotify-import` — auth-gated, `spotifyImport` rate-limited, 8s timeout,
+redirect:"manual"; strict https/host/track-path/length validation BEFORE any network call; the only
+outbound host is `open.spotify.com`; spotify.link is resolved by Spotify inside oEmbed — never fetched
+by us; oEmbed html is string-parsed for the canonical track id then DISCARDED). Persists ONLY the
+canonical track URL (`song_memories.spotify_url`, migration `20260715180000`, OPERATOR-APPLIED,
+probe-gated — pre-application song writes retry WITHOUT the column so manual entry never breaks);
+GDPR v1.7. NO OAuth/account/tokens/credentials, NO iframe/player/preview/artwork/external-link CTA —
+the detail page shows a TEXT-ONLY "Details imported from Spotify" indicator. Do NOT widen the allowed
+hosts/paths, fetch user-supplied hosts, render/persist oEmbed html, or add Spotify credentials. See
 `docs/features/activities.md`.
 
 **STILL POST-LAUNCH — DEFERRED, do NOT implement now (authoritative, 2026-06-28 — narrows the

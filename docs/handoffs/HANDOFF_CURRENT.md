@@ -28,7 +28,22 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is **Music Memories — Activity #4 (2026-07-15, COMPLETE; v1 "The songs of your
+The most recent work is the **Music Memories Spotify link import (2026-07-15, IMPORT-ONLY):** an
+optional Add/Edit field prefills editable song details from a pasted track link. Security: strict
+pure validation (`lib/music-memories/spotify.ts` — https; hosts exactly open.spotify.com
+[track-only, intl-prefix ok] / spotify.link [slug]; ≤200 chars; 24 runtime assertions PASSED) BEFORE
+any network; the server route (`/api/music/spotify-import`, auth + `spotifyImport` rate-limit + 8s
+timeout + redirect:"manual" + captureError) contacts ONLY open.spotify.com/oembed (short links
+resolved by Spotify, never fetched by us); oEmbed html string-parsed for the canonical track id then
+discarded. Persists ONLY the canonical track URL — **probe-gated additive migration
+`20260715180000_music_memories_spotify.sql` (OPERATOR STEP)**; pre-application, song writes RETRY
+without the column (42703 probe) so manual entry keeps working. GDPR v1.7 (whole-row export carries
+the field). UI: shared `SpotifyImportField` in wizard+editor ("We'll ask Spotify for this song's
+public title. No Spotify account is connected."; remove-import control; calm errors leave manual
+entry usable) + a text-only "Details imported from Spotify" detail indicator. NO
+OAuth/player/iframe/artwork/external links. tsc/lint/build green (77/77).
+
+Before that: **Music Memories — Activity #4 (2026-07-15, COMPLETE; v1 "The songs of your
 life" — NO audio):** a song memory = typed metadata (title required; artist/era/note optional) +
 ordered OPTIONAL linked memories. Probe-gated migration **`20260715150000_music_memories.sql` —
 OPERATOR STEP** (ONE `song_memories` table; RLS owner-scoped; reversible). Story Builder's generic
