@@ -45,6 +45,7 @@ export interface GdprExportPayload {
   stories: unknown[];
   matchGames: unknown[];
   matchGameCompletions: unknown[];
+  songMemories: unknown[];
   mediaReferences: MediaReference[];
   counts: Record<string, number>;
 }
@@ -133,6 +134,7 @@ export async function collectUserData(
     storiesRes,
     matchGamesRes,
     matchGameCompletionsRes,
+    songMemoriesRes,
   ] = await Promise.all([
     db.from("profiles").select("*").eq("id", userId).maybeSingle(),
     db.from("memory_profiles").select("*").eq("created_by_account_id", userId),
@@ -157,6 +159,8 @@ export async function collectUserData(
     // Memory Match (2026-07-15) — operator-gated (probe-safe): missing relation → { data: null }.
     db.from("match_games").select("*").eq("user_id", userId),
     db.from("match_game_completions").select("*").eq("user_id", userId),
+    // Music Memories (2026-07-15) — operator-gated (probe-safe): missing relation → { data: null }.
+    db.from("song_memories").select("*").eq("user_id", userId),
   ]);
 
   const invitesReceivedRes = userEmail
@@ -169,7 +173,7 @@ export async function collectUserData(
 
   const payload: GdprExportPayload = {
     exportedAt: new Date().toISOString(),
-    schemaVersion: "1.5",
+    schemaVersion: "1.6",
     account: { userId, email: userEmail },
     profile: profileRes.data ?? null,
     memoryProfiles: memoryProfilesRes.data ?? [],
@@ -191,6 +195,7 @@ export async function collectUserData(
     stories: storiesRes.data ?? [],
     matchGames: matchGamesRes.data ?? [],
     matchGameCompletions: matchGameCompletionsRes.data ?? [],
+    songMemories: songMemoriesRes.data ?? [],
     mediaReferences: extractMediaReferences(memories),
     counts: {},
   };
@@ -215,6 +220,7 @@ export async function collectUserData(
     stories: payload.stories.length,
     matchGames: payload.matchGames.length,
     matchGameCompletions: payload.matchGameCompletions.length,
+    songMemories: payload.songMemories.length,
     mediaReferences: payload.mediaReferences.length,
   };
 

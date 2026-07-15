@@ -80,8 +80,9 @@ export const ACTIVITIES: Activity[] = [
     title: "Music Memories",
     tagline: "Songs that bring moments back",
     description:
-      "Listen together and let familiar music open up conversation.",
-    status: "future",
+      "The songs of your life — and the memories they hold.",
+    status: "available",
+    href: "/activities/music",
     Icon: Music,
   },
   {
