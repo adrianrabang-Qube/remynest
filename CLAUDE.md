@@ -614,8 +614,11 @@ design board `REMYNEST DESIGN LOGO.PNG` (deep-purple `#150A3B→#6B428E` backgro
 board's own icon; lavender/gold fingerprint rings, gold outline heart, small gold bird). It was
 COMPOSED, never redrawn: the exact standalone high-res transparent mark (operator's
 `logo vector version.png`, 1536×1024, mark 695×728 at native resolution — zero upscaling) placed on
-the board-sampled gradient. This is a deliberate exception to the "(A) product brand = sage" icon
-rule above — the APP ICON carries the purple brand-board identity; the sage/sand system remains the
+the board-sampled gradient. **(2026-07-16 approval: the installed icon is review candidate C
+"warm-glow" — board lighting corrected to light-from-BOTTOM-LEFT [the first composition was
+vertically inverted] + a ≤14%-opacity warm-gold radial lift behind the heart for small-size
+legibility; review exports live outside the repo at `~/Downloads/RemyNest-AppIcon-Review-v1/`.)**
+This is a deliberate exception to the "(A) product brand = sage" icon rule above — the APP ICON carries the purple brand-board identity; the sage/sand system remains the
 app-wide UI chrome, and the purple treatment in-app stays scoped to **Remy/Nest companion surfaces
 ONLY** (Nest sheet, Ask Remy chat — never app-wide). The web favicon/OG (`app/icon.svg`,
 `apple-icon.tsx`) still use the sage nest mark (operator decision pending on unifying them). **The

@@ -28,7 +28,18 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **canonical icon + Nest/Ask-Remy V1 brand correction (2026-07-16,
+Most recent: **App Icon v1 review round + approval (2026-07-16, after the brand correction below):**
+three faithful polish candidates (A board-faithful / B deep-indigo / C warm-glow — same mark, same
+composition, native-resolution `logo vector version.png` mark on the board-sampled field) were
+generated to `~/Downloads/RemyNest-AppIcon-Review-v1/` with a 1024/240/120/60 contact sheet. The
+review round caught that the `7cfe039` icon's field gradient was VERTICALLY INVERTED vs the board
+(light was top-left; the board lights from bottom-left) — all candidates carry the corrected
+orientation. **Operator approved C (warm-glow):** corrected lighting + a subtle (≤14%) warm-gold
+radial lift behind the heart for 60px legibility. C is now installed in `AppIcon.appiconset`
+(1024² opaque RGB no-alpha verified; iOS simulator build green; pbxproj untouched — the Build-17
+bump stays the operator's own unstaged change).
+
+Before that, the **canonical icon + Nest/Ask-Remy V1 brand correction (2026-07-16,
 launch-blocking visual fix):** **(1) The App Store icon was CORRECTED** — the 2026-07-15
 sage nest-and-gold-egg icon was the operator-confirmed WRONG selection; `AppIcon.appiconset` now
 carries the **purple fingerprint-heart-bird** per the approved `REMYNEST DESIGN LOGO.PNG` board.
