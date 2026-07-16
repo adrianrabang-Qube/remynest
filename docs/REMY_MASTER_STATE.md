@@ -312,7 +312,13 @@ Nest button idle state is the NEST itself (approved `nestEmpty` art, Remy pops o
 wake choreography, same 6 real actions); the NestMenu sheet + Ask Remy chat carry the companion
 violet/lavender palette with a large V1 composer (presentation-only; chat logic byte-unchanged).
 Validated tsc/lint/build + iOS simulator build green. See `docs/handoffs/HANDOFF_CURRENT.md` and the
-CLAUDE.md "Canonical iOS APP ICON" note. **2026-07-16 — Build 18 prepared for TestFlight:** `CURRENT_PROJECT_VERSION 12→18` (both configs;
+CLAUDE.md "Canonical iOS APP ICON" note. **2026-07-16 — ITMS-90683 fixed, Build 19 prepared:** Build 18's location-API warning was caused by
+`OneSignalLocation.framework` (bundled by the bare OneSignal pod's default subspec — no app location
+feature exists). Podfile scoped to `OneSignalXCFramework/OneSignal` + `/OneSignalInAppMessages`
+(only OneSignalLocation removed; push/IAM unchanged, otool-verified soft-loading). Build 18→19;
+archive verified clean at `~/Downloads/RemyNest-Build19.xcarchive`; upload Build 19, not 18.
+
+**2026-07-16 — Build 18 prepared for TestFlight:** `CURRENT_PROJECT_VERSION 12→18` (both configs;
 incorporates the operator's working-tree 17 bump), marketing version 1.0; signed Release archive
 verified at 1.0 (18) and staged at `~/Downloads/RemyNest-Build18.xcarchive`; upload = operator step.
 

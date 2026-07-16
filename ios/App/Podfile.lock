@@ -12,8 +12,6 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (8.0.2):
     - Capacitor
-  - OneSignalXCFramework (5.5.2):
-    - OneSignalXCFramework/OneSignalComplete (= 5.5.2)
   - OneSignalXCFramework/OneSignal (5.5.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
@@ -22,10 +20,6 @@ PODS:
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalComplete (5.5.2):
-    - OneSignalXCFramework/OneSignal
-    - OneSignalXCFramework/OneSignalInAppMessages
-    - OneSignalXCFramework/OneSignalLocation
   - OneSignalXCFramework/OneSignalCore (5.5.2)
   - OneSignalXCFramework/OneSignalExtension (5.5.2):
     - OneSignalXCFramework/OneSignalCore
@@ -39,11 +33,6 @@ PODS:
     - OneSignalXCFramework/OneSignalUser
   - OneSignalXCFramework/OneSignalLiveActivities (5.5.2):
     - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalOSCore
-    - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLocation (5.5.2):
-    - OneSignalXCFramework/OneSignalCore
-    - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalUser
   - OneSignalXCFramework/OneSignalNotifications (5.5.2):
@@ -70,7 +59,8 @@ DEPENDENCIES:
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
-  - OneSignalXCFramework (= 5.5.2)
+  - OneSignalXCFramework/OneSignal (= 5.5.2)
+  - OneSignalXCFramework/OneSignalInAppMessages (= 5.5.2)
 
 SPEC REPOS:
   trunk:
@@ -102,6 +92,6 @@ SPEC CHECKSUMS:
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
   OneSignalXCFramework: 2f46ff87ccefd9afe8e3b5f9fe357072191205ff
 
-PODFILE CHECKSUM: 4cb57e343af6d98f23f9350963f07a6c0349b9f5
+PODFILE CHECKSUM: af2ae7af42eda26cf7d7d2e43333556d3885efd3
 
 COCOAPODS: 1.16.2

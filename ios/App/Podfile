@@ -25,7 +25,18 @@ target 'App' do
   # remote-URL page and it auto-initialized OneSignal with a nil appId (the
   # double-init conflict). AppDelegate now owns the single native init. Pinned to
   # the version the native code was built against. Module: OneSignalFramework.
-  pod 'OneSignalXCFramework', '5.5.2'
+  #
+  # ITMS-90683 (2026-07-16): the bare 'OneSignalXCFramework' pod resolves to the
+  # OneSignalComplete subspec, which also bundles OneSignalLocation — RemyNest has
+  # NO location feature, and that framework's CLLocationManager /
+  # requestWhenInUseAuthorization strings tripped Apple's missing-purpose-string
+  # scan on Build 18. The subspecs below ship the SAME SDK minus ONLY
+  # OneSignalLocation (the OneSignalFramework umbrella soft-loads optional
+  # modules — verified via otool: it does not hard-link Location). Push init,
+  # notifications, and in-app messages are unchanged. Do not revert to the bare
+  # pod without re-adding a truthful location purpose string.
+  pod 'OneSignalXCFramework/OneSignal', '5.5.2'
+  pod 'OneSignalXCFramework/OneSignalInAppMessages', '5.5.2'
 end
 
 post_install do |installer|

@@ -139,7 +139,14 @@ Capacitor-8 `cap sync`'s `CapApp-SPM/Package.swift` is **inert on main** (0 SPM 
 the project) and is removed. **Do not** migrate main to SPM / re-add `CapApp-SPM`,
 regenerate the iOS project (`cap add ios`), or replace the Podfile/AppDelegate — those
 carry the **OneSignal native init + bridge/ack pod (`OneSignalXCFramework 5.5.2`)** and
-the APNs entitlements (OneSignal and local notifications **coexist**). **Foreground
+the APNs entitlements (OneSignal and local notifications **coexist**). **(ITMS-90683 fix,
+authoritative 2026-07-16: the pod is scoped to the `OneSignalXCFramework/OneSignal` +
+`/OneSignalInAppMessages` subspecs — same SDK/version minus ONLY `OneSignalLocation`, whose
+`CLLocationManager` strings tripped Apple's missing-purpose-string scan on Build 18; RemyNest has
+no location feature. The umbrella soft-loads optional modules [otool-verified, no hard link], so
+push/notifications/IAM are unchanged. Do NOT revert to the bare `OneSignalXCFramework` pod — it
+re-bundles OneSignalLocation — and do NOT add a location purpose string for a feature that
+doesn't exist.)** **Foreground
 banner (authoritative, 2026-06-21):** OneSignal swizzles `UNUserNotificationCenter`
 and owns the foreground path, so local reminders were silent while the app was open.
 `AppDelegate` now conforms to `UNUserNotificationCenterDelegate` and sets

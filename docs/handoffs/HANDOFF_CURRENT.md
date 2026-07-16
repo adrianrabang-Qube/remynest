@@ -28,7 +28,21 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Build 18 TestFlight preparation (2026-07-16):** the operator's unstaged Build-17
+Most recent: **ITMS-90683 location-API warning FIXED → Build 19 (2026-07-16):** Apple flagged
+Build 18 for referencing location APIs with no `NSLocationWhenInUseUsageDescription`. PROVEN root
+cause (from the Build-18 archive binaries, not assumption): the bare `OneSignalXCFramework 5.5.2`
+pod resolves to the `OneSignalComplete` default subspec, which bundles `OneSignalLocation.framework`
+— its `CLLocationManager`/`requestWhenInUseAuthorization`/`startUpdatingLocation` strings trip
+Apple's scan; RemyNest has NO location feature (no geolocation plugin/UI/schema), so per the
+no-deceptive-purpose-string rule the pod was scoped to `OneSignalXCFramework/OneSignal` +
+`/OneSignalInAppMessages` (SAME SDK minus ONLY OneSignalLocation; otool proves the umbrella
+soft-loads optional modules — push init/notifications/IAM unchanged). `pod install` run; build
+bumped 18→19; Release archive VERIFIED: 1.0 (19), `OneSignalLocation.framework` ABSENT, whole-bundle
+location-string sweep CLEAN, mic string + `aps-environment` intact. Archive at
+`~/Downloads/RemyNest-Build19.xcarchive` (upload = operator step; Build 18 should NOT be submitted).
+NOT pushed.
+
+Before that: **Build 18 TestFlight preparation (2026-07-16):** the operator's unstaged Build-17
 pbxproj hunk was INCORPORATED into the committed bump — `CURRENT_PROJECT_VERSION 12→18` in BOTH App
 configurations (marketing version stays 1.0; Info.plist derives both keys from build settings, so
 `CFBundleShortVersionString`/`CFBundleVersion` are coherent at 1.0/18). Nothing else changed (no
