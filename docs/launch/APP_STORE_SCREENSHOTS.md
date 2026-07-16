@@ -47,8 +47,9 @@ crops bottoms in some placements), Fraunces/Inter per brand, charcoal on sand
 2. Add caption bars (optional) without resizing the canvas.
 3. Validate dimensions + no-alpha (command above) for all frames.
 4. Upload to App Store Connect → iOS App → version → the single 6.9"/6.5" set.
-5. Confirm the ASC preview shows the nest icon (not the old template) before
-   submitting.
+5. Confirm the ASC preview shows the **purple fingerprint-heart-bird icon**
+   (2026-07-16 correction — not the sage nest-and-egg, not the old template)
+   before submitting.
 
 ## Remaining operator tasks (recorded 2026-07-15)
 - [ ] Increment build to **18** (only when preparing the archive — Build 17 is

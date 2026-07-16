@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Bell, MessageCircle, Mic, Pencil, Search, Sparkles } from "lucide-react";
 
 import {
@@ -11,6 +12,7 @@ import {
   type NestStage,
   type TimeOfDay,
 } from "@/lib/remy";
+import { getRemyAsset } from "@/lib/remy/companion/asset-registry";
 import Remy from "@/components/remy/Remy";
 import FloatingCompanionButton from "@/components/navigation/FloatingCompanionButton";
 
@@ -75,11 +77,19 @@ export default function Nest({
 
   const stage: NestStage = resolveNestStage(memoryCount);
 
-  // At rest, Remy's LOOK follows the time of day — asleep at night, calm-awake by day. Mid-
-  // interaction (wake → greet → return) the behaviour's own look drives the expression.
-  const restingExpression = night ? "sleeping" : "idle";
-  const displayExpression = isResting ? restingExpression : look.expression;
+  // Mid-interaction (wake → greet → return) the behaviour's own look drives the expression.
+  // At rest the button shows the NEST itself (V1: "Remy is safe in his nest"), so no resting
+  // expression is needed — Remy only appears once woken.
+  const displayExpression = look.expression;
   const displayEmotion = isResting ? undefined : look.emotion;
+
+  // The idle NEST vessel (V1 idle state): the approved standalone nest art, registry-resolved
+  // (paths live ONLY in the asset registry; this is home/vessel art, not the character, so it
+  // does not go through `<Remy>` — same precedent as RemyEffects' goldenFeather). The 1536×1024
+  // scene is cover-cropped to the golden bowl: a ~680px source window centred on the bowl
+  // (712, 540) maps to the 48px circle → display 108×72 offset (−26, −14). Fixed px are safe:
+  // the FAB is a fixed 48px (`h-12 w-12`).
+  const nestArt = getRemyAsset("nestEmpty");
 
   const items: NestMenuItem[] = [
     { href: remyHref, label: "Ask Remy", hint: "Talk through a memory", Icon: MessageCircle },
@@ -97,7 +107,7 @@ export default function Nest({
       <FloatingCompanionButton
         onActivate={wake}
         variant="nest"
-        label="Remy's nest — tap to wake Remy"
+        label="Open Remy's Nest"
         isActive={presentsActions}
         className={night ? styles.glowNight : styles.glow}
       >
@@ -117,40 +127,55 @@ export default function Nest({
             <i className={styles.particle} />
             <i className={styles.particle} />
           </span>
-          {/* Remy IS the button: the AVATAR tier (`assetVariant="avatar"`) draws the square,
-              character-filling 256px export of the same approved art, so the bird fills the
-              48px circle instead of a landscape scene letterboxing it to a ~15px speck. The
-              circular clip on THIS wrapper only (not `.nest`) trims any square-crop edges
-              cleanly and keeps the ambient halo + motes — which live on `.nest` — unclipped.
-              `fit` stays `contain` (never distorts); a missing avatar export falls back to
-              scene art safely inside this same clip.
+          {isResting ? (
+            /* V1 IDLE STATE — the NEST is the button ("Remy is safe in his nest. The nest
+               breathes gently."). The approved standalone nest art is cover-cropped to its
+               golden bowl inside the 48px circle; the gentle `nestBreathe` loop + the ambient
+               halo/motes (on `.nest`) keep it alive. Remy is tucked away until woken. */
+            <span className="relative flex h-12 w-12 overflow-hidden rounded-full">
+              <span className={styles.vessel}>
+                <Image
+                  src={nestArt.src}
+                  alt=""
+                  aria-hidden
+                  width={108}
+                  height={72}
+                  priority
+                  draggable={false}
+                  className="pointer-events-none absolute left-[-26px] top-[-14px] max-w-none"
+                />
+              </span>
+            </span>
+          ) : (
+            /* WOKEN — Remy pops out of the nest (V1 steps 2–3): the AVATAR tier
+               (`assetVariant="avatar"`) draws the square, character-filling 256px export of the
+               same approved art, so the bird fills the 48px circle instead of a landscape scene
+               letterboxing it to a ~15px speck. The circular clip on THIS wrapper only (not
+               `.nest`) trims any square-crop edges cleanly and keeps the ambient halo + motes —
+               which live on `.nest` — unclipped. `fit` stays `contain` (never distorts); a
+               missing avatar export falls back to scene art safely inside this same clip.
 
-              OPTICAL CENTERING (not mathematical): the avatar art composes the character HIGH
-              in its square — the crest sits at the asset's top edge with more empty margin
-              below the feet — so a geometrically-centred 48px fill puts the crest at the
-              circle's top edge, and the 4px (~8%) upward float bob then lifts it PAST that edge
-              (top-heavy; worse on small phones where the FAB draws more of the eye). The fix
-              lives HERE (the Nest surface — never in the shared `<Remy>` renderer other
-              surfaces depend on): `items-start` + a PROPORTIONAL top margin on the avatar
-              (`mt-[8%]` ≈ 8% of the FAB, via `<Remy>`'s documented className margin API — NOT a
-              translateY, and NOT on the float's animated transform, so the bob is untouched and
-              stays centred on the re-seated bird). This biases Remy's optical centre below the
-              geometric centre: the crest keeps clearance across the whole float (≈6.8px at rest,
-              ≈2.8px at the bob peak) while the feet stay visible (≈2px above the bottom). Being a
-              % of the box, it scales with the FAB on every device and survives avatar art
-              evolving to a lower composition (the margin simply becomes a no-op). */}
-          <span className="flex h-12 w-12 items-start justify-center overflow-hidden rounded-full">
-            <Remy
-              className="mt-[8%]"
-              state={displayExpression}
-              assetVariant="avatar"
-              emotion={displayEmotion}
-              reactionKey={behavior}
-              float={isResting}
-              size={48}
-              decorative
-            />
-          </span>
+               OPTICAL CENTERING (not mathematical): the avatar art composes the character HIGH
+               in its square — the crest sits at the asset's top edge with more empty margin
+               below the feet — so a geometrically-centred 48px fill puts the crest at the
+               circle's top edge. The fix lives HERE (the Nest surface — never in the shared
+               `<Remy>` renderer other surfaces depend on): `items-start` + a PROPORTIONAL top
+               margin on the avatar (`mt-[8%]` ≈ 8% of the FAB, via `<Remy>`'s documented
+               className margin API — NOT a translateY, so any future float transform is
+               untouched). Being a % of the box, it scales with the FAB on every device and
+               survives avatar art evolving to a lower composition (the margin becomes a no-op). */
+            <span className="flex h-12 w-12 items-start justify-center overflow-hidden rounded-full">
+              <Remy
+                className="mt-[8%]"
+                state={displayExpression}
+                assetVariant="avatar"
+                emotion={displayEmotion}
+                reactionKey={behavior}
+                size={48}
+                decorative
+              />
+            </span>
+          )}
         </span>
       </FloatingCompanionButton>
 

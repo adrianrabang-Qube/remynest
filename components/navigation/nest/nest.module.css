@@ -177,6 +177,25 @@
   }
 }
 
+/* The idle nest vessel (V1: "The nest breathes gently") — a slow, barely-there breathe on the
+ * cropped nest art while Remy rests inside. Fills the circular clip; reduced-motion-safe. */
+.vessel {
+  position: absolute;
+  inset: 0;
+  animation: nestBreathe 5.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes nestBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
 /* One-shot wake: a gentle rise + scale as Remy stirs, peeks, then climbs out of the nest.
  * Re-triggered by the component re-keying this element per behaviour. */
 .wake {
@@ -200,6 +219,9 @@
   .glowNight {
     animation: none;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+  .vessel {
+    animation: none;
   }
   .wake {
     animation: none;

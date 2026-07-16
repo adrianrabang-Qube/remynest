@@ -11,6 +11,7 @@ import { buildRemyCoach } from "@/lib/remy/coach";
 import { buildRemyAsk } from "@/lib/remy/ask";
 import { REMY } from "@/lib/remy/persona";
 
+import Remy from "@/components/remy/Remy";
 import RemyConversation from "@/components/remy/RemyConversation";
 import RemyActions from "@/components/remy/RemyActions";
 import RemyJourneys from "@/components/remy/RemyJourneys";
@@ -73,14 +74,19 @@ export default async function RemyConversationPage() {
         Home
       </Link>
 
-      <header>
-        <h1 className="text-xl font-semibold text-charcoal md:text-2xl">
-          {REMY.name}
-        </h1>
-        <p className="mt-0.5 text-sm text-charcoal-muted">
-          A conversation with your memory companion
-          {model.subjectName ? ` about ${model.subjectName}` : ""}.
-        </p>
+      {/* Warm Remy presence (V1) — the companion greets the page through the single <Remy>
+          renderer; avatar tier at this compact size. */}
+      <header className="flex items-center gap-3">
+        <Remy state="welcome" assetVariant="avatar" size={56} decorative />
+        <div className="min-w-0">
+          <h1 className="font-serif text-xl font-semibold text-charcoal md:text-2xl">
+            {REMY.name}
+          </h1>
+          <p className="mt-0.5 text-sm text-charcoal-muted">
+            A conversation with your memory companion
+            {model.subjectName ? ` about ${model.subjectName}` : ""}.
+          </p>
+        </div>
       </header>
 
       {/* Opt-in: let Remy narrate the saved memories into a flowing reflection (AI, on explicit tap). */}

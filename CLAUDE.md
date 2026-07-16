@@ -600,11 +600,34 @@ sprite (`components/remy/avatar/*`, `public/remy/remy-blueprint.png`) to sage, a
 audited. Icons/OG auto-wire via `app/{icon.svg,apple-icon.tsx,opengraph-image.tsx}`.
 See `docs/brand/brand-guidelines.md`. **Pending (staged):** raster exports
 (social/true-square PWA), the 17px/scale migration across ~544 small-text
-sites, dark-UI rollout. **(2026-07-15: the iOS store icon + splash are DONE — the Capacitor template
-icon/splash in the Xcode catalog were replaced with the branded nest icon (opaque 1024²) and a
-Warm-Sand nest-mark splash; iPhone-only v1 (`TARGETED_DEVICE_FAMILY=1`, iPad deferred);
-`PrivacyInfo.xcprivacy` now declares Audio Data AND is actually bundled via target membership. Do not
-reintroduce the template assets; screenshot spec lives at `docs/launch/APP_STORE_SCREENSHOTS.md`.)**
+sites, dark-UI rollout. **(2026-07-15: the iOS store splash is DONE — the Capacitor template
+splash was replaced with a Warm-Sand nest-mark splash; iPhone-only v1 (`TARGETED_DEVICE_FAMILY=1`,
+iPad deferred); `PrivacyInfo.xcprivacy` now declares Audio Data AND is actually bundled via target
+membership. Do not reintroduce the template assets; screenshot spec lives at
+`docs/launch/APP_STORE_SCREENSHOTS.md`.)**
+
+**Canonical iOS APP ICON = the purple fingerprint-heart-bird (authoritative, 2026-07-16 —
+operator correction, supersedes the 2026-07-15 sage nest-and-gold-egg icon, which was the WRONG
+selection):** the App Store icon (`ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png`,
+opaque 1024² RGB no-alpha) is the **deep-purple fingerprint-heart-bird** mark per the approved
+design board `REMYNEST DESIGN LOGO.PNG` (deep-purple `#150A3B→#6B428E` background sampled from the
+board's own icon; lavender/gold fingerprint rings, gold outline heart, small gold bird). It was
+COMPOSED, never redrawn: the exact standalone high-res transparent mark (operator's
+`logo vector version.png`, 1536×1024, mark 695×728 at native resolution — zero upscaling) placed on
+the board-sampled gradient. This is a deliberate exception to the "(A) product brand = sage" icon
+rule above — the APP ICON carries the purple brand-board identity; the sage/sand system remains the
+app-wide UI chrome, and the purple treatment in-app stays scoped to **Remy/Nest companion surfaces
+ONLY** (Nest sheet, Ask Remy chat — never app-wide). The web favicon/OG (`app/icon.svg`,
+`apple-icon.tsx`) still use the sage nest mark (operator decision pending on unifying them). **The
+Nest button idle state is the NEST, not Remy** (V1 alignment, 2026-07-16): at rest the 48px center
+button shows the approved standalone nest art (`nestEmpty`, registry-resolved, cover-cropped to the
+bowl, gentle breathe) — Remy appears only through the existing wake choreography (tap → wake →
+peek → emerge → greet → present the 6 real actions), and the NestMenu sheet + RemyAsk chat carry
+the companion palette (deep violet `#5B3E8E` · lavender `#8A6BD0` · warm gold `#E3A24A`), with a
+large rounded composer + round violet send button on the chat (all logic byte-unchanged). Do NOT
+revert the icon to the sage nest-and-egg, upscale board-screenshot crops, redraw/regenerate the
+mark, put Remy's face back as the idle Nest button, or spread the purple treatment beyond
+Remy/Nest surfaces.
 
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch

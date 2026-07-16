@@ -10,7 +10,7 @@
 > CLAUDE.md authoritative notes and slimmed to this continuation doc on 2026-07-09. The full prior
 > history remains in git.)*
 
-Last Updated: 2026-07-13
+Last Updated: 2026-07-16
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
@@ -28,7 +28,27 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-The most recent work is the **iOS launch visual/privacy asset preparation (2026-07-15, iPhone-only
+The most recent work is the **canonical icon + Nest/Ask-Remy V1 brand correction (2026-07-16,
+launch-blocking visual fix):** **(1) The App Store icon was CORRECTED** — the 2026-07-15
+sage nest-and-gold-egg icon was the operator-confirmed WRONG selection; `AppIcon.appiconset` now
+carries the **purple fingerprint-heart-bird** per the approved `REMYNEST DESIGN LOGO.PNG` board.
+The 1024² opaque no-alpha icon was COMPOSED (never redrawn/upscaled): the exact standalone
+transparent high-res mark (operator's `logo vector version.png`, mark 695×728 at NATIVE
+resolution) on the board-sampled deep-purple gradient (`#150A3B→#6B428E`); side-by-side verified
+against the board icon at 210/120/60px. **(2) Nest button V1 alignment** — idle state is now the
+NEST itself (approved `nestEmpty` registry art, bowl cover-crop in the 48px circle, gentle
+reduced-motion-safe breathe; label "Open Remy's Nest"); Remy still pops out via the UNCHANGED wake
+choreography and presents the same 6 REAL actions (no fake Camera/Video/Person/Document); the
+NestMenu sheet carries the companion palette (violet `#5B3E8E` / lavender `#8A6BD0` wash). **(3)
+Ask Remy V1 chat restyle** (`RemyAsk.tsx` + `/remy` header, presentation-only — retrieval/anchor/
+history/guard logic byte-unchanged): warm Remy presence (avatar tier via the single `<Remy>`
+renderer), lavender answer bubbles / white user bubbles, violet links+chips+cards, and a LARGE
+rounded composer ("Ask Remy anything…", `text-base`, round violet send button). Purple stays
+scoped to Remy/Nest surfaces only. Validated: tsc/lint/build green + iOS simulator build (iPhone
+17 Pro) green + icon dims/RGB/no-alpha verified. The user's unstaged Build-17 pbxproj bump was
+preserved untouched. Screenshot spec updated (ASC must show the PURPLE icon). NO push/archive.
+
+Before that: the **iOS launch visual/privacy asset preparation (2026-07-15, iPhone-only
 v1):** **(1)** the Capacitor TEMPLATE app icon (blue X — shipped on TestFlight Builds ≤17!) was
 replaced in `AppIcon.appiconset` with the approved RemyNest nest-and-gold-egg icon (flattened from
 `public/brand/store/app-store-icon-1024.png` to opaque no-alpha 1024², single-size catalog — one file

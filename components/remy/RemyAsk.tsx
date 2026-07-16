@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 import AIDisclaimer from "@/components/ai/AIDisclaimer";
+import Remy from "@/components/remy/Remy";
 import { resolveRemyIntent, type RemyAsk as RemyAskModel } from "@/lib/remy/ask";
 import {
   resolveAskTurn,
@@ -90,7 +91,7 @@ function GraphCard({ graph }: { graph: AskGraph }) {
     const p = graph.person;
     const span = p.fromDate || p.toDate ? `${yearPlain(p.fromDate)}–${yearPlain(p.toDate)}` : null;
     return (
-      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+      <div className="mt-2 rounded-2xl border border-[#8A6BD0]/20 bg-[#8A6BD0]/5 p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
           {p.name} — connections
         </p>
@@ -131,7 +132,7 @@ function GraphCard({ graph }: { graph: AskGraph }) {
   if (graph.kind === "connection" && graph.connection) {
     const c = graph.connection;
     return (
-      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+      <div className="mt-2 rounded-2xl border border-[#8A6BD0]/20 bg-[#8A6BD0]/5 p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
           Connection
         </p>
@@ -150,16 +151,16 @@ function GraphCard({ graph }: { graph: AskGraph }) {
           ? "Most connected memories"
           : "Your key memories";
     return (
-      <div className="mt-2 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+      <div className="mt-2 rounded-2xl border border-[#8A6BD0]/20 bg-[#8A6BD0]/5 p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
           {heading}
         </p>
-        <ul className="mt-1 divide-y divide-sand-deep/30">
+        <ul className="mt-1 divide-y divide-[#8A6BD0]/15">
           {graph.importance.items.map((item) => (
             <li key={item.id}>
               <Link
                 href={`/memories/${item.id}`}
-                className="flex items-baseline justify-between gap-3 py-1.5 text-xs text-sage-deep transition hover:text-sage"
+                className="flex items-baseline justify-between gap-3 py-1.5 text-xs text-[#5B3E8E] transition hover:text-[#8A6BD0]"
               >
                 <span className="min-w-0 flex-1 truncate">{item.title}</span>
                 <span className="shrink-0 text-charcoal-muted">
@@ -178,7 +179,7 @@ function GraphCard({ graph }: { graph: AskGraph }) {
 
   if (graph.kind === "aggregate" && ((graph.themes?.length ?? 0) > 0 || (graph.busiestYears?.length ?? 0) > 0)) {
     return (
-      <div className="mt-2 space-y-1.5 rounded-2xl border border-sand-deep/50 bg-sand/30 p-3">
+      <div className="mt-2 space-y-1.5 rounded-2xl border border-[#8A6BD0]/20 bg-[#8A6BD0]/5 p-3">
         {graph.themes && graph.themes.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
@@ -188,7 +189,7 @@ function GraphCard({ graph }: { graph: AskGraph }) {
               {graph.themes.slice(0, 8).map((t) => (
                 <span
                   key={t.theme}
-                  className="rounded-full bg-sage/10 px-2 py-0.5 text-xs text-sage-deep"
+                  className="rounded-full bg-[#8A6BD0]/10 px-2 py-0.5 text-xs text-[#5B3E8E]"
                 >
                   {t.theme} · {t.count}
                 </span>
@@ -221,12 +222,12 @@ function RelatedMemories({ related }: { related: AskRelatedMemory[] }) {
       <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
         Related memories
       </p>
-      <ul className="mt-1 divide-y divide-sand-deep/30">
+      <ul className="mt-1 divide-y divide-[#8A6BD0]/15">
         {related.map((memory) => (
           <li key={memory.id}>
             <Link
               href={`/memories/${memory.id}`}
-              className="block py-1.5 text-sm text-sage-deep transition hover:text-sage"
+              className="block py-1.5 text-sm text-[#5B3E8E] transition hover:text-[#8A6BD0]"
             >
               {memory.title}
               {yearLabel(memory.date)}
@@ -348,19 +349,29 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
   }
 
   return (
+    /* A COMPANION surface — carries the approved Remy identity (deep violet #5B3E8E · lavender
+       #8A6BD0 · warm gold #E3A24A) per the V1 chat reference: Remy present in the header, a soft
+       lavender wash, violet answer bubbles, and a large rounded composer. Presentation only —
+       all chat/retrieval/anchor logic is unchanged, and the purple treatment is scoped to this
+       Remy surface (the app-wide sage/sand system is untouched). */
     <section
       aria-label="Ask Remy"
-      className="rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft md:p-6"
+      className="rounded-3xl border border-[#8A6BD0]/25 bg-gradient-to-b from-[#F5F2FB] to-white p-4 shadow-soft md:p-6"
     >
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
-          Ask Remy
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        {/* Warm Remy presence (V1: "Remy is here to help") — the single <Remy> renderer. */}
+        <div className="flex min-w-0 items-center gap-3">
+          <Remy state="listening" assetVariant="avatar" size={40} decorative />
+          <div className="min-w-0">
+            <p className="font-serif text-lg font-semibold text-charcoal">Ask Remy</p>
+            <p className="text-xs text-charcoal-muted">Remy is here to help.</p>
+          </div>
+        </div>
         {entries.length > 0 && (
           <button
             type="button"
             onClick={newConversation}
-            className="text-xs font-medium text-sage-deep transition hover:text-sage"
+            className="shrink-0 text-xs font-medium text-[#5B3E8E] transition hover:text-[#8A6BD0]"
           >
             New conversation
           </button>
@@ -374,7 +385,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
               return (
                 <p
                   key={index}
-                  className="ml-auto w-fit max-w-[90%] rounded-2xl bg-sand/60 px-3 py-1.5 text-sm text-charcoal"
+                  className="ml-auto w-fit max-w-[90%] rounded-2xl border border-[#8A6BD0]/20 bg-white px-3 py-1.5 text-sm text-charcoal"
                 >
                   {entry.text}
                 </p>
@@ -386,7 +397,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                 return (
                   <div key={index} className="w-full max-w-[95%]">
                     <p
-                      className="whitespace-pre-wrap rounded-2xl bg-sage/10 px-3 py-2 text-sm leading-relaxed text-charcoal"
+                      className="whitespace-pre-wrap rounded-2xl bg-[#8A6BD0]/10 px-3 py-2 text-sm leading-relaxed text-charcoal"
                       aria-live="polite"
                     >
                       {entry.text}
@@ -418,7 +429,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                             type="button"
                             onClick={() => void runTurn(suggestion)}
                             disabled={loading}
-                            className="rounded-full border border-sand-deep/70 bg-sand/40 px-3 py-1.5 text-xs text-charcoal-soft transition hover:bg-sand/70 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-full border border-[#8A6BD0]/25 bg-white px-3 py-1.5 text-xs text-charcoal-soft transition hover:bg-[#8A6BD0]/10 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {suggestion}
                           </button>
@@ -460,12 +471,12 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
                   I found {entry.results.length}{" "}
                   {entry.results.length === 1 ? "memory" : "memories"}
                 </p>
-                <ul className="mt-1 divide-y divide-sand-deep/30">
+                <ul className="mt-1 divide-y divide-[#8A6BD0]/15">
                   {shown.map((memory) => (
                     <li key={memory.memoryId}>
                       <Link
                         href={`/memories/${memory.memoryId}`}
-                        className="block py-2 text-sm text-sage-deep transition hover:text-sage"
+                        className="block py-2 text-sm text-[#5B3E8E] transition hover:text-[#8A6BD0]"
                       >
                         {memory.title}
                         {yearLabel(memory.memoryDate)}
@@ -482,12 +493,13 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
         </div>
       )}
 
-      <form onSubmit={onSubmit} className="mt-3">
+      {/* The V1 composer — a large, calm rounded field with a round violet send button.
+          `text-base` (16px) so focusing never triggers iOS zoom; focus ring stays visible. */}
+      <form onSubmit={onSubmit} className="mt-4">
         <label htmlFor="remy-ask" className="sr-only">
           Ask Remy to find memories or take you somewhere
         </label>
-        <div className="flex items-center gap-2 rounded-2xl border border-sand-deep/70 bg-white px-3 focus-within:border-sage">
-          <Search className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
+        <div className="flex items-center gap-2 rounded-full border border-[#8A6BD0]/30 bg-white py-1 pl-5 pr-1.5 shadow-soft transition focus-within:border-[#8A6BD0] focus-within:ring-2 focus-within:ring-[#8A6BD0]/25">
           <input
             id="remy-ask"
             type="text"
@@ -500,16 +512,17 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
             placeholder={
               entries.length > 0
                 ? "Ask a follow-up, e.g. tell me more"
-                : "e.g. what happened in 2020?"
+                : "Ask Remy anything…"
             }
-            className="h-11 w-full bg-transparent text-base text-charcoal outline-none placeholder:text-charcoal-muted"
+            className="h-12 w-full bg-transparent text-base text-charcoal outline-none placeholder:text-charcoal-muted"
           />
           <button
             type="submit"
             disabled={loading}
-            className="shrink-0 rounded-full bg-sage px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-sage-deep disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Ask Remy"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#5B3E8E] text-white transition hover:bg-[#8A6BD0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Ask
+            <ArrowUp className="h-5 w-5" aria-hidden />
           </button>
         </div>
       </form>
@@ -533,7 +546,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
               key={intent.id}
               type="button"
               onClick={() => router.push(intent.href)}
-              className="rounded-full border border-sand-deep/70 bg-sand/40 px-3 py-1.5 text-sm text-charcoal-soft transition hover:bg-sand/70"
+              className="rounded-full border border-[#8A6BD0]/25 bg-white px-3 py-1.5 text-sm text-charcoal-soft transition hover:bg-[#8A6BD0]/10"
             >
               {intent.label}
             </button>
