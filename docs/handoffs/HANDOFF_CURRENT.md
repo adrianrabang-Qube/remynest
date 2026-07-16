@@ -28,7 +28,16 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **App Icon v1 review round + approval (2026-07-16, after the brand correction below):**
+Most recent: **Build 18 TestFlight preparation (2026-07-16):** the operator's unstaged Build-17
+pbxproj hunk was INCORPORATED into the committed bump — `CURRENT_PROJECT_VERSION 12→18` in BOTH App
+configurations (marketing version stays 1.0; Info.plist derives both keys from build settings, so
+`CFBundleShortVersionString`/`CFBundleVersion` are coherent at 1.0/18). Nothing else changed (no
+Capacitor sync, no Pods/signing/assets/JS-TS). A signed Release archive was built and VERIFIED
+(1.0 (18), com.remynest.app, team VWT682HUT9) and copied to `~/Downloads/RemyNest-Build18.xcarchive`
+— upload to TestFlight is the OPERATOR step (Xcode Organizer → Distribute, or `xcodebuild
+-exportArchive` with an app-store-connect ExportOptions plist). NOT pushed.
+
+Before that: **App Icon v1 review round + approval (2026-07-16, after the brand correction below):**
 three faithful polish candidates (A board-faithful / B deep-indigo / C warm-glow — same mark, same
 composition, native-resolution `logo vector version.png` mark on the board-sampled field) were
 generated to `~/Downloads/RemyNest-AppIcon-Review-v1/` with a 1024/240/120/60 contact sheet. The
