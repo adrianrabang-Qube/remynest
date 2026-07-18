@@ -1,7 +1,14 @@
+import Image from "next/image";
+
 /**
- * RemyNestLogo — the PRODUCT brand lockup (geometric nest mark + RemyNest wordmark).
- * Sage/sand/gold product identity (NOT the purple Remy Bird companion). Used on the
- * auth screens. The mark is decorative; the wordmark text carries the accessible name.
+ * RemyNestLogo — the product brand lockup (canonical purple fingerprint-heart-bird
+ * mark + RemyNest wordmark). Strategy-1 unification (2026-07-18): the mark is the
+ * SAME approved master used by the app icon on every platform
+ * (`public/brand/remynest-mark.png`, transparent, native-resolution crop — never
+ * redrawn). Used on the auth screens + onboarding. The mark is decorative; the
+ * wordmark text carries the accessible name. Wordmark colours: "Remy" charcoal +
+ * "Nest" deep violet #5B3E8E (the companion violet — AA on sand; the board's gold
+ * wordmark is barred as text by the brand a11y rule: gold fails contrast on light).
  */
 export default function RemyNestLogo({
   size = 52,
@@ -10,34 +17,25 @@ export default function RemyNestLogo({
   size?: number;
   className?: string;
 }) {
+  // The mark master is 695×728 — keep its native aspect at any rendered size.
+  const width = Math.round(size * (695 / 728));
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
-      <svg
-        width={size}
+      <Image
+        src="/brand/remynest-mark.png"
+        alt=""
+        aria-hidden
+        width={width}
         height={size}
-        viewBox="0 0 64 64"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <ellipse cx="32" cy="27" rx="8.5" ry="9.5" fill="#C9A86A" />
-        <g
-          fill="none"
-          stroke="#4F6B5B"
-          strokeWidth={4.2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M9 30 C 9 45 20 53 32 53 C 44 53 55 45 55 30" />
-          <path d="M16 32 C 16 43 24 49 32 49 C 40 49 48 43 48 32" />
-          <path d="M23 34 C 23 41 27 45 32 45 C 37 45 41 41 41 34" />
-        </g>
-      </svg>
+        priority
+        draggable={false}
+      />
       <span
         className="text-2xl font-semibold tracking-tight"
         style={{ fontFamily: "Fraunces, Georgia, serif" }}
       >
         <span className="text-charcoal">Remy</span>
-        <span className="text-sage">Nest</span>
+        <span className="text-[#5B3E8E]">Nest</span>
       </span>
     </div>
   );

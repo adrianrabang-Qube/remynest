@@ -2,7 +2,7 @@
 
 > Operator capture package — **real app screens only**. No fabricated UI, no
 > marketing composites, no device frames, no AI-generated imagery. Capture
-> happens AFTER Build 18 is on the device/simulator (branded icon + splash).
+> happens AFTER Build 19 is on the device/simulator (branded icon + splash).
 > The optional App Preview **video is DEFERRED for v1**.
 
 ## Device & format
@@ -42,7 +42,7 @@ crops bottoms in some placements), Fraunces/Inter per brand, charcoal on sand
 — or ship clean screenshots with no overlay (acceptable and honest).
 
 ## Workflow
-1. Build 18 on an iPhone 16 Pro Max simulator (or device) → sign into the demo
+1. Build 19 on an iPhone 16 Pro Max simulator (or device) → sign into the demo
    account → capture the 8 frames (`Cmd+S` in Simulator saves exact-size PNG).
 2. Add caption bars (optional) without resizing the canvas.
 3. Validate dimensions + no-alpha (command above) for all frames.
@@ -51,11 +51,9 @@ crops bottoms in some placements), Fraunces/Inter per brand, charcoal on sand
    (2026-07-16 correction — not the sage nest-and-egg, not the old template)
    before submitting.
 
-## Remaining operator tasks (recorded 2026-07-15)
-- [ ] Increment build to **18** (only when preparing the archive — Build 17 is
-      already uploaded; the working-tree bump is the operator's own change).
-- [ ] Archive + upload Build 18 to TestFlight (ships branded icon/splash, the
-      voice-memory mic copy, the bundled privacy manifest, iPhone-only).
+## Remaining operator tasks (updated 2026-07-18 — Build 19 supersedes 18)
+- [x] Build 19 archived + uploaded to TestFlight (branded purple icon/sand splash,
+      voice-memory mic copy, bundled privacy manifest, iPhone-only, ITMS-90683 fix).
 - [ ] Complete App Store Connect **privacy answers incl. Audio Data**
       (user content · linked · app functionality · no tracking).
 - [ ] Capture + upload the 8 screenshots per this spec.

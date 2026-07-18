@@ -10,7 +10,7 @@
 > CLAUDE.md authoritative notes and slimmed to this continuation doc on 2026-07-09. The full prior
 > history remains in git.)*
 
-Last Updated: 2026-07-16
+Last Updated: 2026-07-18
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
@@ -28,7 +28,24 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **ITMS-90683 location-API warning FIXED → Build 19 (2026-07-16):** Apple flagged
+Most recent: **Strategy-1 brand unification (2026-07-18, EXECUTION MODE — UNIFY REMYNEST BRAND
+ASSETS; uncommitted, awaiting operator commit authorization):** the purple fingerprint-heart-bird is
+now the SINGLE customer-facing identity everywhere. Three canonical masters vendored
+(`public/brand/store/app-store-icon-1024.png` = byte-copy of the SHIPPED Build-19 icon;
+`public/brand/remynest-mark.png` transparent 695×728; `public/brand/remynest-lockup.png` 960×330).
+`scripts/generate-brand-assets.mjs` REWRITTEN purple-only (sage generation removed) and RUN: web
+favicon route `app/icon.png` + `favicon.ico` (16 = heart-region crop per rendered legibility A/B) +
+`apple-icon.png` + PWA 192/512 + maskable + Play 512 + adaptive fg/bg 432 + ALL Android launcher
+mipmaps (Capacitor template art replaced; adaptive bg `#2E1B60`) + static
+`app/opengraph-image.png` (canonical icon + approved wordmark crop on sand; `.alt.txt` added). The
+sage `app/icon.svg`/`apple-icon.tsx`/`opengraph-image.tsx` routes were DELETED (static PNGs
+replace them); `RemyNestLogo.tsx` now renders the canonical mark + "Remy" charcoal/"Nest" violet
+wordmark. iOS Build-19 catalog/Podfile/signing/privacy/splash untouched. Docs updated
+(brand-guidelines §2/§3/§7/changelog, asset-production, CLAUDE.md, this file, master state;
+screenshot spec already purple-consistent). Contact sheet at
+`~/Downloads/RemyNest-Brand-Unification-ContactSheet.png`. NOT committed/pushed.
+
+Before that: **ITMS-90683 location-API warning FIXED → Build 19 (2026-07-16):** Apple flagged
 Build 18 for referencing location APIs with no `NSLocationWhenInUseUsageDescription`. PROVEN root
 cause (from the Build-18 archive binaries, not assumption): the bare `OneSignalXCFramework 5.5.2`
 pod resolves to the `OneSignalComplete` default subspec, which bundles `OneSignalLocation.framework`

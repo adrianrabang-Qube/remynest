@@ -16,37 +16,48 @@ hand-written family journal; Inter keeps it modern and effortless. Remy, our
 companion songbird, is the friendly family guide who helps each generation tend the
 nest.
 
-## 2. Two-tier identity (authoritative)
-The brand runs **two coexisting systems** that share **gold** as the bridge:
-- **Product / Brand = sage · sand · gold** → logo, app icon, favicon, OG, marketing,
-  all UI chrome.
+## 2. Identity architecture (authoritative — Strategy-1 unification, 2026-07-18)
+**ONE customer-facing identity: the purple fingerprint-heart-bird mark** (deep-purple
+field `#150A3B→#6B428E`, lavender/gold fingerprint rings, gold outline heart, small
+gold bird — per the approved `REMYNEST DESIGN LOGO.PNG` board). It is the SAME mark,
+composition, palette, and source master on **every** identity surface: iOS app icon,
+Android launcher, App Store, Google Play, PWA icons, favicon, apple-touch, OG/social,
+and the auth/onboarding lockup. Platform dimensions/masks/safe-zones may vary; the
+identity may not.
+
+Two supporting palettes coexist UNDER that single identity:
+- **UI chrome = sage · sand · gold** (`#4F6B5B` / `#F5F1EA` / `#C9A86A`) → the app's
+  interior design system (Polaris tokens, headers, cards, buttons). This is a COLOR
+  SYSTEM, not a logo — the sage nest mark is retired as an identity asset.
 - **Companion / Remy = purple `#8A6BD0`→`#5B3E8E` + gold pendant `#E3A24A`** → the
-  **in-app avatar / chat / mood states ONLY**.
+  in-app companion character/chat surfaces (Nest, Ask Remy) ONLY.
 
-**Rules:** the product logo is the sage **nest** mark (never the purple bird on the
-app icon). Do **not** recolor the validated in-app Remy sprite to sage. Do **not**
-put purple Remy on the product brand. A simplified geometric **brand Remy** (sage/
-gold, `public/brand/remy-mark.svg`) is the *secondary* character mark.
+**Rules:** never reintroduce the sage nest-and-gold-egg as an app icon, favicon, or
+store asset (operator correction 2026-07-16 + unification 2026-07-18). Do **not**
+recolor the validated in-app Remy sprite. Do **not** redraw/regenerate the canonical
+mark — every derivative is produced mechanically from the checked-in masters.
 
-## 3. Logo system
-- **Primary mark:** a woven geometric **nest** (three concentric rounded-cap sage
-  arcs) cradling a gold egg/keepsake — `public/brand/logo-mark.svg`.
-- **Lockups:** horizontal (`logo-horizontal.svg`, default header), stacked
-  (`logo-stacked.svg`, login/OG), icon-only (`logo-mark.svg` / `logo-mark-reversed.svg`
-  for app icon + favicon).
-- **Wordmark:** "RemyNest" in **Fraunces** 600; optional two-tone — "Remy" charcoal
-  `#2F3E34`, "Nest" sage `#4F6B5B`.
-- **Variants:** full-color (sage + gold), charcoal mono, **reversed** (sand mark on
-  a sage fill — `logo-mark-reversed.svg`), gold-on-sage keepsake.
-- **Light vs dark package:** light = `logo-{mark,horizontal,stacked}.svg` (sage arcs,
-  two-tone wordmark) for light/sand surfaces. **Dark** = `logo-{mark,horizontal,
-  stacked}-dark.svg` (**sand `#ECE5D8` arcs + gold egg; wordmark "Remy" sand / "Nest"
-  moss `#8FAE8A`**) for dark surfaces — never the light logo on a dark field.
-- **Clear-space:** ≥ the x-height of the wordmark "e" (≥25% of the mark width for
-  icon-only). **Min size:** horizontal 120px wide; icon 32px; favicon uses the
-  simplified two-arc nest (`app/icon.svg`).
-- **Misuse:** never set the wordmark in gold (fails contrast), never stretch/recolor
-  outside the variants, never place the mark on a busy/low-contrast field.
+## 3. Logo system (canonical purple masters — checked in)
+- **Composed icon master:** `public/brand/store/app-store-icon-1024.png` — a
+  byte-copy of the SHIPPED Build-19 iOS icon (approved warm-glow candidate C; 1024²,
+  opaque, no alpha). Every square icon derivative is a mechanical resize of this file.
+- **Mark master (transparent):** `public/brand/remynest-mark.png` (695×728, the
+  operator's approved standalone art at native resolution) — used for lockups,
+  maskable/adaptive safe-zone compositions, and the auth lockup component.
+- **Lockup master:** `public/brand/remynest-lockup.png` (960×330 — serif wordmark +
+  tagline; its flat icon portion is NOT used as identity — the wordmark region is
+  cropped and paired with the canonical mark, e.g. the OG card).
+- **Auth/onboarding lockup:** `components/brand/RemyNestLogo.tsx` — the mark master +
+  typed wordmark ("Remy" charcoal · "Nest" deep violet `#5B3E8E`; gold is barred as
+  wordmark text on light — contrast).
+- **16px favicon frame:** a CROP of the mark (the gold heart region) on the same
+  field — the full mark is illegible at 16px (rendered A/B evidence, 2026-07-18).
+- **Legacy brand-kit (retired as identity):** the sage `logo-{mark,horizontal,
+  stacked}[-dark].svg` + `remy-*.svg` files remain on disk as historical references
+  ONLY — never wire them into an icon, favicon, store asset, or generated raster.
+- **Misuse:** never set body/UI wordmark text in gold (fails contrast), never stretch/
+  recolor the mark, never place it on a busy/low-contrast field, never upscale a
+  small crop.
 
 ## 3a. Remy avatar — character states
 Remy is the **in-app companion** (purple character system; gold is the bridge to the
@@ -100,20 +111,23 @@ See `typography.md`. **Fraunces** (`--font-serif`) = display + h1–h4 + memory 
 Calm, warm, plain-spoken, **non-clinical**. Remy speaks first-person as a gentle
 companion, never a medical authority. Short sentences; reassure, don't alarm.
 
-## 7. Asset index
-| Asset | File | Size | Generated by |
+## 7. Asset index (all identity rasters = purple, generated by `scripts/generate-brand-assets.mjs`)
+| Asset | File | Size | Source |
 |---|---|---|---|
-| Nest mark | `public/brand/logo-mark.svg` | vector | hand-authored |
-| Reversed mark | `public/brand/logo-mark-reversed.svg` | vector | hand-authored |
-| Horizontal lockup | `public/brand/logo-horizontal.svg` | vector | hand-authored |
-| Stacked lockup | `public/brand/logo-stacked.svg` | vector | hand-authored |
-| Brand Remy | `public/brand/remy-mark.svg` | vector | hand-authored |
-| Favicon (SVG) | `app/icon.svg` | 64 | hand-authored |
-| Favicon (.ico) | `app/favicon.ico` | 16/32/48 | *regenerate (pending)* |
-| Apple touch | `app/apple-icon.tsx` | 180 opaque | `next/og` |
-| OG / social card | `app/opengraph-image.tsx` | 1200×630 | `next/og` |
-| PWA icons | `public/icon-192.png`, `icon-512.png` | *regenerate true-square (pending)* | sharp |
-| App Store / Play / social | `public/brand/{store,social}/` | *pending* | sharp from SVG |
+| Composed icon MASTER | `public/brand/store/app-store-icon-1024.png` | 1024 opaque no-alpha | byte-copy of the shipped iOS icon |
+| Mark MASTER (transparent) | `public/brand/remynest-mark.png` | 695×728 | approved standalone art (native res) |
+| Lockup MASTER | `public/brand/remynest-lockup.png` | 960×330 | approved lockup art |
+| iOS app icon | `ios/.../AppIcon.appiconset/AppIcon-512@2x.png` | 1024 | shipped Build 19 (canonical origin) |
+| Favicon route | `app/icon.png` | 512 | resize of master |
+| Favicon (.ico) | `app/favicon.ico` | 16 (heart crop)/32/48 | pipeline |
+| Apple touch | `app/apple-icon.png` | 180 opaque | resize of master |
+| OG / social card | `app/opengraph-image.png` (+ `.alt.txt`) | 1200×630 | canonical icon + lockup wordmark crop |
+| PWA icons | `public/icon-192.png`, `icon-512.png` | true-square | resize of master |
+| PWA maskable | `public/brand/icons/maskable-{192,512}.png` | safe-zone | mark @60% on field |
+| Play icon | `public/brand/store/play-icon-512.png` | 512 | resize of master |
+| Play adaptive | `public/brand/store/play-adaptive-{foreground,background}-432.png` | 432 | mark @56% / field |
+| Android launcher | `android/.../mipmap-*/ic_launcher{,_round,_foreground}.png` | 48–432 | pipeline |
+| Legacy sage SVGs | `public/brand/logo-*.svg`, `remy-*.svg` | vector | RETIRED as identity — reference only |
 
 ## 8. Accessibility posture
 Elder-care first: 17px body floor, generous line-height (≥1.5), high text contrast
@@ -121,6 +135,14 @@ Elder-care first: 17px body floor, generous line-height (≥1.5), high text cont
 Type/zoom (`rem`, viewport zoom enabled), `prefers-reduced-motion`.
 
 ## 9. Changelog / decisions
+- **2026-07-18 — STRATEGY-1 IDENTITY UNIFICATION (operator-directed).** The purple
+  fingerprint-heart-bird is now the single customer-facing identity on every
+  platform (iOS/Android/App Store/Play/PWA/favicon/apple-touch/OG/auth lockup); the
+  sage nest mark is RETIRED as an identity asset (sage/sand/gold remains the UI
+  chrome palette only). All rasters regenerate from the checked-in purple masters
+  via `scripts/generate-brand-assets.mjs` (the sage generation path was removed so
+  it cannot run accidentally). 16px favicon uses the heart-region crop (legibility
+  evidence). §2/§3/§7 rewritten accordingly.
 - **2026-06-23** — System established: two-tier identity, nest logo, dark-theme
   tokens+mechanism, WCAG fixes (gold-as-text barred, body-text + focus contrast),
   type scale.

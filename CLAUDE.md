@@ -589,13 +589,15 @@ enforcement path — reuse `enforceUploadQuota`. **Migration is an operator step
 re-derive the ledger decisions or redesign the schema. See
 `docs/features/storage-ledger.md`.
 
-**Brand system (authoritative, 2026-06-23):** RemyNest has **two coexisting brand
-systems sharing GOLD as the bridge** — **(A) Product/Brand = sage `#4F6B5B` / sand
-`#F5F1EA` / gold `#C9A86A`** (logo, app icon, favicon, OG, all UI chrome — "NOT
-healthcare blue") and **(B) Companion/Remy = purple `#8A6BD0`→`#5B3E8E` + pendant
-`#E3A24A`** (the **in-app avatar/chat ONLY**). The product logo is the geometric
-**nest** mark (`public/brand/logo-*.svg`); a simplified sage/gold **brand Remy**
-(`remy-mark.svg`) is the secondary mark. **Do NOT** recolor the validated in-app Remy
+**Brand system (authoritative, 2026-06-23; identity layer SUPERSEDED 2026-07-18 — see the
+Strategy-1 note below):** RemyNest has **two coexisting brand
+systems sharing GOLD as the bridge** — **(A) UI chrome = sage `#4F6B5B` / sand
+`#F5F1EA` / gold `#C9A86A`** (the app's interior design-system palette — Polaris tokens,
+"NOT healthcare blue"; **since 2026-07-18 this is a COLOR SYSTEM only, NOT the logo**)
+and **(B) Companion/Remy = purple `#8A6BD0`→`#5B3E8E` + pendant
+`#E3A24A`** (the **in-app avatar/chat ONLY**). The former sage geometric
+**nest** mark (`public/brand/logo-*.svg`) and sage/gold **brand Remy**
+(`remy-mark.svg`) are **RETIRED as identity assets** (legacy brand-kit references only). **Do NOT** recolor the validated in-app Remy
 sprite (`components/remy/avatar/*`, `public/remy/remy-blueprint.png`) to sage, and
 **do NOT** put purple Remy on the product brand. Type = **Fraunces** (display/h1–h4)
 + **Inter** (body/UI); body floor **17px**. **A11y (authoritative):** **gold
@@ -625,10 +627,22 @@ the board-sampled gradient. **(2026-07-16 approval: the installed icon is review
 "warm-glow" — board lighting corrected to light-from-BOTTOM-LEFT [the first composition was
 vertically inverted] + a ≤14%-opacity warm-gold radial lift behind the heart for small-size
 legibility; review exports live outside the repo at `~/Downloads/RemyNest-AppIcon-Review-v1/`.)**
-This is a deliberate exception to the "(A) product brand = sage" icon rule above — the APP ICON carries the purple brand-board identity; the sage/sand system remains the
-app-wide UI chrome, and the purple treatment in-app stays scoped to **Remy/Nest companion surfaces
-ONLY** (Nest sheet, Ask Remy chat — never app-wide). The web favicon/OG (`app/icon.svg`,
-`apple-icon.tsx`) still use the sage nest mark (operator decision pending on unifying them). **The
+**STRATEGY-1 BRAND UNIFICATION (authoritative, 2026-07-18 — resolves the formerly-pending
+unification decision):** the purple fingerprint-heart-bird is now the SINGLE customer-facing
+identity on EVERY platform — iOS icon (unchanged, Build 19) · web favicon/`.ico` · apple-touch ·
+PWA any+maskable · OG/social card · auth/onboarding lockup (`RemyNestLogo.tsx`) · Android launcher
+mipmaps (the Capacitor template art is GONE; adaptive bg `#2E1B60`) · App Store/Play store assets.
+All derivatives are generated MECHANICALLY by `scripts/generate-brand-assets.mjs` from three
+checked-in masters: `public/brand/store/app-store-icon-1024.png` (byte-copy of the SHIPPED Build-19
+icon — the canonical composed master), `public/brand/remynest-mark.png` (transparent mark, native
+695×728), and `public/brand/remynest-lockup.png` (wordmark; its flat icon portion is never used).
+The SAGE generation path was REMOVED from the script (sage nest = retired identity, legacy
+brand-kit SVGs only); the 16px favicon frame is a heart-region CROP of the same mark (rendered
+legibility evidence); the former `app/icon.svg` + `apple-icon.tsx` + `opengraph-image.tsx` routes
+were replaced by static PNGs (`app/icon.png`, `apple-icon.png`, `opengraph-image.png` + `.alt.txt`).
+The sage/sand system remains the app-wide UI CHROME PALETTE (not a logo), and the purple treatment
+in-app stays scoped to **Remy/Nest companion surfaces ONLY** (Nest sheet, Ask Remy chat — never
+app-wide UI). Do NOT re-point the generator at a sage master or resurrect the sage icon anywhere. **The
 Nest button idle state is the NEST, not Remy** (V1 alignment, 2026-07-16): at rest the 48px center
 button shows the approved standalone nest art (`nestEmpty`, registry-resolved, cover-cropped to the
 bowl, gentle breathe) — Remy appears only through the existing wake choreography (tap → wake →
