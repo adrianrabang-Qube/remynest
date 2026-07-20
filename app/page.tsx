@@ -1,6 +1,5 @@
-import dynamic from "next/dynamic";
-
 import JsonLd from "@/components/seo/JsonLd";
+import LandingClient from "@/components/marketing/LandingClient";
 import {
   SITE_URL,
   SITE_NAME,
@@ -18,22 +17,14 @@ export const metadata = pageMetadata({
   absoluteTitle: true,
 });
 
-const LandingClient = dynamic(
-  () =>
-    import(
-      "@/components/marketing/LandingClient"
-    ),
-  {
-    ssr: false,
-  }
-);
-
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: absoluteUrl("/logo.png"),
+  // The canonical purple identity (commit 606b7c1) — the same mark every
+  // platform surface uses, not the /logo.png OG-card asset.
+  logo: absoluteUrl("/brand/remynest-mark.png"),
   description: SITE_DESCRIPTION,
   contactPoint: {
     "@type": "ContactPoint",
@@ -47,7 +38,9 @@ const softwareApplicationLd = {
   "@type": "SoftwareApplication",
   name: SITE_NAME,
   applicationCategory: "LifestyleApplication",
-  operatingSystem: "Web, iOS, Android",
+  // Web is the only platform with a live public listing; iOS is TestFlight-only
+  // (no App Store URL yet) and Android is not shipped — do not claim either here.
+  operatingSystem: "Web",
   url: SITE_URL,
   description: SITE_DESCRIPTION,
   offers: {

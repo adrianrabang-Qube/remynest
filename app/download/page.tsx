@@ -4,15 +4,15 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Download",
-  description:
-    "Get RemyNest on iPhone and iPad, on Android, or use it right in your browser.",
+  description: "Get RemyNest on iPhone, or use it right in your browser.",
   path: "/download",
 });
 
-// Store URLs aren't live yet — wire these env vars at submission time; until then
-// each section shows a neutral "Coming soon" state (no dead links).
+// Store URL isn't live yet — wire this env var at submission time; until then the
+// iPhone card shows a neutral "Coming soon" state (no dead link). Android is not
+// shipped (no signing/FCM — a decided post-iOS deferral) and is intentionally not
+// offered here; iPad is not supported in the v1 release (iPhone-only target).
 const APP_STORE_URL = process.env.NEXT_PUBLIC_APP_STORE_URL ?? "";
-const PLAY_STORE_URL = process.env.NEXT_PUBLIC_PLAY_STORE_URL ?? "";
 
 function StoreCard({
   platform,
@@ -62,25 +62,18 @@ export default function DownloadPage() {
       <header className="mx-auto max-w-2xl text-center">
         <h1 className="text-3xl font-semibold sm:text-4xl">Get RemyNest</h1>
         <p className="mt-3 text-charcoal-soft">
-          A calm home for your memories — on your phone, your tablet, or right in
-          your browser.
+          A calm home for your memories — on your iPhone, or right in your
+          browser.
         </p>
       </header>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
+      <div className="mt-12 grid gap-6 sm:grid-cols-2">
         <StoreCard
-          platform="iPhone & iPad"
+          platform="iPhone"
           blurb="Download RemyNest from the App Store for the full native experience, including on-device reminders."
           href={APP_STORE_URL}
           cta="Download on the App Store"
           comingSoon={!APP_STORE_URL}
-        />
-        <StoreCard
-          platform="Android"
-          blurb="Get RemyNest on Google Play for your Android phone or tablet."
-          href={PLAY_STORE_URL}
-          cta="Get it on Google Play"
-          comingSoon={!PLAY_STORE_URL}
         />
         <StoreCard
           platform="Web app"
