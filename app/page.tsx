@@ -1,5 +1,6 @@
 import JsonLd from "@/components/seo/JsonLd";
 import LandingClient from "@/components/marketing/LandingClient";
+import NativeEntryRedirect from "@/components/NativeEntryRedirect";
 import {
   SITE_URL,
   SITE_NAME,
@@ -54,6 +55,7 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={[organizationLd, softwareApplicationLd]} />
+      <NativeEntryRedirect />
       <LandingClient />
     </>
   );
