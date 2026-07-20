@@ -75,8 +75,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { WorkspaceShell } from "./components/workspace/WorkspaceShell";
-
 type Profile = {
   id: string;
   profile_name?: string | null;
@@ -739,15 +737,15 @@ export default async function DashboardPage() {
   });
 
   return (
-    <WorkspaceShell>
-
-      {/* Calm, single reading column (Project Polaris). Mobile keeps px-0 (the app shell
-          already gutters px-4); a narrower max-width + generous vertical rhythm cut the
-          scanning cost. Every widget below is preserved — only regrouped into a natural
-          progression (Greeting → Today → Jump back in → People → Insights → Account), with
-          the heavy analytics tucked into progressive-disclosure sections so the first screen
-          stays quiet. */}
-      <div className="mx-auto max-w-2xl space-y-6 px-0 py-6 md:max-w-3xl md:space-y-8 md:px-6 md:py-10">
+    /* Calm, single reading column (Project Polaris). The dashboard's ONE shell is
+       app/(app)/dashboard/layout.tsx's <WorkspaceShell> (px-4 md:px-6 + bg-[#f5f1ea]); this
+       page must not add a second one (that produced a triple-padded outer frame). Mobile
+       keeps px-0 here (the app shell + the layout's WorkspaceShell already gutter it); a
+       narrower max-width + generous vertical rhythm cut the scanning cost. Every widget below
+       is preserved — only regrouped into a natural progression (Greeting → Today → Jump back
+       in → People → Insights → Account), with the heavy analytics tucked into
+       progressive-disclosure sections so the first screen stays quiet. */
+    <div className="mx-auto max-w-2xl space-y-6 px-0 py-6 md:max-w-3xl md:space-y-8 md:px-6 md:py-10">
 
         {/* GREETING */}
         <DashboardHeader
@@ -942,6 +940,5 @@ export default async function DashboardPage() {
           />
         </CollapsibleSection>
       </div>
-    </WorkspaceShell>
   );
 }
