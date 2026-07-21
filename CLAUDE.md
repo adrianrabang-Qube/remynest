@@ -723,8 +723,18 @@ Everything else is preserved: menu remains a CONSEQUENCE of `presentsActions` (n
 `?context=` threading, single `<Remy>` renderer (avatar tier, 150px centre). **POSITIONING-vs-
 MOTION invariant:** the shared variants animate `transform`, so plain outer `<span>`s own the
 absolute orbit position + −50% centering and the motion elements sit INSIDE them — never merge
-them onto one element. Do NOT revert to a bottom sheet, add a `menuOpen` state, darken the
-scrim, or grow the orbit beyond the 6 approved actions.
+them onto one element. **Same-day operator fixes (authoritative):** **(1)** the full-screen
+layout wrapper is `pointer-events-none` with `pointer-events-auto` re-enabled on interactive
+children, so a tap ANYWHERE outside the orbit falls through to the backdrop and closes the menu
+— never remove this fall-through; **(2)** an explicit **X close button** sits top-right
+(44px, safe-area-aware, `aria-label="Close Remy's menu"`); **(3)** the catalog centre renders
+**ONE CONSISTENT image — the clean `happy` avatar** (fixed `state="happy"`, warmed in Nest's
+preload block at 150px) — never the varying `greeting.expression` (welcome/wink avatars carry
+scene-prop crops [speech bubble + baked glow] that read broken at centre stage); the `greeting`
+prop stays in the API for the choreography. **SEASONAL centre art (design-bible board 68 —
+Nest/Garden/Sky/Twilight environments) is a future registry-only asset drop** once the operator
+supplies the four images — do NOT fabricate it. Do NOT revert to a bottom sheet, add a
+`menuOpen` state, darken the scrim, or grow the orbit beyond the 6 approved actions.
 
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch

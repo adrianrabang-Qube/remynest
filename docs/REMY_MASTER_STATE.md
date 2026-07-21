@@ -29,8 +29,11 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Nest Action Menu = radial orbit COMPLETE (2026-07-21, design-bible
-board 07)**: NestMenu's bottom sheet replaced by Remy centre-screen + the 6 actions orbiting in a
+Current Task: *(none active — **Radial-orbit follow-up fixes COMPLETE (2026-07-21)**:
+tap-outside-to-close (pointer-events fall-through), top-right X close button, ONE consistent
+catalog centre image (clean `happy` avatar, preloaded; seasonal board-68 art = future
+registry-only drop). Before it, **Nest Action Menu = radial orbit COMPLETE (2026-07-21,
+design-bible board 07)**: NestMenu's bottom sheet replaced by Remy centre-screen + the 6 actions orbiting in a
 circle over a light sand wash (speech-bubble greeting; behaviour/portal/a11y/routing byte-
 preserved; NestMenu.tsx only). Before it, **Nest resting = art-only (2026-07-21 follow-up)**: ambient
 glow/halo/motes suppressed at rest (`data-resting` gate; sand load fallback) — only the nest art

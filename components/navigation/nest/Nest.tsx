@@ -201,6 +201,9 @@ export default function Nest({
         <Remy state="wink" assetVariant="avatar" size={48} decorative />
         <Remy state="welcome" assetVariant="avatar" size={48} decorative />
         <Remy state="goodbye" assetVariant="avatar" size={48} decorative />
+        {/* The radial catalog's fixed centre image (NestMenu, 150px) — warmed at its live
+            size so the first open never pops. */}
+        <Remy state="happy" assetVariant="avatar" size={150} decorative />
       </span>
 
       {/* The menu is a CONSEQUENCE of Remy greeting — Remy offers the actions while greeting. */}

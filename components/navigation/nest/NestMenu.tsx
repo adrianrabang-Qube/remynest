@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { haptic } from "@/lib/haptics";
@@ -68,13 +69,14 @@ const ORBIT: Array<{ left: string; top: string }> = [
 export default function NestMenu({
   open,
   items,
-  greeting,
   greetingTitle = "How can I help?",
   onDismiss,
   onSelect,
 }: {
   open: boolean;
   items: NestMenuItem[];
+  /** Choreography look — accepted for API stability (Nest still passes it), but the catalog
+      centre deliberately renders ONE consistent image (see the `<Remy>` note below). */
   greeting: { expression: RemyVariant; emotion?: RemyEmotion };
   greetingTitle?: string;
   onDismiss: () => void;
@@ -129,12 +131,24 @@ export default function NestMenu({
         animate="visible"
       />
 
-      {/* Remy centre-stage with the actions orbiting him (companion remy.* palette). */}
+      {/* Remy centre-stage with the actions orbiting him (companion remy.* palette).
+          `pointer-events-none` on this full-screen layout wrapper (with `pointer-events-auto`
+          re-enabled on the interactive children) so a tap ANYWHERE outside the orbit falls
+          through to the backdrop button and closes the menu (operator fix, 2026-07-21). */}
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 pb-[env(safe-area-inset-bottom)] focus:outline-none"
+        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 pb-[env(safe-area-inset-bottom)] focus:outline-none"
       >
+        {/* Explicit close — a small X, top-right, safe-area aware (operator fix, 2026-07-21). */}
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Close Remy's menu"
+          className="pointer-events-auto absolute right-4 top-[max(1rem,env(safe-area-inset-top))] flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-soft-lg ring-1 ring-remy-lavender/30 transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
         {/* Speech-bubble greeting (board frame 3: "Remy pops out and says hello"). */}
         <motion.div
           variants={remyEmergeVariants}
@@ -159,11 +173,18 @@ export default function NestMenu({
               animate="visible"
               className="block"
             >
+              {/* ONE CONSISTENT catalog image (operator fix, 2026-07-21): the varying
+                  greeting expression put scene-prop crops (welcome's speech bubble + baked
+                  glow) in the centre — unprofessional. The catalog always shows the clean,
+                  complete `happy` avatar (wings-open greeting pose, transparent). The
+                  `greeting` prop still drives the choreography elsewhere; SEASONAL centre
+                  art (design-bible board 68: Nest/Garden/Sky/Twilight) is a future
+                  registry-only asset drop once the operator supplies the four images —
+                  do not fabricate it. */}
               <Remy
-                state={greeting.expression}
+                state="happy"
                 assetVariant="avatar"
-                emotion={greeting.emotion}
-                reactionKey="nest-greeting"
+                reactionKey="nest-catalog"
                 size={150}
                 decorative
               />
@@ -192,7 +213,7 @@ export default function NestMenu({
                       void haptic("light");
                       onSelect();
                     }}
-                    className="flex w-20 flex-col items-center gap-1 rounded-2xl p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="pointer-events-auto flex w-20 flex-col items-center gap-1 rounded-2xl p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow-soft-lg ring-1 ring-remy-lavender/30 transition active:scale-95">
                       <Icon className="h-6 w-6" aria-hidden />

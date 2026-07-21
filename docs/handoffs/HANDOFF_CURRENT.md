@@ -28,7 +28,15 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Nest Action Menu → radial orbit (2026-07-21, EXECUTION — design-bible board 07,
+Most recent (same-day follow-up): **Radial orbit — 3 operator fixes:** (1) tap-outside-to-close
+now works (layout wrapper `pointer-events-none`, interactive children `pointer-events-auto`, so
+outside taps reach the backdrop); (2) explicit top-right X close button (44px, safe-area,
+labelled); (3) the catalog centre shows ONE consistent clean image — fixed `happy` avatar,
+preloaded at 150px — instead of the varying greeting expression (welcome/wink avatars embed
+scene-prop crops that read broken). Seasonal centre art (board 68) = future registry-only drop
+when the operator supplies the 4 environment images. tsc/lint green (no new warnings).
+
+Before that: **Nest Action Menu → radial orbit (2026-07-21, EXECUTION — design-bible board 07,
 operator-directed):** the NestMenu bottom sheet was replaced by the board's "Action Menu": Remy
 pops out centre-screen over a light `bg-sand/90` wash with a white speech-bubble greeting, and
 the SAME 6 actions orbit him in a fixed 6-point circle (compact orbit labels; full label+hint on
