@@ -29,7 +29,10 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Nest resting = art-only (2026-07-21 follow-up)**: ambient
+Current Task: *(none active — **Nest Action Menu = radial orbit COMPLETE (2026-07-21, design-bible
+board 07)**: NestMenu's bottom sheet replaced by Remy centre-screen + the 6 actions orbiting in a
+circle over a light sand wash (speech-bubble greeting; behaviour/portal/a11y/routing byte-
+preserved; NestMenu.tsx only). Before it, **Nest resting = art-only (2026-07-21 follow-up)**: ambient
 glow/halo/motes suppressed at rest (`data-resting` gate; sand load fallback) — only the nest art
 is visible; ambience returns while Remy is out. Before it, **Nest-button full-bleed art fix
 COMPLETE (2026-07-21)**: resting

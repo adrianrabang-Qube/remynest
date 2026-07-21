@@ -709,6 +709,23 @@ Remy is out (wake → greet → return); the breathe loop remains the sole resti
 reintroduce a resting ring/pedestal/halo/glow around the resting nest art or loosen the bowl
 crop.
 
+**Nest Action Menu = RADIAL ORBIT (authoritative, 2026-07-21, operator-directed per design-bible
+board 07 — SUPERSEDES the bottom-sheet presentation of `NestMenu.tsx`):** while greeting, Remy
+pops out CENTRE-SCREEN over a light **`bg-sand/90` wash** (board 07: the page fades to cream —
+never a dark modal) with a white speech-bubble greeting, and the **6 existing actions orbit him
+in a fixed 6-point circle** (`ORBIT` percent ring, radius 42% of a 320px/86vw box; compact
+display labels via `SHORT_LABEL`, FULL label+hint preserved on each `aria-label`), staggering in
+through the SAME centralized motion primitives (backdrop / remyEmerge / offerList / offerItem;
+`nestSheetVariants` is no longer used by NestMenu but stays in the shared vocabulary).
+Everything else is preserved: menu remains a CONSEQUENCE of `presentsActions` (no menu state),
+`createPortal(document.body)` (backdrop-filter containing-block invariant), focus-trap + Escape
++ focus-restore + scroll-lock + desktop-breakpoint safety-close, haptic + `onSelect` on choose,
+`?context=` threading, single `<Remy>` renderer (avatar tier, 150px centre). **POSITIONING-vs-
+MOTION invariant:** the shared variants animate `transform`, so plain outer `<span>`s own the
+absolute orbit position + −50% centering and the motion elements sit INSIDE them — never merge
+them onto one element. Do NOT revert to a bottom sheet, add a `menuOpen` state, darken the
+scrim, or grow the orbit beyond the 6 approved actions.
+
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
 roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage
