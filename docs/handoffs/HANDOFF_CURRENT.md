@@ -28,7 +28,15 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **PURPLE-PRIMARY app-wide color unification (2026-07-21, EXECUTION MODE — operator
+Most recent: **Nest button full-bleed art fix (2026-07-21, EXECUTION MODE — operator-circled
+defect):** the resting center button read as a nest photo inside a white circle (the crop window
+kept the artwork's cream margin + a pale resting ring). Now the golden bowl covers the whole 48px
+face: `FloatingCompanionButton` `"nest-art"` variant (ringless at rest; ring width per-tone;
+`focus-visible:ring-4` keeps the violet keyboard ring; woken states keep the white pedestal for
+the avatar) + tightened crop (132×88 @ −37,−22). Evolution art will read edge-to-edge. tsc/lint
+green.
+
+Before that: **PURPLE-PRIMARY app-wide color unification (2026-07-21, EXECUTION MODE — operator
 decision, presentation-only):** violet `#5B3E8E` is now the app-wide PRIMARY (buttons, links,
 chips, active nav, focus rings [violet — no longer sage], selection, `.btn-primary`/`.rn-btn`/
 `.input:focus`, themeColor/manifest). New `primary/primary-deep/primary-soft` tokens + `--primary*`

@@ -14,24 +14,32 @@ import { haptic } from "@/lib/haptics";
  *
  * `variant` controls the tone WITHOUT touching geometry, so the slot can be handed over with no
  * layout shift:
- *  - "solid" → the brand primary pill (violet since purple-primary, 2026-07-21).
- *  - "nest"  → a clean white pedestal so the purple Companion/Remy avatar reads cleanly.
- *              Geometry, lift, and ring width are identical.
+ *  - "solid"    → the brand primary pill (violet since purple-primary, 2026-07-21).
+ *  - "nest"     → a clean white pedestal so the purple Companion/Remy avatar reads cleanly
+ *                 (the WOKEN Nest state).
+ *  - "nest-art" → FULL-BLEED artwork vessel (the RESTING Nest, 2026-07-21 operator fix):
+ *                 no resting ring and no visible pedestal — the nest art itself IS the
+ *                 button face, so evolution art reads edge-to-edge. The keyboard focus
+ *                 ring still appears on :focus-visible.
+ * Geometry and lift are identical across variants (ring is box-shadow — no layout shift).
  * The background is set here (not via an appended class) because Tailwind can't reliably
  * override `bg-primary` from the caller's `className`.
  */
-// Geometry + a clearly-visible, on-brand keyboard focus ring. The resting ring is set
-// per-tone; on `:focus-visible` it turns brand violet so the indicator is obvious against
-// the sand nav (purple-primary rule: focus rings are violet, never gold). Both variants
-// inherit this.
+// Geometry + a clearly-visible, on-brand keyboard focus ring. Ring WIDTH lives per-tone so
+// the art vessel can rest ringless; `focus-visible:ring-4` guarantees the indicator on every
+// variant, and it turns brand violet (purple-primary rule: focus rings are violet, never
+// gold).
 const GEOMETRY =
-  "flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full ring-4 shadow-lg transition active:scale-95 focus-visible:outline-none focus-visible:ring-primary";
+  "flex h-12 w-12 -translate-y-3 items-center justify-center rounded-full shadow-lg transition active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary";
 
-const TONE: Record<"solid" | "nest", string> = {
-  solid: "bg-primary text-white ring-sand hover:bg-primary-deep",
-  // Companion pedestal: still a clean white vessel (the purple avatar must read cleanly),
-  // with a soft lavender resting ring per the design-bible ambience.
-  nest: "bg-white text-primary ring-remy-lavender/25 hover:bg-remy-mist",
+const TONE: Record<"solid" | "nest" | "nest-art", string> = {
+  solid: "ring-4 bg-primary text-white ring-sand hover:bg-primary-deep",
+  // Companion pedestal (woken): a clean white vessel (the purple avatar must read cleanly),
+  // with a soft lavender ring per the design-bible ambience.
+  nest: "ring-4 bg-white text-primary ring-remy-lavender/25 hover:bg-remy-mist",
+  // Resting art vessel: the artwork covers the whole face; white stays only as the
+  // image-load fallback beneath the cover-cropped art.
+  "nest-art": "bg-white text-primary",
 };
 
 export default function FloatingCompanionButton({
@@ -48,7 +56,7 @@ export default function FloatingCompanionButton({
   label: string;
   children: ReactNode;
   isActive?: boolean;
-  variant?: "solid" | "nest";
+  variant?: "solid" | "nest" | "nest-art";
   className?: string;
 }) {
   const cls = `${GEOMETRY} ${TONE[variant]} ${className}`.trim();

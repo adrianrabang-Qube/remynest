@@ -85,10 +85,12 @@ export default function Nest({
 
   // The idle NEST vessel (V1 idle state): the approved standalone nest art, registry-resolved
   // (paths live ONLY in the asset registry; this is home/vessel art, not the character, so it
-  // does not go through `<Remy>` — same precedent as RemyEffects' goldenFeather). The 1536×1024
-  // scene is cover-cropped to the golden bowl: a ~680px source window centred on the bowl
-  // (712, 540) maps to the 48px circle → display 108×72 offset (−26, −14). Fixed px are safe:
-  // the FAB is a fixed 48px (`h-12 w-12`).
+  // does not go through `<Remy>` — same precedent as RemyEffects' goldenFeather). FULL-BLEED
+  // crop (2026-07-21 operator fix — the old ~680px window kept the artwork's cream margin
+  // inside the circle, reading as a white border): a ~560px source window centred on the bowl
+  // (712, 540) maps to the 48px circle → display 132×88, offset (−37, −22) — the golden bowl
+  // itself fills the button edge-to-edge, so evolution art reads at full size. Fixed px are
+  // safe: the FAB is a fixed 48px (`h-12 w-12`).
   const nestArt = getRemyAsset("nestEmpty");
 
   const items: NestMenuItem[] = [
@@ -106,7 +108,9 @@ export default function Nest({
     <>
       <FloatingCompanionButton
         onActivate={wake}
-        variant="nest"
+        /* Resting = the art IS the button (full-bleed, ringless); woken = the white
+           pedestal + ring so the transparent Remy avatar reads cleanly. */
+        variant={isResting ? "nest-art" : "nest"}
         label="Open Remy's Nest"
         isActive={presentsActions}
         className={night ? styles.glowNight : styles.glow}
@@ -129,20 +133,22 @@ export default function Nest({
           </span>
           {isResting ? (
             /* V1 IDLE STATE — the NEST is the button ("Remy is safe in his nest. The nest
-               breathes gently."). The approved standalone nest art is cover-cropped to its
-               golden bowl inside the 48px circle; the gentle `nestBreathe` loop + the ambient
-               halo/motes (on `.nest`) keep it alive. Remy is tucked away until woken. */
+               breathes gently."). Full-bleed bowl crop (2026-07-21): the golden bowl covers
+               the whole 48px face — no visible pedestal/border — so the nest (and its future
+               per-stage evolution art) reads edge-to-edge; the gentle `nestBreathe` loop +
+               the ambient halo/motes (on `.nest`) keep it alive. Remy is tucked away until
+               woken. */
             <span className="relative flex h-12 w-12 overflow-hidden rounded-full">
               <span className={styles.vessel}>
                 <Image
                   src={nestArt.src}
                   alt=""
                   aria-hidden
-                  width={108}
-                  height={72}
+                  width={132}
+                  height={88}
                   priority
                   draggable={false}
-                  className="pointer-events-none absolute left-[-26px] top-[-14px] max-w-none"
+                  className="pointer-events-none absolute left-[-37px] top-[-22px] max-w-none"
                 />
               </span>
             </span>

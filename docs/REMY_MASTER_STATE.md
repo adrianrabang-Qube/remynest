@@ -29,7 +29,11 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **PURPLE-PRIMARY app-wide color unification COMPLETE (2026-07-21,
+Current Task: *(none active — **Nest-button full-bleed art fix COMPLETE (2026-07-21)**: resting
+center button now shows the nest bowl edge-to-edge (`nest-art` FCB variant, ringless at rest,
+focus ring preserved; tightened 132×88 crop) — the white-circle border defect the operator
+circled is gone; woken pedestal unchanged. Before it, **PURPLE-PRIMARY app-wide color unification
+COMPLETE (2026-07-21,
 EXECUTION MODE; operator decision, presentation-only):** violet `#5B3E8E` is the app-wide primary
 (new `primary/-deep/-soft` tokens; ~664 class sites / 151 files migrated `-sage → -primary`; focus
 rings now violet; sage demoted to success/nature status accents [curated allowlist]; themeColor/

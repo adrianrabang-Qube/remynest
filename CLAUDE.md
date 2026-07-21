@@ -692,6 +692,17 @@ byte-unchanged; verified by diff audit — every changed line is a color token o
 for text, revert focus rings to sage, or grow the sage allowlist beyond genuine success/nature
 status.
 
+**Nest button face = FULL-BLEED nest art (authoritative, 2026-07-21, operator fix):** the RESTING
+center button shows the nest artwork edge-to-edge — `FloatingCompanionButton` gained a
+`"nest-art"` variant (no resting ring/pedestal; ring width moved per-tone and
+`focus-visible:ring-4` guarantees the violet keyboard ring on every variant; geometry/lift
+unchanged — ring is box-shadow, no layout shift), and the idle crop window was tightened (~560px
+source window on the bowl → display 132×88 @ (−37,−22)) so the golden bowl covers the whole 48px
+face with none of the artwork's cream margin reading as a white border. WOKEN states keep the
+white `"nest"` pedestal + lavender ring (the transparent Remy avatar needs the backdrop). Future
+per-stage evolution art drops into this same full-bleed face (registry-only swap). Do NOT
+reintroduce a resting ring/pedestal around the resting nest art or loosen the bowl crop.
+
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
 roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage
