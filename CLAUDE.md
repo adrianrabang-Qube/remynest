@@ -700,8 +700,14 @@ unchanged — ring is box-shadow, no layout shift), and the idle crop window was
 source window on the bowl → display 132×88 @ (−37,−22)) so the golden bowl covers the whole 48px
 face with none of the artwork's cream margin reading as a white border. WOKEN states keep the
 white `"nest"` pedestal + lavender ring (the transparent Remy avatar needs the backdrop). Future
-per-stage evolution art drops into this same full-bleed face (registry-only swap). Do NOT
-reintroduce a resting ring/pedestal around the resting nest art or loosen the bowl crop.
+per-stage evolution art drops into this same full-bleed face (registry-only swap).
+**Tightened same-day (operator follow-up): at REST the nest art is the ONLY visible thing** — the
+ambient glow, the `::after` evolution/time-of-day halo, and the drifting motes are now
+**suppressed while resting** (`data-resting` gate in `nest.module.css` + conditional
+glow/particles in `Nest.tsx`; the load fallback is `bg-sand`, never white) and appear only while
+Remy is out (wake → greet → return); the breathe loop remains the sole resting motion. Do NOT
+reintroduce a resting ring/pedestal/halo/glow around the resting nest art or loosen the bowl
+crop.
 
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch

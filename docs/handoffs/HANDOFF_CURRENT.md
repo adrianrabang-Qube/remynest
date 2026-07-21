@@ -28,7 +28,13 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Nest button full-bleed art fix (2026-07-21, EXECUTION MODE — operator-circled
+Most recent (follow-up, same day): **Nest resting state = art ONLY** — the operator flagged the
+remaining pale ring: it was the ambient glow + the `::after` evolution/time-of-day halo (inset
+−22%) + white load fallback. All resting-state chrome is now suppressed (`data-resting` CSS gate;
+glow/motes only while Remy is out; `bg-sand` fallback). Breathe remains the only resting motion.
+tsc/lint green.
+
+Before that: **Nest button full-bleed art fix (2026-07-21, EXECUTION MODE — operator-circled
 defect):** the resting center button read as a nest photo inside a white circle (the crop window
 kept the artwork's cream margin + a pale resting ring). Now the golden bowl covers the whole 48px
 face: `FloatingCompanionButton` `"nest-art"` variant (ringless at rest; ring width per-tone;

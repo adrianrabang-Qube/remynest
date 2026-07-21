@@ -29,7 +29,10 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Nest-button full-bleed art fix COMPLETE (2026-07-21)**: resting
+Current Task: *(none active — **Nest resting = art-only (2026-07-21 follow-up)**: ambient
+glow/halo/motes suppressed at rest (`data-resting` gate; sand load fallback) — only the nest art
+is visible; ambience returns while Remy is out. Before it, **Nest-button full-bleed art fix
+COMPLETE (2026-07-21)**: resting
 center button now shows the nest bowl edge-to-edge (`nest-art` FCB variant, ringless at rest,
 focus ring preserved; tightened 132×88 crop) — the white-circle border defect the operator
 circled is gone; woken pedestal unchanged. Before it, **PURPLE-PRIMARY app-wide color unification

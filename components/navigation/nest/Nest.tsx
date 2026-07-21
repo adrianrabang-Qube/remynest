@@ -108,12 +108,14 @@ export default function Nest({
     <>
       <FloatingCompanionButton
         onActivate={wake}
-        /* Resting = the art IS the button (full-bleed, ringless); woken = the white
-           pedestal + ring so the transparent Remy avatar reads cleanly. */
+        /* Resting = the art IS the button (full-bleed, ringless, NO ambient chrome —
+           operator rule 2026-07-21: nothing but the nest is visible at rest); woken = the
+           white pedestal + ring so the transparent Remy avatar reads cleanly, with the
+           brief glow while Remy is out. */
         variant={isResting ? "nest-art" : "nest"}
         label="Open Remy's Nest"
         isActive={presentsActions}
-        className={night ? styles.glowNight : styles.glow}
+        className={isResting ? "" : night ? styles.glowNight : styles.glow}
       >
         {/* The living Nest: ambient motes drift behind Remy; the stage + time of day drive the
             halo/lighting; re-keying per behaviour replays the one-shot wake motion. */}
@@ -121,16 +123,20 @@ export default function Nest({
           key={behavior}
           data-nest-stage={stage}
           data-time-of-day={timeOfDay}
+          data-resting={isResting ? "true" : undefined}
           className={[styles.nest, isWaking ? styles.wake : ""]
             .filter(Boolean)
             .join(" ")}
         >
-          <span aria-hidden className={styles.particles}>
-            <i className={styles.particle} />
-            <i className={styles.particle} />
-            <i className={styles.particle} />
-            <i className={styles.particle} />
-          </span>
+          {/* Ambient motes only while Remy is out — at rest the nest alone is visible. */}
+          {!isResting && (
+            <span aria-hidden className={styles.particles}>
+              <i className={styles.particle} />
+              <i className={styles.particle} />
+              <i className={styles.particle} />
+              <i className={styles.particle} />
+            </span>
+          )}
           {isResting ? (
             /* V1 IDLE STATE — the NEST is the button ("Remy is safe in his nest. The nest
                breathes gently."). Full-bleed bowl crop (2026-07-21): the golden bowl covers

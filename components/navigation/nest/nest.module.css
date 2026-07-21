@@ -56,6 +56,13 @@
   display: inline-block;
 }
 
+/* RESTING = art only (operator rule, 2026-07-21): no halo, glow, or motes around the
+ * resting button — the nest artwork alone is the button. The halo/glow/motes now appear
+ * only while Remy is out (wake → greet → return). */
+.nest[data-resting="true"]::after {
+  content: none;
+}
+
 .nest::after {
   content: "";
   position: absolute;
