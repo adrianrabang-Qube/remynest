@@ -11,6 +11,7 @@ import {
 
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 import { Remy } from "@/lib/remy";
 
@@ -33,7 +34,10 @@ import StorageFullModal, {
 const MEMORY_FORM_TAG =
   "create-memory-form";
 
-const MEMORY_DATE_OPTIONS: {
+// Progressive disclosure: the common quick choices stay always visible; the less-common
+// approximate choices (year / decade) live in a secondary disclosure (see the render below) so
+// the section doesn't default to showing all six as equal-weight rows.
+const PRIMARY_DATE_OPTIONS: {
   mode: MemoryDateMode;
   label: string;
 }[] = [
@@ -41,6 +45,12 @@ const MEMORY_DATE_OPTIONS: {
   { mode: "yesterday", label: "Yesterday" },
   { mode: "last-week", label: "Last week" },
   { mode: "custom", label: "Custom date" },
+];
+
+const SECONDARY_DATE_OPTIONS: {
+  mode: MemoryDateMode;
+  label: string;
+}[] = [
   { mode: "year", label: "A year" },
   { mode: "decade", label: "A decade" },
 ];
@@ -508,9 +518,18 @@ export default function CreateMemoryForm({
         className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40 resize-none"
       />
 
-      {/* When did this happen? — historical dating */}
+      {/* When did this happen? — historical dating. Progressive disclosure: the header
+          always shows the resolved selection; Today/Yesterday/Last week/Custom date are
+          the common quick choices and stay always visible; the less-common approximate
+          choices (a year, a decade) live inside an uncontrolled native <details> so they
+          don't compete for space by default. Uncontrolled deliberately — dateMode can only
+          become "year"/"decade" by clicking a button that lives inside this disclosure, so
+          it never needs to auto-open, and staying uncontrolled means a later unrelated
+          re-render (e.g. typing in the title/content fields) can never fight a user's
+          manual expand/collapse. All state, validation, and the custom/year/decade inputs
+          are byte-identical to before — only the layout changed. */}
       <div className="space-y-3 rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <label className="text-sm font-medium text-gray-700">
             When did this happen?
           </label>
@@ -520,7 +539,7 @@ export default function CreateMemoryForm({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {MEMORY_DATE_OPTIONS.map(
+          {PRIMARY_DATE_OPTIONS.map(
             (option) => {
               const active =
                 dateMode === option.mode;
@@ -528,12 +547,13 @@ export default function CreateMemoryForm({
                 <button
                   key={option.mode}
                   type="button"
+                  aria-pressed={active}
                   onClick={() =>
                     setDateMode(
                       option.mode
                     )
                   }
-                  className={`rounded-full px-3 py-1.5 text-sm transition ${
+                  className={`inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm transition ${
                     active
                       ? "bg-black text-white"
                       : "border border-gray-200 text-gray-600 hover:bg-gray-50"
@@ -565,47 +585,87 @@ export default function CreateMemoryForm({
           />
         )}
 
-        {dateMode === "year" && (
-          <input
-            type="number"
-            inputMode="numeric"
-            aria-label="Year this happened"
-            min={1900}
-            max={CURRENT_YEAR}
-            value={yearValue}
-            onChange={(e) =>
-              setYearValue(
-                e.target.value
-              )
-            }
-            placeholder="e.g. 1995"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
-          />
-        )}
+        <details className="group rounded-lg [&_summary::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-lg px-1 text-sm font-medium text-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <ChevronDown
+              aria-hidden
+              className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+            />
+            Approximate date (a year or a decade)
+          </summary>
 
-        {dateMode === "decade" && (
-          <select
-            aria-label="Decade this happened"
-            value={decadeValue}
-            onChange={(e) =>
-              setDecadeValue(
-                e.target.value
-              )
-            }
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
-          >
-            {DECADE_OPTIONS.map(
-              (decade) => (
-                <option
-                  key={decade}
-                  value={decade}
-                >
-                  {decade}s
-                </option>
-              )
+          <div className="mt-2 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {SECONDARY_DATE_OPTIONS.map(
+                (option) => {
+                  const active =
+                    dateMode === option.mode;
+                  return (
+                    <button
+                      key={option.mode}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() =>
+                        setDateMode(
+                          option.mode
+                        )
+                      }
+                      className={`inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm transition ${
+                        active
+                          ? "bg-black text-white"
+                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                }
+              )}
+            </div>
+
+            {dateMode === "year" && (
+              <input
+                type="number"
+                inputMode="numeric"
+                aria-label="Year this happened"
+                min={1900}
+                max={CURRENT_YEAR}
+                value={yearValue}
+                onChange={(e) =>
+                  setYearValue(
+                    e.target.value
+                  )
+                }
+                placeholder="e.g. 1995"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+              />
             )}
-          </select>
-        )}
+
+            {dateMode === "decade" && (
+              <select
+                aria-label="Decade this happened"
+                value={decadeValue}
+                onChange={(e) =>
+                  setDecadeValue(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+              >
+                {DECADE_OPTIONS.map(
+                  (decade) => (
+                    <option
+                      key={decade}
+                      value={decade}
+                    >
+                      {decade}s
+                    </option>
+                  )
+                )}
+              </select>
+            )}
+          </div>
+        </details>
       </div>
 
       {/* Photos — optional; multi-photo via the shared picker */}

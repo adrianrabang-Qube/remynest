@@ -23,7 +23,7 @@ export default function NewMemoryPage({
   // never bypassing the required title + written-content validation.
   const voiceFirst = searchParams?.voice === "1";
   return (
-    <div className="mx-auto max-w-xl px-4 py-8">
+    <div className="mx-auto max-w-xl py-8">
       <h1 className="mb-4 text-2xl font-semibold text-charcoal">
         {voiceFirst ? "New voice memory" : "New memory"}
       </h1>

@@ -123,7 +123,7 @@ export default async function AppLayout({
     // Nest button have context. `children` is a stable prop, so opening/closing Remy
     // re-renders ONLY the provider + its context consumers (the layer) — never the app tree.
     <RemyProvider>
-      <div className="min-h-screen bg-stone-50">
+      <div className="min-h-screen bg-sand">
         {/* LA2: skip-to-content (WCAG 2.4.1 Bypass Blocks) — the first focusable
             element; visible only on keyboard focus, jumps past the header/nav. */}
         <a
