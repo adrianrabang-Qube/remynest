@@ -10,7 +10,7 @@ const STATUS_LABEL: Record<CoachStatus, string> = {
 };
 
 const STATUS_CLASS: Record<CoachStatus, string> = {
-  healthy: "bg-sage/15 text-sage-deep",
+  healthy: "bg-primary/15 text-primary-deep",
   growing: "bg-sand-deep/30 text-charcoal-muted",
   attention: "bg-amber-100 text-amber-700",
 };

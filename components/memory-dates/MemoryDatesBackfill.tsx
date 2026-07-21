@@ -92,7 +92,7 @@ export default function MemoryDatesBackfill({
         </div>
         <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-sand-deep/40">
           <div
-            className="h-full rounded-full bg-sage transition-all"
+            className="h-full rounded-full bg-primary transition-all"
             style={{ width: `${live.percentage}%` }}
           />
         </div>
@@ -106,7 +106,7 @@ export default function MemoryDatesBackfill({
 
       {/* Recently added (this session) */}
       {recent.length > 0 && (
-        <section className="rounded-3xl border border-sage/25 bg-sage/[0.05] p-5 shadow-soft">
+        <section className="rounded-3xl border border-primary/25 bg-primary/[0.05] p-5 shadow-soft">
           <h2 className="text-sm font-semibold text-charcoal">
             Dates you just added
           </h2>
@@ -174,7 +174,7 @@ function BackfillRow({
   const createdLabel = formatAddedDate(memory.created_at);
 
   const inputClass =
-    "w-full rounded-lg border border-sand-deep px-3 py-2 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/30";
+    "w-full rounded-lg border border-sand-deep px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30";
 
   const save = async () => {
     if (mode === "not-sure") {
@@ -248,7 +248,7 @@ function BackfillRow({
               }}
               className={`rounded-full px-3 py-1.5 text-sm transition ${
                 active
-                  ? "bg-sage text-white"
+                  ? "bg-primary text-white"
                   : "border border-sand-deep text-charcoal-soft hover:bg-sand/40"
               }`}
             >

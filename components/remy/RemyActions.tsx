@@ -28,7 +28,7 @@ export default function RemyActions({ actions }: { actions: RemyActionsModel }) 
           <p className="text-sm text-charcoal">{actions.primaryAction.text}</p>
           <Link
             href={actions.primaryAction.href}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
           >
             {actions.primaryAction.label}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -42,7 +42,7 @@ export default function RemyActions({ actions }: { actions: RemyActionsModel }) 
             <li key={action.href}>
               <Link
                 href={action.href}
-                className="flex min-h-[44px] items-center justify-between gap-3 py-2 text-sm font-medium text-sage-deep transition hover:text-sage"
+                className="flex min-h-[44px] items-center justify-between gap-3 py-2 text-sm font-medium text-primary-deep transition hover:text-primary"
               >
                 {action.label}
                 <ChevronRight className="h-4 w-4 shrink-0 text-charcoal-muted" aria-hidden />

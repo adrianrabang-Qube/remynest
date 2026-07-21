@@ -27,7 +27,7 @@ export default function DashboardHeader({
         <div className={`inline-flex items-center rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider shadow-soft border max-md:px-3 max-md:py-1 max-md:text-[11px] ${
           workspaceType === "my-nest"
             ? "bg-gold/10 border-gold/30 text-[#9c7e3f]"
-            : "bg-sage/10 border-sage/25 text-sage"
+            : "bg-primary/10 border-primary/25 text-primary"
         }`}>
           {workspaceType === "my-nest"
             ? "My Nest Workspace"

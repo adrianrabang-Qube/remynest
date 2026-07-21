@@ -58,7 +58,7 @@ export default function SignupPage() {
         <div className="mt-6 text-center text-sm">
           <Link
             href="/login"
-            className="font-medium text-sage hover:text-sage-deep"
+            className="font-medium text-primary hover:text-primary-deep"
           >
             Back to sign in
           </Link>
@@ -102,7 +102,7 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-sage px-4 py-2.5 font-medium text-white transition hover:bg-sage-deep disabled:opacity-70"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition hover:bg-primary-deep disabled:opacity-70"
         >
           {loading && (
             <span
@@ -116,7 +116,7 @@ export default function SignupPage() {
 
       <p className="mt-4 text-center text-sm text-charcoal-soft">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-sage hover:text-sage-deep">
+        <Link href="/login" className="font-medium text-primary hover:text-primary-deep">
           Sign in
         </Link>
       </p>

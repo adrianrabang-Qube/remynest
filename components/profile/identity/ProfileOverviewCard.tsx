@@ -44,7 +44,7 @@ export default function ProfileOverviewCard({
             className="h-16 w-16 shrink-0 rounded-full border border-sand-deep/50 object-cover"
           />
         ) : (
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-sage text-2xl font-semibold text-white">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-semibold text-white">
             {initial}
           </div>
         )}
@@ -58,7 +58,7 @@ export default function ProfileOverviewCard({
               {contextLabel && <span>{contextLabel}</span>}
               {contextLabel && planLabel && <span aria-hidden>·</span>}
               {planLabel && (
-                <span className="font-medium uppercase tracking-wide text-sage-deep">
+                <span className="font-medium uppercase tracking-wide text-primary-deep">
                   {planLabel}
                 </span>
               )}

@@ -81,7 +81,7 @@ export default function SpotifyImportField({
               void haptic("light");
             }}
             aria-label="Remove the Spotify import"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -102,14 +102,14 @@ export default function SpotifyImportField({
               value={link}
               onChange={(e) => setLink(e.target.value)}
               placeholder="Paste a Spotify song link"
-              className="min-w-0 flex-1 rounded-xl border border-sand-deep bg-white px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="min-w-0 flex-1 rounded-xl border border-sand-deep bg-white px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
             <button
               type="button"
               onClick={() => void onImport()}
               disabled={pending || !link.trim()}
               aria-busy={pending || undefined}
-              className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-50"
+              className="flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
             >
               <Download className="h-4 w-4" aria-hidden />
               {pending ? "Asking…" : "Import"}

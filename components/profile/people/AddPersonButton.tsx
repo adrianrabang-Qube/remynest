@@ -42,7 +42,7 @@ export default function AddPersonButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
       >
         {label}
       </button>
@@ -65,7 +65,7 @@ export default function AddPersonButton({
             <button
               type="button"
               onClick={close}
-              className="mt-3 w-full rounded-full py-2 text-center text-sm text-charcoal-muted transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="mt-3 w-full rounded-full py-2 text-center text-sm text-charcoal-muted transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               Cancel
             </button>

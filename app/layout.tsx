@@ -55,9 +55,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  // Brand sage for browser/PWA chrome (was the manifest's off-brand black). A dark
+  // Brand violet for browser/PWA chrome (purple-primary, 2026-07-21). A dark
   // media variant lands with the dark-UI rollout, not before it.
-  themeColor: "#4F6B5B",
+  themeColor: "#5B3E8E",
 };
 
 // Body: Inter (clear, calm, Apple-like rhythm).

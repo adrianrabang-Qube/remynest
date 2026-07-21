@@ -29,7 +29,14 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Companion design-bible UI polish COMPLETE (2026-07-21, EXECUTION
+Current Task: *(none active — **PURPLE-PRIMARY app-wide color unification COMPLETE (2026-07-21,
+EXECUTION MODE; operator decision, presentation-only):** violet `#5B3E8E` is the app-wide primary
+(new `primary/-deep/-soft` tokens; ~664 class sites / 151 files migrated `-sage → -primary`; focus
+rings now violet; sage demoted to success/nature status accents [curated allowlist]; themeColor/
+manifest `#5B3E8E`; canvas sand/white/charcoal/gold unchanged; frozen surfaces className-only,
+diff-audit verified; tsc/lint green). Supersedes the Strategy-1 purple-scope clause + the sage
+focus-ring standard — see CLAUDE.md "PURPLE-PRIMARY". Before it, **Companion design-bible UI polish
+COMPLETE (2026-07-21, EXECUTION
 MODE; presentation-only):** operator supplied the external Remy Design Bible boards; the Remy/Nest
 companion surfaces were aligned to them — single-source `remy.*` Tailwind tokens (violet/lavender/
 gold/mist), NestMenu + RemyAsk hex→token migration, companion palette on RemyMomentChip · `/remy`

@@ -54,7 +54,7 @@ export default function ForgotPasswordClient() {
             </p>
             <Link
               href="/login"
-              className="inline-block text-sm font-medium text-sage hover:text-sage-deep"
+              className="inline-block text-sm font-medium text-primary hover:text-primary-deep"
             >
               ← Back to login
             </Link>
@@ -74,7 +74,7 @@ export default function ForgotPasswordClient() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
 
             {error && (
@@ -86,14 +86,14 @@ export default function ForgotPasswordClient() {
             <button
               type="submit"
               disabled={loading || !email.trim()}
-              className="w-full rounded-full bg-sage px-4 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep disabled:opacity-50"
+              className="w-full rounded-full bg-primary px-4 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep disabled:opacity-50"
             >
               {loading ? "Sending…" : "Send reset link"}
             </button>
 
             <Link
               href="/login"
-              className="block text-center text-sm font-medium text-sage hover:text-sage-deep"
+              className="block text-center text-sm font-medium text-primary hover:text-primary-deep"
             >
               ← Back to login
             </Link>

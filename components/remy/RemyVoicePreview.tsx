@@ -18,7 +18,7 @@ export default function RemyVoicePreview({ lines }: { lines: RemyVoiceLine[] }) 
   return (
     <section
       aria-label="Remy"
-      className="flex items-start gap-3 rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-4 shadow-soft md:p-5"
+      className="flex items-start gap-3 rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.07] to-sand/40 p-4 shadow-soft md:p-5"
     >
       <RemyAvatar
         mood={top.mood}
@@ -41,7 +41,7 @@ export default function RemyVoicePreview({ lines }: { lines: RemyVoiceLine[] }) 
         {top.cta && (
           <Link
             href={top.cta.href}
-            className="mt-2 inline-flex items-center text-sm font-semibold text-sage-deep underline-offset-2 hover:underline"
+            className="mt-2 inline-flex items-center text-sm font-semibold text-primary-deep underline-offset-2 hover:underline"
           >
             {top.cta.label} →
           </Link>

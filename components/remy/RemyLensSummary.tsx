@@ -37,7 +37,7 @@ export default function RemyLensSummary({
   if (variant === "inline") {
     return (
       <span className={`flex min-w-0 items-center gap-1.5 ${className}`}>
-        <span aria-hidden className="shrink-0 text-sage">
+        <span aria-hidden className="shrink-0 text-primary">
           ✦
         </span>
         <span className="truncate">{understanding.summary}</span>

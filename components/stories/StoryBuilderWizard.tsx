@@ -195,7 +195,7 @@ export default function StoryBuilderWizard() {
             ? router.push("/activities/stories")
             : setStep("select")
         }
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         {step === "select" ? "Story Builder" : "Back to choosing"}
@@ -243,7 +243,7 @@ export default function StoryBuilderWizard() {
               <button
                 type="button"
                 onClick={() => void retry()}
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Try again
               </button>
@@ -273,9 +273,9 @@ export default function StoryBuilderWizard() {
                           ? `Remove “${name}” from the story`
                           : `Add “${name}” to the story`
                       }
-                      className={`relative aspect-square overflow-hidden rounded-2xl border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                      className={`relative aspect-square overflow-hidden rounded-2xl border text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                         isSelected
-                          ? "border-sage ring-2 ring-sage"
+                          ? "border-primary ring-2 ring-primary"
                           : "border-sand-deep/60"
                       }`}
                     >
@@ -300,7 +300,7 @@ export default function StoryBuilderWizard() {
                       {isSelected && (
                         <span
                           aria-hidden
-                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-sage text-xs font-bold text-white shadow-soft"
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-soft"
                         >
                           {orderIndex + 1}
                         </span>
@@ -313,7 +313,7 @@ export default function StoryBuilderWizard() {
                 <button
                   type="button"
                   onClick={() => void loadPage(offset)}
-                  className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   Show more memories
                 </button>
@@ -322,7 +322,7 @@ export default function StoryBuilderWizard() {
                 type="button"
                 disabled={!canContinue}
                 onClick={() => setStep("arrange")}
-                className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+                className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 <Check className="h-5 w-5" aria-hidden />
                 {canContinue
@@ -350,7 +350,7 @@ export default function StoryBuilderWizard() {
               maxLength={STORY_TITLE_MAX}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Our summers at the lake"
-              className="mt-1 w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="mt-1 w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
           </div>
 
@@ -365,7 +365,7 @@ export default function StoryBuilderWizard() {
             disabled={!canSave}
             onClick={() => void onSave()}
             aria-busy={saving || undefined}
-            className="flex min-h-11 w-full items-center justify-center rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
           >
             {saving ? "Saving your story…" : "Save story"}
           </button>

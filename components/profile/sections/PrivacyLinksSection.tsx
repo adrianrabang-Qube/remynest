@@ -31,7 +31,7 @@ export default function PrivacyLinksSection() {
         <Link
           key={link.href}
           href={link.href}
-          className="block rounded-2xl border border-sand-deep/60 p-4 transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          className="block rounded-2xl border border-sand-deep/60 p-4 transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <span className="font-medium text-charcoal">{link.label}</span>
           <span className="mt-1 block text-charcoal-muted">

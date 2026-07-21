@@ -206,7 +206,7 @@ export default async function OnboardingPage() {
               name="first_name"
               placeholder="John"
               required
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -221,7 +221,7 @@ export default async function OnboardingPage() {
               type="text"
               name="preferred_name"
               placeholder="Johnny"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-primary"
             />
 
             <p className="text-sm text-charcoal-soft">
@@ -241,7 +241,7 @@ export default async function OnboardingPage() {
               type="text"
               name="country"
               placeholder="Ireland"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -255,7 +255,7 @@ export default async function OnboardingPage() {
             <input
               type="date"
               name="date_of_birth"
-              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-sage"
+              className="w-full rounded-2xl border px-5 py-4 outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -289,7 +289,7 @@ export default async function OnboardingPage() {
           {/* BUTTON */}
           <button
             type="submit"
-            className="w-full rounded-2xl bg-sage text-white py-4 text-lg font-medium hover:bg-sage-deep transition"
+            className="w-full rounded-2xl bg-primary text-white py-4 text-lg font-medium hover:bg-primary-deep transition"
           >
             Continue to Home
           </button>

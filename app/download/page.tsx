@@ -38,7 +38,7 @@ function StoreCard({
       ) : href.startsWith("/") ? (
         <Link
           href={href}
-          className="mt-5 inline-flex w-fit rounded-xl bg-sage px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sage-deep"
+          className="mt-5 inline-flex w-fit rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-deep"
         >
           {cta}
         </Link>
@@ -47,7 +47,7 @@ function StoreCard({
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex w-fit rounded-xl bg-sage px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-sage-deep"
+          className="mt-5 inline-flex w-fit rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-deep"
         >
           {cta}
         </a>
@@ -85,11 +85,11 @@ export default function DownloadPage() {
 
       <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-charcoal-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-sage underline">
+        <Link href="/login" className="font-medium text-primary underline">
           Sign in
         </Link>{" "}
         · New here?{" "}
-        <Link href="/pricing" className="font-medium text-sage underline">
+        <Link href="/pricing" className="font-medium text-primary underline">
           See plans
         </Link>
       </p>

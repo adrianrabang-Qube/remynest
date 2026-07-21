@@ -236,7 +236,7 @@ export default function MatchBoard({
             onClick={() => void onReplay()}
             disabled={busy}
             aria-label="Start this game again with a fresh shuffle"
-            className="flex h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-50"
+            className="flex h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
           >
             <RotateCcw className="h-4 w-4" aria-hidden />
             Shuffle again
@@ -281,11 +281,11 @@ export default function MatchBoard({
                     ? `${label} — face up`
                     : "Hidden card — tap to turn it over"
               }
-              className={`relative aspect-square min-h-11 overflow-hidden rounded-2xl border shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+              className={`relative aspect-square min-h-11 overflow-hidden rounded-2xl border shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 reduceMotion ? "" : "transition-transform duration-200"
               } ${
                 isMatched
-                  ? "border-sage ring-1 ring-sage/50"
+                  ? "border-primary ring-1 ring-primary/50"
                   : faceUp
                     ? "border-sand-deep/70"
                     : "border-sand-deep/60 bg-sand hover:bg-sand-deep/30"
@@ -310,7 +310,7 @@ export default function MatchBoard({
                   aria-hidden
                   className="flex h-full w-full items-center justify-center"
                 >
-                  <Sparkles className="h-6 w-6 text-sage/60" />
+                  <Sparkles className="h-6 w-6 text-primary/60" />
                 </span>
               )}
             </button>
@@ -335,14 +335,14 @@ export default function MatchBoard({
               type="button"
               onClick={() => void onReplay()}
               disabled={busy}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
             >
               <RotateCcw className="h-4 w-4" aria-hidden />
               Play again
             </button>
             <Link
               href="/activities/match"
-              className="flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               Back to Memory Match
             </Link>

@@ -49,7 +49,7 @@ export default function InviteCaregiverForm({
         ) : (
           <Link
             href="/account/subscription"
-            className="mt-3 inline-flex rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white transition hover:bg-sage-deep"
+            className="mt-3 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-deep"
           >
             See plans
           </Link>
@@ -110,7 +110,7 @@ export default function InviteCaregiverForm({
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
           required
         />
 
@@ -118,7 +118,7 @@ export default function InviteCaregiverForm({
           aria-label="Relationship"
           value={relationshipType}
           onChange={(e) => setRelationshipType(e.target.value)}
-          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+          className="w-full rounded-lg border px-4 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
         >
           <option value="family">Family</option>
           <option value="caregiver">Caregiver</option>
@@ -155,7 +155,7 @@ export default function InviteCaregiverForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-sage text-white px-4 py-2 transition hover:bg-sage-deep disabled:opacity-60"
+          className="rounded-lg bg-primary text-white px-4 py-2 transition hover:bg-primary-deep disabled:opacity-60"
         >
           {isPending ? "Inviting..." : "Send Invite"}
         </button>

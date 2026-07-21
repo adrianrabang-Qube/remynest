@@ -131,7 +131,7 @@ export default function MomentPlayer({
           type="button"
           onClick={() => go(-1)}
           disabled={index === 0}
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-40"
+          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-40"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Previous
@@ -140,7 +140,7 @@ export default function MomentPlayer({
           type="button"
           onClick={() => go(1)}
           disabled={index === moments.length - 1}
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-40"
+          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40"
         >
           Next
           <ArrowRight className="h-4 w-4" aria-hidden />

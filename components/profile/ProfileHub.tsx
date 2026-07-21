@@ -67,7 +67,7 @@ export default function ProfileHub({
       <button
         type="button"
         onClick={goToMyNest}
-        className="flex w-full items-center justify-between rounded-2xl border border-sand-deep/70 bg-white px-4 py-2.5 text-sm font-semibold text-sage-deep transition hover:bg-sand/40"
+        className="flex w-full items-center justify-between rounded-2xl border border-sand-deep/70 bg-white px-4 py-2.5 text-sm font-semibold text-primary-deep transition hover:bg-sand/40"
       >
         🏡 My Nest
         <span aria-hidden>→</span>
@@ -76,7 +76,7 @@ export default function ProfileHub({
       {/* The identity layer — Profile V2. Settings sections remain below. */}
       <Link
         href="/profile"
-        className="flex items-center justify-between rounded-2xl border border-sand-deep/70 bg-white px-4 py-2.5 text-sm font-semibold text-sage-deep transition hover:bg-sand/40"
+        className="flex items-center justify-between rounded-2xl border border-sand-deep/70 bg-white px-4 py-2.5 text-sm font-semibold text-primary-deep transition hover:bg-sand/40"
       >
         View profile
         <span aria-hidden>→</span>

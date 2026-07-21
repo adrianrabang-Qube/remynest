@@ -13,7 +13,7 @@ export default function PrintButton({
     <button
       type="button"
       onClick={() => window.print()}
-      className="print:hidden inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+      className="print:hidden inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
     >
       {label}
     </button>

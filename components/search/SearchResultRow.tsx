@@ -16,12 +16,12 @@ const TYPE_META: Record<
   { icon: LucideIcon; badge: string; tint: string }
 > = {
   // Type is conveyed by the distinct ICON + badge text; the chip tint stays a single calm
-  // brand sage (Polaris: brand tokens only, hierarchy over colour — no amber/sky/violet/rose).
-  memory: { icon: FileText, badge: "Memory", tint: "bg-sage/10 text-sage" },
-  collection: { icon: FolderHeart, badge: "Collection", tint: "bg-sage/10 text-sage" },
-  connection: { icon: Link2, badge: "Connection", tint: "bg-sage/10 text-sage" },
-  chapter: { icon: BookMarked, badge: "Chapter", tint: "bg-sage/10 text-sage" },
-  person: { icon: Users, badge: "Person", tint: "bg-sage/10 text-sage" },
+  // brand primary violet (purple-primary 2026-07-21: brand tokens only, hierarchy over colour).
+  memory: { icon: FileText, badge: "Memory", tint: "bg-primary/10 text-primary" },
+  collection: { icon: FolderHeart, badge: "Collection", tint: "bg-primary/10 text-primary" },
+  connection: { icon: Link2, badge: "Connection", tint: "bg-primary/10 text-primary" },
+  chapter: { icon: BookMarked, badge: "Chapter", tint: "bg-primary/10 text-primary" },
+  person: { icon: Users, badge: "Person", tint: "bg-primary/10 text-primary" },
 };
 
 /**
@@ -74,7 +74,7 @@ export default function SearchResultRow({
       ) : (
         <Link
           href={hit.href}
-          className="flex min-h-[44px] flex-1 items-center gap-3 px-3 py-2.5 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
+          className="flex min-h-[44px] flex-1 items-center gap-3 px-3 py-2.5 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
         >
           {body}
           <ChevronRight
@@ -88,7 +88,7 @@ export default function SearchResultRow({
         <button
           type="button"
           onClick={() => onReport!(hit.reportableMemoryId!, hit.title)}
-          className="mr-2 inline-flex min-h-11 shrink-0 items-center rounded-full border border-sand-deep/60 px-3 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          className="mr-2 inline-flex min-h-11 shrink-0 items-center rounded-full border border-sand-deep/60 px-3 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label={`Report "${hit.title}"`}
         >
           Report

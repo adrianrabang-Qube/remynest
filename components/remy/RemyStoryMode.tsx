@@ -17,7 +17,7 @@ export default function RemyStoryMode({
   if (stories.length === 0) return null;
 
   return (
-    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.06] to-sand/40 p-6 shadow-soft max-md:p-4">
+    <section className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] to-sand/40 p-6 shadow-soft max-md:p-4">
       <h2 className="text-lg font-semibold text-charcoal">Story Mode</h2>
       <p className="mt-1 text-sm text-charcoal-soft">
         Take a guided walk through the chapters of your story.
@@ -34,7 +34,7 @@ export default function RemyStoryMode({
                 {story.title}
               </h3>
               {formatChapterRange(story) && (
-                <span className="shrink-0 text-sm font-medium text-sage-deep">
+                <span className="shrink-0 text-sm font-medium text-primary-deep">
                   {formatChapterRange(story)}
                 </span>
               )}
@@ -50,7 +50,7 @@ export default function RemyStoryMode({
                   <li key={section.id} className="relative">
                     <span
                       aria-hidden="true"
-                      className="absolute -left-[1.65rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-sage"
+                      className="absolute -left-[1.65rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-primary"
                     />
                     <div className="flex flex-wrap items-baseline gap-x-3">
                       <span className="font-medium text-charcoal break-words">
@@ -59,7 +59,7 @@ export default function RemyStoryMode({
                       {section.href && (
                         <Link
                           href={section.href}
-                          className="text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+                          className="text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
                         >
                           Explore →
                         </Link>
@@ -77,7 +77,7 @@ export default function RemyStoryMode({
 
             <Link
               href={story.href}
-              className="mt-5 inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+              className="mt-5 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
             >
               Walk through {story.title}
             </Link>

@@ -30,9 +30,9 @@ export default function RemyTimeline({
           <li key={group.year} className="relative">
             <span
               aria-hidden="true"
-              className="absolute -left-[1.95rem] top-1 h-3 w-3 rounded-full border-2 border-white bg-sage"
+              className="absolute -left-[1.95rem] top-1 h-3 w-3 rounded-full border-2 border-white bg-primary"
             />
-            <p className="text-sm font-semibold text-sage-deep">
+            <p className="text-sm font-semibold text-primary-deep">
               {group.year}
             </p>
             <ul className="mt-2 space-y-2 max-md:space-y-1">

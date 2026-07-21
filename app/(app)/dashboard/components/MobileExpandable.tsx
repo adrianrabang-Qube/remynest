@@ -57,7 +57,7 @@ export default function MobileExpandable({ children }: MobileExpandableProps) {
           type="button"
           onClick={() => setExpanded((value) => !value)}
           aria-expanded={expanded}
-          className="md:hidden mt-2 flex w-full items-center justify-center rounded-full border border-sand-deep/70 bg-white/70 px-4 py-2 text-sm font-medium text-sage transition hover:bg-white"
+          className="md:hidden mt-2 flex w-full items-center justify-center rounded-full border border-sand-deep/70 bg-white/70 px-4 py-2 text-sm font-medium text-primary transition hover:bg-white"
         >
           {expanded ? "Show less" : "Show more"}
         </button>

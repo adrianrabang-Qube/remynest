@@ -25,7 +25,7 @@ export default function DashboardStats({
           Total Memories
         </p>
 
-        <h2 className="text-5xl font-semibold text-sage max-md:text-3xl">
+        <h2 className="text-5xl font-semibold text-primary max-md:text-3xl">
           {memoryCount}
         </h2>
 

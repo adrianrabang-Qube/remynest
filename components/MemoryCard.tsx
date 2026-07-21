@@ -55,7 +55,7 @@ export default function MemoryCard({
   return (
     <Link
       href={`/memories/${memory.id}`}
-      className="block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+      className="block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
     >
       <div className="rounded-3xl border border-sand-deep/70 p-5 mb-4 bg-white shadow-soft transition hover:shadow-soft-lg hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 overflow-hidden cursor-pointer">
         {/* Title */}
@@ -65,7 +65,7 @@ export default function MemoryCard({
 
         {/* Primary date — when the memory happened */}
         {memoryDateLabel && (
-          <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-sage-deep">
+          <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-primary-deep">
             <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden />
             <span className="sr-only">Memory date: </span>
             {memoryDateLabel}
@@ -97,7 +97,7 @@ export default function MemoryCard({
             {memory.ai_tags.map((tag, i) => (
               <span
                 key={i}
-                className="text-xs bg-sage/10 text-sage px-2.5 py-1 rounded-full break-words"
+                className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full break-words"
               >
                 #{tag}
               </span>
@@ -113,7 +113,7 @@ export default function MemoryCard({
               e.stopPropagation();
               onEdit();
             }}
-            className="font-medium text-sage hover:text-sage-deep"
+            className="font-medium text-primary hover:text-primary-deep"
           >
             Edit
           </button>

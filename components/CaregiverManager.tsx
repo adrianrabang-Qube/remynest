@@ -147,7 +147,7 @@ export default function CaregiverManager({
                         type="button"
                         onClick={() => setConfirmingId(null)}
                         disabled={busy}
-                        className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                        className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       >
                         Cancel
                       </button>

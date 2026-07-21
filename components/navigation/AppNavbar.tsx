@@ -93,11 +93,11 @@ export default function AppNavbar({
               hover:bg-white
               focus-visible:outline-none
               focus-visible:ring-2
-              focus-visible:ring-sage
+              focus-visible:ring-primary
               focus-visible:ring-offset-2
             "
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
               {initial}
             </div>
 

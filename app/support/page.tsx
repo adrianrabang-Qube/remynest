@@ -15,7 +15,7 @@ export const metadata = pageMetadata({
 const Mail = ({ to }: { to: string }) => (
   <a
     href={`mailto:${to}`}
-    className="font-medium text-sage underline underline-offset-2"
+    className="font-medium text-primary underline underline-offset-2"
   >
     {to}
   </a>
@@ -41,7 +41,7 @@ export default function SupportPage() {
           Before you reach out: you can manage your subscription, export your
           data, and delete your account directly in the app under{" "}
           <strong>Profile → Settings → Privacy</strong>, or from your{" "}
-          <Link href="/account/subscription" className="text-sage underline">
+          <Link href="/account/subscription" className="text-primary underline">
             subscription page
           </Link>
           .
@@ -59,7 +59,7 @@ export default function SupportPage() {
         <p className="mt-3 text-sm text-charcoal-soft">
           Privacy and data-rights requests are handled within the timeframes
           required by law (generally within one month). See our{" "}
-          <Link href="/privacy" className="text-sage underline">
+          <Link href="/privacy" className="text-primary underline">
             Privacy Policy
           </Link>{" "}
           for details on the data we hold and your rights.
@@ -72,7 +72,7 @@ export default function SupportPage() {
         <p className="mt-2 text-charcoal">
           You can permanently delete your account and associated data yourself —
           in the app under <strong>Settings → Privacy</strong>, or via our{" "}
-          <Link href="/account-deletion" className="text-sage underline">
+          <Link href="/account-deletion" className="text-primary underline">
             account deletion page
           </Link>
           . Prefer we handle it? Email <Mail to={CONTACT.privacy} /> and we will

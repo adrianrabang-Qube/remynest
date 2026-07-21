@@ -31,7 +31,7 @@ export default function PersonRow({
     <li>
       <Link
         href={`/profiles/${person.id}`}
-        className="flex min-h-[44px] items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
+        className="flex min-h-[44px] items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
       >
         {person.photo ? (
           <Image
@@ -43,7 +43,7 @@ export default function PersonRow({
             className="h-11 w-11 shrink-0 rounded-full border border-sand-deep/50 object-cover"
           />
         ) : (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sage text-base font-semibold text-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-base font-semibold text-white">
             {initial}
           </div>
         )}

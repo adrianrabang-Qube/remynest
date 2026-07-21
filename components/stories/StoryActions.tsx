@@ -35,7 +35,7 @@ export default function StoryActions({ storyId }: { storyId: string }) {
     <div className="flex items-center gap-2">
       <Link
         href={`/activities/stories/${storyId}/edit`}
-        className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Pencil className="h-4 w-4" aria-hidden />
         Edit

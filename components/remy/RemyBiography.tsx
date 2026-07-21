@@ -29,7 +29,7 @@ export default function RemyBiography({
       <div className="mx-auto mt-8 max-md:mt-4 max-w-2xl space-y-10 max-md:space-y-5">
         {biography.sections.map((section) => (
           <article key={section.id}>
-            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-sage-deep">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-deep">
               {section.title}
             </h3>
             <div className="mt-3 space-y-3">
@@ -45,7 +45,7 @@ export default function RemyBiography({
             {section.href && (
               <Link
                 href={section.href}
-                className="mt-3 inline-flex items-center text-sm font-semibold text-sage-deep underline-offset-2 hover:underline"
+                className="mt-3 inline-flex items-center text-sm font-semibold text-primary-deep underline-offset-2 hover:underline"
               >
                 Explore →
               </Link>

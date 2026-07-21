@@ -63,7 +63,7 @@ export default function ToastProvider({
           announced to screen-reader users. Placement is safe-area-aware so a toast
           never sits under the iOS status bar / notch. (`animate-toastIn` — the old
           `animate-slide-in` class never existed, so toasts popped in unanimated;
-          `bg-sage-deep` is the brand token, 8:1 with white — up from green-700's 5.3:1.) */}
+          `bg-primary-deep` is the brand token, 8:1 with white — up from green-700's 5.3:1.) */}
       <div
         role="status"
         aria-live="polite"
@@ -73,7 +73,7 @@ export default function ToastProvider({
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="animate-toastIn max-w-[calc(100vw-2.5rem)] rounded-2xl bg-sage-deep px-5 py-3 text-[15px] font-medium text-white shadow-soft-lg sm:max-w-sm"
+            className="animate-toastIn max-w-[calc(100vw-2.5rem)] rounded-2xl bg-primary-deep px-5 py-3 text-[15px] font-medium text-white shadow-soft-lg sm:max-w-sm"
           >
             {toast.message}
           </div>

@@ -520,7 +520,7 @@ export default function RemyAsk({ ask }: { ask: RemyAskModel }) {
             type="submit"
             disabled={loading}
             aria-label="Ask Remy"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-remy-violet text-white transition hover:bg-remy-lavender focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-remy-violet text-white transition hover:bg-remy-lavender focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowUp className="h-5 w-5" aria-hidden />
           </button>

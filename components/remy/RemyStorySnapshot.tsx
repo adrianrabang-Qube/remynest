@@ -55,7 +55,7 @@ export default function RemyStorySnapshot({
       <ul className="mt-3 space-y-2">
         {facts.map((fact) => (
           <li key={fact.text} className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <fact.icon className="h-4 w-4" aria-hidden />
             </div>
             <span className="text-sm text-charcoal-soft">{fact.text}</span>

@@ -35,7 +35,7 @@ export default function DateCompletionCard({
 
           <Link
             href="/memory-dates"
-            className="mt-5 inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-5 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
           >
             Add memory dates
           </Link>

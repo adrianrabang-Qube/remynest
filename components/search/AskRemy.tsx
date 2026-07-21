@@ -45,7 +45,7 @@ export default function AskRemy({
   }
 
   return (
-    <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-sand-deep/70 bg-gradient-to-b from-sage/5 to-white px-3 py-2.5">
+    <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-sand-deep/70 bg-gradient-to-b from-primary/5 to-white px-3 py-2.5">
       <RemyAvatar size="sm" />
       <p className="min-w-0 flex-1 text-sm text-charcoal-soft">{text}</p>
     </div>

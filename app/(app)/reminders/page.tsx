@@ -617,7 +617,7 @@ export default async function RemindersPage({
 
       {/* Create Reminder */}
       <details className="group bg-white border border-sand-deep/70 rounded-3xl p-6 shadow-soft mb-2">
-      <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage">
+      <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
         <h2 className="text-xl font-semibold text-charcoal">
           Add a reminder
         </h2>
@@ -643,7 +643,7 @@ export default async function RemindersPage({
             defaultValue=""
             placeholder="e.g. Morning medication — with breakfast"
             required
-            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
           {/* LA1: legibility helper (presentation/copy only — non-clinical, no dosing
               advice). A clear title lets a covering caregiver act on the reminder
@@ -656,7 +656,7 @@ export default async function RemindersPage({
           {/* Date (timezone-correct: converts local → UTC in the browser) */}
           <ReminderDateTimeField
             required
-            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
 
           {/* Recurring */}
@@ -676,7 +676,7 @@ export default async function RemindersPage({
               name="frequency"
               aria-label="Repeat frequency"
               defaultValue="daily"
-              className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
             >
               <option value="daily">
                 Daily
@@ -695,7 +695,7 @@ export default async function RemindersPage({
           {/* QA fix (2026-07-13, proven defect — freeze-compliant UI guard): disables while
               the create action is pending so a double-tap can't create duplicate reminders
               (and duplicate iOS notifications). Action/fields/form-key byte-unchanged. */}
-          <PendingSubmitButton className="rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+          <PendingSubmitButton className="rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white">
             Create Reminder
           </PendingSubmitButton>
         </div>

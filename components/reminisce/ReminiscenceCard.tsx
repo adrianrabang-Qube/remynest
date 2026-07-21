@@ -39,7 +39,7 @@ export default function ReminiscenceCard({
       )}
 
       <div className="flex flex-1 flex-col p-6">
-        <p className="text-base font-semibold text-sage-deep">
+        <p className="text-base font-semibold text-primary-deep">
           🕰 {dateLabel}
         </p>
         <h3 className="mt-1 text-2xl font-semibold leading-tight text-charcoal break-words">

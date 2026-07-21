@@ -122,7 +122,7 @@ export default function ResetPasswordClient() {
             </p>
             <Link
               href="/forgot-password"
-              className="inline-block rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+              className="inline-block rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
             >
               Request a new link
             </Link>
@@ -130,7 +130,7 @@ export default function ResetPasswordClient() {
         )}
 
         {phase === "done" && (
-          <p className="mt-4 text-sm text-sage-deep">
+          <p className="mt-4 text-sm text-primary-deep">
             ✅ Your password has been updated. Redirecting you to RemyNest…
           </p>
         )}
@@ -150,7 +150,7 @@ export default function ResetPasswordClient() {
               placeholder="New password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
 
             <input
@@ -162,7 +162,7 @@ export default function ResetPasswordClient() {
               placeholder="Confirm new password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="w-full rounded-xl border border-sand-deep px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
 
             {error && (
@@ -174,7 +174,7 @@ export default function ResetPasswordClient() {
             <button
               type="submit"
               disabled={loading || !password || !confirm}
-              className="w-full rounded-full bg-sage px-4 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep disabled:opacity-50"
+              className="w-full rounded-full bg-primary px-4 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep disabled:opacity-50"
             >
               {loading ? "Updating…" : "Update password"}
             </button>

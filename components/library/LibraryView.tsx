@@ -64,7 +64,7 @@ export default function LibraryView() {
     <div className="space-y-4">
       {/* Sticky search + filter chips on mobile */}
       <div className="space-y-3 max-md:sticky max-md:top-[calc(3.5rem_+_env(safe-area-inset-top))] max-md:z-20 max-md:-mx-4 max-md:bg-sand/95 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
-        <label className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 py-2.5 transition focus-within:border-sage focus-within:ring-2 focus-within:ring-sage">
+        <label className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 py-2.5 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary">
           <Search className="h-4 w-4 shrink-0 text-charcoal-muted" aria-hidden />
           <input
             type="text"
@@ -90,9 +90,9 @@ export default function LibraryView() {
                 role="tab"
                 aria-selected={active}
                 onClick={() => setFilter(chip.key)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   active
-                    ? "bg-sage text-white"
+                    ? "bg-primary text-white"
                     : "border border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand/50"
                 }`}
               >
@@ -112,9 +112,9 @@ export default function LibraryView() {
               <li key={section.key}>
                 <Link
                   href={section.href}
-                  className="flex items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
+                  className="flex items-center gap-3 px-3 py-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1">

@@ -28,7 +28,7 @@ function HighlightRow({
       href={highlight.href}
       className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition hover:bg-sand/40"
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
         <Icon className="h-5 w-5" aria-hidden />
       </div>
       <div className="min-w-0 flex-1">

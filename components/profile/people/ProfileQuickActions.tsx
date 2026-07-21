@@ -52,7 +52,7 @@ export default function ProfileQuickActions({
             disabled={pending}
             className="flex min-h-[44px] flex-col items-center justify-center gap-1.5 rounded-2xl border border-sand-deep/70 bg-white p-4 text-center shadow-soft transition hover:shadow-soft-lg disabled:opacity-60"
           >
-            <Icon className="h-5 w-5 text-sage" aria-hidden />
+            <Icon className="h-5 w-5 text-primary" aria-hidden />
             <span className="text-sm font-medium text-charcoal">{label}</span>
           </button>
         ))}

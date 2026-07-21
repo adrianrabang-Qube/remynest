@@ -55,7 +55,7 @@ export default function TimelineRow({
     <li>
       <Link
         href={`/memories/${memory.id}`}
-        className="flex items-center gap-3 py-2.5 pl-3 pr-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
+        className="flex items-center gap-3 py-2.5 pl-3 pr-3 transition hover:bg-sand/40 active:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
       >
         {thumbnail ? (
           <Image
@@ -67,7 +67,7 @@ export default function TimelineRow({
             className="h-12 w-12 shrink-0 rounded-xl border border-sand-deep/50 object-cover"
           />
         ) : (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <FileText className="h-5 w-5" aria-hidden />
           </div>
         )}

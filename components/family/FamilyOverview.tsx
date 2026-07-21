@@ -34,7 +34,7 @@ export default function FamilyOverview({
               {o.cta && (
                 <Link
                   href={o.cta.href}
-                  className="shrink-0 whitespace-nowrap text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+                  className="shrink-0 whitespace-nowrap text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
                 >
                   {o.cta.label} →
                 </Link>

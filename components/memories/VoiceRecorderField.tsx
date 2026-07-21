@@ -259,9 +259,9 @@ export default function VoiceRecorderField({
           <button
             type="button"
             onClick={() => void startRecording()}
-            className="flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <Mic className="h-4 w-4 text-sage" aria-hidden />
+            <Mic className="h-4 w-4 text-primary" aria-hidden />
             Record
           </button>
         </div>
@@ -283,7 +283,7 @@ export default function VoiceRecorderField({
             <button
               type="button"
               onClick={() => stopRecording(false)}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <Square className="h-4 w-4" aria-hidden />
               Stop
@@ -303,7 +303,7 @@ export default function VoiceRecorderField({
       {phase === "preview" && file && previewUrl && (
         <div>
           <div className="flex items-center gap-2">
-            <Play className="h-4 w-4 shrink-0 text-sage" aria-hidden />
+            <Play className="h-4 w-4 shrink-0 text-primary" aria-hidden />
             <p className="text-sm font-medium text-charcoal">
               Voice memory · {formatSeconds(seconds)}
             </p>
@@ -323,7 +323,7 @@ export default function VoiceRecorderField({
                 removeRecording();
                 void startRecording();
               }}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <RotateCcw className="h-4 w-4" aria-hidden />
               Re-record

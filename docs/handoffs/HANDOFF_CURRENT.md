@@ -28,7 +28,18 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Companion design-bible UI polish (2026-07-21, EXECUTION MODE — presentation-only;
+Most recent: **PURPLE-PRIMARY app-wide color unification (2026-07-21, EXECUTION MODE — operator
+decision, presentation-only):** violet `#5B3E8E` is now the app-wide PRIMARY (buttons, links,
+chips, active nav, focus rings [violet — no longer sage], selection, `.btn-primary`/`.rn-btn`/
+`.input:focus`, themeColor/manifest). New `primary/primary-deep/primary-soft` tokens + `--primary*`
+vars; mechanical `-sage → -primary` class swap (~664 sites / 151 files) + curated GREEN allowlist
+(sage demoted to success/nature status only: ReminderCenter completed chip, Account "saved"
+message); canvas unchanged (sand/white/charcoal/gold). Frozen surfaces: className-only (diff-audit
+verified — no logic lines). tsc + lint green in-session; `npm run build` = operator/Vercel gate.
+Supersedes the Strategy-1 purple-scope clause + the sage focus-ring standard (see the CLAUDE.md
+PURPLE-PRIMARY note + the brand-guidelines banner).
+
+Before that: **Companion design-bible UI polish (2026-07-21, EXECUTION MODE — presentation-only;
 operator supplied the external Remy Design Bible boards as images):** aligned the Remy/Nest
 COMPANION surfaces to the boards' purple look. New single-source **`remy.*` Tailwind tokens**
 (violet `#5B3E8E` · lavender `#8A6BD0` · gold `#E3A24A` · mist `#F5F2FB`); NestMenu + RemyAsk

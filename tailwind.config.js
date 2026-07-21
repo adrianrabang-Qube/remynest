@@ -25,6 +25,15 @@ module.exports = {
       // RemyNest brand palette — Memory · Family · Trust · Legacy · Nature · Care.
       // Intentionally NOT healthcare blue.
       colors: {
+        // PURPLE-PRIMARY (authoritative 2026-07-21, operator decision — supersedes the
+        // two-system split): violet is the app-wide PRIMARY for buttons, links, active
+        // states, focus rings, and accents. Sand/charcoal/gold canvas unchanged; sage is
+        // DEMOTED to success/nature status accents only (never interactive primaries).
+        primary: {
+          DEFAULT: "#5B3E8E", // deep companion violet — AA on white (8.6:1) & sand (7.9:1)
+          deep: "#3A2266", // hover/pressed
+          soft: "#8A6BD0", // washes/borders/hover tints ONLY — fails as small text
+        },
         sage: {
           DEFAULT: "#4F6B5B", // Forest Sage — primary
           deep: "#3E5648",

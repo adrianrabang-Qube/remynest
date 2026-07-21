@@ -41,7 +41,7 @@ export default async function PuzzlesHubPage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <Link
         href="/activities"
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Remy&apos;s Activities
@@ -71,7 +71,7 @@ export default async function PuzzlesHubPage() {
         <>
           <Link
             href="/activities/puzzles/new"
-            className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+            className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <Plus className="h-5 w-5" aria-hidden />
             Create a puzzle

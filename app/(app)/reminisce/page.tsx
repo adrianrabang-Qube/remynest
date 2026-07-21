@@ -96,7 +96,7 @@ function EmptyState() {
       </p>
       <Link
         href="/memory-dates"
-        className="mt-6 inline-flex items-center rounded-full bg-sage px-6 py-3 text-base font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+        className="mt-6 inline-flex items-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-white shadow-soft transition hover:bg-primary-deep"
       >
         Add memory dates
       </Link>
@@ -113,7 +113,7 @@ function SparseNote() {
       </p>
       <Link
         href="/memory-dates"
-        className="mt-3 inline-flex items-center text-base font-semibold text-sage-deep underline-offset-2 hover:underline"
+        className="mt-3 inline-flex items-center text-base font-semibold text-primary-deep underline-offset-2 hover:underline"
       >
         Add memory dates →
       </Link>

@@ -116,7 +116,7 @@ export default function CompactMemoryRow({
                 />
               </div>
             ) : (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <FileText className="h-5 w-5" aria-hidden />
               </div>
             ))}

@@ -34,7 +34,7 @@ export default function RemyStoryConversation() {
       <div className="flex items-start gap-3">
         <span
           aria-hidden
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sage/10 text-sage-deep"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary-deep"
         >
           <Sparkles className="h-5 w-5" />
         </span>
@@ -51,7 +51,7 @@ export default function RemyStoryConversation() {
         type="button"
         onClick={run}
         disabled={pending}
-        className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-sage px-5 py-2.5 text-base font-medium text-white transition hover:bg-sage-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-60"
+        className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-base font-medium text-white transition hover:bg-primary-deep focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60"
       >
         {pending ? "Remy is reflecting…" : result ? "Tell it again" : "Ask Remy to tell your story"}
       </button>

@@ -24,7 +24,7 @@ export default function RemyConversation({
       {/* Greeting + opening message */}
       <section
         aria-label={`Conversation with ${REMY.name}`}
-        className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.08] to-sand/40 p-4 shadow-soft md:p-6"
+        className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] to-sand/40 p-4 shadow-soft md:p-6"
       >
         <div className="flex items-start gap-4 max-md:gap-3">
           <RemyAvatar
@@ -45,7 +45,7 @@ export default function RemyConversation({
         {conversation.featuredCTA && (
           <Link
             href={conversation.featuredCTA.href}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
           >
             {conversation.featuredCTA.label}
             <ArrowRight className="h-4 w-4" aria-hidden />

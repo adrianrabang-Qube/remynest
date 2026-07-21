@@ -64,7 +64,7 @@ export default function MomentOrderList({
                 disabled={i === 0}
                 onClick={() => onMove(i, -1)}
                 aria-label={`Move “${name}” earlier — currently ${i + 1} of ${items.length}`}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-soft transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-30"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-soft transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30"
               >
                 <ArrowUp className="h-5 w-5" aria-hidden />
               </button>
@@ -73,7 +73,7 @@ export default function MomentOrderList({
                 disabled={i === items.length - 1}
                 onClick={() => onMove(i, 1)}
                 aria-label={`Move “${name}” later — currently ${i + 1} of ${items.length}`}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-soft transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-30"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-soft transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30"
               >
                 <ArrowDown className="h-5 w-5" aria-hidden />
               </button>

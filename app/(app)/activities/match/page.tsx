@@ -25,7 +25,7 @@ function GameCard({ game }: { game: MatchGameSummary }) {
   return (
     <Link
       href={`/activities/match/${game.id}`}
-      className="flex items-center gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+      className="flex items-center gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-primary/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       {game.thumbUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- signed, short-lived URL
@@ -48,7 +48,7 @@ function GameCard({ game }: { game: MatchGameSummary }) {
         </span>
         <span className="mt-0.5 block text-sm text-charcoal-muted">{state}</span>
       </span>
-      <span aria-hidden className="shrink-0 text-sm font-semibold text-sage">
+      <span aria-hidden className="shrink-0 text-sm font-semibold text-primary">
         {game.matchedCount > 0 ? "Continue" : "Play"}
       </span>
     </Link>
@@ -82,7 +82,7 @@ export default async function MatchHubPage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <Link
         href="/activities"
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Remy&apos;s Activities
@@ -111,7 +111,7 @@ export default async function MatchHubPage() {
         <>
           <Link
             href="/activities/match/new"
-            className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+            className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <Plus className="h-5 w-5" aria-hidden />
             Create a game

@@ -104,7 +104,7 @@ export default function StoryEditor({
           value={title}
           maxLength={STORY_TITLE_MAX}
           onChange={(e) => setTitle(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
+          className="mt-1 w-full rounded-xl border border-sand-deep px-4 py-3 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-primary focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
@@ -120,13 +120,13 @@ export default function StoryEditor({
           disabled={!canSave}
           onClick={() => void onSave()}
           aria-busy={saving || undefined}
-          className="flex min-h-11 flex-1 items-center justify-center rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
         <Link
           href={`/activities/stories/${storyId}`}
-          className="flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-3 font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          className="flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-3 font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           Cancel
         </Link>

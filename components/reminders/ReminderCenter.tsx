@@ -81,11 +81,13 @@ const PRIORITY_META: Record<
 > = {
   critical: { dot: "bg-rose-500", label: "Critical" },
   important: { dot: "bg-gold", label: "Important" },
-  general: { dot: "bg-sage-soft", label: "General" },
+  general: { dot: "bg-primary-soft", label: "General" },
 };
 
 function StateChip({ state }: { state: LifecycleState }) {
   const map = {
+    // Success-status stays GREEN (purple-primary 2026-07-21: sage is demoted to
+    // success/nature accents — completion is exactly that).
     completed: "bg-sage-soft/25 text-sage-deep",
     awaiting: "bg-gold/15 text-gold-ink",
     scheduled: "bg-sand-deep/60 text-charcoal-soft",
@@ -151,7 +153,7 @@ function ReminderCard({
           </p>
 
           {r.recurring && r.frequency && (
-            <p className="text-sm text-sage mt-1">
+            <p className="text-sm text-primary mt-1">
               ↻ Repeats {r.frequency}
             </p>
           )}
@@ -174,10 +176,10 @@ function ReminderCard({
                 value={String(Boolean(r.completed))}
               />
               <PendingSubmitButton
-                className={`text-xs px-3 py-1 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                className={`text-xs px-3 py-1 rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   r.completed
                     ? "border border-sand-deep text-charcoal-soft hover:bg-sand-deep/40"
-                    : "bg-sage text-white hover:bg-sage-deep"
+                    : "bg-primary text-white hover:bg-primary-deep"
                 }`}
               >
                 {r.completed
@@ -315,7 +317,7 @@ export default function ReminderCenter({
   return (
     <div>
       {/* SECTION 1 — TODAY'S FOCUS (hero) */}
-      <section className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-sage/[0.06] to-white p-7 shadow-soft">
+      <section className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-primary/[0.06] to-white p-7 shadow-soft">
         <div className="flex items-center justify-between">
           <div className="text-xs font-medium uppercase tracking-wider text-charcoal-muted">
             Today&apos;s Focus
@@ -336,7 +338,7 @@ export default function ReminderCenter({
             <h2 className="mt-1 font-serif text-3xl font-semibold text-charcoal">
               {groups.nextUp.title}
             </h2>
-            <p className="text-lg text-sage-deep mt-1">
+            <p className="text-lg text-primary-deep mt-1">
               {fmtDateTime(groups.nextUp.remind_at)}
             </p>
           </div>
@@ -440,7 +442,7 @@ export default function ReminderCenter({
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="rounded text-sm font-medium text-sage transition hover:text-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="rounded text-sm font-medium text-primary transition hover:text-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 {showCompleted
                   ? "Show less"

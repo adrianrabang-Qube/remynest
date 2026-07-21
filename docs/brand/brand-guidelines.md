@@ -4,6 +4,19 @@
 `lib/brand/tokens.ts` + `tailwind.config.js` + `app/globals.css`; logo files in
 `public/brand/`.*
 
+> **PURPLE-PRIMARY UPDATE (authoritative, 2026-07-21 — operator decision; supersedes
+> sage-as-primary throughout this document):** Deep Violet **`#5B3E8E`** (`primary`,
+> with `primary-deep #3A2266` for hover/pressed and `primary-soft #8A6BD0` for
+> washes/borders only — not text-grade) is now the **app-wide PRIMARY** for all
+> interactive UI: buttons, links, chips, active nav states, text selection, and
+> keyboard **focus rings (violet — never gold, no longer sage)**. This unifies the
+> product with the purple identity (app icon, marketing site, Remy Design Bible).
+> **Forest Sage + Soft Moss are demoted to success/nature STATUS accents only**
+> (e.g. a completed-reminder chip, a "saved" confirmation) — never interactive
+> primaries. The canvas is unchanged: Warm Sand background, white cards, Deep
+> Charcoal text, Soft Gold keepsake accents (`gold-ink` rules unchanged). Where this
+> document says "sage" for an interactive element, read `primary` violet.
+
 ## 1. Essence
 RemyNest is a calm, private home for a family's memories and the gentle care that
 surrounds them. The **nest** is our central metaphor — a warm, hand-built,

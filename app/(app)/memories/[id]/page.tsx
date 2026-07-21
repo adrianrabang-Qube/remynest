@@ -172,7 +172,7 @@ export default async function MemoryPage({
                   memory.title}
               </h1>
 
-              <p className="text-base font-medium text-sage-deep mt-3">
+              <p className="text-base font-medium text-primary-deep mt-3">
                 🕰 Memory Date:{" "}
                 {formatMemoryDateLabel(memory)}
               </p>

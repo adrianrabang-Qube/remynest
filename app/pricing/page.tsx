@@ -65,12 +65,12 @@ export default function PricingPage() {
               key={plan}
               className={`flex flex-col rounded-3xl border p-6 shadow-soft ${
                 featured
-                  ? "border-sage bg-white ring-1 ring-sage/30"
+                  ? "border-primary bg-white ring-1 ring-primary/30"
                   : "border-sand-deep bg-white"
               }`}
             >
               {featured && (
-                <span className="mb-3 inline-flex w-fit rounded-full bg-sage/10 px-3 py-1 text-xs font-semibold text-sage">
+                <span className="mb-3 inline-flex w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                   Most popular
                 </span>
               )}
@@ -109,7 +109,7 @@ export default function PricingPage() {
       <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-charcoal-muted">
         Prices in EUR, billed monthly, cancel any time. Storage is shared across
         all your memories and care profiles. Need an organisation plan?{" "}
-        <Link href="/contact" className="font-medium text-sage underline">
+        <Link href="/contact" className="font-medium text-primary underline">
           Talk to us
         </Link>
         .

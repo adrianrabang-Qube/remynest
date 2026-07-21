@@ -78,9 +78,9 @@ export default function TimelineViewToggle({
               selectedCategory,
             })}
             aria-current={isActive ? "page" : undefined}
-            className={`rounded-xl px-5 py-2 text-sm font-medium transition max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+            className={`rounded-xl px-5 py-2 text-sm font-medium transition max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               isActive
-                ? "bg-sage text-white shadow-soft"
+                ? "bg-primary text-white shadow-soft"
                 : "text-charcoal-soft hover:bg-sand/40 hover:text-charcoal"
             }`}
           >

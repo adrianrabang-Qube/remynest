@@ -67,7 +67,7 @@ export default function MobileTopBar({
           onClick={onOpenMenu}
           aria-label="Open menu and profile"
           aria-haspopup="dialog"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sage text-sm font-semibold text-white transition hover:bg-sage-deep"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white transition hover:bg-primary-deep"
         >
           {initial}
         </button>

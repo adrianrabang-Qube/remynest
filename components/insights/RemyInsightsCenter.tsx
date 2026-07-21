@@ -50,14 +50,14 @@ export default function RemyInsightsCenter({
               key={a.id}
               className={`flex items-start gap-3 rounded-2xl border p-3 ${
                 a.unlocked
-                  ? "border-sage/30 bg-sage/[0.06]"
+                  ? "border-primary/30 bg-primary/[0.06]"
                   : "border-sand-deep/60 bg-sand/30 opacity-70"
               }`}
             >
               <span
                 className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${
                   a.unlocked
-                    ? "bg-sage/20 text-sage-deep"
+                    ? "bg-primary/20 text-primary-deep"
                     : "bg-sand-deep/40 text-charcoal-muted"
                 }`}
               >
@@ -76,7 +76,7 @@ export default function RemyInsightsCenter({
 
       {/* GENTLE RECOMMENDATIONS */}
       {model.recommendations.length > 0 && (
-        <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.06] to-sand/40 p-6 shadow-soft">
+        <section className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.06] to-sand/40 p-6 shadow-soft">
           <div className="flex items-center gap-2">
             <RemyAvatar mood="thoughtful" size="sm" />
             <h2 className="text-lg font-semibold text-charcoal">
@@ -93,7 +93,7 @@ export default function RemyInsightsCenter({
                 {r.cta && (
                   <Link
                     href={r.cta.href}
-                    className="shrink-0 whitespace-nowrap text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+                    className="shrink-0 whitespace-nowrap text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
                   >
                     {r.cta.label} →
                   </Link>

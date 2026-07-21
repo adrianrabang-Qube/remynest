@@ -79,7 +79,7 @@ export default function LifeChapterCard({
           </div>
 
           <div className="shrink-0">
-            <span className="whitespace-nowrap rounded-full bg-sage px-4 py-2 text-sm text-white">
+            <span className="whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm text-white">
               {chapter.memoryCount} memories
             </span>
           </div>
@@ -117,7 +117,7 @@ export default function LifeChapterCard({
         <div className="mt-8">
           <Link
             href={`/timeline?view=chapters&chapter=${chapter.id}`}
-            className="inline-flex min-h-11 items-center rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
           >
             Open Chapter
           </Link>

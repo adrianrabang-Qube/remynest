@@ -173,7 +173,7 @@ export default function SearchView() {
           <label htmlFor="global-search" className="sr-only">
             Search memories, collections, people and more
           </label>
-          <div className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 shadow-soft transition focus-within:border-sage focus-within:ring-2 focus-within:ring-sage">
+          <div className="flex items-center gap-2 rounded-full border border-sand-deep/70 bg-white px-4 shadow-soft transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary">
             <Search className="h-5 w-5 shrink-0 text-charcoal-muted" aria-hidden />
             <input
               id="global-search"
@@ -196,7 +196,7 @@ export default function SearchView() {
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <X className="h-4 w-4" aria-hidden />
                 </button>
@@ -220,9 +220,9 @@ export default function SearchView() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setFilter(f.key)}
-                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                     active
-                      ? "border-sage bg-sage text-white"
+                      ? "border-primary bg-primary text-white"
                       : "border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand/40"
                   }`}
                 >
@@ -258,7 +258,7 @@ export default function SearchView() {
                 <button
                   type="button"
                   onClick={clearRecent}
-                  className="rounded-full px-2 py-1 text-xs font-medium text-charcoal-muted transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="rounded-full px-2 py-1 text-xs font-medium text-charcoal-muted transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   Clear
                 </button>
@@ -269,7 +269,7 @@ export default function SearchView() {
                     key={r}
                     type="button"
                     onClick={() => setQuery(r)}
-                    className="rounded-full border border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                    className="rounded-full border border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     {r}
                   </button>
@@ -288,7 +288,7 @@ export default function SearchView() {
                   key={s}
                   type="button"
                   onClick={() => setQuery(s.replace(/^A\s+/, ""))}
-                  className="rounded-full border border-dashed border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="rounded-full border border-dashed border-sand-deep/70 bg-white px-4 py-2 text-sm text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   {s}
                 </button>
@@ -324,7 +324,7 @@ export default function SearchView() {
                   onClick={() =>
                     setCollapsed((p) => ({ ...p, [group.key]: !p[group.key] }))
                   }
-                  className="flex w-full items-center justify-between rounded-xl px-2 py-2 transition hover:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage"
+                  className="flex w-full items-center justify-between rounded-xl px-2 py-2 transition hover:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
                 >
                   <span className="text-xs font-semibold uppercase tracking-wide text-charcoal-muted">
                     {group.title}{" "}

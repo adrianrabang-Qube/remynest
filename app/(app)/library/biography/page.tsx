@@ -38,7 +38,7 @@ export default async function LibraryBiographyPage() {
     <div className="space-y-4 p-4 md:p-6">
       <Link
         href="/library"
-        className="inline-flex items-center gap-1 rounded py-1 text-sm font-medium text-sage-deep transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex items-center gap-1 rounded py-1 text-sm font-medium text-primary-deep transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ChevronLeft className="h-4 w-4" aria-hidden /> Library
       </Link>

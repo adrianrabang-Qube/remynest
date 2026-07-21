@@ -41,7 +41,7 @@ export default function ProfileLifeSnapshot({
             href={stat.href}
             className="rounded-2xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:shadow-soft-lg"
           >
-            <p className="text-2xl font-semibold text-sage">
+            <p className="text-2xl font-semibold text-primary">
               {values[stat.key]}
             </p>
             <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-charcoal-muted">

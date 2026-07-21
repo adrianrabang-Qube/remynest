@@ -61,7 +61,7 @@ export default async function ConnectionDetailPage({
             {connection.connectedCount === 1 ? "moment" : "moments"}
           </span>
           {span && (
-            <span className="font-medium text-sage-deep">{span}</span>
+            <span className="font-medium text-primary-deep">{span}</span>
           )}
           {connection.themes.length > 0 && (
             <span className="text-charcoal-muted">
@@ -70,7 +70,7 @@ export default async function ConnectionDetailPage({
           )}
           <Link
             href={`/memories/${connection.id}`}
-            className="font-medium text-sage-deep underline-offset-2 hover:underline"
+            className="font-medium text-primary-deep underline-offset-2 hover:underline"
           >
             Open this memory →
           </Link>
@@ -106,7 +106,7 @@ export default async function ConnectionDetailPage({
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm font-medium text-sage-deep">
+                  <p className="mt-1 text-sm font-medium text-primary-deep">
                     🕰 {formatMemoryDateLabel(m)}
                   </p>
                 </Link>

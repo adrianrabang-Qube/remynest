@@ -216,7 +216,7 @@ export default function AttachmentManager({
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 focus-within:ring-2 focus-within:ring-sage focus-within:ring-offset-2">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2">
           <span aria-hidden>＋</span>
           <span>Add photos or videos</span>
           {/* LA2 (WCAG 2.1.1 Keyboard): sr-only (was `hidden`=display:none, which

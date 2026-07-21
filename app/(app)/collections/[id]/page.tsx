@@ -63,7 +63,7 @@ export default async function CollectionDetailPage({
             {collection.memoryCount === 1 ? "memory" : "memories"}
           </span>
           {range && (
-            <span className="font-medium text-sage-deep">{range}</span>
+            <span className="font-medium text-primary-deep">{range}</span>
           )}
           {collection.emotionalThemes.length > 0 && (
             <span className="text-charcoal-muted">
@@ -102,7 +102,7 @@ export default async function CollectionDetailPage({
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm font-medium text-sage-deep">
+                  <p className="mt-1 text-sm font-medium text-primary-deep">
                     🕰 {formatMemoryDateLabel(m)}
                   </p>
                 </Link>

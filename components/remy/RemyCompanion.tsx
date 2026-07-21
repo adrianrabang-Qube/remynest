@@ -29,7 +29,7 @@ export default function RemyCompanion({
   const mood = primary?.mood ?? REMY.defaultMood;
 
   return (
-    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-6 shadow-soft max-md:p-4">
+    <section className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.07] to-sand/40 p-6 shadow-soft max-md:p-4">
       <div className="flex items-start gap-4 max-md:gap-3">
         <RemyAvatar mood={mood} size="lg" className="max-md:!h-12 max-md:!w-12 max-md:!text-xl" />
 
@@ -50,7 +50,7 @@ export default function RemyCompanion({
               {primary.cta && (
                 <Link
                   href={primary.cta.href}
-                  className="mt-2 inline-flex items-center text-sm font-semibold text-sage-deep underline-offset-2 hover:underline"
+                  className="mt-2 inline-flex items-center text-sm font-semibold text-primary-deep underline-offset-2 hover:underline"
                 >
                   {primary.cta.label} →
                 </Link>
@@ -63,7 +63,7 @@ export default function RemyCompanion({
           )}
 
           {rest.length > 0 && (
-            <ul className="mt-4 space-y-2 border-t border-sage/15 pt-3 max-md:mt-2 max-md:space-y-1 max-md:pt-2">
+            <ul className="mt-4 space-y-2 border-t border-primary/15 pt-3 max-md:mt-2 max-md:space-y-1 max-md:pt-2">
               {rest.map((o) => (
                 <li
                   key={o.id}
@@ -73,7 +73,7 @@ export default function RemyCompanion({
                   {o.cta && (
                     <Link
                       href={o.cta.href}
-                      className="shrink-0 whitespace-nowrap text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+                      className="shrink-0 whitespace-nowrap text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
                     >
                       {o.cta.label} →
                     </Link>

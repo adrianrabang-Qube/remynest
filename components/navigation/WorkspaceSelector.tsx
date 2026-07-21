@@ -185,7 +185,7 @@ export default function WorkspaceSelector({
                         {profile.name}
                       </span>
                       {active && (
-                        <span aria-hidden className="text-sage">
+                        <span aria-hidden className="text-primary">
                           ✓
                         </span>
                       )}
@@ -200,7 +200,7 @@ export default function WorkspaceSelector({
                 type="button"
                 onClick={() => setManageOpen((value) => !value)}
                 aria-expanded={manageOpen}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium text-sage-deep transition hover:bg-sand/50"
+                className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium text-primary-deep transition hover:bg-sand/50"
               >
                 Manage care profiles
                 <span className="text-xs">{manageOpen ? "▴" : "▾"}</span>

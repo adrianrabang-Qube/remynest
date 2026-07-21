@@ -39,7 +39,7 @@ export default function ProfileCoverageCard({
         <h2 className="text-lg font-semibold text-charcoal">Memory coverage</h2>
         <Link
           href="/memory-dates"
-          className="text-sm font-semibold text-sage-deep hover:underline"
+          className="text-sm font-semibold text-primary-deep hover:underline"
         >
           Add dates →
         </Link>
@@ -66,7 +66,7 @@ export default function ProfileCoverageCard({
           aria-valuemax={100}
           aria-label="Dated memory coverage"
         >
-          <div className="h-full rounded-full bg-sage" style={{ width: `${pct}%` }} />
+          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
         </div>
       </div>
     </section>

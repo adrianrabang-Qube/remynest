@@ -112,7 +112,7 @@ function CollapsibleSection({
       {...(defaultOpen ? { open: true } : {})}
       className="group overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft [&_summary::-webkit-details-marker]:hidden"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:px-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary md:px-6">
         <span className="min-w-0">
           <span className="block font-serif text-lg font-semibold text-charcoal">
             {title}
@@ -802,7 +802,7 @@ export default async function DashboardPage() {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className="text-sm font-medium text-sage-deep underline-offset-2 hover:underline"
+                  className="text-sm font-medium text-primary-deep underline-offset-2 hover:underline"
                 >
                   {item.title}
                 </Link>
@@ -864,7 +864,7 @@ export default async function DashboardPage() {
                   : ""}
               </span>
             </span>
-            <span className="shrink-0 text-sm font-medium text-sage-deep">
+            <span className="shrink-0 text-sm font-medium text-primary-deep">
               View insights →
             </span>
           </Link>

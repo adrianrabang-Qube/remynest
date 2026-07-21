@@ -24,9 +24,9 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
       aria-hidden
       className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
         status === "available"
-          ? "bg-sage text-white"
+          ? "bg-primary text-white"
           : status === "coming-soon"
-            ? "bg-sand text-sage"
+            ? "bg-sand text-primary"
             : "bg-sand text-charcoal-muted"
       }`}
     >
@@ -69,12 +69,12 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
     return (
       <Link
         href={href}
-        className="flex items-center gap-3 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage sm:gap-4"
+        className="flex items-center gap-3 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-primary/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:gap-4"
       >
         {body}
         <span
           aria-hidden
-          className="shrink-0 text-sm font-semibold text-sage"
+          className="shrink-0 text-sm font-semibold text-primary"
         >
           Open
         </span>

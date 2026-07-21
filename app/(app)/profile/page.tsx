@@ -174,7 +174,7 @@ export default async function ProfilePage() {
           <div>
             <h2 className="text-lg font-semibold text-charcoal">Relationships</h2>
             <div className="mt-2 flex items-center gap-3 text-sm text-charcoal-soft">
-              <Users className="h-5 w-5 shrink-0 text-sage" aria-hidden />
+              <Users className="h-5 w-5 shrink-0 text-primary" aria-hidden />
               <span>
                 <span className="font-semibold text-charcoal">{peopleCount}</span>{" "}
                 {peopleCount === 1 ? "person" : "people"} in your care

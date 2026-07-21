@@ -238,7 +238,7 @@ export default function BillingSection() {
               return (
                 <span
                   key={plan}
-                  className="rounded-lg border border-sage bg-sage/10 px-4 py-2 text-sm font-medium text-sage"
+                  className="rounded-lg border border-primary bg-primary/10 px-4 py-2 text-sm font-medium text-primary"
                 >
                   {BILLING_PLANS[plan].displayName} ✓ Current Plan
                 </span>
@@ -257,8 +257,8 @@ export default function BillingSection() {
                 }
                 className={`rounded-lg border px-4 py-2 text-sm ${
                   selected
-                    ? "bg-sage text-white border-sage"
-                    : "border-sand-deep text-charcoal-soft hover:border-sage/50"
+                    ? "bg-primary text-white border-primary"
+                    : "border-sand-deep text-charcoal-soft hover:border-primary/50"
                 }`}
               >
                 {BILLING_PLANS[plan].displayName} ({getPlanPriceLabel(plan)})
@@ -276,7 +276,7 @@ export default function BillingSection() {
             disabled={loading}
             className="
               rounded-full
-              bg-sage
+              bg-primary
               px-5
               py-2
               text-sm
@@ -284,7 +284,7 @@ export default function BillingSection() {
               text-white
               shadow-soft
               transition
-              hover:bg-sage-deep
+              hover:bg-primary-deep
               disabled:opacity-50
             "
           >
@@ -323,8 +323,8 @@ export default function BillingSection() {
               font-medium
               text-charcoal
               transition
-              hover:border-sage/50
-              hover:text-sage
+              hover:border-primary/50
+              hover:text-primary
               disabled:opacity-50
             "
           >

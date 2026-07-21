@@ -37,7 +37,7 @@ export default function CompactChapterRow({
         href={`/timeline?view=chapters&chapter=${chapter.id}`}
         className="flex items-center gap-3 px-3 py-3 transition active:bg-sand/50"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <BookOpen className="h-5 w-5" aria-hidden />
         </div>
 

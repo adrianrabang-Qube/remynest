@@ -147,7 +147,7 @@ export default function MatchWizard() {
         onClick={() =>
           step === "size" ? router.push("/activities/match") : setStep("size")
         }
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         {step === "size" ? "Memory Match" : "Back to sizes"}
@@ -187,7 +187,7 @@ export default function MatchWizard() {
                 setSelected([]);
                 setStep("photos");
               }}
-              className="flex w-full items-center justify-between gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 text-left shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="flex w-full items-center justify-between gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 text-left shadow-soft transition hover:border-primary/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <span>
                 <span className="block text-[17px] font-semibold text-charcoal">
@@ -197,7 +197,7 @@ export default function MatchWizard() {
                   {s.pairs} pairs · {s.description}
                 </span>
               </span>
-              <span aria-hidden className="text-sm font-semibold text-sage">
+              <span aria-hidden className="text-sm font-semibold text-primary">
                 Choose
               </span>
             </button>
@@ -227,7 +227,7 @@ export default function MatchWizard() {
               <button
                 type="button"
                 onClick={() => void retry()}
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Try again
               </button>
@@ -257,8 +257,8 @@ export default function MatchWizard() {
                           ? `Remove photo from “${name}”`
                           : `Use photo from “${name}”`
                       }
-                      className={`relative aspect-square overflow-hidden rounded-2xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
-                        isSelected ? "border-sage ring-2 ring-sage" : "border-sand-deep/60"
+                      className={`relative aspect-square overflow-hidden rounded-2xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                        isSelected ? "border-primary ring-2 ring-primary" : "border-sand-deep/60"
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- signed, short-lived URL */}
@@ -271,7 +271,7 @@ export default function MatchWizard() {
                       {isSelected && (
                         <span
                           aria-hidden
-                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-sage text-xs font-bold text-white shadow-soft"
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-soft"
                         >
                           {orderIndex + 1}
                         </span>
@@ -284,7 +284,7 @@ export default function MatchWizard() {
                 <button
                   type="button"
                   onClick={() => void loadPage(offset)}
-                  className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   Show more photos
                 </button>
@@ -294,7 +294,7 @@ export default function MatchWizard() {
                 disabled={selected.length !== pairs || creating}
                 onClick={() => void onCreate()}
                 aria-busy={creating || undefined}
-                className="mt-6 flex min-h-11 w-full items-center justify-center rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-50"
+                className="mt-6 flex min-h-11 w-full items-center justify-center rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 {creating
                   ? "Setting the table…"

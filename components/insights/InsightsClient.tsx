@@ -385,7 +385,7 @@ export default function InsightsClient({
 
       {/* HEADER */}
       <header>
-        <span className="inline-flex items-center rounded-full border border-sand-deep/70 bg-white px-4 py-1.5 text-sm font-medium text-sage-deep">
+        <span className="inline-flex items-center rounded-full border border-sand-deep/70 bg-white px-4 py-1.5 text-sm font-medium text-primary-deep">
           Remy Insights Center
         </span>
         <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-charcoal md:text-4xl">
@@ -410,7 +410,7 @@ export default function InsightsClient({
           the page opens calm (Apple Health, not an analytics dashboard). Nothing removed;
           every chart still mounts when the section is expanded. */}
       <details className="group [&_summary::-webkit-details-marker]:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white px-5 py-4 shadow-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:px-6">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-3xl border border-sand-deep/70 bg-white px-5 py-4 shadow-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary md:px-6">
           <span className="min-w-0">
             <span className="block font-serif text-lg font-semibold text-charcoal">
               Detailed analytics

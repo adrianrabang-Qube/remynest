@@ -113,14 +113,14 @@ export default function TimelineCard({
 
   return (
     <details className="group overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft transition hover:shadow-soft-lg open:shadow-soft-lg motion-reduce:transition-none">
-      <summary className="cursor-pointer list-none p-6 transition-colors group-open:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage md:p-7">
+      <summary className="cursor-pointer list-none p-6 transition-colors group-open:bg-sand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary md:p-7">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <h3 className="break-words font-serif text-2xl font-semibold leading-tight text-charcoal transition-colors group-hover:text-sage-deep md:text-3xl">
+            <h3 className="break-words font-serif text-2xl font-semibold leading-tight text-charcoal transition-colors group-hover:text-primary-deep md:text-3xl">
               {displayTitle}
             </h3>
 
-            <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-sage-deep">
+            <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary-deep">
               <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="sr-only">Memory date: </span>
               {memoryDateLabel}
@@ -213,7 +213,7 @@ export default function TimelineCard({
               (tag: string) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-sage/10 px-3 py-1 text-xs text-sage"
+                  className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary"
                 >
                   #{tag}
                 </span>

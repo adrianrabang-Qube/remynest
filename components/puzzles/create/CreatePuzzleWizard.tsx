@@ -213,7 +213,7 @@ export default function CreatePuzzleWizard() {
             ? router.push("/activities/puzzles")
             : setStep(step === "crop" ? "image" : "crop")
         }
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         {step === "image" ? "Memory Puzzles" : "Back"}
@@ -256,9 +256,9 @@ export default function CreatePuzzleWizard() {
                 role="tab"
                 aria-selected={tab === id}
                 onClick={() => setTab(id)}
-                className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                className={`min-h-11 rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   tab === id
-                    ? "bg-sage text-white"
+                    ? "bg-primary text-white"
                     : "bg-white text-charcoal-soft border border-sand-deep/70 hover:bg-sand"
                 }`}
               >
@@ -290,7 +290,7 @@ export default function CreatePuzzleWizard() {
                 <button
                   type="button"
                   onClick={() => void retryPicker()}
-                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-sage px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   Try again
                 </button>
@@ -315,7 +315,7 @@ export default function CreatePuzzleWizard() {
                         setStep("crop");
                       }}
                       aria-label={`Use photo from “${img.memoryTitle || "memory"}”`}
-                      className="aspect-square overflow-hidden rounded-2xl border border-sand-deep/60 bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                      className="aspect-square overflow-hidden rounded-2xl border border-sand-deep/60 bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- signed, short-lived
                           URLs; next/image optimization would re-proxy already-optimized variants */}
@@ -332,7 +332,7 @@ export default function CreatePuzzleWizard() {
                   <button
                     type="button"
                     onClick={() => void loadPage(pickerOffset)}
-                    className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                    className="mx-auto mt-4 flex min-h-11 items-center justify-center rounded-full border border-sand-deep/70 bg-white px-6 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     Show more photos
                   </button>
@@ -340,8 +340,8 @@ export default function CreatePuzzleWizard() {
               </>
             )
           ) : (
-            <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-3xl border border-dashed border-sand-deep bg-white p-10 text-center shadow-soft transition focus-within:ring-2 focus-within:ring-sage hover:border-sage/40">
-              <ImagePlus className="h-8 w-8 text-sage" aria-hidden />
+            <label className="mt-4 flex cursor-pointer flex-col items-center gap-2 rounded-3xl border border-dashed border-sand-deep bg-white p-10 text-center shadow-soft transition focus-within:ring-2 focus-within:ring-primary hover:border-primary/40">
+              <ImagePlus className="h-8 w-8 text-primary" aria-hidden />
               <span className="font-medium text-charcoal">
                 {uploading ? "Adding your photo…" : "Choose a photo"}
               </span>
@@ -378,7 +378,7 @@ export default function CreatePuzzleWizard() {
               type="button"
               disabled={creating}
               onClick={() => onCreate(d.id)}
-              className="flex w-full items-center justify-between gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 text-left shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-60"
+              className="flex w-full items-center justify-between gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 text-left shadow-soft transition hover:border-primary/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
             >
               <span>
                 <span className="block text-[17px] font-semibold text-charcoal">
@@ -388,7 +388,7 @@ export default function CreatePuzzleWizard() {
                   {d.pieces} pieces · {d.estimate}, no rush
                 </span>
               </span>
-              <span aria-hidden className="text-sm font-semibold text-sage">
+              <span aria-hidden className="text-sm font-semibold text-primary">
                 {creating ? "…" : "Create"}
               </span>
             </button>
@@ -466,7 +466,7 @@ function CropStep({
         }}
         onPointerUp={() => (drag.current = null)}
         onPointerCancel={() => (drag.current = null)}
-        className="relative mx-auto aspect-square w-full max-w-sm touch-none select-none overflow-hidden rounded-3xl border border-sand-deep bg-sand shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="relative mx-auto aspect-square w-full max-w-sm touch-none select-none overflow-hidden rounded-3xl border border-sand-deep bg-sand shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- signed source; we need raw
             natural dimensions for exact crop math */}
@@ -516,7 +516,7 @@ function CropStep({
             naturalHeight: dims.h,
           });
         }}
-        className="mx-auto mt-5 flex min-h-11 w-full max-w-sm items-center justify-center rounded-full bg-sage px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 disabled:opacity-60"
+        className="mx-auto mt-5 flex min-h-11 w-full max-w-sm items-center justify-center rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60"
       >
         Use this framing
       </button>

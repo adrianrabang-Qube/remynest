@@ -51,7 +51,7 @@ export default function DashboardFocus({
         </p>
         <Link
           href="/reminders"
-          className="mt-4 inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+          className="mt-4 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
         >
           Open Reminder Center
         </Link>
@@ -74,7 +74,7 @@ export default function DashboardFocus({
         className={`rounded-3xl border p-6 shadow-soft ${
           rightNowOverdue
             ? "border-gold/50 bg-gold/10"
-            : "border-sage/30 bg-sage/[0.06]"
+            : "border-primary/30 bg-primary/[0.06]"
         }`}
       >
         <div className="flex items-center justify-between">
@@ -83,7 +83,7 @@ export default function DashboardFocus({
           </p>
           <Link
             href="/reminders"
-            className="text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+            className="text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
           >
             Reminder Center →
           </Link>

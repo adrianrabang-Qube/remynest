@@ -49,7 +49,7 @@ export default function FloatingCompanionLayer() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss Remy companion"
-          className="pointer-events-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-sage/10 shadow-lg ring-1 ring-sage/30 backdrop-blur-sm transition active:scale-95"
+          className="pointer-events-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-primary/10 shadow-lg ring-1 ring-primary/30 backdrop-blur-sm transition active:scale-95"
         >
           <Remy
             state={presentation.expression}

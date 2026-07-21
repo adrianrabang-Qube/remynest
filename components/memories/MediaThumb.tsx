@@ -81,7 +81,7 @@ export default function MediaThumb({
       <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-sand px-2 text-center">
         <span
           aria-hidden
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-sage shadow-soft"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-soft"
         >
           ♪
         </span>

@@ -449,11 +449,11 @@ export default function PuzzlePlayer({
                 aria-label={`Row ${Math.floor(slot / cols) + 1}, column ${(slot % cols) + 1}${
                   selected != null ? " — place the chosen piece here" : ""
                 }`}
-                className={`border border-sand-deep/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sage ${
+                className={`border border-sand-deep/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
                   isHintSlot
                     ? `bg-gold-soft/60 ${reduceMotion ? "" : "animate-pulse"}`
                     : selected != null
-                      ? "bg-sand/60 hover:bg-sage/15"
+                      ? "bg-sand/60 hover:bg-primary/15"
                       : "bg-sand/40"
                 }`}
               />
@@ -553,9 +553,9 @@ export default function PuzzlePlayer({
                       ...tileBackground(puzzle.crop, cols, piece, TRAY_TILE * cols),
                       opacity: hidden ? 0.25 : 1,
                     }}
-                    className={`[touch-action:pan-x] rounded-xl border shadow-soft transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage ${
+                    className={`[touch-action:pan-x] rounded-xl border shadow-soft transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                       selected === piece
-                        ? "border-sage ring-2 ring-sage"
+                        ? "border-primary ring-2 ring-primary"
                         : isHint
                           ? `border-gold ${reduceMotion ? "" : "animate-pulse"}`
                           : "border-white/60"
@@ -601,7 +601,7 @@ export default function PuzzlePlayer({
             {puzzle.memory_id && (
               <Link
                 href={`/memories/${puzzle.memory_id}`}
-                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <BookHeart className="h-4 w-4" aria-hidden />
                 Open this memory
@@ -614,7 +614,7 @@ export default function PuzzlePlayer({
                 (quota-gated like the chat). Until then it opens Ask Remy. */}
             <Link
               href="/remy"
-              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               Talk with Remy
@@ -623,7 +623,7 @@ export default function PuzzlePlayer({
               type="button"
               onClick={onReplay}
               disabled={busy}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-60"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-sand-deep/70 bg-white px-5 py-2.5 text-sm font-semibold text-charcoal transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
             >
               <RotateCcw className="h-4 w-4" aria-hidden />
               Play again
@@ -662,8 +662,8 @@ function ControlButton({
         danger
           ? "border-rose-100 bg-rose-50 text-rose-600/90 hover:bg-rose-100 focus-visible:ring-rose-600"
           : pressed
-            ? "border-sage bg-sage/10 text-sage focus-visible:ring-sage"
-            : "border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand focus-visible:ring-sage"
+            ? "border-primary bg-primary/10 text-primary focus-visible:ring-primary"
+            : "border-sand-deep/70 bg-white text-charcoal-soft hover:bg-sand focus-visible:ring-primary"
       }`}
     >
       {children}

@@ -50,7 +50,7 @@ export default function RemyUnderstanding({
   return (
     <section
       aria-label={`Remy's understanding of ${subject.name}`}
-      className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-sage/5 to-white p-4 shadow-soft md:p-6"
+      className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-primary/5 to-white p-4 shadow-soft md:p-6"
     >
       <div className="flex items-center gap-3">
         <RemyAvatar size="sm" />
@@ -72,7 +72,7 @@ export default function RemyUnderstanding({
             const Icon = KIND_ICON[facet.kind];
             const inner = (
               <>
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage/10 text-sage">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">

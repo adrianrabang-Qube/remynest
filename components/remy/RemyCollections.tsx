@@ -22,7 +22,7 @@ export default function RemyCollections({
         </h2>
         <Link
           href="/collections"
-          className="text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+          className="text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
         >
           View all collections →
         </Link>

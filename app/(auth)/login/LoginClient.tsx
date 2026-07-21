@@ -78,7 +78,7 @@ export default function LoginClient() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-sage px-4 py-2.5 font-medium text-white transition hover:bg-sage-deep active:scale-[.98] active:opacity-90 disabled:opacity-70 disabled:active:scale-100"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-medium text-white transition hover:bg-primary-deep active:scale-[.98] active:opacity-90 disabled:opacity-70 disabled:active:scale-100"
         >
           {loading && (
             <span

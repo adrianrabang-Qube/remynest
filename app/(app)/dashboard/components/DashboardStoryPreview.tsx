@@ -48,7 +48,7 @@ export default function DashboardStoryPreview({
         </h2>
         <Link
           href="/library"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-sage-deep hover:underline"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-primary-deep hover:underline"
         >
           Open Library
           <ChevronRight className="h-4 w-4" aria-hidden />

@@ -20,7 +20,7 @@ export default function RemyConnections({
         </h2>
         <Link
           href="/connections"
-          className="text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+          className="text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
         >
           View all connections →
         </Link>

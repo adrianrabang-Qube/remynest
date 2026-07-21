@@ -12,7 +12,7 @@ const STATUS_LABEL: Record<JourneyStatus, string> = {
 };
 
 const STATUS_CLASS: Record<JourneyStatus, string> = {
-  ready: "bg-sage/15 text-sage-deep",
+  ready: "bg-primary/15 text-primary-deep",
   growing: "bg-sand-deep/30 text-charcoal-muted",
 };
 

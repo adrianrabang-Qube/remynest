@@ -26,8 +26,8 @@ export default function RemyMemoryBook({
   return (
     <section className="overflow-hidden rounded-3xl border border-sand-deep/70 bg-white shadow-soft">
       {/* Cover */}
-      <header className="border-b border-sand-deep/60 bg-gradient-to-br from-sage/[0.10] to-sand/50 p-6 sm:p-8 max-md:p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sage-deep">
+      <header className="border-b border-sand-deep/60 bg-gradient-to-br from-primary/[0.10] to-sand/50 p-6 sm:p-8 max-md:p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-deep">
           Memory Book
         </p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight text-charcoal sm:text-4xl max-md:text-2xl">
@@ -40,7 +40,7 @@ export default function RemyMemoryBook({
         )}
         <Link
           href="/memory-book/print"
-          className="mt-4 inline-flex items-center rounded-full border border-sage/40 bg-white px-4 py-2 text-sm font-semibold text-sage-deep transition hover:bg-sage/10"
+          className="mt-4 inline-flex items-center rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-semibold text-primary-deep transition hover:bg-primary/10"
         >
           Export as PDF →
         </Link>
@@ -64,7 +64,7 @@ export default function RemyMemoryBook({
                     aria-current={isActive ? "true" : undefined}
                     className={`rounded-xl px-3 py-2 text-left text-sm transition max-md:shrink-0 max-md:whitespace-nowrap ${
                       isActive
-                        ? "bg-sage/15 font-semibold text-sage-deep"
+                        ? "bg-primary/15 font-semibold text-primary-deep"
                         : "text-charcoal-soft hover:bg-sand/40"
                     }`}
                   >
@@ -101,7 +101,7 @@ export default function RemyMemoryBook({
                   {chapter.href && (
                     <Link
                       href={chapter.href}
-                      className="mt-1 inline-flex items-center text-sm font-semibold text-sage-deep underline-offset-2 hover:underline"
+                      className="mt-1 inline-flex items-center text-sm font-semibold text-primary-deep underline-offset-2 hover:underline"
                     >
                       Open chapter →
                     </Link>
@@ -125,7 +125,7 @@ export default function RemyMemoryBook({
           {active.href && (
             <Link
               href={active.href}
-              className="mt-5 inline-flex items-center text-sm font-semibold text-sage-deep underline-offset-2 hover:underline"
+              className="mt-5 inline-flex items-center text-sm font-semibold text-primary-deep underline-offset-2 hover:underline"
             >
               Explore →
             </Link>

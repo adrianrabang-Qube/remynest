@@ -51,7 +51,7 @@ export default async function ChapterDetailPage({
           {chapter.title}
         </h1>
         {range && (
-          <p className="mt-2 text-lg font-medium text-sage-deep">{range}</p>
+          <p className="mt-2 text-lg font-medium text-primary-deep">{range}</p>
         )}
 
         <p className="mt-3 text-lg text-charcoal-soft break-words">
@@ -101,7 +101,7 @@ export default async function ChapterDetailPage({
                       m.title?.trim() ||
                       "Untitled memory"}
                   </h3>
-                  <p className="mt-1 text-sm font-medium text-sage-deep">
+                  <p className="mt-1 text-sm font-medium text-primary-deep">
                     🕰 {formatMemoryDateLabel(m)}
                   </p>
                 </Link>

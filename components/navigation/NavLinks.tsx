@@ -24,8 +24,8 @@ function NavLinksContent() {
             aria-current={active ? "page" : undefined}
             className={`rounded-full px-3 py-1.5 transition ${
               active
-                ? "bg-sage/10 text-sage"
-                : "text-charcoal-soft hover:bg-white/70 hover:text-sage"
+                ? "bg-primary/10 text-primary"
+                : "text-charcoal-soft hover:bg-white/70 hover:text-primary"
             }`}
           >
             {label}

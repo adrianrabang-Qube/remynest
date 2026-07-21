@@ -35,7 +35,7 @@ export default function SubscriptionPage() {
 
       <p className="mt-8 text-sm text-charcoal-muted">
         Questions about your plan? Visit{" "}
-        <Link href="/support" className="text-sage underline">
+        <Link href="/support" className="text-primary underline">
           Support
         </Link>
         .

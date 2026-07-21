@@ -35,7 +35,7 @@ function DrawerLinks({ onNavigate }: { onNavigate: () => void }) {
             aria-current={active ? "page" : undefined}
             className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
               active
-                ? "bg-sage/10 text-sage"
+                ? "bg-primary/10 text-primary"
                 : "text-charcoal-soft hover:bg-sand"
             }`}
           >
@@ -103,7 +103,7 @@ export default function MobileNavDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="-mr-1.5 flex h-11 w-11 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="-mr-1.5 flex h-11 w-11 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>

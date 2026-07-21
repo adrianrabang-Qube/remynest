@@ -25,7 +25,7 @@ export default function ChapterCard({
       </h3>
 
       {range && (
-        <p className="mt-1 text-sm font-medium text-sage-deep">{range}</p>
+        <p className="mt-1 text-sm font-medium text-primary-deep">{range}</p>
       )}
 
       <p className="mt-2 text-sm text-charcoal-soft break-words">

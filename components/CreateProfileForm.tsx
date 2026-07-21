@@ -78,7 +78,7 @@ export default function CreateProfileForm({
             name="profile_name"
             required
             placeholder="Grandma Mary"
-            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full border rounded-xl p-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
         </div>
 
@@ -91,7 +91,7 @@ export default function CreateProfileForm({
             type="text"
             name="preferred_name"
             placeholder="Mary"
-            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full border rounded-xl p-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
         </div>
 
@@ -106,7 +106,7 @@ export default function CreateProfileForm({
             id="date_of_birth"
             type="date"
             name="date_of_birth"
-            className="w-full border rounded-xl p-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full border rounded-xl p-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
         </div>
 
@@ -131,7 +131,7 @@ export default function CreateProfileForm({
         <button
           type="submit"
           disabled={loading}
-          className="bg-sage text-white px-6 py-3 rounded-xl transition hover:bg-sage-deep disabled:opacity-50"
+          className="bg-primary text-white px-6 py-3 rounded-xl transition hover:bg-primary-deep disabled:opacity-50"
         >
           {loading ? "Adding..." : "Add Person"}
         </button>

@@ -498,7 +498,7 @@ export default function CreateMemoryForm({
         onChange={(e) => {
           setTitle(e.target.value);
         }}
-        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
       />
 
       <label htmlFor="memory-content" className="sr-only">
@@ -515,7 +515,7 @@ export default function CreateMemoryForm({
         onChange={(e) => {
           setContent(e.target.value);
         }}
-        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-sage focus:ring-2 focus:ring-sage/40 resize-none"
+        className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/40 resize-none"
       />
 
       {/* When did this happen? — historical dating. Progressive disclosure: the header
@@ -581,12 +581,12 @@ export default function CreateMemoryForm({
                 e.target.value
               )
             }
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
           />
         )}
 
         <details className="group rounded-lg [&_summary::-webkit-details-marker]:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-lg px-1 text-sm font-medium text-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-lg px-1 text-sm font-medium text-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
             <ChevronDown
               aria-hidden
               className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
@@ -637,7 +637,7 @@ export default function CreateMemoryForm({
                   )
                 }
                 placeholder="e.g. 1995"
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
               />
             )}
 
@@ -650,7 +650,7 @@ export default function CreateMemoryForm({
                     e.target.value
                   )
                 }
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/40"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
               >
                 {DECADE_OPTIONS.map(
                   (decade) => (

@@ -34,7 +34,7 @@ export default async function EditSongPage({
       <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <Link
           href="/activities/music"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Music Memories
@@ -55,7 +55,7 @@ export default async function EditSongPage({
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
       <Link
         href={`/activities/music/${song.id}`}
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full text-sm font-medium text-charcoal-soft transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Back to the song

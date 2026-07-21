@@ -71,7 +71,7 @@ export default function ReportDialog({
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex min-h-11 items-center rounded-full bg-sage px-5 text-sm font-semibold text-white transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Done
               </button>
@@ -95,7 +95,7 @@ export default function ReportDialog({
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r.value}
-                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-sand-deep/60 px-3 py-2.5 text-sm text-charcoal transition hover:bg-sand/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-sage"
+                    className="flex cursor-pointer items-center gap-3 rounded-xl border border-sand-deep/60 px-3 py-2.5 text-sm text-charcoal transition hover:bg-sand/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary"
                   >
                     <input
                       type="radio"
@@ -124,7 +124,7 @@ export default function ReportDialog({
               rows={3}
               maxLength={MAX_REPORT_DESCRIPTION}
               placeholder="Add any detail that will help us review this."
-              className="mt-1 w-full rounded-xl border border-sand-deep px-3 py-2 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-sage focus:ring-2 focus:ring-sage/40"
+              className="mt-1 w-full rounded-xl border border-sand-deep px-3 py-2 text-base text-charcoal outline-none transition placeholder:text-charcoal-muted focus:border-primary focus:ring-2 focus:ring-primary/40"
             />
 
             {error && (
@@ -138,7 +138,7 @@ export default function ReportDialog({
                 type="button"
                 onClick={onClose}
                 disabled={busy}
-                className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-5 text-sm font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-5 text-sm font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Cancel
               </button>

@@ -93,7 +93,7 @@ export default async function RemyConversationPage() {
           Companion surface — carries the remy.* palette (matches the RemyAsk section below). */}
       <Link
         href="/remy/story"
-        className="flex items-center gap-3 rounded-3xl border border-remy-lavender/25 bg-gradient-to-b from-remy-mist to-white p-4 shadow-soft transition hover:bg-remy-lavender/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+        className="flex items-center gap-3 rounded-3xl border border-remy-lavender/25 bg-gradient-to-b from-remy-mist to-white p-4 shadow-soft transition hover:bg-remy-lavender/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <span
           aria-hidden

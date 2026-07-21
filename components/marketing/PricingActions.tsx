@@ -32,7 +32,7 @@ export default function PricingActions({ plan }: { plan: BillingPlan }) {
     return (
       <Link
         href="/signup"
-        className="block w-full rounded-xl border border-sage/40 px-4 py-2.5 text-center text-sm font-semibold text-sage transition hover:bg-sage/5"
+        className="block w-full rounded-xl border border-primary/40 px-4 py-2.5 text-center text-sm font-semibold text-primary transition hover:bg-primary/5"
       >
         Get started free
       </Link>
@@ -69,7 +69,7 @@ export default function PricingActions({ plan }: { plan: BillingPlan }) {
       type="button"
       onClick={choosePlan}
       disabled={loading}
-      className="block w-full rounded-xl bg-sage px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-sage-deep disabled:opacity-60"
+      className="block w-full rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-primary-deep disabled:opacity-60"
     >
       {loading ? "Redirecting…" : "Choose this plan"}
     </button>

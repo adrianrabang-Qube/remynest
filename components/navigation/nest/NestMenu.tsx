@@ -106,8 +106,8 @@ export default function NestMenu({
       {/* The Nest surface — Remy opening the Nest (rises + settles), not a menu snapping up.
           This is a COMPANION surface, so it carries the approved Remy identity via the `remy.*`
           tokens (deep violet · lavender · warm gold — tailwind.config.js) — a soft lavender wash +
-          violet accents, scoped to this sheet only (the app-wide sage/sand system is untouched).
-          Focus rings stay sage per the authoritative a11y rule. */}
+          violet accents. Since purple-primary (2026-07-21) the whole app shares this primary;
+          focus rings are brand violet. */}
       <motion.div
         ref={panelRef}
         tabIndex={-1}
@@ -165,7 +165,7 @@ export default function NestMenu({
                   void haptic("light");
                   onSelect();
                 }}
-                className="flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-remy-lavender/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-remy-lavender/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-remy-lavender/10 text-remy-violet">
                   <Icon className="h-5 w-5" aria-hidden />

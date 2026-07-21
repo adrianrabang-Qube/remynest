@@ -110,7 +110,7 @@ export default function SafetyCenter({
                         setMessage("");
                         setReporting(p);
                       }}
-                      className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                      className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       Report
                     </button>
@@ -120,7 +120,7 @@ export default function SafetyCenter({
                       disabled={busy}
                       className={`inline-flex min-h-11 items-center rounded-full px-4 text-xs font-medium transition disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 ${
                         p.blocked
-                          ? "border border-sand-deep/60 text-charcoal-soft hover:bg-sand/40 focus-visible:ring-sage"
+                          ? "border border-sand-deep/60 text-charcoal-soft hover:bg-sand/40 focus-visible:ring-primary"
                           : "border border-rose-200 text-rose-600 hover:bg-rose-50 focus-visible:ring-rose-600"
                       }`}
                     >
@@ -180,7 +180,7 @@ export default function SafetyCenter({
                           type="button"
                           onClick={() => setConfirmLeave(null)}
                           disabled={busy}
-                          className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                          className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 text-xs font-medium text-charcoal-soft transition hover:bg-sand/40 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           Cancel
                         </button>

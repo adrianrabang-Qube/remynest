@@ -80,21 +80,21 @@ export default function RelatedMemories({
               <Link
                 href={`/memories/${memory.id}`}
                 key={memory.id}
-                className="group block rounded-2xl border border-sand-deep/60 bg-sand/30 p-4 transition hover:border-sand-deep hover:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage motion-reduce:transition-none"
+                className="group block rounded-2xl border border-sand-deep/60 bg-sand/30 p-4 transition hover:border-sand-deep hover:bg-sand/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="break-words font-semibold text-charcoal transition-colors group-hover:text-sage-deep">
+                    <p className="break-words font-semibold text-charcoal transition-colors group-hover:text-primary-deep">
                       {displayTitle}
                     </p>
 
-                    <p className="mt-1 text-sm font-medium text-sage-deep">
+                    <p className="mt-1 text-sm font-medium text-primary-deep">
                       {memoryDateLabel}
                     </p>
                   </div>
 
                   {memory.ai_importance && (
-                    <span className="shrink-0 whitespace-nowrap rounded-full bg-sage/10 px-2 py-1 text-xs text-sage">
+                    <span className="shrink-0 whitespace-nowrap rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">
                       {
                         memory.ai_importance
                       }

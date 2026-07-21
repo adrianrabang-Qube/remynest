@@ -811,7 +811,7 @@ function MemoriesPageContent() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New memory
@@ -853,14 +853,14 @@ function MemoriesPageContent() {
             }}
             // text-base (16px): never drop below iOS's 16px focus-zoom threshold on the sticky
             // mobile search (the old field inherited the 16px base — 15px would zoom on tap).
-            className="w-full rounded-full border border-sand-deep/70 bg-white py-2 pl-11 pr-11 text-base text-charcoal placeholder:text-charcoal-muted transition focus:border-sage focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="w-full rounded-full border border-sand-deep/70 bg-white py-2 pl-11 pr-11 text-base text-charcoal placeholder:text-charcoal-muted transition focus:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           />
           {isSearchActive && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <X className="h-4 w-4" aria-hidden />
             </button>
@@ -930,7 +930,7 @@ function MemoriesPageContent() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Try again
           </button>
@@ -952,7 +952,7 @@ function MemoriesPageContent() {
             <button
               type="button"
               onClick={() => setShowCreate(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
             >
               Add your first memory
             </button>

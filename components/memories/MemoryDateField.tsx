@@ -93,7 +93,7 @@ export default function MemoryDateField({
     : "Today";
 
   const inputClass =
-    "w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-sage focus:ring-2 focus:ring-sage/30";
+    "w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30";
 
   return (
     <div className="space-y-3 rounded-xl border border-gray-200 p-4">

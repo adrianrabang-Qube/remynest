@@ -61,7 +61,7 @@ export default async function RemyHomePage() {
 
       {/* First-run welcome: a clear next step when there are no memories yet. */}
       {coverage.total === 0 && (
-        <section className="flex flex-col items-start gap-4 rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-5 shadow-soft sm:flex-row sm:items-center">
+        <section className="flex flex-col items-start gap-4 rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.07] to-sand/40 p-5 shadow-soft sm:flex-row sm:items-center">
           <RemyStage context="welcome" size={112} className="shrink-0" priority />
           <div>
             <h2 className="text-lg font-semibold text-charcoal">
@@ -73,7 +73,7 @@ export default async function RemyHomePage() {
             </p>
             <Link
               href="/memories/new"
-              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
             >
               Add your first memory
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -85,11 +85,11 @@ export default async function RemyHomePage() {
       {/* First-run education: what My Nest is vs a care profile (dismissible). */}
       {careProfiles.length === 0 && <MyNestExplainer />}
 
-      {/* Entry point into the dedicated companion experience — a COMPANION surface, so it
-          carries the remy.* palette (purple stays scoped to Remy surfaces; page chrome is sage). */}
+      {/* Entry point into the dedicated companion experience — carries the remy.* companion
+          washes (app-wide purple-primary since 2026-07-21). */}
       <Link
         href="/remy"
-        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-remy-lavender/30 bg-remy-lavender/[0.08] px-4 py-3.5 text-[15px] font-semibold text-remy-violet transition hover:bg-remy-lavender/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-remy-lavender/30 bg-remy-lavender/[0.08] px-4 py-3.5 text-[15px] font-semibold text-remy-violet transition hover:bg-remy-lavender/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <span className="inline-flex items-center gap-2">
           <MessageCircle className="h-4 w-4" aria-hidden />
@@ -124,7 +124,7 @@ export default async function RemyHomePage() {
       {nextAction?.cta && (
         <section
           aria-label="Suggested next step"
-          className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.07] to-sand/40 p-4 shadow-soft md:p-6"
+          className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.07] to-sand/40 p-4 shadow-soft md:p-6"
         >
           <p className="text-[11px] font-semibold uppercase tracking-wide text-charcoal-muted">
             Suggested next step
@@ -132,7 +132,7 @@ export default async function RemyHomePage() {
           <p className="mt-1 text-sm text-charcoal">{nextAction.text}</p>
           <Link
             href={nextAction.cta.href}
-            className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-sage px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-sage-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+            className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white shadow-soft transition hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
           >
             {nextAction.cta.label}
             <ArrowRight className="h-4 w-4" aria-hidden />

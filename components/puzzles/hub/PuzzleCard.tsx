@@ -29,7 +29,7 @@ export default function PuzzleCard({ puzzle }: { puzzle: PuzzleSummary }) {
   return (
     <Link
       href={`/activities/puzzles/${puzzle.id}`}
-      className="flex items-center gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-sage/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+      className="flex items-center gap-4 rounded-3xl border border-sand-deep/70 bg-white p-4 shadow-soft transition hover:border-primary/30 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       <span
         aria-hidden
@@ -51,7 +51,7 @@ export default function PuzzleCard({ puzzle }: { puzzle: PuzzleSummary }) {
           {diff?.label ?? puzzle.difficulty} · {progress}
         </span>
       </span>
-      <span aria-hidden className="shrink-0 text-sm font-semibold text-sage">
+      <span aria-hidden className="shrink-0 text-sm font-semibold text-primary">
         {puzzle.placedCount > 0 ? "Continue" : "Play"}
       </span>
     </Link>

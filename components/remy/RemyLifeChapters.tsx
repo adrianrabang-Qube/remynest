@@ -27,7 +27,7 @@ export default function RemyLifeChapters({
         <h2 className="text-lg font-semibold text-charcoal">Life Chapters</h2>
         <Link
           href="/chapters"
-          className="text-xs font-semibold text-sage-deep underline-offset-2 hover:underline"
+          className="text-xs font-semibold text-primary-deep underline-offset-2 hover:underline"
         >
           View all chapters →
         </Link>

@@ -42,8 +42,8 @@ function buildTimelineHref({
 }
 
 const CHIP_BASE =
-  "rounded-full px-4 py-2 text-sm transition max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage";
-const CHIP_ACTIVE = "bg-sage text-white";
+  "rounded-full px-4 py-2 text-sm transition max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3 max-md:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
+const CHIP_ACTIVE = "bg-primary text-white";
 const CHIP_INACTIVE =
   "border border-sand-deep/60 bg-white text-charcoal-soft hover:bg-sand/40";
 

@@ -33,7 +33,7 @@ export default function ProfilePersonSnapshot({
             key={s.label}
             className="rounded-2xl border border-sand-deep/70 bg-white p-4 shadow-soft"
           >
-            <p className="text-2xl font-semibold text-sage">{s.value}</p>
+            <p className="text-2xl font-semibold text-primary">{s.value}</p>
             <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-charcoal-muted">
               {s.label}
             </p>

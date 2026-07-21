@@ -39,7 +39,7 @@ export default function StorageUsageCard({
   const planName = BILLING_PLANS[tier]?.displayName ?? tier;
   const pct = Math.min(100, Math.max(0, percentUsed));
   const barColor =
-    pct >= 95 ? "bg-red-500" : pct >= 80 ? "bg-amber-500" : "bg-sage";
+    pct >= 95 ? "bg-red-500" : pct >= 80 ? "bg-amber-500" : "bg-primary";
   const usedLabel = formatBytes(usedBytes);
   const limitLabel = formatBytes(limitBytes);
 

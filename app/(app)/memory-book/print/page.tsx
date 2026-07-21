@@ -94,7 +94,7 @@ export default async function MemoryBookPrintPage() {
         </p>
         <Link
           href="/memory-dates"
-          className="mt-6 inline-flex items-center rounded-full bg-sage px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+          className="mt-6 inline-flex items-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
         >
           Add memory dates
         </Link>

@@ -10,7 +10,7 @@ export default function ReminisceDashboardCard({
   datedCount: number;
 }) {
   return (
-    <section className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.08] to-sand/40 p-6 shadow-soft">
+    <section className="rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] to-sand/40 p-6 shadow-soft">
       <div className="flex items-start gap-3">
         <span aria-hidden="true" className="text-2xl leading-none">
           🕰
@@ -26,7 +26,7 @@ export default function ReminisceDashboardCard({
           </p>
           <Link
             href="/reminisce"
-            className="mt-4 inline-flex items-center rounded-full bg-sage px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+            className="mt-4 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-deep"
           >
             Start reminiscing
           </Link>

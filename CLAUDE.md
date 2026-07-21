@@ -670,6 +670,28 @@ fabricate it. Explicitly NOT implemented from the boards (locked/deferred): dark
 notification redesign, haptics/sound library, gesture guide (long-press/swipe), Android/iPad
 platform claims.
 
+**PURPLE-PRIMARY — app-wide color unification (authoritative, 2026-07-21, operator decision —
+SUPERSEDES the Strategy-1 "purple = companion surfaces ONLY" scope clause, the "app chrome stays
+sage" clauses above, and the "focus rings are sage" a11y standard):** violet is now the app-wide
+PRIMARY. Tokens: **`primary #5B3E8E` · `primary-deep #3A2266` (hover/pressed) · `primary-soft
+#8A6BD0` (washes/borders ONLY — fails as text, same rule as gold)** in `tailwind.config.js` +
+`--primary*` CSS vars in `globals.css` (dark-mechanism values defined, dark rollout still
+deferred). ALL interactive chrome uses `primary*`: buttons, links, chips, active nav, **keyboard
+focus rings (violet — never gold, no longer sage)**, `::selection`, `.btn-primary`/`.rn-btn`/
+`.input:focus`, and browser/PWA `themeColor` + manifest `theme_color` (`#5B3E8E`). The CANVAS is
+unchanged: sand background · white cards · charcoal text · gold/`gold-ink` accents. **Sage/moss
+are DEMOTED to success/nature STATUS accents only** — current allowlist: ReminderCenter
+`completed` chip (`bg-sage-soft/25 text-sage-deep`), AccountInformationSection "saved" message
+(`text-sage-deep`), the nest memoryTree nature halo (CSS rgba); never interactive primaries.
+Implementation was a mechanical prefixed class swap (`(bg|text|ring|border|from|to|via|divide|
+fill|stroke)-sage → -primary`; ~664 sites / 151 files) + the curated allowlist; FROZEN surfaces
+received className-only edits under the Polaris/LA presentation-only precedent (logic
+byte-unchanged; verified by diff audit — every changed line is a color token or comment). The
+`remy.*` companion tokens remain for companion-specific washes (`remy-lavender`/`remy-mist`;
+`remy.violet ≡ primary`). Do NOT reintroduce sage on interactive elements, use `primary-soft`
+for text, revert focus rings to sage, or grow the sage allowlist beyond genuine success/nature
+status.
+
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
 roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage

@@ -16,7 +16,7 @@ export default function Page() {
       <div className="mx-auto max-w-md px-6">
         <Link
           href="/forgot-password"
-          className="text-sm font-medium text-sage hover:text-sage-deep"
+          className="text-sm font-medium text-primary hover:text-primary-deep"
         >
           Forgot your password?
         </Link>
@@ -25,7 +25,7 @@ export default function Page() {
         New to RemyNest?{" "}
         <Link
           href="/signup"
-          className="font-medium text-sage hover:text-sage-deep"
+          className="font-medium text-primary hover:text-primary-deep"
         >
           Create an account
         </Link>

@@ -31,7 +31,7 @@ export default function CollectionCard({
       </p>
 
       {range && (
-        <p className="mt-2 text-sm font-medium text-sage-deep">{range}</p>
+        <p className="mt-2 text-sm font-medium text-primary-deep">{range}</p>
       )}
 
       {collection.emotionalThemes.length > 0 && (

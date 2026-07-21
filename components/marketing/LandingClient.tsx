@@ -141,27 +141,27 @@ export default function LandingClient() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
           <Wordmark />
           <nav aria-label="Site" className="hidden items-center gap-7 text-[17px] text-charcoal-soft md:flex">
-            <a href="#features" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <a href="#features" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Features
             </a>
-            <a href="#privacy" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <a href="#privacy" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Privacy
             </a>
-            <Link href="/pricing" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/pricing" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Pricing
             </Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="inline-flex min-h-11 items-center rounded-full px-3 text-[17px] font-medium text-charcoal-soft transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+              className="inline-flex min-h-11 items-center rounded-full px-3 text-[17px] font-medium text-charcoal-soft transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               Sign in
             </Link>
             <Link
               href="/signup"
               style={{ backgroundColor: VIOLET }}
-              className="inline-flex min-h-11 items-center rounded-full px-5 text-[17px] font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 items-center rounded-full px-5 text-[17px] font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Get started
             </Link>
@@ -186,13 +186,13 @@ export default function LandingClient() {
                 <Link
                   href="/signup"
                   style={{ backgroundColor: VIOLET }}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full px-7 text-lg font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full px-7 text-lg font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   Create your free account
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   Sign in
                 </Link>
@@ -233,7 +233,7 @@ export default function LandingClient() {
                   <div className="mt-4 grid grid-cols-3 gap-2">
                     <div className="h-14 rounded-xl bg-gradient-to-br from-[#8A6BD0]/25 to-[#5B3E8E]/40" />
                     <div className="h-14 rounded-xl bg-gradient-to-br from-gold-soft to-gold/60" />
-                    <div className="h-14 rounded-xl bg-gradient-to-br from-sand-deep to-sage/30" />
+                    <div className="h-14 rounded-xl bg-gradient-to-br from-sand-deep to-primary/30" />
                   </div>
                 </div>
                 <div className="rounded-3xl border border-sand-deep/60 bg-white p-5 shadow-soft">
@@ -362,19 +362,19 @@ export default function LandingClient() {
                 </p>
                 <p className="mt-4 text-[17px] text-charcoal-muted">
                   Read more in our{" "}
-                  <Link href="/privacy" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage" style={{ color: VIOLET }}>
+                  <Link href="/privacy" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" style={{ color: VIOLET }}>
                     privacy policy
                   </Link>{" "}
                   and{" "}
-                  <Link href="/terms" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage" style={{ color: VIOLET }}>
+                  <Link href="/terms" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" style={{ color: VIOLET }}>
                     terms
                   </Link>
                   , or visit{" "}
-                  <Link href="/account-deletion" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage" style={{ color: VIOLET }}>
+                  <Link href="/account-deletion" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" style={{ color: VIOLET }}>
                     account deletion
                   </Link>{" "}
                   and{" "}
-                  <Link href="/support" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage" style={{ color: VIOLET }}>
+                  <Link href="/support" className="rounded font-medium underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" style={{ color: VIOLET }}>
                     support
                   </Link>
                   .
@@ -401,7 +401,7 @@ export default function LandingClient() {
               <Link
                 href="/signup"
                 style={{ backgroundColor: VIOLET }}
-                className="inline-flex min-h-12 items-center justify-center rounded-full px-7 text-lg font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+                className="inline-flex min-h-12 items-center justify-center rounded-full px-7 text-lg font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Open RemyNest in your browser
               </Link>
@@ -410,7 +410,7 @@ export default function LandingClient() {
                   href={appStoreUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <Download className="h-5 w-5" aria-hidden />
                   Download on the App Store
@@ -418,7 +418,7 @@ export default function LandingClient() {
               ) : (
                 <Link
                   href="/download"
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-charcoal/15 bg-white px-7 text-lg font-medium text-charcoal transition hover:bg-sand-deep/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   See platform details
                 </Link>
@@ -467,19 +467,19 @@ export default function LandingClient() {
             <p className="mt-2 text-[17px] text-charcoal-muted">A safe place for memories.</p>
           </div>
           <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-[17px] text-charcoal-soft">
-            <Link href="/privacy" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/privacy" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Privacy
             </Link>
-            <Link href="/terms" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/terms" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Terms
             </Link>
-            <Link href="/support" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/support" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Support
             </Link>
-            <Link href="/contact" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/contact" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Contact
             </Link>
-            <Link href="/pricing" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage">
+            <Link href="/pricing" className="rounded transition hover:text-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               Pricing
             </Link>
           </nav>

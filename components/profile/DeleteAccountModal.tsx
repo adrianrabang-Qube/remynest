@@ -108,7 +108,7 @@ export default function DeleteAccountModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-charcoal-muted transition hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close"
           >
             ×
@@ -204,7 +204,7 @@ export default function DeleteAccountModal({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
+                className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 autoComplete="current-password"
               />
             </>
@@ -226,7 +226,7 @@ export default function DeleteAccountModal({
             type="text"
             value={typed}
             onChange={(e) => setTyped(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-sage focus-visible:ring-2 focus-visible:ring-sage"
+            className="mt-1 w-full rounded-xl border border-sand-deep/60 px-3 py-2.5 text-base text-charcoal outline-none transition focus:border-primary focus-visible:ring-2 focus-visible:ring-primary"
             autoComplete="off"
           />
           <label className="mt-3 flex items-start gap-2">
@@ -250,7 +250,7 @@ export default function DeleteAccountModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 py-2.5 text-sm font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage disabled:opacity-50"
+            className="inline-flex min-h-11 items-center rounded-full border border-sand-deep/60 px-4 py-2.5 text-sm font-medium text-charcoal-soft transition hover:bg-sand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
             disabled={submitting}
           >
             Cancel

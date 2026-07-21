@@ -97,7 +97,7 @@ export default function NavigationProgress() {
       style={{ top: "env(safe-area-inset-top)" }}
     >
       <div
-        className="h-0.5 bg-sage shadow-[0_0_8px_rgba(79,107,91,0.5)] transition-[width,opacity] duration-200 ease-out"
+        className="h-0.5 bg-primary shadow-[0_0_8px_rgba(79,107,91,0.5)] transition-[width,opacity] duration-200 ease-out"
         style={{ width: `${width}%`, opacity: visible ? 1 : 0 }}
       />
     </div>
