@@ -653,6 +653,23 @@ revert the icon to the sage nest-and-egg, upscale board-screenshot crops, redraw
 mark, put Remy's face back as the idle Nest button, or spread the purple treatment beyond
 Remy/Nest surfaces.
 
+**Companion palette tokens + real-character avatar seam (authoritative, 2026-07-21 — design-bible
+polish):** the companion trio now lives as **Tailwind tokens `remy.violet #5B3E8E` · `remy.lavender
+#8A6BD0` · `remy.gold #E3A24A` · `remy.mist #F5F2FB`** (`tailwind.config.js`) — companion surfaces
+(NestMenu sheet, RemyAsk, RemyMomentChip, the Remy-labelled Home cards [briefing / "What Remy
+understands" / the "Open conversation with Remy" CTA], the `/remy` story card, the nest ambient
+glow, the `FloatingCompanionButton` "nest" pedestal ring) use these tokens, **never hardcoded hex**.
+The purple SCOPE rule is unchanged (companion surfaces ONLY — app chrome stays sage/sand; keyboard
+focus rings stay sage). **`components/remy/RemyAvatar.tsx` (the documented mood-avatar plug-in
+seam) now renders the REAL Remy character through the single `<Remy>` renderer (avatar tier,
+registry-resolved; props unchanged — all mounting surfaces upgraded with zero call-site changes;
+the sparkle placeholder is retired).** Do NOT revert it to a non-character placeholder, bypass the
+registry, or re-hardcode companion hex. The external Remy Design Bible boards remain out-of-repo
+(operator-supplied images); per-stage nest art is still a future registry-only asset drop — do not
+fabricate it. Explicitly NOT implemented from the boards (locked/deferred): dark-mode enablement,
+notification redesign, haptics/sound library, gesture guide (long-press/swipe), Android/iPad
+platform claims.
+
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
 roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage

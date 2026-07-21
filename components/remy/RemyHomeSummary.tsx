@@ -18,9 +18,10 @@ export default function RemyHomeSummary({
   observations?: RemyObservation[];
 }) {
   return (
+    /* COMPANION surface — Remy's understanding, so it carries the remy.* palette. */
     <section
       aria-label="What Remy understands"
-      className="rounded-3xl border border-sand-deep/70 bg-gradient-to-b from-sage/5 to-white p-4 shadow-soft md:p-6"
+      className="rounded-3xl border border-remy-lavender/20 bg-gradient-to-b from-remy-lavender/5 to-white p-4 shadow-soft md:p-6"
     >
       <div className="flex items-center gap-3">
         <RemyAvatar size="sm" />
@@ -34,7 +35,7 @@ export default function RemyHomeSummary({
       </div>
 
       {observations && observations.length > 0 && (
-        <ul className="mt-4 space-y-1.5 border-t border-sand-deep/30 pt-3">
+        <ul className="mt-4 space-y-1.5 border-t border-remy-lavender/15 pt-3">
           {observations.slice(0, 3).map((o) => (
             <li
               key={o.id}
@@ -42,7 +43,7 @@ export default function RemyHomeSummary({
             >
               <span
                 aria-hidden
-                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sage"
+                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-remy-lavender"
               />
               <span>{o.text}</span>
             </li>

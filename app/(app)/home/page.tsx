@@ -85,10 +85,11 @@ export default async function RemyHomePage() {
       {/* First-run education: what My Nest is vs a care profile (dismissible). */}
       {careProfiles.length === 0 && <MyNestExplainer />}
 
-      {/* Entry point into the dedicated companion experience */}
+      {/* Entry point into the dedicated companion experience — a COMPANION surface, so it
+          carries the remy.* palette (purple stays scoped to Remy surfaces; page chrome is sage). */}
       <Link
         href="/remy"
-        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-sage/30 bg-sage/[0.06] px-4 py-3.5 text-[15px] font-semibold text-sage-deep transition hover:bg-sage/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+        className="flex min-h-12 items-center justify-between gap-3 rounded-2xl border border-remy-lavender/30 bg-remy-lavender/[0.08] px-4 py-3.5 text-[15px] font-semibold text-remy-violet transition hover:bg-remy-lavender/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
       >
         <span className="inline-flex items-center gap-2">
           <MessageCircle className="h-4 w-4" aria-hidden />

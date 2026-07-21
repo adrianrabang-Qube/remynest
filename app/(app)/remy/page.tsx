@@ -89,14 +89,15 @@ export default async function RemyConversationPage() {
         </div>
       </header>
 
-      {/* Opt-in: let Remy narrate the saved memories into a flowing reflection (AI, on explicit tap). */}
+      {/* Opt-in: let Remy narrate the saved memories into a flowing reflection (AI, on explicit tap).
+          Companion surface — carries the remy.* palette (matches the RemyAsk section below). */}
       <Link
         href="/remy/story"
-        className="flex items-center gap-3 rounded-3xl border border-charcoal/10 bg-white/70 p-4 shadow-soft transition hover:bg-sand/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
+        className="flex items-center gap-3 rounded-3xl border border-remy-lavender/25 bg-gradient-to-b from-remy-mist to-white p-4 shadow-soft transition hover:bg-remy-lavender/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2"
       >
         <span
           aria-hidden
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sage/10 text-sage-deep"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-remy-lavender/10 text-remy-violet"
         >
           <Sparkles className="h-5 w-5" />
         </span>

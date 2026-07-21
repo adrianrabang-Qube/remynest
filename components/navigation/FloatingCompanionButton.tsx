@@ -28,7 +28,9 @@ const GEOMETRY =
 
 const TONE: Record<"solid" | "nest", string> = {
   solid: "bg-sage text-white ring-sand hover:bg-sage-deep",
-  nest: "bg-white text-sage ring-sand hover:bg-sand",
+  // Companion pedestal: still a clean white vessel (the purple avatar must read cleanly),
+  // with a soft lavender resting ring per the design-bible ambience. Focus ring stays sage.
+  nest: "bg-white text-sage ring-remy-lavender/25 hover:bg-remy-mist",
 };
 
 export default function FloatingCompanionButton({

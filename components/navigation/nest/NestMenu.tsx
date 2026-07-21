@@ -104,14 +104,14 @@ export default function NestMenu({
       />
 
       {/* The Nest surface — Remy opening the Nest (rises + settles), not a menu snapping up.
-          This is a COMPANION surface, so it carries the approved Remy identity (deep violet
-          #5B3E8E · lavender #8A6BD0 · warm gold #E3A24A) — a soft lavender wash + violet accents,
-          scoped to this sheet only (the app-wide sage/sand system is untouched). Focus rings stay
-          sage per the authoritative a11y rule. */}
+          This is a COMPANION surface, so it carries the approved Remy identity via the `remy.*`
+          tokens (deep violet · lavender · warm gold — tailwind.config.js) — a soft lavender wash +
+          violet accents, scoped to this sheet only (the app-wide sage/sand system is untouched).
+          Focus rings stay sage per the authoritative a11y rule. */}
       <motion.div
         ref={panelRef}
         tabIndex={-1}
-        className="absolute inset-x-0 bottom-0 mx-auto max-h-[85vh] max-w-md overflow-y-auto rounded-t-3xl bg-gradient-to-b from-[#F5F2FB] to-white px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-soft-lg focus:outline-none"
+        className="absolute inset-x-0 bottom-0 mx-auto max-h-[85vh] max-w-md overflow-y-auto rounded-t-3xl bg-gradient-to-b from-remy-mist to-white px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-soft-lg focus:outline-none"
         variants={nestSheetVariants}
         initial={initial}
         animate="visible"
@@ -119,7 +119,7 @@ export default function NestMenu({
         {/* Grab handle */}
         <div
           aria-hidden
-          className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-[#8A6BD0]/30"
+          className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-remy-lavender/30"
         />
 
         <div className="mb-3 flex items-center gap-3 px-1">
@@ -165,9 +165,9 @@ export default function NestMenu({
                   void haptic("light");
                   onSelect();
                 }}
-                className="flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-[#8A6BD0]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+                className="flex items-center gap-4 rounded-2xl px-3 py-3 transition hover:bg-remy-lavender/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#8A6BD0]/10 text-[#5B3E8E]">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-remy-lavender/10 text-remy-violet">
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
                 <span className="min-w-0">

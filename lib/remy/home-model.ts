@@ -127,7 +127,17 @@ export async function buildRemyHomeModel(
     totalDated: family?.totalDated ?? coverage.dated,
     themes:
       family?.themes ??
-      collections.map((c) => ({ label: c.title, memoryCount: c.memoryCount })),
+      collections.map((c) => ({
+        // Match the family path's presentation: cluster titles can arrive mixed-case
+        // from enrichment (e.g. "health & Fitness") — title-case them so the briefing
+        // reads cleanly. Formatting only (same rule as family.ts titleCase).
+        label: c.title
+          .trim()
+          .split(/\s+/)
+          .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+          .join(" "),
+        memoryCount: c.memoryCount,
+      })),
     decades,
     story,
   });

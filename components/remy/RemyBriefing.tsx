@@ -20,9 +20,11 @@ export default function RemyBriefing({
   if (!briefing.headline) return null;
 
   return (
+    /* COMPANION surface — Remy speaking, so it carries the remy.* palette (design-bible look);
+       page chrome elsewhere stays sage/sand. */
     <section
       aria-label={`${REMY.name}'s briefing`}
-      className="rounded-3xl border border-sage/25 bg-gradient-to-br from-sage/[0.08] to-sand/40 p-4 shadow-soft md:p-6"
+      className="rounded-3xl border border-remy-lavender/25 bg-gradient-to-br from-remy-lavender/[0.08] to-white p-4 shadow-soft md:p-6"
     >
       <div className="flex items-start gap-4 max-md:gap-3">
         <RemyAvatar
@@ -44,7 +46,7 @@ export default function RemyBriefing({
           </p>
 
           {briefing.highlights.length > 0 && (
-            <ul className="mt-3 space-y-1.5 border-t border-sage/15 pt-3">
+            <ul className="mt-3 space-y-1.5 border-t border-remy-lavender/15 pt-3">
               {briefing.highlights.map((line) => (
                 <li
                   key={line.id}
@@ -52,7 +54,7 @@ export default function RemyBriefing({
                 >
                   <span
                     aria-hidden
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sage"
+                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-remy-lavender"
                   />
                   <span>{line.text}</span>
                 </li>
@@ -63,7 +65,7 @@ export default function RemyBriefing({
           {briefing.nextAction?.cta && (
             <Link
               href={briefing.nextAction.cta.href}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sage px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-sage-deep"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-remy-violet px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-remy-lavender"
             >
               {briefing.nextAction.cta.label}
               <ArrowRight className="h-4 w-4" aria-hidden />

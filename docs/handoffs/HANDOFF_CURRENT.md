@@ -10,7 +10,7 @@
 > CLAUDE.md authoritative notes and slimmed to this continuation doc on 2026-07-09. The full prior
 > history remains in git.)*
 
-Last Updated: 2026-07-18
+Last Updated: 2026-07-21
 Authoritative state: `docs/REMY_MASTER_STATE.md`
 
 ## Current status
@@ -28,7 +28,23 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Strategy-1 brand unification (2026-07-18, EXECUTION MODE — UNIFY REMYNEST BRAND
+Most recent: **Companion design-bible UI polish (2026-07-21, EXECUTION MODE — presentation-only;
+operator supplied the external Remy Design Bible boards as images):** aligned the Remy/Nest
+COMPANION surfaces to the boards' purple look. New single-source **`remy.*` Tailwind tokens**
+(violet `#5B3E8E` · lavender `#8A6BD0` · gold `#E3A24A` · mist `#F5F2FB`); NestMenu + RemyAsk
+migrated hardcoded hex → tokens (render-identical); RemyMomentChip ring, the `/remy` story card,
+Home's "Open conversation with Remy" CTA, RemyBriefing + RemyHomeSummary (washes/bullets/CTA), and
+the `FloatingCompanionButton` "nest" pedestal ring took the companion palette; `nest.module.css`
+day glow / base halo / 2 motes blend lavender with the gold (values only — time-of-day, stage
+accents, reduced-motion untouched). **`components/remy/RemyAvatar.tsx` (the documented plug-in
+seam) now renders the REAL Remy character** via the single `<Remy>` renderer (avatar tier; same
+props — every mounting surface upgraded, sparkle placeholder retired). Copy fix: `home-model.ts`
+fallback theme labels title-cased ("health & Fitness" → "Health & Fitness"). NOT done (locked /
+deferred / assets absent): dark mode, notification design, haptics/sounds, gestures, per-stage nest
+art, app-wide purple; focus rings stay sage. *(Git note: the Strategy-1 work below IS now
+committed + pushed — `606b7c1` on main; the "uncommitted" claims below are historical.)*
+
+Before that: **Strategy-1 brand unification (2026-07-18, EXECUTION MODE — UNIFY REMYNEST BRAND
 ASSETS; uncommitted, awaiting operator commit authorization):** the purple fingerprint-heart-bird is
 now the SINGLE customer-facing identity everywhere. Three canonical masters vendored
 (`public/brand/store/app-store-icon-1024.png` = byte-copy of the SHIPPED Build-19 icon;

@@ -43,7 +43,7 @@ export default function RemyMomentChip({
             type="button"
             onClick={onDismiss}
             aria-label={`${message} — dismiss`}
-            className="pointer-events-auto flex max-w-[22rem] items-center gap-3 rounded-full bg-white/95 py-2 pl-2 pr-4 text-left shadow-soft-lg ring-1 ring-sand-deep/40 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
+            className="pointer-events-auto flex max-w-[22rem] items-center gap-3 rounded-full bg-white/95 py-2 pl-2 pr-4 text-left shadow-soft-lg ring-1 ring-remy-lavender/30 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage"
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}

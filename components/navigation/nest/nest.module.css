@@ -2,8 +2,9 @@
  * The Nest — the LIVING presence of Remy's home in the bottom-nav center.
  *
  * Ambient life (glow · drifting motes · breathing) + time-of-day lighting (warm by day, cool
- * moonlight at night) + 6-stage evolution accents (tiny → sanctuary). On-brand gold accent; night
- * shifts cool. Additive to <Remy>'s own breathe/float. All motion is reduced-motion-safe.
+ * moonlight at night) + 6-stage evolution accents (tiny → sanctuary). Warm gold accent blended
+ * with the companion lavender (#8A6BD0 — design-bible ambience; values only, behaviour untouched);
+ * night shifts cool. Additive to <Remy>'s own breathe/float. All motion is reduced-motion-safe.
  * Framer-motion drives the interaction transitions; these are the cheap infinite ambient loops.
  */
 
@@ -26,7 +27,8 @@
   }
   50% {
     box-shadow:
-      0 0 16px 4px rgba(201, 168, 106, 0.45),
+      0 0 16px 4px rgba(201, 168, 106, 0.38),
+      0 0 26px 10px rgba(138, 107, 208, 0.2),
       0 8px 20px rgba(0, 0, 0, 0.12);
   }
 }
@@ -63,7 +65,8 @@
   background: radial-gradient(
     circle,
     rgba(201, 168, 106, 0.18) 0%,
-    rgba(201, 168, 106, 0) 70%
+    rgba(138, 107, 208, 0.1) 55%,
+    rgba(138, 107, 208, 0) 78%
   );
   opacity: 0.6;
   transition: opacity 400ms ease, background 600ms ease;
@@ -150,6 +153,7 @@
 .particle:nth-child(2) {
   left: 46%;
   animation-delay: 1.6s;
+  background: rgba(138, 107, 208, 0.5);
 }
 .particle:nth-child(3) {
   left: 66%;
@@ -158,6 +162,7 @@
 .particle:nth-child(4) {
   left: 82%;
   animation-delay: 4.4s;
+  background: rgba(138, 107, 208, 0.5);
 }
 .nest[data-time-of-day="night"] .particle {
   background: rgba(138, 155, 208, 0.55);

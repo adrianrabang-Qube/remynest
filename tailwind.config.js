@@ -40,6 +40,17 @@ module.exports = {
           ink: "#7A5E22", // text-grade gold for links/accent-text — AA on light (5.4:1)
         },
         moss: "#8FAE8A",
+        // Remy companion palette (authoritative 2026-07-21) — the purple identity
+        // trio + pendant gold + the lavender-tinted surface white. Scope: Remy/Nest
+        // COMPANION surfaces ONLY (Nest sheet, Ask Remy, moment chip, Remy-labelled
+        // cards) — never app-wide UI chrome (that stays sage/sand). Use these tokens
+        // instead of hardcoded hex on companion surfaces.
+        remy: {
+          violet: "#5B3E8E", // deep companion violet (AA on white ~8.6:1)
+          lavender: "#8A6BD0", // light companion purple — washes/borders/hover
+          gold: "#E3A24A", // Remy pendant warm gold — accent only
+          mist: "#F5F2FB", // lavender-tinted surface white (sheet/card gradient top)
+        },
         charcoal: {
           DEFAULT: "#2F3E34", // Deep Charcoal — text
           soft: "#54655B", // secondary text
