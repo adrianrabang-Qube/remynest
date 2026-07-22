@@ -11,7 +11,10 @@ interface LegalPageProps {
 
 /**
  * Shared layout for legal pages. Presentational only.
- * Content is a launch template pending legal counsel review.
+ * (2026-07-22: the "launch template" banner was removed pre-App-Store-submission —
+ * a reviewer-visible disclaimer that the legal docs were unapproved. The governing-law
+ * jurisdiction is resolved (Ireland); counsel review remains an operator follow-up,
+ * tracked in docs — not announced on the live pages.)
  */
 export default function LegalPage({
   title,
@@ -34,14 +37,6 @@ export default function LegalPage({
       <p className="mt-1 text-sm text-neutral-500">
         Effective date: {effectiveDate}
       </p>
-
-      <div
-        role="note"
-        className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
-      >
-        This document is a launch template and must be reviewed and
-        approved by qualified legal counsel before public launch.
-      </div>
 
       <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-neutral-700">
         {children}

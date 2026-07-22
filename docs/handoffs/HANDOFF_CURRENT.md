@@ -28,7 +28,13 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Pre-submission fixes (2026-07-22, EXECUTION — operator authorized fix + push):**
+Most recent (same authorization): **"Launch template" banner removed from all legal pages** —
+the shared `LegalPage.tsx` amber note ("must be reviewed and approved by qualified legal counsel
+before public launch") was live on /terms, /privacy, /cookies — a reviewer-visible disclaimer
+that the legal docs were unapproved. Removed pre-submission; counsel review stays an operator
+follow-up tracked in docs, not announced on the live pages. tsc/lint green.
+
+Before that: **Pre-submission fixes (2026-07-22, EXECUTION — operator authorized fix + push):**
 the `/terms` Governing-law placeholder is RESOLVED — operator selected **Ireland** (exclusive
 jurisdiction, with a mandatory-consumer-protection carve-out); the LA5 legal blocker is closed.
 The Build-20 pbxproj bump (operator's `CURRENT_PROJECT_VERSION 19→20`) is committed. Both pushed
