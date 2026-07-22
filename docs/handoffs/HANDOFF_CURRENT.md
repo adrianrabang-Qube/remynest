@@ -28,7 +28,15 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent: **Nest button idle = Remy himself (2026-07-21, operator decision — supersedes
+Most recent: **Pre-submission fixes (2026-07-22, EXECUTION — operator authorized fix + push):**
+the `/terms` Governing-law placeholder is RESOLVED — operator selected **Ireland** (exclusive
+jurisdiction, with a mandatory-consumer-protection carve-out); the LA5 legal blocker is closed.
+The Build-20 pbxproj bump (operator's `CURRENT_PROJECT_VERSION 19→20`) is committed. Both pushed
+to main (operator-authorized; auto-deploy). App Store submission is now unblocked pending the
+operator checklist (fresh purple screenshots, demo review account, ASC privacy answers,
+Safety-Center production verification, Build-20 archive/upload).
+
+Before that: **Nest button idle = Remy himself (2026-07-21, operator decision — supersedes
 "idle = the NEST"):** the resting center button renders the clean `idle` avatar via the single
 `<Remy>` renderer on the ringless sand face — no nest art, no chrome, no background (seasonal
 deferred). The operator's dedicated standalone render is a pending registry-only drop

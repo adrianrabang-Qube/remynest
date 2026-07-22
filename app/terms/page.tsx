@@ -126,8 +126,11 @@ export default function TermsPage() {
 
       <H>Governing law</H>
       <p>
-        These Terms are governed by the laws of [Jurisdiction to be
-        confirmed by counsel].
+        These Terms are governed by the laws of Ireland, and the courts of
+        Ireland have exclusive jurisdiction over any dispute arising from
+        them. Nothing in this section limits any mandatory consumer
+        protections you are entitled to under the laws of the country where
+        you live.
       </p>
 
       <H>Changes</H>

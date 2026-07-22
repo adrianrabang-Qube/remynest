@@ -29,8 +29,12 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Nest button idle = Remy himself COMPLETE (2026-07-21, operator
-decision)**: resting center button = clean `idle` avatar via the single renderer, no nest/chrome/
+Current Task: *(none active — **Pre-submission fixes COMPLETE (2026-07-22)**: `/terms`
+governing law = **Ireland** (operator decision — LA5 legal blocker CLOSED) + Build-20 pbxproj
+bump committed; both pushed (operator-authorized). Submission unblocked pending the operator
+checklist (purple screenshots, demo review account, ASC privacy answers, Safety-Center prod
+verification, archive/upload 1.0 (20)). Before it, **Nest button idle = Remy himself COMPLETE
+(2026-07-21, operator decision)**: resting center button = clean `idle` avatar via the single renderer, no nest/chrome/
 background; operator's dedicated render = pending registry-only drop (`remy_button.png`).
 Before it, **Radial-orbit follow-up fixes COMPLETE (2026-07-21)**:
 tap-outside-to-close (pointer-events fall-through), top-right X close button, ONE consistent

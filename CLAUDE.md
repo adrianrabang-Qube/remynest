@@ -2219,8 +2219,9 @@ feature). Repoint `privacy@`/`dpo@` once the operator provisions dedicated mailb
 `allowBackup="false"`** (`AndroidManifest.xml`) — PHI data-safety hardening; **Android remains a
 DECIDED post-iOS deferral** (no FCM/`google-services.json`, `versionCode 1`, no release signing → not
 submittable). **STILL OPEN (do NOT re-flag as NEW — tracked):** the UGC report/block mechanism
-(CRITICAL, feature); the `/terms` **governing-law jurisdiction** placeholder (`app/terms/page.tsx` —
-LEGAL/counsel, do NOT fabricate a jurisdiction); provisioning real `support@`/`privacy@`/`dpo@`/
+(CRITICAL, feature — CLOSED by LA5.1); the `/terms` **governing-law jurisdiction** placeholder
+(**RESOLVED 2026-07-22: Ireland, exclusive jurisdiction + mandatory-consumer-protection
+carve-out — operator decision**); provisioning real `support@`/`privacy@`/`dpo@`/
 `security@` mailboxes + naming the controller legal entity/DPO (operator/legal); the Health/Sensitive
 ASC-label + Play Data-Safety declaration decision (product); processor-side Stripe-cancel/OneSignal-
 delete on account deletion (LOCKED RC3 roadmap). **Do NOT** reintroduce `HealthApplication`/
