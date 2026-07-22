@@ -736,6 +736,21 @@ Nest/Garden/Sky/Twilight environments) is a future registry-only asset drop** on
 supplies the four images — do NOT fabricate it. Do NOT revert to a bottom sheet, add a
 `menuOpen` state, darken the scrim, or grow the orbit beyond the 6 approved actions.
 
+**Nest button idle = REMY HIMSELF (authoritative, 2026-07-21, operator decision — SUPERSEDES the
+2026-07-16 "idle state is the NEST, not Remy" V1 alignment AND the same-day full-bleed nest-art
+notes above):** the resting center button now renders the CHARACTER, not the nest ("just Remy,
+NO NEST") — the clean `idle` avatar through the single `<Remy>` renderer (avatar tier, 48px,
+same optical centring as the woken branch) on the ringless `nest-art` sand face: no nest art, no
+vessel chrome, no background image (transparent portrait straight on the nav; seasonal features
+deferred by the operator). `nestEmpty` is retired from the button (asset + stage/time-of-day
+halo machinery remain for non-resting states); the wake choreography and woken pedestal are
+unchanged. The operator supplied a dedicated standalone button render in chat (front-facing
+standing portrait) — chat images never reach the filesystem, so it becomes a **registry-only
+drop**: save it with REAL transparency (not a baked checkerboard) as
+`public/assets/remy/remy_button.png`, then a one-line registry key + swap points the resting
+face at it. Do NOT reintroduce nest art on the button, and do NOT fabricate/reconstruct the
+dedicated render from chat or from the immutable `remy_master_v1.png` sheet.
+
 **Launch priority (authoritative, 2026-06-23 — supersedes prior "active development
 focus"):** the immediate focus is **App-Store launch, NOT advanced AI**. Launch
 roadmap, in order: **(1) Memory-system completion** — multi-photo [done] · storage

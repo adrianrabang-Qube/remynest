@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Bell, MessageCircle, Mic, Pencil, Search, Sparkles } from "lucide-react";
 
 import {
@@ -12,7 +11,6 @@ import {
   type NestStage,
   type TimeOfDay,
 } from "@/lib/remy";
-import { getRemyAsset } from "@/lib/remy/companion/asset-registry";
 import Remy from "@/components/remy/Remy";
 import FloatingCompanionButton from "@/components/navigation/FloatingCompanionButton";
 
@@ -83,15 +81,12 @@ export default function Nest({
   const displayExpression = look.expression;
   const displayEmotion = isResting ? undefined : look.emotion;
 
-  // The idle NEST vessel (V1 idle state): the approved standalone nest art, registry-resolved
-  // (paths live ONLY in the asset registry; this is home/vessel art, not the character, so it
-  // does not go through `<Remy>` — same precedent as RemyEffects' goldenFeather). FULL-BLEED
-  // crop (2026-07-21 operator fix — the old ~680px window kept the artwork's cream margin
-  // inside the circle, reading as a white border): a ~560px source window centred on the bowl
-  // (712, 540) maps to the 48px circle → display 132×88, offset (−37, −22) — the golden bowl
-  // itself fills the button edge-to-edge, so evolution art reads at full size. Fixed px are
-  // safe: the FAB is a fixed 48px (`h-12 w-12`).
-  const nestArt = getRemyAsset("nestEmpty");
+  // IDLE = REMY HIMSELF (operator decision 2026-07-21 — "just Remy, NO NEST"; supersedes the
+  // nest-art idle face): the resting button renders the clean idle character portrait through
+  // the single `<Remy>` renderer (avatar tier, transparent art on the ringless sand face — no
+  // vessel chrome, no background image). The operator's dedicated standalone button render
+  // replaces it as a registry-only drop (`public/assets/remy/remy_button.png` + key) once the
+  // file lands in the repo with real transparency — do not fabricate it.
 
   const items: NestMenuItem[] = [
     { href: remyHref, label: "Ask Remy", hint: "Talk through a memory", Icon: MessageCircle },
@@ -138,25 +133,19 @@ export default function Nest({
             </span>
           )}
           {isResting ? (
-            /* V1 IDLE STATE — the NEST is the button ("Remy is safe in his nest. The nest
-               breathes gently."). Full-bleed bowl crop (2026-07-21): the golden bowl covers
-               the whole 48px face — no visible pedestal/border — so the nest (and its future
-               per-stage evolution art) reads edge-to-edge; the gentle `nestBreathe` loop +
-               the ambient halo/motes (on `.nest`) keep it alive. Remy is tucked away until
-               woken. */
-            <span className="relative flex h-12 w-12 overflow-hidden rounded-full">
-              <span className={styles.vessel}>
-                <Image
-                  src={nestArt.src}
-                  alt=""
-                  aria-hidden
-                  width={132}
-                  height={88}
-                  priority
-                  draggable={false}
-                  className="pointer-events-none absolute left-[-37px] top-[-22px] max-w-none"
-                />
-              </span>
+            /* IDLE STATE (operator, 2026-07-21) — REMY is the button: the calm idle portrait,
+               transparent on the sand nav (no nest, no pedestal, no border). Same optical
+               centring as the woken branch (avatar art composes the character high in its
+               square). `<Remy>`'s own breathe keeps him gently alive. */
+            <span className="flex h-12 w-12 items-start justify-center overflow-hidden rounded-full">
+              <Remy
+                className="mt-[8%]"
+                state="idle"
+                assetVariant="avatar"
+                reactionKey="nest-resting"
+                size={48}
+                decorative
+              />
             </span>
           ) : (
             /* WOKEN — Remy pops out of the nest (V1 steps 2–3): the AVATAR tier

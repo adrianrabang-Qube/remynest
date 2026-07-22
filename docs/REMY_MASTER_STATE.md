@@ -29,7 +29,10 @@ Current Milestone: **App Store Submission Readiness** (roadmap phase 4 — Produ
 
 Current Sprint: **Launch hardening & App-Store compliance.**
 
-Current Task: *(none active — **Radial-orbit follow-up fixes COMPLETE (2026-07-21)**:
+Current Task: *(none active — **Nest button idle = Remy himself COMPLETE (2026-07-21, operator
+decision)**: resting center button = clean `idle` avatar via the single renderer, no nest/chrome/
+background; operator's dedicated render = pending registry-only drop (`remy_button.png`).
+Before it, **Radial-orbit follow-up fixes COMPLETE (2026-07-21)**:
 tap-outside-to-close (pointer-events fall-through), top-right X close button, ONE consistent
 catalog centre image (clean `happy` avatar, preloaded; seasonal board-68 art = future
 registry-only drop). Before it, **Nest Action Menu = radial orbit COMPLETE (2026-07-21,

@@ -28,7 +28,14 @@ tags recommended for the untagged June-July production programme [operator to cr
 commits ARE now pushed — `main` was in sync with `origin/main` @ `b646449` at session start, so that
 work is live in production. "Unpushed" claims in older entries below are historical.)*
 
-Most recent (same-day follow-up): **Radial orbit — 3 operator fixes:** (1) tap-outside-to-close
+Most recent: **Nest button idle = Remy himself (2026-07-21, operator decision — supersedes
+"idle = the NEST"):** the resting center button renders the clean `idle` avatar via the single
+`<Remy>` renderer on the ringless sand face — no nest art, no chrome, no background (seasonal
+deferred). The operator's dedicated standalone render is a pending registry-only drop
+(`public/assets/remy/remy_button.png`, real alpha) — chat images don't reach disk, so the
+operator must save the file into the repo; then key + one-line swap. tsc/lint green.
+
+Before that (same-day follow-up): **Radial orbit — 3 operator fixes:** (1) tap-outside-to-close
 now works (layout wrapper `pointer-events-none`, interactive children `pointer-events-auto`, so
 outside taps reach the backdrop); (2) explicit top-right X close button (44px, safe-area,
 labelled); (3) the catalog centre shows ONE consistent clean image — fixed `happy` avatar,

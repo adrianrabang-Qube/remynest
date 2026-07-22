@@ -37,9 +37,9 @@ const TONE: Record<"solid" | "nest" | "nest-art", string> = {
   // Companion pedestal (woken): a clean white vessel (the purple avatar must read cleanly),
   // with a soft lavender ring per the design-bible ambience.
   nest: "ring-4 bg-white text-primary ring-remy-lavender/25 hover:bg-remy-mist",
-  // Resting art vessel: the artwork covers the whole face; the load fallback is SAND so
-  // nothing white ever flashes behind/around the art (operator rule: at rest only the
-  // nest is visible).
+  // Resting art face (2026-07-21: the Remy idle portrait — "just Remy, no nest"): sand
+  // face so nothing white ever shows behind/around the transparent art (operator rule: at
+  // rest only Remy is visible).
   "nest-art": "bg-sand text-primary",
 };
 
